@@ -10,6 +10,7 @@ export interface Medicine {
     lastUpdate: string;
     brand: string;
     activeSubstance: string;
+    internalId?: string; // Add internal ID for unique key
 }
 
 export interface Pharmacy {
