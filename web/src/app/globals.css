@@ -1,0 +1,1200 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+@plugin "daisyui/theme" {
+  name: "BV2026";
+  default: true;
+  prefers-dark: false;
+  color-scheme: "light";
+  --color-base-100: #FFFFFF;
+  --color-base-200: #F2F5FA;
+  --color-base-300: #E1E6F0;
+  --color-base-content: #0F234A;
+  --color-primary: #0F234A;
+  --color-primary-content: oklch(98% 0.003 247.858);
+  --color-secondary: oklch(61.302% 0.202 261.294);
+  --color-secondary-content: oklch(100% 0 0);
+  --color-accent: #2D8540;
+  --color-accent-content: oklch(98% 0.003 247.858);
+  --color-neutral: #0F234A;
+  --color-neutral-content: oklch(98.462% 0.001 247.838);
+  --color-info: #0D73AD;
+  --color-info-content: oklch(98% 0.003 247.858);
+  --color-success: #3B8003;
+  --color-success-content: oklch(98% 0.003 247.858);
+  --color-warning: #DBC51D;
+  --color-warning-content: oklch(0% 0 0);
+  --color-error: #B8240E;
+  --color-error-content: oklch(98% 0.003 247.858);
+  --radius-selector: 1rem;
+  --radius-field: 1rem;
+  --radius-box: 1rem;
+  --size-selector: 0.3125rem;
+  --size-field: 0.3125rem;
+  --border: 1.5px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Enable text selection globally */
+* {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+/* Disable text selection only for interactive elements */
+button,
+.btn,
+input[type="checkbox"],
+input[type="radio"],
+.material-symbols-rounded {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Material Symbols Icon Utilities */
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded';
+  font-weight: 400;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'liga';
+
+  /* Default outline state */
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 200,
+    'opsz' 24;
+}
+
+/* Filled state for active icons */
+.material-symbols-rounded.filled {
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 400,
+    'GRAD' 200,
+    'opsz' 24;
+}
+
+/* Deprecated Medicine Styling */
+.deprecated-badge {
+  background-color: var(--color-base-300);
+  color: var(--color-base-content);
+  border: 1px dashed var(--color-base-content);
+  opacity: 0.6;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.deprecated-badge .material-symbols-rounded {
+  font-size: 1rem;
+}
+
+.medicine-card.deprecated {
+  opacity: 0.7;
+  position: relative;
+}
+
+.medicine-card.deprecated .medicine-name,
+.deprecated .medicine-name {
+  text-decoration: line-through;
+  color: var(--color-base-content);
+  opacity: 0.7;
+}
+
+.medicine-list-item.deprecated {
+  opacity: 0.7;
+}
+
+.medicine-list-item.deprecated .medicine-title {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.deprecated-warning-alert {
+  background-color: oklch(from var(--color-warning) l c h / 0.15);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-box);
+  padding: 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.deprecated-warning-alert .alert-icon {
+  color: var(--color-warning);
+  flex-shrink: 0;
+}
+
+.deprecated-warning-alert .alert-content {
+  flex: 1;
+}
+
+.deprecated-warning-alert .alert-title {
+  font-weight: 700;
+  color: var(--color-base-content);
+  margin-bottom: 0.25rem;
+}
+
+.deprecated-warning-alert .alert-description {
+  font-size: 0.875rem;
+  color: var(--color-base-content);
+  opacity: 0.8;
+}
+
+.deprecated-info-alert {
+  background-color: oklch(from var(--color-info) l c h / 0.15);
+  border: 1px solid var(--color-info);
+  border-radius: var(--radius-box);
+  padding: 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.deprecated-info-alert .alert-icon {
+  color: var(--color-info);
+  flex-shrink: 0;
+}
+
+.deprecated-info-alert .alert-content {
+  flex: 1;
+}
+
+.deprecated-info-alert .alert-description {
+  font-size: 0.875rem;
+  color: var(--color-base-content);
+  opacity: 0.8;
+}
+
+.pharmacy-card.has-deprecated-medicine {
+  position: relative;
+}
+
+.status-badge.deprecated {
+  background-color: var(--color-base-300);
+  color: var(--color-base-content);
+  border: 1px dashed var(--color-base-content);
+  opacity: 0.6;
+}
+
+.deprecated-badge,
+.status-badge.deprecated {
+  font-weight: 500;
+}
+
+.medicine-card.deprecated:hover {
+  opacity: 0.85;
+}
+
+.medicine-card.deprecated:focus-within {
+  opacity: 1;
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.deprecated-filter-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.remove-deprecated-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.remove-deprecated-btn .material-symbols-rounded {
+  font-size: 1.25rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+.deprecated-badge:focus,
+.deprecated-filter-label:focus-within,
+.remove-deprecated-btn:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-box);
+}
+
+.medicine-card.deprecated:focus {
+  opacity: 1;
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px oklch(from var(--color-primary) l c h / 0.1);
+}
+
+.deprecated-warning-alert[role="alert"],
+.deprecated-info-alert[role="alert"] {
+  display: flex;
+}
+
+@media (prefers-contrast: high) {
+
+  .deprecated-badge,
+  .status-badge.deprecated {
+    border-width: 2px;
+    font-weight: 600;
+  }
+
+  .medicine-card.deprecated {
+    opacity: 0.9;
+  }
+
+  .medicine-card.deprecated .medicine-name {
+    opacity: 0.9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .medicine-card.deprecated,
+  .deprecated-badge {
+    transition: none;
+  }
+}
+
+@media print {
+  .deprecated-badge {
+    border: 2px solid black;
+    background-color: white;
+    color: black;
+    opacity: 1;
+  }
+
+  .medicine-card.deprecated .medicine-name::after {
+    content: " (Megszűnt)";
+    font-weight: bold;
+  }
+}
+
+.menu li>a.active {
+  background-color: var(--color-primary);
+  color: var(--color-primary-content);
+  font-weight: 500;
+}
+
+.menu li>a.active:hover {
+  background-color: var(--color-primary);
+  opacity: 0.9;
+}
+
+.menu li>a.active:focus {
+  outline: 2px solid var(--color-primary-content);
+  outline-offset: 2px;
+}
+
+/* ========================================= */
+/* IMPORTED ANIMATIONS.CSS */
+/* ========================================= */
+
+.modal {
+  transition: opacity 300ms ease-in-out;
+}
+
+.modal-box {
+  transition: transform 300ms ease-in-out, opacity 300ms ease-in-out;
+}
+
+.card {
+  transition: box-shadow 250ms ease-in-out, transform 200ms ease-in-out;
+}
+
+.card:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.card.cursor-pointer:hover {
+  transform: translateY(-2px);
+}
+
+.btn {
+  transition: transform 200ms ease-in-out, box-shadow 200ms ease-in-out;
+}
+
+.btn:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.btn-circle:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.navbar a {
+  transition: opacity 250ms ease-in-out;
+}
+
+.tab {
+  transition: background-color 200ms ease-in-out, color 200ms ease-in-out;
+}
+
+.badge {
+  transition: transform 200ms ease-in-out;
+}
+
+.input,
+.select,
+.textarea {
+  transition: border-color 200ms ease-in-out, box-shadow 200ms ease-in-out;
+}
+
+.dropdown-content {
+  transition: opacity 250ms ease-in-out, transform 250ms ease-in-out;
+}
+
+.drawer-side {
+  transition: transform 300ms ease-in-out;
+}
+
+.drawer-overlay {
+  transition: opacity 300ms ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 300ms ease-out;
+}
+
+.fade-in-stagger>* {
+  animation: fadeIn 300ms ease-out;
+  animation-fill-mode: both;
+}
+
+.fade-in-stagger>*:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.fade-in-stagger>*:nth-child(2) {
+  animation-delay: 50ms;
+}
+
+.fade-in-stagger>*:nth-child(3) {
+  animation-delay: 100ms;
+}
+
+.fade-in-stagger>*:nth-child(4) {
+  animation-delay: 150ms;
+}
+
+.fade-in-stagger>*:nth-child(5) {
+  animation-delay: 200ms;
+}
+
+.fade-in-stagger>*:nth-child(n+6) {
+  animation-delay: 250ms;
+}
+
+.loading {
+  transition: opacity 200ms ease-in-out;
+}
+
+.alert {
+  transition: opacity 250ms ease-in-out, transform 250ms ease-in-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.toast {
+  animation: slideInRight 300ms ease-out;
+}
+
+.toast.removing {
+  animation: slideOutRight 300ms ease-in;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.link {
+  transition: color 200ms ease-in-out, text-decoration-color 200ms ease-in-out;
+}
+
+.menu li>* {
+  transition: background-color 200ms ease-in-out, color 200ms ease-in-out;
+}
+
+.collapse-content {
+  transition: max-height 300ms ease-in-out, opacity 300ms ease-in-out;
+}
+
+.progress {
+  transition: value 300ms ease-in-out;
+}
+
+.range {
+  transition: background 200ms ease-in-out;
+}
+
+.toggle {
+  transition: background-color 200ms ease-in-out;
+}
+
+.checkbox,
+.radio {
+  transition: background-color 200ms ease-in-out, border-color 200ms ease-in-out;
+}
+
+.join-item {
+  transition: background-color 200ms ease-in-out, color 200ms ease-in-out, transform 200ms ease-in-out;
+}
+
+.join-item:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.material-symbols-rounded {
+  transition: font-variation-settings 200ms ease-in-out;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.skeleton {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ========================================= */
+/* IMPORTED NAVBAR-RESPONSIVE.CSS */
+/* ========================================= */
+
+.navbar {
+  min-height: 4rem;
+}
+
+.lg\:hidden.px-4.py-3 {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.navbar-center.lg\:hidden img {
+  height: 3rem;
+  width: auto;
+}
+
+.navbar-start.lg\:hidden .btn-circle,
+.navbar-end .btn-circle {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+#globalSearchMobile {
+  min-height: 44px;
+  font-size: 16px;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .navbar {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .navbar-center.lg\:hidden img {
+    height: 3.5rem;
+  }
+
+  .drawer-side .menu {
+    min-height: 100vh;
+  }
+
+  .drawer-side .menu li>a {
+    min-height: 48px;
+    padding: 0.75rem 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .navbar {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    min-height: 5rem;
+  }
+
+  .navbar-start.hidden.lg\:flex img {
+    height: 3.5rem;
+  }
+
+  #desktopSearchPanel {
+    max-width: 18rem;
+    min-width: 14rem;
+  }
+
+  #desktopNavigationMenu {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+  }
+
+  #desktopNavigationMenu>li {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+
+  #desktopNavigationMenu .menu-horizontal>li>a {
+    padding: 0.5rem 0.65rem;
+    min-height: 44px;
+    font-size: 0.875rem;
+  }
+
+  .navbar-end {
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  #pharmacySelectorButton {
+    min-width: 95px;
+    min-height: 60px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .navbar-start.hidden.lg\:flex {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+@media (min-width: 1600px) {
+  .navbar {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .navbar-start.hidden.lg\:flex {
+    gap: 1rem;
+  }
+
+  .navbar-start.hidden.lg\:flex img {
+    height: 4rem;
+  }
+
+  #desktopSearchPanel {
+    max-width: 20rem;
+    min-width: 16rem;
+  }
+
+  #desktopNavigationMenu .menu-horizontal>li>a {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.9375rem;
+  }
+
+  #desktopNavigationMenu .menu-horizontal>li>a .material-symbols-rounded {
+    font-size: 1.5rem;
+  }
+
+  .navbar-end {
+    gap: 1.25rem;
+  }
+
+  #pharmacySelectorButton {
+    min-width: 110px;
+    font-size: 0.875rem;
+  }
+
+  .navbar-end .material-symbols-rounded {
+    font-size: 2rem !important;
+  }
+}
+
+.drawer-side {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.drawer-overlay {
+  transition: opacity 0.3s ease-in-out;
+}
+
+@media (max-width: 1023px) {
+  .lg\:hidden.px-4.py-3 {
+    background-color: var(--color-base-100);
+    border-bottom: 1px solid var(--color-base-300);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+}
+
+@media (max-width: 767px) {
+  .drawer-side .menu li>a {
+    min-height: 52px;
+    padding: 1rem;
+    font-size: 1rem;
+  }
+
+  .drawer-side .menu-title {
+    padding: 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 767px) and (orientation: landscape) {
+  .navbar {
+    min-height: 3.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .navbar-center.lg\:hidden img {
+    height: 2.5rem;
+  }
+
+  .lg\:hidden.px-4.py-3 {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .lg\:hidden.px-4.py-3 .input-lg {
+    height: 2.5rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 820px) and (orientation: portrait) {
+  .navbar {
+    padding: 1rem 1.5rem;
+  }
+
+  .drawer-side .menu {
+    width: 22rem;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1366px) and (orientation: landscape) {
+  .navbar-center {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .navbar-end {
+    gap: 1.5rem;
+  }
+}
+
+.navbar .btn,
+.navbar a,
+.navbar button,
+.navbar input[type="search"] {
+  min-height: 44px;
+}
+
+.navbar .btn-circle {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.drawer-side .menu li>a {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+#pharmacySelectorButton {
+  min-height: 60px;
+  padding: 0.5rem 1rem;
+}
+
+.navbar a:focus-visible,
+.navbar button:focus-visible,
+.navbar input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-contrast: high) {
+  .navbar {
+    border-bottom: 2px solid var(--color-base-content);
+  }
+
+  .drawer-side .menu li>a {
+    border: 1px solid transparent;
+  }
+
+  .drawer-side .menu li>a:hover,
+  .drawer-side .menu li>a:focus {
+    border-color: var(--color-primary);
+  }
+}
+
+@media (min-width: 1024px) {
+  .navbar {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  #desktopSearchPanel input {
+    width: 100%;
+  }
+
+  #desktopNavigationMenu {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  #desktopNavigationMenu>li>a {
+    white-space: nowrap;
+  }
+
+  .navbar-end>* {
+    flex-shrink: 0;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1599px) {
+  .navbar {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .navbar-start.hidden.lg\:flex {
+    gap: 0.5rem;
+  }
+
+  .navbar-start.hidden.lg\:flex img {
+    height: 3rem;
+  }
+
+  #desktopSearchPanel {
+    max-width: 14rem;
+    min-width: 12rem;
+  }
+
+  #desktopNavigationMenu .menu-horizontal>li>a {
+    padding: 0.5rem 0.4rem;
+    font-size: 0.8125rem;
+  }
+
+  #desktopNavigationMenu .menu-horizontal>li>a .material-symbols-rounded {
+    font-size: 1.125rem;
+  }
+
+  .navbar-end {
+    gap: 0.5rem;
+  }
+
+  #pharmacySelectorButton {
+    min-width: 85px;
+    font-size: 0.7rem;
+    padding: 0.25rem 0.4rem;
+  }
+
+  .navbar-end .material-symbols-rounded {
+    font-size: 1.75rem !important;
+  }
+}
+
+.drawer-side {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.navbar {
+  contain: layout style;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .drawer-side,
+  .drawer-overlay,
+  .navbar a,
+  .navbar button {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media (max-width: 359px) {
+  .navbar {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .navbar-center.lg\:hidden img {
+    height: 2.5rem;
+  }
+
+  .drawer-side .menu {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1920px) {
+  .navbar {
+    max-width: 1920px;
+    margin: 0 auto;
+  }
+}
+
+/* ========================================= */
+/* IMPORTED STOCK-MODAL-RESPONSIVE.CSS */
+/* ========================================= */
+
+#stockLocatorModal .modal-box {
+  width: 100vw !important;
+  max-width: none !important;
+  margin: 0 auto;
+}
+
+@media (max-width: 1023px) {
+  #stockLocatorModal .modal-box {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  #stockLocatorModal .overflow-y-auto {
+    height: calc(100vh - 88px);
+  }
+
+  #stockModalCloseBtn {
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+  }
+
+  #stockModalContent .checkbox {
+    min-width: 24px;
+    min-height: 24px;
+  }
+
+  #stockModalContent .label {
+    min-height: 44px;
+    padding: 8px 0;
+  }
+
+  #stockModalContent .btn {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+
+  #stockModalContent .grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .mobile-view-switcher {
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--fallback-b1, oklch(var(--b1)));
+    border-bottom: 1px solid var(--fallback-bc, oklch(var(--bc) / 0.2));
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+    padding: 0;
+  }
+
+  .mobile-view-switcher button {
+    flex: 1;
+    min-height: 48px;
+    border-radius: 0;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .mobile-view-switcher button.active {
+    border-bottom-color: var(--fallback-p, oklch(var(--p)));
+    color: var(--fallback-p, oklch(var(--p)));
+    background: var(--fallback-b2, oklch(var(--b2) / 0.5));
+  }
+
+  .mobile-view-switcher button:not(.active) {
+    color: var(--fallback-bc, oklch(var(--bc) / 0.6));
+  }
+
+  .mobile-view-container {
+    display: none;
+  }
+
+  .mobile-view-container.active {
+    display: block;
+  }
+
+  .mobile-view-container .card {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .mobile-view-container .card-body {
+    padding: 0;
+  }
+
+  .mobile-view-container .card-title {
+    display: none;
+  }
+
+  #stockModalMap {
+    height: calc(100vh - 300px) !important;
+    min-height: 400px;
+    border-radius: 0;
+  }
+
+  #stockModalPharmacyList {
+    max-height: calc(100vh - 300px) !important;
+    padding: 0;
+  }
+
+  #stockModalPharmacyList .card {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    margin-bottom: 0;
+  }
+
+  #stockModalPharmacyList .card:last-child {
+    border-bottom: none;
+  }
+
+  #stockModalPharmacyList .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  #stockModalContent .card.bg-base-100:first-child {
+    margin-bottom: 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+  }
+
+  #stockModalContent .card.bg-base-100:first-child .card-body {
+    padding: 1rem;
+  }
+
+  #stockModalContent .grid-cols-1 {
+    gap: 1rem;
+  }
+
+  #stockModalResultText {
+    padding: 0.75rem 1rem;
+    background: var(--fallback-b2, oklch(var(--b2)));
+    margin: 0 -1.5rem 1rem -1.5rem;
+    border-bottom: 1px solid var(--fallback-bc, oklch(var(--bc) / 0.1));
+  }
+
+  #stockModalFavoriteSection {
+    margin: 0 -1.5rem 1rem -1.5rem;
+    border-radius: 0;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  #stockLocatorModal .modal-box {
+    width: 100vw;
+    max-width: none;
+    height: 95vh;
+    max-height: 95vh;
+    border-radius: 1rem;
+  }
+
+  #stockModalMap {
+    height: calc(95vh - 350px) !important;
+  }
+
+  #stockModalPharmacyList {
+    max-height: calc(95vh - 350px) !important;
+  }
+}
+
+.swipe-indicator {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--fallback-b1, oklch(var(--b1) / 0.9));
+  padding: 8px 16px;
+  border-radius: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--fallback-bc, oklch(var(--bc) / 0.7));
+  z-index: 1000;
+  pointer-events: none;
+  animation: fadeInOut 3s ease-in-out;
+}
+
+@keyframes fadeInOut {
+
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  10%,
+  90% {
+    opacity: 1;
+  }
+}
+
+body.modal-open-mobile {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 1023px) {
+
+  .card:active,
+  .btn:active,
+  .checkbox:active {
+    transform: scale(0.98);
+    transition: transform 0.1s;
+  }
+}
+
+@media (max-width: 1023px) {
+  .leaflet-container {
+    touch-action: pan-x pan-y pinch-zoom;
+  }
+
+  .leaflet-control-zoom a {
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+    font-size: 24px;
+  }
+
+  .leaflet-top.leaflet-left {
+    top: 10px;
+    left: 10px;
+  }
+}
+
+@media (max-width: 1023px) {
+
+  #stockModalLoading,
+  #stockModalError {
+    min-height: calc(100vh - 200px);
+  }
+}
+
+@media (max-width: 1023px) {
+  .mobile-view-switcher button:focus-visible {
+    outline: 2px solid var(--fallback-p, oklch(var(--p)));
+    outline-offset: -2px;
+  }
+
+  .card:focus-visible {
+    outline: 2px solid var(--fallback-p, oklch(var(--p)));
+    outline-offset: 2px;
+  }
+}
