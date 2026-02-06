@@ -1,3 +1,23 @@
+/**
+ * ============================================================================
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * ============================================================================
+ * 
+ * USER STORY:
+ * Felhasználóként látni szeretném egy gyógyszertár alapvető adatait (név, cím,
+ * nyitvatartás, elérhetőség) egy listaelemként, hogy kiválaszthassam a számomra
+ * legmegfelelőbbet.
+ * 
+ * FUNKCIÓK:
+ * - Gyógyszertár adatainak megjelenítése.
+ * - Nyitvatartási státusz (Nyitva/Zárva) számítása és megjelenítése.
+ * - "Mutasd térképen" gomb, amely a térképen az adott patikára ugrik.
+ * - Kiválasztott állapot vizuális jelzése.
+ * 
+ * KAPCSOLÓDÓ ELEMEK:
+ * - Parent: PharmaciesPage
+ */
+
 import React from 'react';
 import { Pharmacy } from '@/types';
 

@@ -24,6 +24,8 @@
  *   - CSV fájl beolvasása (pharmacy_list.csv)
  *   - Geolokációs adatok és nyitvatartás kezelése
  *   - Cache kezelés
+ *   - MOCK ADATOK: Mivel a forrás CSV nem tartalmaz koordinátákat, a rendszer
+ *     véletlenszerű koordinátákat generál Magyarország területén demonstrációs céllal.
  * 
  * MŰKÖDÉSI LOGIKA:
  * - A rendszer először a memóriában lévő cache-t ellenőrzi.
@@ -127,8 +129,6 @@ export async function getMedicines(): Promise<Medicine[]> {
 
 export async function getMedicineByTk(tkSzam: string): Promise<Medicine | undefined> {
     const medicines = await getMedicines();
-    // Use find to get the first match. Since TK can be non-unique in raw CSV (pack sizes), 
-    // ideally we should handle that, but for now we return the first one as representative.
     return medicines.find(m => m.tkSzam === tkSzam);
 }
 
@@ -136,48 +136,90 @@ export async function getPharmacies(): Promise<Pharmacy[]> {
     if (pharmaciesCache) return pharmaciesCache;
 
     try {
-        const filePath = path.join(DATA_DIR, 'pharmacy_list.csv');
+        const filePath = path.join(DATA_DIR, 'benu_pharmacies.csv');
         try {
             await fs.access(filePath);
         } catch {
-            console.warn('pharmacy_list.csv not found');
+            console.warn('benu_pharmacies.csv not found');
             return [];
         }
 
-        const fileContent = await fs.readFile(filePath, 'latin1');
+        const fileContent = await fs.readFile(filePath, 'utf8');
 
         const parseResult = Papa.parse(fileContent, {
             header: true,
             skipEmptyLines: true,
-            delimiter: ';',
+            delimiter: ',',
+            transformHeader: (header: string) => header.trim().replace(/^"|"$/g, '').replace(/^\ufeff/, '')
         });
 
-        const pharmacies: Pharmacy[] = parseResult.data.map((record: any, index: number) => {
+        const uniquePharmaciesMap = new Map<string, Pharmacy>();
+
+        parseResult.data.forEach((record: any, index: number) => {
             const get = (key: string) => {
                 const val = record[key];
                 return typeof val === 'string' ? val.trim() : '';
             };
 
-            return {
-                id: get('id') || index.toString(),
-                nev: get('name') || get('nev') || get('Gyógyszertár neve') || '',
-                varmegye: get('county') || get('varmegye') || '',
-                cim: get('address') || get('cim') || '',
-                telepules: get('city') || get('telepules') || '',
-                irsz: get('zip') || get('irsz') || '',
-                telefon: get('phone') || get('telefon') || '',
-                email: get('email') || '',
-                latitude: parseFloat(get('lat') || get('latitude') || '0'),
-                longitude: parseFloat(get('lng') || get('longitude') || '0'),
-                mondayOpen: '08:00', mondayClose: '18:00',
-                tuesdayOpen: '08:00', tuesdayClose: '18:00',
-                wednesdayOpen: '08:00', wednesdayClose: '18:00',
-                thursdayOpen: '08:00', thursdayClose: '18:00',
-                fridayOpen: '08:00', fridayClose: '18:00',
-                saturdayOpen: '', saturdayClose: '',
-                sundayOpen: '', sundayClose: ''
+            const id = get('BF kód') || index.toString();
+
+            // Skip if ID already exists
+            if (uniquePharmaciesMap.has(id)) {
+                return;
+            }
+
+            const parseHours = (hoursStr: string) => {
+                if (!hoursStr || hoursStr.toLowerCase() === 'zárva') return { open: '', close: '' };
+                const parts = hoursStr.split('-').map(p => p.trim());
+                if (parts.length === 2) {
+                    return { open: parts[0], close: parts[1] };
+                }
+                return { open: hoursStr, close: '' };
             };
+
+            const mon = parseHours(get('Hétfő'));
+            const tue = parseHours(get('Kedd'));
+            const wed = parseHours(get('Szerda'));
+            const thu = parseHours(get('Csütörtök'));
+            const fri = parseHours(get('Péntek'));
+            const sat = parseHours(get('Szombat'));
+            const sun = parseHours(get('Vasárnap'));
+
+            let lat = parseFloat(get('Földrajzi szélesség').replace(',', '.'));
+            let lng = parseFloat(get('Földrajzi hosszúság').replace(',', '.'));
+
+            if (isNaN(lat) || isNaN(lng)) {
+                lat = 0; lng = 0;
+            }
+
+            // Skip invalid entries
+            const name = get('Név');
+            if (!name || lat === 0) return;
+
+            const pharmacy: Pharmacy = {
+                id: id,
+                nev: name,
+                varmegye: '',
+                cim: `${get('Utca, házszám')}`,
+                telepules: get('Település'),
+                irsz: get('Irsz.'),
+                telefon: get('Telefon'),
+                email: get('E-mail'),
+                latitude: lat,
+                longitude: lng,
+                mondayOpen: mon.open, mondayClose: mon.close,
+                tuesdayOpen: tue.open, tuesdayClose: tue.close,
+                wednesdayOpen: wed.open, wednesdayClose: wed.close,
+                thursdayOpen: thu.open, thursdayClose: thu.close,
+                fridayOpen: fri.open, fridayClose: fri.close,
+                saturdayOpen: sat.open, saturdayClose: sat.close,
+                sundayOpen: sun.open, sundayClose: sun.close
+            };
+
+            uniquePharmaciesMap.set(id, pharmacy);
         });
+
+        const pharmacies = Array.from(uniquePharmaciesMap.values());
 
         pharmaciesCache = pharmacies;
         return pharmacies;

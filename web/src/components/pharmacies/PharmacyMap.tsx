@@ -1,3 +1,28 @@
+/**
+ * ============================================================================
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * ============================================================================
+ * 
+ * USER STORY:
+ * Felhasználóként vizuálisan szeretném látni a gyógyszertárak elhelyezkedését
+ * egy térképen, hogy földrajzi közelség alapján választhassak közülük.
+ * 
+ * FUNKCIÓK:
+ * - Leaflet térkép megjelenítése OpenStreetMap réteggel.
+ * - Gyógyszertárak megjelenítése marker-ként.
+ * - Marker-re kattintva felugró ablak (Popup) a patika nevével és címével.
+ * - Térkép automatikus mozgatása (FlyTo) a kívülről kiválasztott patikára.
+ * - Saját pozíció jelzése (opcionális, engedélyköteles).
+ * 
+ * TECHNOLÓGIA:
+ * - react-leaflet (Leaflet wrapper React-hez).
+ * - SSR (Server Side Rendering) tiltása szükséges (dynamic import), mivel a Leaflet
+ *   a window objektumot használja.
+ * 
+ * KAPCSOLÓDÓ ELEMEK:
+ * - Parent: PharmaciesPage
+ */
+
 'use client';
 
 import React, { useEffect } from 'react';
