@@ -10,6 +10,7 @@
  * 
  * FUNKCIÓK:
  * - Gyógyszer adatainak megjelenítése (Név, Ár, Kiszerelés, Gyártó).
+ * - Adatok dinamikus megjelenítése: A szülő komponenstől kapott beállítások alapján a mezők elrejtése/megjelenítése.
  * - Státuszjelző badge megjelenítése (pl. Elérhető - Zöld, Készlethiány - Sárga).
  * - "Részletek" gomb, amely a termék adatlapjára navigál.
  * - Kedvencekhez adás és értesítés kérése gombok (Jelenleg csak UI elemek).
@@ -25,9 +26,10 @@ import Link from 'next/link';
 
 interface MedicineCardProps {
     medicine: Medicine;
+    visibleFields?: Record<string, boolean>; // Make it optional for backward compatibility
 }
 
-export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine }) => {
+export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine, visibleFields }) => {
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
             case 'elérhető': return 'badge-success';
@@ -43,9 +45,11 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine }) => {
 
             <div className="card-body p-5">
                 <div className="flex justify-between items-center mb-2">
-                    <div className={`badge ${getStatusColor(medicine.status)} font-semibold`}>
-                        {medicine.status}
-                    </div>
+                    {(!visibleFields || visibleFields.status) && (
+                        <div className={`badge ${getStatusColor(medicine.status)} font-semibold`}>
+                            {medicine.status}
+                        </div>
+                    )}
                 </div>
 
                 <h2 className="card-title text-lg leading-tight min-h-[3rem] line-clamp-2">
@@ -55,18 +59,24 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine }) => {
                 </h2>
 
                 <div className="text-sm text-gray-500 mb-2 space-y-1">
-                    <div className="flex justify-between">
-                        <span>TK:</span>
-                        <span className="font-mono text-xs font-semibold">{medicine.tkSzam}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Kiszerelés:</span>
-                        <span>{medicine.kiszereles}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Gyártó:</span>
-                        <span className="truncate max-w-[120px]" title={medicine.gyarto}>{medicine.gyarto}</span>
-                    </div>
+                    {(!visibleFields || visibleFields.tkSzam) && (
+                        <div className="flex justify-between">
+                            <span>TK:</span>
+                            <span className="font-mono text-xs font-semibold">{medicine.tkSzam}</span>
+                        </div>
+                    )}
+                    {(!visibleFields || visibleFields.kiszereles) && (
+                        <div className="flex justify-between">
+                            <span>Kiszerelés:</span>
+                            <span>{medicine.kiszereles}</span>
+                        </div>
+                    )}
+                    {(!visibleFields || visibleFields.gyarto) && (
+                        <div className="flex justify-between">
+                            <span>Gyártó:</span>
+                            <span className="truncate max-w-[120px]" title={medicine.gyarto}>{medicine.gyarto}</span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="divider my-2"></div>

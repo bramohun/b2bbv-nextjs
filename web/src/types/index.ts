@@ -13,6 +13,15 @@ export interface Medicine {
     internalId?: string; // Add internal ID for unique key
 }
 
+export type MedicineTableColumn = 'tkSzam' | 'nev' | 'activeSubstance' | 'kiszereles' | 'gyarto' | 'status' | 'actions';
+
+export type MedicineCardField = 'status' | 'tkSzam' | 'kiszereles' | 'gyarto' | 'actions';
+
+export interface ViewSettings {
+    tableColumns: Record<MedicineTableColumn, boolean>;
+    cardFields: Record<MedicineCardField, boolean>;
+}
+
 export interface Pharmacy {
     id: string;
     nev: string;

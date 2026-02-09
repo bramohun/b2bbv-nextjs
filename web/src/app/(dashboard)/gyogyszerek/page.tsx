@@ -14,6 +14,7 @@
  * - Szűrés (Filter): Szűrés gyógyszerstátusz szerint (Elérhető, Készlethiány, Megszűnt).
  * - Lapozás (Pagination): Az eredmények tördelése a gyorsabb betöltés és áttekinthetőség érdekében.
  * - Reszponzív nézet: Mobil és asztali felületre optimalizált megjelenés.
+ * - Nézet testreszabása (Customization): Oszlopok és kártyaadatok láthatóságának kapcsolása, beállítások mentése localStorage-ba.
  * 
  * MŰKÖDÉSI LOGIKA:
  * - Az oldal betöltésekor (/api/medicines) lekéri az összes gyógyszert.
@@ -28,9 +29,28 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Medicine } from '@/types';
+import { Medicine, ViewSettings, MedicineTableColumn, MedicineCardField } from '@/types';
 import Link from 'next/link';
 import { MedicineCard } from '@/components/medicines/MedicineCard';
+
+const DEFAULT_VIEW_SETTINGS: ViewSettings = {
+    tableColumns: {
+        tkSzam: true,
+        nev: true,
+        activeSubstance: true,
+        kiszereles: true,
+        gyarto: true,
+        status: true,
+        actions: true,
+    },
+    cardFields: {
+        status: true,
+        tkSzam: true,
+        kiszereles: true,
+        gyarto: true,
+        actions: true,
+    }
+};
 
 export default function MedicinesPage() {
     const [medicines, setMedicines] = useState<Medicine[]>([]);
@@ -38,6 +58,8 @@ export default function MedicinesPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
     const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+    const [viewSettings, setViewSettings] = useState<ViewSettings>(DEFAULT_VIEW_SETTINGS);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -58,6 +80,43 @@ export default function MedicinesPage() {
 
         fetchMedicines();
     }, []);
+
+    // Load view settings from localStorage
+    useEffect(() => {
+        const savedSettings = localStorage.getItem('medicineViewSettings');
+        if (savedSettings) {
+            try {
+                setViewSettings(JSON.parse(savedSettings));
+            } catch (e) {
+                console.error('Failed to parse view settings', e);
+            }
+        }
+    }, []);
+
+    // Save view settings to localStorage
+    useEffect(() => {
+        localStorage.setItem('medicineViewSettings', JSON.stringify(viewSettings));
+    }, [viewSettings]);
+
+    const toggleTableColumn = (column: MedicineTableColumn) => {
+        setViewSettings(prev => ({
+            ...prev,
+            tableColumns: {
+                ...prev.tableColumns,
+                [column]: !prev.tableColumns[column]
+            }
+        }));
+    };
+
+    const toggleCardField = (field: MedicineCardField) => {
+        setViewSettings(prev => ({
+            ...prev,
+            cardFields: {
+                ...prev.cardFields,
+                [field]: !prev.cardFields[field]
+            }
+        }));
+    };
 
     // Filter Logic
     const filteredMedicines = medicines.filter(medicine => {
@@ -133,6 +192,89 @@ export default function MedicinesPage() {
                         </button>
                     </div>
 
+                    <div className="relative">
+                        <button
+                            className="btn btn-md m-1"
+                            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                            aria-label="Nézet testreszabása"
+                        >
+                            <span className="material-symbols-rounded">tune</span>
+                            Nézet
+                        </button>
+                        {isSettingsOpen && (
+                            <>
+                                <div className="fixed inset-0 z-[40]" onClick={() => setIsSettingsOpen(false)}></div>
+                                <div className="absolute right-0 top-full mt-2 z-[50] w-64 p-2 shadow-xl bg-base-100 rounded-box border border-base-200 overflow-y-auto max-h-[80vh]">
+                                    <ul className="menu menu-sm gap-1">
+                                        {viewMode === 'table' ? (
+                                            <>
+                                                <li className="menu-title px-2">Oszlopok megjelenítése</li>
+                                                <li>
+                                                    <label className="label cursor-pointer hover:bg-base-200">
+                                                        <span className="label-text">TK-szám</span>
+                                                        <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={viewSettings.tableColumns.tkSzam} onChange={() => toggleTableColumn('tkSzam')} />
+                                                    </label>
+                                                </li>
+                                                <li>
+                                                    <label className="label cursor-pointer hover:bg-base-200">
+                                                        <span className="label-text">Hatóanyag</span>
+                                                        <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={viewSettings.tableColumns.activeSubstance} onChange={() => toggleTableColumn('activeSubstance')} />
+                                                    </label>
+                                                </li>
+                                                <li>
+                                                    <label className="label cursor-pointer hover:bg-base-200">
+                                                        <span className="label-text">Kiszerelés</span>
+                                                        <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={viewSettings.tableColumns.kiszereles} onChange={() => toggleTableColumn('kiszereles')} />
+                                                    </label>
+                                                </li>
+                                                <li>
+                                                    <label className="label cursor-pointer hover:bg-base-200">
+                                                        <span className="label-text">Gyártó</span>
+                                                        <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={viewSettings.tableColumns.gyarto} onChange={() => toggleTableColumn('gyarto')} />
+                                                    </label>
+                                                </li>
+                                                <li>
+                                                    <label className="label cursor-pointer hover:bg-base-200">
+                                                        <span className="label-text">Státusz</span>
+                                                        <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={viewSettings.tableColumns.status} onChange={() => toggleTableColumn('status')} />
+                                                    </label>
+                                                </li>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <li className="menu-title px-2">Kártya mezők</li>
+                                                <li>
+                                                    <label className="label cursor-pointer hover:bg-base-200">
+                                                        <span className="label-text">Státusz</span>
+                                                        <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={viewSettings.cardFields.status} onChange={() => toggleCardField('status')} />
+                                                    </label>
+                                                </li>
+                                                <li>
+                                                    <label className="label cursor-pointer hover:bg-base-200">
+                                                        <span className="label-text">TK-szám</span>
+                                                        <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={viewSettings.cardFields.tkSzam} onChange={() => toggleCardField('tkSzam')} />
+                                                    </label>
+                                                </li>
+                                                <li>
+                                                    <label className="label cursor-pointer hover:bg-base-200">
+                                                        <span className="label-text">Kiszerelés</span>
+                                                        <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={viewSettings.cardFields.kiszereles} onChange={() => toggleCardField('kiszereles')} />
+                                                    </label>
+                                                </li>
+                                                <li>
+                                                    <label className="label cursor-pointer hover:bg-base-200">
+                                                        <span className="label-text">Gyártó</span>
+                                                        <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={viewSettings.cardFields.gyarto} onChange={() => toggleCardField('gyarto')} />
+                                                    </label>
+                                                </li>
+                                            </>
+                                        )}
+                                    </ul>
+                                </div>
+                            </>
+                        )}
+                    </div>
+
                     <label className="input input-bordered flex items-center gap-2">
                         <input
                             type="text"
@@ -166,7 +308,11 @@ export default function MedicinesPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
                             {paginatedItems.length > 0 ? (
                                 paginatedItems.map((medicine) => (
-                                    <MedicineCard key={medicine.internalId} medicine={medicine} />
+                                    <MedicineCard
+                                        key={medicine.internalId}
+                                        medicine={medicine}
+                                        visibleFields={viewSettings.cardFields}
+                                    />
                                 ))
                             ) : (
                                 <div className="col-span-full text-center py-12 text-gray-500">
@@ -180,41 +326,49 @@ export default function MedicinesPage() {
                                 {/* head */}
                                 <thead>
                                     <tr>
-                                        <th>Terméknév / TK-szám</th>
-                                        <th>Hatóanyag</th>
-                                        <th>Kiszerelés</th>
-                                        <th>Gyártó</th>
-                                        <th>Státusz</th>
-                                        <th>Műveletek</th>
+                                        {viewSettings.tableColumns.nev && <th>Terméknév / TK-szám</th>}
+                                        {viewSettings.tableColumns.activeSubstance && <th>Hatóanyag</th>}
+                                        {viewSettings.tableColumns.kiszereles && <th>Kiszerelés</th>}
+                                        {viewSettings.tableColumns.gyarto && <th>Gyártó</th>}
+                                        {viewSettings.tableColumns.status && <th>Státusz</th>}
+                                        {viewSettings.tableColumns.actions && <th>Műveletek</th>}
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedItems.length > 0 ? (
                                         paginatedItems.map((medicine) => (
                                             <tr key={medicine.internalId} className="hover">
-                                                <td>
-                                                    <div className="font-bold text-primary">
-                                                        <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="hover:underline">
-                                                            {medicine.nev}
-                                                        </Link>
-                                                    </div>
-                                                    <div className="text-xs opacity-50">{medicine.tkSzam}</div>
-                                                </td>
-                                                <td>
-                                                    {medicine.activeSubstance || medicine.inn || '-'}
-                                                </td>
-                                                <td>{medicine.kiszereles}</td>
-                                                <td>
-                                                    <div className="tooltip" data-tip={medicine.gyarto}>
-                                                        <span className="truncate max-w-[150px] block">{medicine.gyarto}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div className={`badge ${getStatusColor(medicine.status)} badge-sm`}>
-                                                        {medicine.status}
-                                                    </div>
-                                                </td>
-                                                <td>
+                                                {viewSettings.tableColumns.nev && (
+                                                    <td>
+                                                        <div className="font-bold text-primary">
+                                                            <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="hover:underline">
+                                                                {medicine.nev}
+                                                            </Link>
+                                                        </div>
+                                                        {viewSettings.tableColumns.tkSzam && <div className="text-xs opacity-50">{medicine.tkSzam}</div>}
+                                                    </td>
+                                                )}
+                                                {viewSettings.tableColumns.activeSubstance && (
+                                                    <td>
+                                                        {medicine.activeSubstance || medicine.inn || '-'}
+                                                    </td>
+                                                )}
+                                                {viewSettings.tableColumns.kiszereles && <td>{medicine.kiszereles}</td>}
+                                                {viewSettings.tableColumns.gyarto && (
+                                                    <td>
+                                                        <div className="tooltip" data-tip={medicine.gyarto}>
+                                                            <span className="truncate max-w-[150px] block">{medicine.gyarto}</span>
+                                                        </div>
+                                                    </td>
+                                                )}
+                                                {viewSettings.tableColumns.status && (
+                                                    <td>
+                                                        <div className={`badge ${medicine.status === 'Elérhető' ? 'badge-success' : medicine.status === 'Készlethiány' ? 'badge-warning' : 'badge-error'} badge-sm`}>
+                                                            {medicine.status}
+                                                        </div>
+                                                    </td>
+                                                )}
+                                                <td className="bg-base-100 sticky right-0 z-10 shadow-[-5px_0px_5px_-5px_#0000001a]">
                                                     <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="btn btn-ghost btn-xs">
                                                         Részletek
                                                     </Link>
@@ -223,7 +377,7 @@ export default function MedicinesPage() {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={6} className="text-center py-12 text-gray-500">
+                                            <td colSpan={Object.values(viewSettings.tableColumns).filter(Boolean).length} className="text-center py-12 text-gray-500">
                                                 Nem található a keresésnek megfelelő gyógyszer.
                                             </td>
                                         </tr>
