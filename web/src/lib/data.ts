@@ -115,6 +115,11 @@ export async function getMedicines(): Promise<Medicine[]> {
                 lastUpdate: new Date().toISOString(),
                 brand: get('Márkanév') || get('Név'),
                 activeSubstance: get('Hatóanyag') || get('INN'),
+                packagingDetails: get('Csomagolás részletezése'),
+                dispensability: get('Kiadhatóság'),
+                dispensabilitySub: get('Kiad_alcsop'),
+                safetyFeatures: get('Biztonsági elemek'),
+                authorizationDate: get('TK dátum'),
             };
         }).filter((m: Medicine) => m.tkSzam && m.nev); // Filter invalid rows
 

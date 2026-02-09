@@ -92,6 +92,36 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine, visibleFie
                             <span className="truncate max-w-[120px]" title={medicine.gyarto}>{medicine.gyarto}</span>
                         </div>
                     )}
+                    {(visibleFields?.packagingDetails) && (
+                        <div className="flex justify-between">
+                            <span>Csomagolás:</span>
+                            <span className="truncate max-w-[120px]" title={medicine.packagingDetails}>{medicine.packagingDetails}</span>
+                        </div>
+                    )}
+                    {(visibleFields?.dispensability) && (
+                        <div className="flex justify-between">
+                            <span>Kiadhatóság:</span>
+                            <span>{medicine.dispensability}</span>
+                        </div>
+                    )}
+                    {(visibleFields?.dispensabilitySub) && (
+                        <div className="flex justify-between">
+                            <span>Kiad. Alcsop.:</span>
+                            <span>{medicine.dispensabilitySub}</span>
+                        </div>
+                    )}
+                    {(visibleFields?.safetyFeatures) && (
+                        <div className="flex justify-between">
+                            <span>Biztonsági E.:</span>
+                            <span>{medicine.safetyFeatures}</span>
+                        </div>
+                    )}
+                    {(visibleFields?.authorizationDate) && (
+                        <div className="flex justify-between">
+                            <span>Eng. Dátum:</span>
+                            <span>{medicine.authorizationDate}</span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="divider my-2"></div>
