@@ -417,22 +417,22 @@ export default function MedicinesPage() {
                                 )}
                             </div>
                         ) : (
-                            <div className="overflow-x-auto mb-8 bg-base-100 rounded-lg shadow">
-                                <table className="table">
+                            <div className="overflow-x-visible mb-8 bg-base-100 rounded-lg shadow">
+                                <table className="table table-pin-rows">
                                     {/* head */}
                                     <thead>
                                         <tr>
-                                            {viewSettings.tableColumns.nev && <th>Terméknév / TK-szám</th>}
-                                            {viewSettings.tableColumns.activeSubstance && <th>Hatóanyag</th>}
-                                            {viewSettings.tableColumns.kiszereles && <th>Kiszerelés</th>}
-                                            {viewSettings.tableColumns.gyarto && <th>Gyártó</th>}
-                                            {viewSettings.tableColumns.packagingDetails && <th>Csomagolás</th>}
-                                            {viewSettings.tableColumns.dispensability && <th>Kiadhatóság</th>}
-                                            {viewSettings.tableColumns.dispensabilitySub && <th>Kiad. Alcsop.</th>}
-                                            {viewSettings.tableColumns.safetyFeatures && <th>B. Elemek</th>}
-                                            {viewSettings.tableColumns.authorizationDate && <th>Eng. Dátum</th>}
-                                            {viewSettings.tableColumns.status && <th>Státusz</th>}
-                                            {viewSettings.tableColumns.actions && <th>Műveletek</th>}
+                                            {viewSettings.tableColumns.nev && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Terméknév / TK-szám</th>}
+                                            {viewSettings.tableColumns.activeSubstance && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Hatóanyag</th>}
+                                            {viewSettings.tableColumns.kiszereles && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Kiszerelés</th>}
+                                            {viewSettings.tableColumns.gyarto && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Gyártó</th>}
+                                            {viewSettings.tableColumns.packagingDetails && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Csomagolás</th>}
+                                            {viewSettings.tableColumns.dispensability && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Kiadhatóság</th>}
+                                            {viewSettings.tableColumns.dispensabilitySub && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Kiad. Alcsop.</th>}
+                                            {viewSettings.tableColumns.safetyFeatures && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">B. Elemek</th>}
+                                            {viewSettings.tableColumns.authorizationDate && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Eng. Dátum</th>}
+                                            {viewSettings.tableColumns.status && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Státusz</th>}
+                                            {viewSettings.tableColumns.actions && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Műveletek</th>}
                                         </tr>
                                     </thead>
                                     <tbody>
