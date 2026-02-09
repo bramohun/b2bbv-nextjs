@@ -61,7 +61,7 @@ export default async function MedicineDetailPage({ params }: PageProps) {
         <div className="container mx-auto py-8 px-4">
             {/* Breadcrumb / Back Navigation */}
             <div className="mb-6">
-                <Link href="/medicines" className="btn btn-ghost gap-2 pl-0 hover:bg-transparent hover:text-primary">
+                <Link href="/gyogyszerek" className="btn btn-ghost gap-2 pl-0 hover:bg-transparent hover:text-primary">
                     <span className="material-symbols-rounded">arrow_back</span>
                     Vissza a listához
                 </Link>

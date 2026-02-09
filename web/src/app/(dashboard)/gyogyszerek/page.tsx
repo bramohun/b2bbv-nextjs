@@ -29,6 +29,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Medicine } from '@/types';
+import Link from 'next/link';
 import { MedicineCard } from '@/components/medicines/MedicineCard';
 
 export default function MedicinesPage() {
@@ -36,6 +37,7 @@ export default function MedicinesPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
+    const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -92,6 +94,15 @@ export default function MedicinesPage() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
+    const getStatusColor = (status: string) => {
+        switch (status?.toLowerCase()) {
+            case 'elérhető': return 'badge-success';
+            case 'készlethiány': return 'badge-warning';
+            case 'megszűnt': return 'badge-error';
+            default: return 'badge-ghost';
+        }
+    };
+
     return (
         <div className="container mx-auto">
             {/* Header & Controls */}
@@ -103,7 +114,25 @@ export default function MedicinesPage() {
                     </span>
                 </h1>
 
-                <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto items-center">
+
+                    <div className="join">
+                        <button
+                            className={`join-item btn btn-md ${viewMode === 'grid' ? 'btn-active btn-primary' : ''}`}
+                            onClick={() => setViewMode('grid')}
+                            title="Rács nézet"
+                        >
+                            <span className="material-symbols-rounded">grid_view</span>
+                        </button>
+                        <button
+                            className={`join-item btn btn-md ${viewMode === 'table' ? 'btn-active btn-primary' : ''}`}
+                            onClick={() => setViewMode('table')}
+                            title="Lista nézet"
+                        >
+                            <span className="material-symbols-rounded">view_list</span>
+                        </button>
+                    </div>
+
                     <label className="input input-bordered flex items-center gap-2">
                         <input
                             type="text"
@@ -133,17 +162,76 @@ export default function MedicinesPage() {
                 </div>
             ) : (
                 <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
-                        {paginatedItems.length > 0 ? (
-                            paginatedItems.map((medicine) => (
-                                <MedicineCard key={medicine.internalId} medicine={medicine} />
-                            ))
-                        ) : (
-                            <div className="col-span-full text-center py-12 text-gray-500">
-                                Nem található a keresésnek megfelelő gyógyszer.
-                            </div>
-                        )}
-                    </div>
+                    {viewMode === 'grid' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+                            {paginatedItems.length > 0 ? (
+                                paginatedItems.map((medicine) => (
+                                    <MedicineCard key={medicine.internalId} medicine={medicine} />
+                                ))
+                            ) : (
+                                <div className="col-span-full text-center py-12 text-gray-500">
+                                    Nem található a keresésnek megfelelő gyógyszer.
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto mb-8 bg-base-100 rounded-lg shadow">
+                            <table className="table">
+                                {/* head */}
+                                <thead>
+                                    <tr>
+                                        <th>Terméknév / TK-szám</th>
+                                        <th>Hatóanyag</th>
+                                        <th>Kiszerelés</th>
+                                        <th>Gyártó</th>
+                                        <th>Státusz</th>
+                                        <th>Műveletek</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {paginatedItems.length > 0 ? (
+                                        paginatedItems.map((medicine) => (
+                                            <tr key={medicine.internalId} className="hover">
+                                                <td>
+                                                    <div className="font-bold text-primary">
+                                                        <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="hover:underline">
+                                                            {medicine.nev}
+                                                        </Link>
+                                                    </div>
+                                                    <div className="text-xs opacity-50">{medicine.tkSzam}</div>
+                                                </td>
+                                                <td>
+                                                    {medicine.activeSubstance || medicine.inn || '-'}
+                                                </td>
+                                                <td>{medicine.kiszereles}</td>
+                                                <td>
+                                                    <div className="tooltip" data-tip={medicine.gyarto}>
+                                                        <span className="truncate max-w-[150px] block">{medicine.gyarto}</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div className={`badge ${getStatusColor(medicine.status)} badge-sm`}>
+                                                        {medicine.status}
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="btn btn-ghost btn-xs">
+                                                        Részletek
+                                                    </Link>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={6} className="text-center py-12 text-gray-500">
+                                                Nem található a keresésnek megfelelő gyógyszer.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
 
                     {/* Pagination Controls */}
                     {totalPages > 1 && (
@@ -169,6 +257,7 @@ export default function MedicinesPage() {
                                         className={`join-item btn ${currentPage === 1 ? 'btn-active' : ''}`}
                                         onClick={() => handlePageChange(1)}
                                     >
+                                        1
                                     </button>
 
                                     {/* Show dots if far from start */}

@@ -49,7 +49,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine }) => {
                 </div>
 
                 <h2 className="card-title text-lg leading-tight min-h-[3rem] line-clamp-2">
-                    <Link href={`/medicines/${medicine.tkSzam}`} className="hover:text-primary transition-colors">
+                    <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="hover:text-primary transition-colors">
                         {medicine.nev}
                     </Link>
                 </h2>
@@ -80,7 +80,7 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine }) => {
                             <span className="material-symbols-rounded">notifications</span>
                         </button>
                     </div>
-                    <Link href={`/medicines/${medicine.tkSzam}`} className="btn btn-primary btn-sm">
+                    <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="btn btn-primary btn-sm">
                         Részletek
                     </Link>
                 </div>

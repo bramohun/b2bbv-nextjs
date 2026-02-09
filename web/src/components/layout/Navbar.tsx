@@ -14,8 +14,8 @@ export const Navbar = () => {
                         className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
                     >
                         <li><Link href="/dashboard">Irányítópult</Link></li>
-                        <li><Link href="/medicines">Gyógyszerek</Link></li>
-                        <li><Link href="/pharmacies">Gyógyszertárak</Link></li>
+                        <li><Link href="/gyogyszerek">Gyógyszerek</Link></li>
+                        <li><Link href="/gyogyszertarak">Gyógyszertárak</Link></li>
                         <li><Link href="/kozosseg">Közösség</Link></li>
                     </ul>
                 </div>
@@ -27,8 +27,8 @@ export const Navbar = () => {
             <div className="navbar-center hidden lg:flex">
                 <ul className="menu menu-horizontal px-1">
                     <li><Link href="/dashboard">Irányítópult</Link></li>
-                    <li><Link href="/medicines">Gyógyszerek</Link></li>
-                    <li><Link href="/pharmacies">Gyógyszertárak</Link></li>
+                    <li><Link href="/gyogyszerek">Gyógyszerek</Link></li>
+                    <li><Link href="/gyogyszertarak">Gyógyszertárak</Link></li>
                     <li><Link href="/kozosseg">Közösség</Link></li>
                 </ul>
             </div>
