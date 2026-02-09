@@ -31,6 +31,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getMedicineByTk } from '@/lib/data';
 import { MedicineDetailActions } from '@/components/medicines/MedicineDetailActions';
+import { formatDate } from '@/lib/utils';
 
 interface PageProps {
     params: Promise<{ id: string[] }>;
@@ -121,7 +122,7 @@ export default async function MedicineDetailPage({ params }: PageProps) {
                         <div>
                             <h3 className="font-semibold text-gray-500 text-sm uppercase tracking-wide mb-1">Utolsó frissítés</h3>
                             <p className="text-sm text-gray-400">
-                                {new Date(medicine.lastUpdate).toLocaleDateString('hu-HU')}
+                                {formatDate(medicine.lastUpdate)}
                             </p>
                         </div>
                     </div>

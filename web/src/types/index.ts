@@ -18,9 +18,9 @@ export interface Medicine {
     authorizationDate: string;
 }
 
-export type MedicineTableColumn = 'tkSzam' | 'nev' | 'activeSubstance' | 'kiszereles' | 'gyarto' | 'status' | 'actions' | 'packagingDetails' | 'dispensability' | 'dispensabilitySub' | 'safetyFeatures' | 'authorizationDate';
+export type MedicineTableColumn = 'tkSzam' | 'nev' | 'activeSubstance' | 'kiszereles' | 'gyarto' | 'status' | 'actions' | 'packagingDetails' | 'dispensability' | 'dispensabilitySub' | 'safetyFeatures' | 'authorizationDate' | 'lastUpdate';
 
-export type MedicineCardField = 'status' | 'tkSzam' | 'kiszereles' | 'gyarto' | 'actions' | 'packagingDetails' | 'dispensability' | 'dispensabilitySub' | 'safetyFeatures' | 'authorizationDate';
+export type MedicineCardField = 'status' | 'tkSzam' | 'kiszereles' | 'gyarto' | 'actions' | 'packagingDetails' | 'dispensability' | 'dispensabilitySub' | 'safetyFeatures' | 'authorizationDate' | 'lastUpdate';
 
 export interface ViewSettings {
     tableColumns: Record<MedicineTableColumn, boolean>;

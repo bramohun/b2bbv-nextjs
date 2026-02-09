@@ -32,6 +32,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Medicine, ViewSettings, MedicineTableColumn, MedicineCardField } from '@/types';
 import Link from 'next/link';
 import { MedicineCard } from '@/components/medicines/MedicineCard';
+import { formatDate } from '@/lib/utils';
 
 const DEFAULT_VIEW_SETTINGS: ViewSettings = {
     tableColumns: {
@@ -47,6 +48,7 @@ const DEFAULT_VIEW_SETTINGS: ViewSettings = {
         dispensabilitySub: false,
         safetyFeatures: false,
         authorizationDate: false,
+        lastUpdate: false,
     },
     cardFields: {
         status: true,
@@ -59,6 +61,7 @@ const DEFAULT_VIEW_SETTINGS: ViewSettings = {
         dispensabilitySub: false,
         safetyFeatures: false,
         authorizationDate: false,
+        lastUpdate: false,
     }
 };
 
@@ -305,6 +308,12 @@ export default function MedicinesPage() {
                                                     <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.authorizationDate} onChange={() => toggleTableColumn('authorizationDate')} />
                                                 </label>
                                             </li>
+                                            <li>
+                                                <label className="label cursor-pointer hover:bg-base-200">
+                                                    <span className="label-text">Utolsó frissítés</span>
+                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.lastUpdate} onChange={() => toggleTableColumn('lastUpdate')} />
+                                                </label>
+                                            </li>
                                         </>
                                     ) : (
                                         <>
@@ -361,6 +370,12 @@ export default function MedicinesPage() {
                                                 <label className="label cursor-pointer hover:bg-base-200">
                                                     <span className="label-text">Engedély Dátuma</span>
                                                     <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.cardFields.authorizationDate} onChange={() => toggleCardField('authorizationDate')} />
+                                                </label>
+                                            </li>
+                                            <li>
+                                                <label className="label cursor-pointer hover:bg-base-200">
+                                                    <span className="label-text">Utolsó frissítés</span>
+                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.cardFields.lastUpdate} onChange={() => toggleCardField('lastUpdate')} />
                                                 </label>
                                             </li>
                                         </>
@@ -431,6 +446,7 @@ export default function MedicinesPage() {
                                             {viewSettings.tableColumns.dispensabilitySub && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Kiad. Alcsop.</th>}
                                             {viewSettings.tableColumns.safetyFeatures && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">B. Elemek</th>}
                                             {viewSettings.tableColumns.authorizationDate && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Eng. Dátum</th>}
+                                            {viewSettings.tableColumns.lastUpdate && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Utolsó friss.</th>}
                                             {viewSettings.tableColumns.status && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Státusz</th>}
                                             {viewSettings.tableColumns.actions && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Műveletek</th>}
                                         </tr>
@@ -468,6 +484,7 @@ export default function MedicinesPage() {
                                                     {viewSettings.tableColumns.dispensabilitySub && <td>{medicine.dispensabilitySub}</td>}
                                                     {viewSettings.tableColumns.safetyFeatures && <td>{medicine.safetyFeatures}</td>}
                                                     {viewSettings.tableColumns.authorizationDate && <td>{medicine.authorizationDate}</td>}
+                                                    {viewSettings.tableColumns.lastUpdate && <td>{formatDate(medicine.lastUpdate)}</td>}
                                                     {viewSettings.tableColumns.status && (
                                                         <td>
                                                             <div className={`badge ${medicine.status === 'Elérhető' ? 'badge-success' : medicine.status === 'Készlethiány' ? 'badge-warning' : 'badge-error'} badge-sm`}>

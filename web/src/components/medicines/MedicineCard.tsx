@@ -26,6 +26,7 @@ import React from 'react';
 import { Medicine } from '@/types';
 import Link from 'next/link';
 import { useNotification } from '@/context/NotificationContext';
+import { formatDate } from '@/lib/utils';
 
 interface MedicineCardProps {
     medicine: Medicine;
@@ -120,6 +121,12 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine, visibleFie
                         <div className="flex justify-between">
                             <span>Eng. Dátum:</span>
                             <span>{medicine.authorizationDate}</span>
+                        </div>
+                    )}
+                    {(visibleFields?.lastUpdate) && (
+                        <div className="flex justify-between">
+                            <span>Utolsó friss.:</span>
+                            <span>{formatDate(medicine.lastUpdate)}</span>
                         </div>
                     )}
                 </div>
