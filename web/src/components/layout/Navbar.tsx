@@ -16,6 +16,7 @@ export const Navbar = () => {
                         <li><Link href="/dashboard">Irányítópult</Link></li>
                         <li><Link href="/medicines">Gyógyszerek</Link></li>
                         <li><Link href="/pharmacies">Gyógyszertárak</Link></li>
+                        <li><Link href="/kozosseg">Közösség</Link></li>
                     </ul>
                 </div>
                 <Link href="/dashboard" className="btn btn-ghost text-xl">
@@ -28,6 +29,7 @@ export const Navbar = () => {
                     <li><Link href="/dashboard">Irányítópult</Link></li>
                     <li><Link href="/medicines">Gyógyszerek</Link></li>
                     <li><Link href="/pharmacies">Gyógyszertárak</Link></li>
+                    <li><Link href="/kozosseg">Közösség</Link></li>
                 </ul>
             </div>
             <div className="navbar-end gap-2">
