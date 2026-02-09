@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * ============================================================================
  * FUNKCIONÁLIS SPECIFIKÁCIÓ
@@ -23,6 +25,7 @@
 import React from 'react';
 import { Medicine } from '@/types';
 import Link from 'next/link';
+import { useNotification } from '@/context/NotificationContext';
 
 interface MedicineCardProps {
     medicine: Medicine;
@@ -30,12 +33,24 @@ interface MedicineCardProps {
 }
 
 export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine, visibleFields }) => {
+    const { isSubscribed, subscribe, unsubscribe } = useNotification();
+    const subscribed = isSubscribed(medicine.tkSzam);
+
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
             case 'elérhető': return 'badge-success';
             case 'készlethiány': return 'badge-warning';
             case 'megszűnt': return 'badge-error';
             default: return 'badge-ghost';
+        }
+    };
+
+    const handleSubscription = (e: React.MouseEvent) => {
+        e.preventDefault(); // Prevent navigation to detail page
+        if (subscribed) {
+            unsubscribe(medicine.tkSzam);
+        } else {
+            subscribe(medicine);
         }
     };
 
@@ -86,8 +101,14 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine, visibleFie
                         <button className="btn btn-circle btn-ghost btn-sm text-gray-400 hover:text-warning" title="Kedvencekhez">
                             <span className="material-symbols-rounded">star</span>
                         </button>
-                        <button className="btn btn-circle btn-ghost btn-sm text-gray-400 hover:text-info" title="Értesítés">
-                            <span className="material-symbols-rounded">notifications</span>
+                        <button
+                            className={`btn btn-circle btn-sm ${subscribed ? 'btn-primary' : 'btn-ghost text-gray-400 hover:text-info'}`}
+                            onClick={handleSubscription}
+                            title={subscribed ? "Leiratkozás" : "Értesítés kérése"}
+                        >
+                            <span className="material-symbols-rounded">
+                                {subscribed ? 'notifications_active' : 'notifications'}
+                            </span>
                         </button>
                     </div>
                     <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="btn btn-primary btn-sm">

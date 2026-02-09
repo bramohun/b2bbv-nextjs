@@ -30,6 +30,7 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getMedicineByTk } from '@/lib/data';
+import { MedicineDetailActions } from '@/components/medicines/MedicineDetailActions';
 
 interface PageProps {
     params: Promise<{ id: string[] }>;
@@ -127,16 +128,7 @@ export default async function MedicineDetailPage({ params }: PageProps) {
 
                     <div className="divider"></div>
 
-                    <div className="card-actions justify-end mt-4">
-                        <button className="btn btn-outline gap-2">
-                            <span className="material-symbols-rounded">star</span>
-                            Kedvencekhez
-                        </button>
-                        <button className="btn btn-primary gap-2">
-                            <span className="material-symbols-rounded">notifications</span>
-                            Értesítés kérése
-                        </button>
-                    </div>
+                    <MedicineDetailActions medicine={medicine} />
                 </div>
             </div>
         </div>
