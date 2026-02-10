@@ -41,6 +41,7 @@ import { Medicine, ViewSettings, MedicineTableColumn, MedicineCardField } from '
 import Link from 'next/link';
 import { MedicineCard } from '@/components/medicines/MedicineCard';
 import { formatDate } from '@/lib/utils';
+import { useNotification } from '@/context/NotificationContext';
 
 type SortDirection = 'asc' | 'desc' | null;
 type SortKey = 'nev' | 'activeSubstance' | 'kiszereles' | 'gyarto' | 'status'
@@ -85,10 +86,11 @@ export default function MedicinesPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
-    const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+    const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
     const [viewSettings, setViewSettings] = useState<ViewSettings>(DEFAULT_VIEW_SETTINGS);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const settingsRef = useRef<HTMLDivElement>(null);
+    const { isSubscribed, subscribe, unsubscribe } = useNotification();
 
     // Sorting State
     const [sortKey, setSortKey] = useState<SortKey | null>(null);
@@ -305,6 +307,14 @@ export default function MedicinesPage() {
             case 'készlethiány': return 'badge-warning';
             case 'megszűnt': return 'badge-error';
             default: return 'badge-ghost';
+        }
+    };
+
+    const handleSubscription = (medicine: Medicine) => {
+        if (isSubscribed(medicine.tkSzam)) {
+            unsubscribe(medicine.tkSzam);
+        } else {
+            subscribe(medicine);
         }
     };
 
@@ -752,9 +762,23 @@ export default function MedicinesPage() {
                                                         </td>
                                                     )}
                                                     <td className="bg-base-100 sticky right-0 z-10 shadow-[-5px_0px_5px_-5px_#0000001a]">
-                                                        <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="btn btn-ghost btn-xs">
-                                                            Részletek
-                                                        </Link>
+                                                        <div className="flex items-center gap-1">
+                                                            <button className="btn btn-circle btn-ghost btn-xs text-gray-400 hover:text-warning" title="Kedvencekhez">
+                                                                <span className="material-symbols-rounded text-[18px]">star</span>
+                                                            </button>
+                                                            <button
+                                                                className={`btn btn-circle btn-xs ${isSubscribed(medicine.tkSzam) ? 'btn-primary' : 'btn-ghost text-gray-400 hover:text-info'}`}
+                                                                onClick={() => handleSubscription(medicine)}
+                                                                title={isSubscribed(medicine.tkSzam) ? "Leiratkozás" : "Értesítés kérése"}
+                                                            >
+                                                                <span className="material-symbols-rounded text-[18px]">
+                                                                    {isSubscribed(medicine.tkSzam) ? 'notifications_active' : 'notifications'}
+                                                                </span>
+                                                            </button>
+                                                            <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="btn btn-ghost btn-xs">
+                                                                Részletek
+                                                            </Link>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             ))
