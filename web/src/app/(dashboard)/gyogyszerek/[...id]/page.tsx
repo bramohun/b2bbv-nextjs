@@ -31,6 +31,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getMedicineByTk } from '@/lib/data';
 import { MedicineDetailActions } from '@/components/medicines/MedicineDetailActions';
+import { MedicineStockInfo } from '@/components/medicines/MedicineStockInfo';
 import { MedicineStatusHistory } from '@/components/medicines/MedicineStatusHistory';
 import { formatDate } from '@/lib/utils';
 
@@ -182,25 +183,11 @@ export default async function MedicineDetailPage({ params }: PageProps) {
                                 {getStatusBadge(medicine.status)}
                             </div>
 
-                            {stockInfo.show && (
-                                <div className="mt-4 p-3 bg-base-200 rounded-lg text-sm">
-                                    {stockInfo.isLimited ? (
-                                        <div className="text-gray-600">
-                                            Készleten: <strong>{stockInfo.inStock}</strong> gyógyszertárban
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <div className="font-semibold mb-1">
-                                                {stockInfo.total} gyógyszertárban elérhető:
-                                            </div>
-                                            <ul className="list-disc list-inside text-gray-600 space-y-0.5">
-                                                <li>Készleten: <strong>{stockInfo.inStock}</strong> gyógyszertárban</li>
-                                                <li>Rendelésre 1-2 munkanapon belül: <strong>{stockInfo.onOrder}</strong> gyógyszertárban</li>
-                                            </ul>
-                                        </>
-                                    )}
-                                </div>
-                            )}
+                            <MedicineStockInfo
+                                medicineName={medicine.nev}
+                                medicineId={medicine.tkSzam}
+                                stockInfo={stockInfo}
+                            />
                         </div>
                         <div className="mt-2">
                             <MedicineDetailActions medicine={medicine} />
