@@ -1,12 +1,33 @@
 'use client';
 
+/**
+ * ============================================================================
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * ============================================================================
+ * 
+ * USER STORY:
+ * Felhasználóként szeretnék egy központi navigációs sávot használni az oldalak
+ * közötti váltáshoz, a kereséshez, a kedvenc gyógyszereim gyors eléréséhez 
+ * és a profilbeállításaim kezeléséhez.
+ * 
+ * FUNKCIÓK:
+ * - Navigációs linkek: Irányítópult, Gyógyszerek, Gyógyszertárak, Közösség.
+ * - Gyorskereső gomb.
+ * - Kedvencek dropdown: A kedvencnek jelölt gyógyszerek gyorslistája és navigáció a részletes kedvencek oldalra.
+ * - Felhasználói profil menü: Profil, Beállítások, Kijelentkezés.
+ * - Reszponzív megjelenés: Mobil nézetben hamburger menü.
+ * 
+ * ÜZLETI LOGIKA:
+ * - A kedvencek száma dinamikusan frissül a FavoriteContext alapján.
+ * - Az értesítések kezelése kikerült a navigációs sávról, azokat csak a terméklapokon,
+ *   a listákban és a profil/kedvencek oldalon lehet kezelni.
+ */
+
 import Link from 'next/link';
 import React from 'react';
-import { useNotification } from '@/context/NotificationContext';
 import { useFavorite } from '@/context/FavoriteContext';
 
 export const Navbar = () => {
-    const { subscriptions } = useNotification();
     const { favorites } = useFavorite();
 
     return (
@@ -84,53 +105,6 @@ export const Navbar = () => {
                             </div>
                             <div className="card-actions">
                                 <Link href="/profile/favorites" className="btn btn-warning btn-block btn-sm">
-                                    Összes megtekintése
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="dropdown dropdown-end">
-                    <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
-                        <div className="indicator">
-                            <span className="material-symbols-rounded">notifications</span>
-                            {subscriptions.length > 0 && (
-                                <span className="badge badge-xs badge-primary indicator-item">
-                                    {subscriptions.length}
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                    <div
-                        tabIndex={0}
-                        className="card card-compact dropdown-content bg-base-100 z-[1] mt-3 w-80 shadow"
-                    >
-                        <div className="card-body">
-                            <span className="text-lg font-bold">{subscriptions.length} feliratkozás</span>
-                            <div className="max-h-60 overflow-y-auto">
-                                {subscriptions.length === 0 ? (
-                                    <p className="text-sm text-gray-500">Nincs aktív értesítés kérés.</p>
-                                ) : (
-                                    <ul className="menu menu-sm bg-base-100 rounded-box p-0">
-                                        {subscriptions.map((sub) => (
-                                            <li key={sub.tkSzam} className="border-b border-base-200 last:border-none">
-                                                <Link href={`/gyogyszerek/${sub.tkSzam}`} className="flex flex-col items-start py-2">
-                                                    <span className="font-medium truncate w-full">{sub.name}</span>
-                                                    <span className="text-xs text-gray-400">{sub.tkSzam}</span>
-                                                    <span className={`badge badge-xs mt-1 ${sub.status === 'Elérhető' ? 'badge-success' :
-                                                        sub.status === 'Készlethiány' ? 'badge-warning' : 'badge-error'
-                                                        }`}>
-                                                        {sub.status}
-                                                    </span>
-                                                </Link>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </div>
-                            <div className="card-actions">
-                                <Link href="/profile/notifications" className="btn btn-primary btn-block btn-sm">
                                     Összes megtekintése
                                 </Link>
                             </div>

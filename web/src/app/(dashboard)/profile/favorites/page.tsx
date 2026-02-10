@@ -3,20 +3,24 @@
 import React from 'react';
 import Link from 'next/link';
 import { useFavorite } from '@/context/FavoriteContext';
+import { useNotification } from '@/context/NotificationContext';
 
 /**
  * User Story: Felhasználóként szeretném egy külön felületen látni az összes kedvencnek jelölt gyógyszeremet, 
- * hogy gyorsan elérhessem őket és szükség esetén eltávolíthassak elemeket a listából.
+ * hogy gyorsan elérhessem őket és szükség esetén eltávolíthassak elemeket a listából, 
+ * illetve feliratkozhassak értesítésekre a kedvenc termékeimnél.
  * 
  * Funkciók:
  * - Kedvenc gyógyszerek listázása táblázatos formában.
  * - Közvetlen navigáció a gyógyszer adatlapjára.
  * - Eltávolítás a kedvencek közül egy kattintással.
+ * - Értesítésre feliratkozás és leiratkozás.
  * - Üres állapot kezelése.
  */
 
 export default function FavoritesPage() {
     const { favorites, removeFavorite } = useFavorite();
+    const { isSubscribed, subscribe, unsubscribe } = useNotification();
 
     const getStatusColor = (status: string) => {
         switch (status?.toLowerCase()) {
@@ -24,6 +28,14 @@ export default function FavoritesPage() {
             case 'készlethiány': return 'badge-warning';
             case 'megszűnt': return 'badge-error';
             default: return 'badge-ghost';
+        }
+    };
+
+    const handleSubscription = (medicine: any) => {
+        if (isSubscribed(medicine.tkSzam)) {
+            unsubscribe(medicine.tkSzam);
+        } else {
+            subscribe(medicine);
         }
     };
 
@@ -48,6 +60,7 @@ export default function FavoritesPage() {
                                     <th>Gyógyszer neve</th>
                                     <th>TK-szám</th>
                                     <th>Státusz</th>
+                                    <th>Értesítés</th>
                                     <th>Hozzáadás ideje</th>
                                     <th className="text-right">Műveletek</th>
                                 </tr>
@@ -65,6 +78,17 @@ export default function FavoritesPage() {
                                             <div className={`badge ${getStatusColor(fav.status)} badge-sm`}>
                                                 {fav.status}
                                             </div>
+                                        </td>
+                                        <td>
+                                            <button
+                                                className={`btn btn-sm btn-circle ${isSubscribed(fav.tkSzam) ? 'btn-primary' : 'btn-ghost text-gray-400'}`}
+                                                onClick={() => handleSubscription(fav)}
+                                                title={isSubscribed(fav.tkSzam) ? 'Leiratkozás' : 'Értesítés kérése'}
+                                            >
+                                                <span className="material-symbols-rounded">
+                                                    {isSubscribed(fav.tkSzam) ? 'notifications_active' : 'notifications'}
+                                                </span>
+                                            </button>
                                         </td>
                                         <td className="text-sm">
                                             {fav.addedAt ? new Date(fav.addedAt).toLocaleDateString('hu-HU', {

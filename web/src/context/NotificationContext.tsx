@@ -37,12 +37,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         localStorage.setItem('medicine_subscriptions', JSON.stringify(subscriptions));
     }, [subscriptions]);
 
-    const subscribe = (medicine: Medicine) => {
+    const subscribe = (medicine: { tkSzam: string; nev?: string; name?: string; status: string }) => {
         setSubscriptions(prev => {
             if (prev.some(s => s.tkSzam === medicine.tkSzam)) return prev;
             return [...prev, {
                 tkSzam: medicine.tkSzam,
-                name: medicine.nev,
+                name: medicine.nev || medicine.name || 'Ismeretlen',
                 status: medicine.status,
                 subscribedAt: new Date().toISOString()
             }];
