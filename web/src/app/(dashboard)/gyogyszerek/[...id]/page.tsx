@@ -57,11 +57,48 @@ export default async function MedicineDetailPage({ params }: PageProps) {
         if (s === 'elérhető') return <span className="badge badge-success badge-lg">{status}</span>;
         if (s === 'készlethiány') return <span className="badge badge-warning badge-lg">{status}</span>;
         if (s === 'megszűnt') return <span className="badge badge-error badge-lg">{status}</span>;
+
         return <span className="badge badge-ghost badge-lg">{status}</span>;
     };
 
+    const getStockInfo = (status: string) => {
+        const totalPharmacies = 247;
+        const s = status?.toLowerCase() || '';
+
+        if (s === 'elérhető') {
+            // Random split, ensuring total <= 247
+            // Let's say 40-80% in stock, rest on order or neither
+            const inStock = Math.floor(Math.random() * (totalPharmacies * 0.6)) + Math.floor(totalPharmacies * 0.1);
+            const remaining = totalPharmacies - inStock;
+            const onOrder = Math.floor(Math.random() * remaining);
+            return {
+                show: true,
+                inStock,
+                onOrder,
+                total: inStock + onOrder,
+                isLimited: false
+            };
+        }
+
+        if (s === 'készlethiány') {
+            // Only inStock, no onOrder
+            const inStock = Math.floor(Math.random() * (totalPharmacies * 0.4)) + 10;
+            return {
+                show: true,
+                inStock,
+                onOrder: 0,
+                total: inStock, // Total is just inStock for limited
+                isLimited: true
+            };
+        }
+
+        return { show: false, inStock: 0, onOrder: 0, total: 0, isLimited: false };
+    };
+
+    const stockInfo = getStockInfo(medicine.status);
+
     const generateMockHistory = (currentStatus: string) => {
-        const history = [];
+        const history: { date: string; status: string }[] = [];
         const count = Math.floor(Math.random() * 5) + 1; // 1-5 entries
         const now = new Date();
         const oneYearAgo = new Date();
@@ -144,6 +181,20 @@ export default async function MedicineDetailPage({ params }: PageProps) {
                             <div className="mt-2">
                                 {getStatusBadge(medicine.status)}
                             </div>
+
+                            {stockInfo.show && (
+                                <div className="mt-4 p-3 bg-base-200 rounded-lg text-sm">
+                                    <div className="font-semibold mb-1">
+                                        {stockInfo.total} gyógyszertárban elérhető:
+                                    </div>
+                                    <ul className="list-disc list-inside text-gray-600 space-y-0.5">
+                                        <li>Készleten: <strong>{stockInfo.inStock}</strong> gyógyszertárban</li>
+                                        {!stockInfo.isLimited && (
+                                            <li>Rendelésre 1-2 munkanapon belül: <strong>{stockInfo.onOrder}</strong> gyógyszertárban</li>
+                                        )}
+                                    </ul>
+                                </div>
+                            )}
                         </div>
                         <div className="mt-2">
                             <MedicineDetailActions medicine={medicine} />
