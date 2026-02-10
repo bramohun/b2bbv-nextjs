@@ -15,11 +15,12 @@
  * - Adatok dinamikus megjelenítése: A szülő komponenstől kapott beállítások alapján a mezők elrejtése/megjelenítése.
  * - Státuszjelző badge megjelenítése (pl. Elérhető - Zöld, Készlethiány - Sárga).
  * - "Részletek" gomb, amely a termék adatlapjára navigál.
- * - Kedvencekhez adás és értesítés kérése gombok (Jelenleg csak UI elemek).
+ * - Kedvencekhez adás és értesítés kérése gombok.
+ * - Kedvenc eltávolítása esetén figyelmeztetés, ha értesítés is aktív.
  * 
  * KAPCSOLÓDÓ ELEMEK:
  * - src/types/index.ts: Medicine interfész
- * - Parent: MedicinesPage (src/app/(dashboard)/medicines/page.tsx)
+ * - Parent: MedicinesPage (src/app/(dashboard)/gyogyszerek/page.tsx)
  */
 
 import React from 'react';
@@ -28,6 +29,7 @@ import Link from 'next/link';
 import { useNotification } from '@/context/NotificationContext';
 import { useFavorite } from '@/context/FavoriteContext';
 import { formatDate } from '@/lib/utils';
+import { FavoriteRemovalModal } from './FavoriteRemovalModal';
 
 interface MedicineCardProps {
     medicine: Medicine;
@@ -39,6 +41,8 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine, visibleFie
     const { isFavorite, addFavorite, removeFavorite } = useFavorite();
     const subscribed = isSubscribed(medicine.tkSzam);
     const favorit = isFavorite(medicine.tkSzam);
+
+    const [isRemovalWarningOpen, setIsRemovalWarningOpen] = React.useState(false);
 
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
@@ -55,21 +59,40 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine, visibleFie
             unsubscribe(medicine.tkSzam);
         } else {
             subscribe(medicine);
+            // Ha feliratkozik, automatikusan kedvenc is lesz, ha még nem az
+            if (!favorit) {
+                addFavorite(medicine);
+            }
         }
     };
 
     const handleFavorite = (e: React.MouseEvent) => {
         e.preventDefault(); // Prevent navigation to detail page
         if (favorit) {
-            removeFavorite(medicine.tkSzam);
+            if (subscribed) {
+                setIsRemovalWarningOpen(true);
+            } else {
+                removeFavorite(medicine.tkSzam);
+            }
         } else {
             addFavorite(medicine);
         }
     };
 
+    const confirmRemoval = () => {
+        removeFavorite(medicine.tkSzam);
+        unsubscribe(medicine.tkSzam);
+        setIsRemovalWarningOpen(false);
+    };
+
     return (
         <div className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow duration-300 border border-base-200">
             {/* Image section removed by user request */}
+            <FavoriteRemovalModal
+                isOpen={isRemovalWarningOpen}
+                onClose={() => setIsRemovalWarningOpen(false)}
+                onConfirm={confirmRemoval}
+            />
 
             <div className="card-body p-5">
                 <div className="flex justify-between items-center mb-2">

@@ -19,7 +19,7 @@
  * - Az URL-ből kiolvassa a dinamikus ID-t (TK-szám, ami perjeleket is tartalmazhat).
  * - Szerver oldalon lekéri a gyógyszer adatait a `getMedicineByTk` függvénnyel.
  * - Ha a gyógyszer nem található, 404-es oldalra irányít.
- * - Reszponzív elrendezés: Mobilon egymás alatt, Desktopon kétoszlopos nézet (Kép + Adatok).
+ * - Reszponzív elrendezés: Egységes kártya nézet (Adatok teljes szélességben).
  * 
  * KAPCSOLÓDÓ ELEMEK:
  * - src/lib/data.ts: Adatlekérdezés
@@ -69,25 +69,19 @@ export default async function MedicineDetailPage({ params }: PageProps) {
                 </Link>
             </div>
 
-            <div className="card lg:card-side bg-base-100 shadow-xl border border-base-200 overflow-hidden">
-                {/* Left Side: Image Placeholder */}
-                <figure className="lg:w-1/3 bg-base-200/50 min-h-[300px] flex items-center justify-center relative">
-                    <span className="text-9xl opacity-20 select-none">💊</span>
-                    {/* Status Overlay on Mobile */}
-                    <div className="absolute top-4 right-4 lg:hidden">
-                        {getStatusBadge(medicine.status)}
-                    </div>
-                </figure>
-
-                {/* Right Side: Details */}
-                <div className="card-body lg:w-2/3">
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <h1 className="card-title text-3xl mb-2 font-bold">{medicine.nev}</h1>
-                            <p className="text-gray-500 font-mono text-sm mb-4">TK-szám: {medicine.tkSzam}</p>
+            <div className="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+                {/* Details */}
+                <div className="card-body">
+                    <div className="flex flex-col md:flex-row justify-between items-start gap-4">
+                        <div className="flex flex-col items-start gap-1">
+                            <h1 className="card-title text-3xl mb-1 font-bold">{medicine.nev}</h1>
+                            <p className="text-gray-500 font-mono text-sm">TK-szám: {medicine.tkSzam}</p>
+                            <div className="mt-2">
+                                {getStatusBadge(medicine.status)}
+                            </div>
                         </div>
-                        <div className="hidden lg:block">
-                            {getStatusBadge(medicine.status)}
+                        <div className="mt-2">
+                            <MedicineDetailActions medicine={medicine} />
                         </div>
                     </div>
 
@@ -127,9 +121,7 @@ export default async function MedicineDetailPage({ params }: PageProps) {
                         </div>
                     </div>
 
-                    <div className="divider"></div>
 
-                    <MedicineDetailActions medicine={medicine} />
                 </div>
             </div>
         </div>

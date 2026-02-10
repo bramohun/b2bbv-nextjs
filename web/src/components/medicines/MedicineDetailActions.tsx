@@ -1,9 +1,25 @@
 'use client';
 
+/**
+ * ============================================================================
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * ============================================================================
+ * 
+ * USER STORY:
+ * Felhasználóként a termék adatlapján szeretném kezelni a kedvenc státuszt
+ * és az értesítés feliratkozást.
+ * 
+ * FUNKCIÓK:
+ * - Kedvencekhez adás / eltávolítás.
+ * - Értesítés kérése / lemondása.
+ * - Kedvenc eltávolítása esetén figyelmeztetés, ha értesítés is aktív.
+ */
+
 import React from 'react';
 import { Medicine } from '@/types';
 import { useNotification } from '@/context/NotificationContext';
 import { useFavorite } from '@/context/FavoriteContext';
+import { FavoriteRemovalModal } from './FavoriteRemovalModal';
 
 interface MedicineDetailActionsProps {
     medicine: Medicine;
@@ -15,24 +31,45 @@ export const MedicineDetailActions = ({ medicine }: MedicineDetailActionsProps) 
     const subscribed = isSubscribed(medicine.tkSzam);
     const favorit = isFavorite(medicine.tkSzam);
 
+    const [isRemovalWarningOpen, setIsRemovalWarningOpen] = React.useState(false);
+
     const handleSubscription = () => {
         if (subscribed) {
             unsubscribe(medicine.tkSzam);
         } else {
             subscribe(medicine);
+            // Ha feliratkozik, automatikusan kedvenc is lesz, ha még nem az
+            if (!favorit) {
+                addFavorite(medicine);
+            }
         }
     };
 
     const handleFavorite = () => {
         if (favorit) {
-            removeFavorite(medicine.tkSzam);
+            if (subscribed) {
+                setIsRemovalWarningOpen(true);
+            } else {
+                removeFavorite(medicine.tkSzam);
+            }
         } else {
             addFavorite(medicine);
         }
     };
 
+    const confirmRemoval = () => {
+        removeFavorite(medicine.tkSzam);
+        unsubscribe(medicine.tkSzam);
+        setIsRemovalWarningOpen(false);
+    };
+
     return (
-        <div className="card-actions justify-end mt-4">
+        <div className="card-actions justify-start md:justify-end">
+            <FavoriteRemovalModal
+                isOpen={isRemovalWarningOpen}
+                onClose={() => setIsRemovalWarningOpen(false)}
+                onConfirm={confirmRemoval}
+            />
             <button
                 className={`btn gap-2 ${favorit ? 'btn-active bg-warning text-warning-content border-warning' : 'btn-outline border-base-300'}`}
                 onClick={handleFavorite}

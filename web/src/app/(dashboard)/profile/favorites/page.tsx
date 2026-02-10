@@ -14,13 +14,17 @@ import { useNotification } from '@/context/NotificationContext';
  * - Kedvenc gyógyszerek listázása táblázatos formában.
  * - Közvetlen navigáció a gyógyszer adatlapjára.
  * - Eltávolítás a kedvencek közül egy kattintással.
+ * - Kedvenc eltávolítása esetén figyelmeztetés, ha értesítés is aktív.
  * - Értesítésre feliratkozás és leiratkozás.
  * - Üres állapot kezelése.
  */
 
+import { FavoriteRemovalModal } from '@/components/medicines/FavoriteRemovalModal';
+
 export default function FavoritesPage() {
     const { favorites, removeFavorite } = useFavorite();
     const { isSubscribed, subscribe, unsubscribe } = useNotification();
+    const [pendingRemovalTkSzam, setPendingRemovalTkSzam] = React.useState<string | null>(null);
 
     const getStatusColor = (status: string) => {
         switch (status?.toLowerCase()) {
@@ -39,8 +43,29 @@ export default function FavoritesPage() {
         }
     };
 
+    const handleRemoveClick = (tkSzam: string) => {
+        if (isSubscribed(tkSzam)) {
+            setPendingRemovalTkSzam(tkSzam);
+        } else {
+            removeFavorite(tkSzam);
+        }
+    };
+
+    const confirmRemoval = () => {
+        if (pendingRemovalTkSzam) {
+            removeFavorite(pendingRemovalTkSzam);
+            unsubscribe(pendingRemovalTkSzam);
+            setPendingRemovalTkSzam(null);
+        }
+    };
+
     return (
         <div className="container mx-auto py-8">
+            <FavoriteRemovalModal
+                isOpen={pendingRemovalTkSzam !== null}
+                onClose={() => setPendingRemovalTkSzam(null)}
+                onConfirm={confirmRemoval}
+            />
             <h1 className="text-3xl font-bold mb-6">Kedvenc gyógyszerek</h1>
 
             <div className="bg-base-100 rounded-lg shadow border border-base-200">
@@ -102,7 +127,7 @@ export default function FavoritesPage() {
                                         <td className="text-right">
                                             <button
                                                 className="btn btn-sm btn-ghost text-error hover:bg-error/10"
-                                                onClick={() => removeFavorite(fav.tkSzam)}
+                                                onClick={() => handleRemoveClick(fav.tkSzam)}
                                                 title="Eltávolítás a kedvencekből"
                                             >
                                                 <span className="material-symbols-rounded">star_half</span>
