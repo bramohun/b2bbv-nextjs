@@ -7,19 +7,27 @@
  * Felhasználóként szeretném áttekinteni az elérhető gyógyszerek listáját, 
  * keresni közöttük név, hatóanyag vagy TK-szám alapján, és szűrni a státuszuk szerint,
  * hogy gyorsan megtaláljam a számomra releváns készítményeket.
+ * Emellett rendezni szeretném az eredményeket különböző szempontok szerint.
  * 
  * FUNKCIÓK:
  * - Gyógyszerlista megjelenítése rácsos elrendezésben (MedicineCard).
  * - Keresés (Search): Valós idejű szűrés név, INN vagy TK-szám alapján.
  * - Szűrés (Filter): Szűrés gyógyszerstátusz szerint (Elérhető, Készlethiány, Megszűnt).
+ * - Rendezés (Sorting):
+ *   - Táblázatos nézet: az egyes oszlopok fejlécére kattintva növekvő/csökkenő rendezés.
+ *     Az aktuális rendezési irány ▲/▼ jelzéssel látható a fejlécen.
+ *   - Kártyás nézet: a találatok felett dropdown az alábbi opciókkal:
+ *     "ABC sorrendben növekvő", "ABC sorrendben csökkenő", "Frissítés szerint",
+ *     "Hatóanyag szerint növekvő", "Hatóanyag szerint csökkenő".
  * - Lapozás (Pagination): Az eredmények tördelése a gyorsabb betöltés és áttekinthetőség érdekében.
  * - Reszponzív nézet: Mobil és asztali felületre optimalizált megjelenés.
  * - Nézet testreszabása (Customization): Oszlopok és kártyaadatok láthatóságának kapcsolása, beállítások mentése localStorage-ba.
  * 
  * MŰKÖDÉSI LOGIKA:
  * - Az oldal betöltésekor (/api/medicines) lekéri az összes gyógyszert.
- * - A kliens oldalon történik a szűrés és a lapozás a `medicines` state alapján.
- * - Kereséskor vagy szűréskor a lapozó automatikusan az első oldalra ugrik.
+ * - A kliens oldalon történik a szűrés, rendezés és a lapozás a `medicines` state alapján.
+ * - Kereséskor, szűréskor vagy rendezéskor a lapozó automatikusan az első oldalra ugrik.
+ * - Rendezés a szűrt listán (`filteredMedicines`) történik, mielőtt a lapozás alkalmazásra kerül.
  * 
  * KAPCSOLÓDÓ ELEMEK:
  * - src/components/medicines/MedicineCard.tsx: Egyedi termékkártya
@@ -28,11 +36,18 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Medicine, ViewSettings, MedicineTableColumn, MedicineCardField } from '@/types';
 import Link from 'next/link';
 import { MedicineCard } from '@/components/medicines/MedicineCard';
 import { formatDate } from '@/lib/utils';
+
+type SortDirection = 'asc' | 'desc' | null;
+type SortKey = 'nev' | 'activeSubstance' | 'kiszereles' | 'gyarto' | 'status'
+    | 'tkSzam' | 'packagingDetails' | 'dispensability' | 'dispensabilitySub'
+    | 'safetyFeatures' | 'authorizationDate' | 'lastUpdate';
+type CardSortOption = 'name-asc' | 'name-desc' | 'lastUpdate-desc'
+    | 'activeSubstance-asc' | 'activeSubstance-desc';
 
 const DEFAULT_VIEW_SETTINGS: ViewSettings = {
     tableColumns: {
@@ -74,6 +89,11 @@ export default function MedicinesPage() {
     const [viewSettings, setViewSettings] = useState<ViewSettings>(DEFAULT_VIEW_SETTINGS);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const settingsRef = useRef<HTMLDivElement>(null);
+
+    // Sorting State
+    const [sortKey, setSortKey] = useState<SortKey | null>(null);
+    const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+    const [cardSortOption, setCardSortOption] = useState<CardSortOption>('name-asc');
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -180,11 +200,62 @@ export default function MedicinesPage() {
         setCurrentPage(1);
     }, [searchTerm, filterStatus]);
 
+    // Sorting Logic
+    const sortedMedicines = useMemo(() => {
+        const list = [...filteredMedicines];
+        let key: string | null = null;
+        let dir: 'asc' | 'desc' = 'asc';
+
+        if (viewMode === 'table' && sortKey && sortDirection) {
+            key = sortKey;
+            dir = sortDirection;
+        } else if (viewMode === 'grid') {
+            switch (cardSortOption) {
+                case 'name-asc': key = 'nev'; dir = 'asc'; break;
+                case 'name-desc': key = 'nev'; dir = 'desc'; break;
+                case 'lastUpdate-desc': key = 'lastUpdate'; dir = 'desc'; break;
+                case 'activeSubstance-asc': key = 'activeSubstance'; dir = 'asc'; break;
+                case 'activeSubstance-desc': key = 'activeSubstance'; dir = 'desc'; break;
+            }
+        }
+
+        if (!key) return list;
+
+        list.sort((a, b) => {
+            const va = (a as any)[key!] ?? '';
+            const vb = (b as any)[key!] ?? '';
+            if (key === 'lastUpdate' || key === 'authorizationDate') {
+                return dir === 'asc'
+                    ? new Date(va).getTime() - new Date(vb).getTime()
+                    : new Date(vb).getTime() - new Date(va).getTime();
+            }
+            return dir === 'asc'
+                ? String(va).localeCompare(String(vb), 'hu')
+                : String(vb).localeCompare(String(va), 'hu');
+        });
+        return list;
+    }, [filteredMedicines, viewMode, sortKey, sortDirection, cardSortOption]);
+
+    const handleTableSort = (key: SortKey) => {
+        if (sortKey === key) {
+            if (sortDirection === 'asc') {
+                setSortDirection('desc');
+            } else {
+                setSortDirection(null);
+                setSortKey(null);
+            }
+        } else {
+            setSortKey(key);
+            setSortDirection('asc');
+        }
+        setCurrentPage(1);
+    };
+
     // Pagination Logic
-    const totalItems = filteredMedicines.length;
+    const totalItems = sortedMedicines.length;
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedItems = filteredMedicines.slice(startIndex, startIndex + itemsPerPage);
+    const paginatedItems = sortedMedicines.slice(startIndex, startIndex + itemsPerPage);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -416,38 +487,53 @@ export default function MedicinesPage() {
                 ) : (
                     <>
                         {viewMode === 'grid' ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
-                                {paginatedItems.length > 0 ? (
-                                    paginatedItems.map((medicine) => (
-                                        <MedicineCard
-                                            key={medicine.internalId}
-                                            medicine={medicine}
-                                            visibleFields={viewSettings.cardFields}
-                                        />
-                                    ))
-                                ) : (
-                                    <div className="col-span-full text-center py-12 text-gray-500">
-                                        Nem található a keresésnek megfelelő gyógyszer.
-                                    </div>
-                                )}
-                            </div>
+                            <>
+                                <div className="flex justify-end mb-4">
+                                    <select
+                                        className="select select-bordered select-sm"
+                                        value={cardSortOption}
+                                        onChange={(e) => { setCardSortOption(e.target.value as CardSortOption); setCurrentPage(1); }}
+                                    >
+                                        <option value="name-asc">ABC sorrendben növekvő</option>
+                                        <option value="name-desc">ABC sorrendben csökkenő</option>
+                                        <option value="lastUpdate-desc">Frissítés szerint</option>
+                                        <option value="activeSubstance-asc">Hatóanyag szerint növekvő</option>
+                                        <option value="activeSubstance-desc">Hatóanyag szerint csökkenő</option>
+                                    </select>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+                                    {paginatedItems.length > 0 ? (
+                                        paginatedItems.map((medicine) => (
+                                            <MedicineCard
+                                                key={medicine.internalId}
+                                                medicine={medicine}
+                                                visibleFields={viewSettings.cardFields}
+                                            />
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full text-center py-12 text-gray-500">
+                                            Nem található a keresésnek megfelelő gyógyszer.
+                                        </div>
+                                    )}
+                                </div>
+                            </>
                         ) : (
                             <div className="overflow-x-visible mb-8 bg-base-100 rounded-lg shadow">
                                 <table className="table table-pin-rows">
                                     {/* head */}
                                     <thead>
                                         <tr>
-                                            {viewSettings.tableColumns.nev && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Terméknév / TK-szám</th>}
-                                            {viewSettings.tableColumns.activeSubstance && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Hatóanyag</th>}
-                                            {viewSettings.tableColumns.kiszereles && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Kiszerelés</th>}
-                                            {viewSettings.tableColumns.gyarto && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Gyártó</th>}
-                                            {viewSettings.tableColumns.packagingDetails && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Csomagolás</th>}
-                                            {viewSettings.tableColumns.dispensability && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Kiadhatóság</th>}
-                                            {viewSettings.tableColumns.dispensabilitySub && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Kiad. Alcsop.</th>}
-                                            {viewSettings.tableColumns.safetyFeatures && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">B. Elemek</th>}
-                                            {viewSettings.tableColumns.authorizationDate && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Eng. Dátum</th>}
-                                            {viewSettings.tableColumns.lastUpdate && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Utolsó friss.</th>}
-                                            {viewSettings.tableColumns.status && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Státusz</th>}
+                                            {viewSettings.tableColumns.nev && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('nev')}>Terméknév / TK-szám{sortKey === 'nev' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
+                                            {viewSettings.tableColumns.activeSubstance && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('activeSubstance')}>Hatóanyag{sortKey === 'activeSubstance' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
+                                            {viewSettings.tableColumns.kiszereles && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('kiszereles')}>Kiszerelés{sortKey === 'kiszereles' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
+                                            {viewSettings.tableColumns.gyarto && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('gyarto')}>Gyártó{sortKey === 'gyarto' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
+                                            {viewSettings.tableColumns.packagingDetails && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('packagingDetails')}>Csomagolás{sortKey === 'packagingDetails' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
+                                            {viewSettings.tableColumns.dispensability && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('dispensability')}>Kiadhatóság{sortKey === 'dispensability' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
+                                            {viewSettings.tableColumns.dispensabilitySub && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('dispensabilitySub')}>Kiad. Alcsop.{sortKey === 'dispensabilitySub' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
+                                            {viewSettings.tableColumns.safetyFeatures && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('safetyFeatures')}>B. Elemek{sortKey === 'safetyFeatures' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
+                                            {viewSettings.tableColumns.authorizationDate && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('authorizationDate')}>Eng. Dátum{sortKey === 'authorizationDate' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
+                                            {viewSettings.tableColumns.lastUpdate && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('lastUpdate')}>Utolsó friss.{sortKey === 'lastUpdate' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
+                                            {viewSettings.tableColumns.status && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('status')}>Státusz{sortKey === 'status' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
                                             {viewSettings.tableColumns.actions && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Műveletek</th>}
                                         </tr>
                                     </thead>
