@@ -78,7 +78,7 @@ export const MedicineDetailActions = ({ medicine }: MedicineDetailActionsProps) 
                 {favorit ? 'Eltávolítás a kedvencekből' : 'Kedvencekhez'}
             </button>
             <button
-                className={`btn gap-2 ${subscribed ? 'btn-active' : 'btn-primary'}`}
+                className={`btn gap-2 ${subscribed ? 'btn-primary' : 'btn-outline border-base-300'}`}
                 onClick={handleSubscription}
             >
                 <span className="material-symbols-rounded">
