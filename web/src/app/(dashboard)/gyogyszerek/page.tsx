@@ -42,6 +42,7 @@ import Link from 'next/link';
 import { MedicineCard } from '@/components/medicines/MedicineCard';
 import { formatDate } from '@/lib/utils';
 import { useNotification } from '@/context/NotificationContext';
+import { useFavorite } from '@/context/FavoriteContext';
 
 type SortDirection = 'asc' | 'desc' | null;
 type SortKey = 'nev' | 'activeSubstance' | 'kiszereles' | 'gyarto' | 'status'
@@ -91,6 +92,8 @@ export default function MedicinesPage() {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const settingsRef = useRef<HTMLDivElement>(null);
     const { isSubscribed, subscribe, unsubscribe } = useNotification();
+    const { isFavorite, addFavorite, removeFavorite } = useFavorite();
+    const [favoritesOnly, setFavoritesOnly] = useState(false);
 
     // Sorting State
     const [sortKey, setSortKey] = useState<SortKey | null>(null);
@@ -231,13 +234,14 @@ export default function MedicinesPage() {
             return String(itemValue || '').toLowerCase().includes(value.toLowerCase());
         });
 
-        return matchesSearch && matchesStatus && matchesColumnFilters;
+        const matchesFavorites = !favoritesOnly || isFavorite(medicine.tkSzam);
+
+        return matchesSearch && matchesStatus && matchesColumnFilters && matchesFavorites;
     });
 
-    // Reset to page 1 when search/filter changes
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, filterStatus]);
+    }, [searchTerm, filterStatus, favoritesOnly]);
 
     // Sorting Logic
     const sortedMedicines = useMemo(() => {
@@ -318,6 +322,14 @@ export default function MedicinesPage() {
         }
     };
 
+    const handleFavorite = (medicine: Medicine) => {
+        if (isFavorite(medicine.tkSzam)) {
+            removeFavorite(medicine.tkSzam);
+        } else {
+            addFavorite(medicine);
+        }
+    };
+
     return (
         <div className="container mx-auto">
             {/* Header & Controls */}
@@ -330,6 +342,14 @@ export default function MedicinesPage() {
                 </h1>
 
                 <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto items-center">
+                    <button
+                        className={`btn btn-md gap-2 ${favoritesOnly ? 'btn-warning' : 'btn-ghost border-base-300'}`}
+                        onClick={() => setFavoritesOnly(!favoritesOnly)}
+                        title={favoritesOnly ? "Minden gyógyszer mutatása" : "Csak kedvencek mutatása"}
+                    >
+                        <span className={`material-symbols-rounded ${favoritesOnly ? 'fill-1' : ''}`}>star</span>
+                        Kedvencek
+                    </button>
 
                     <div className="join">
                         <button
@@ -763,8 +783,12 @@ export default function MedicinesPage() {
                                                     )}
                                                     <td className="bg-base-100 sticky right-0 z-10 shadow-[-5px_0px_5px_-5px_#0000001a]">
                                                         <div className="flex items-center gap-1">
-                                                            <button className="btn btn-circle btn-ghost btn-xs text-gray-400 hover:text-warning" title="Kedvencekhez">
-                                                                <span className="material-symbols-rounded text-[18px]">star</span>
+                                                            <button
+                                                                className={`btn btn-circle btn-xs ${isFavorite(medicine.tkSzam) ? 'bg-warning text-warning-content border-warning' : 'btn-ghost text-gray-400 hover:text-warning'}`}
+                                                                onClick={() => handleFavorite(medicine)}
+                                                                title={isFavorite(medicine.tkSzam) ? "Eltávolítás a kedvencekből" : "Kedvencekhez"}
+                                                            >
+                                                                <span className={`material-symbols-rounded text-[18px] ${isFavorite(medicine.tkSzam) ? 'fill-1' : ''}`}>star</span>
                                                             </button>
                                                             <button
                                                                 className={`btn btn-circle btn-xs ${isSubscribed(medicine.tkSzam) ? 'btn-primary' : 'btn-ghost text-gray-400 hover:text-info'}`}

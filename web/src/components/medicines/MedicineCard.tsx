@@ -26,6 +26,7 @@ import React from 'react';
 import { Medicine } from '@/types';
 import Link from 'next/link';
 import { useNotification } from '@/context/NotificationContext';
+import { useFavorite } from '@/context/FavoriteContext';
 import { formatDate } from '@/lib/utils';
 
 interface MedicineCardProps {
@@ -35,7 +36,9 @@ interface MedicineCardProps {
 
 export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine, visibleFields }) => {
     const { isSubscribed, subscribe, unsubscribe } = useNotification();
+    const { isFavorite, addFavorite, removeFavorite } = useFavorite();
     const subscribed = isSubscribed(medicine.tkSzam);
+    const favorit = isFavorite(medicine.tkSzam);
 
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
@@ -52,6 +55,15 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine, visibleFie
             unsubscribe(medicine.tkSzam);
         } else {
             subscribe(medicine);
+        }
+    };
+
+    const handleFavorite = (e: React.MouseEvent) => {
+        e.preventDefault(); // Prevent navigation to detail page
+        if (favorit) {
+            removeFavorite(medicine.tkSzam);
+        } else {
+            addFavorite(medicine);
         }
     };
 
@@ -135,8 +147,12 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine, visibleFie
 
                 <div className="card-actions justify-between items-center mt-auto">
                     <div className="flex gap-2">
-                        <button className="btn btn-circle btn-ghost btn-sm text-gray-400 hover:text-warning" title="Kedvencekhez">
-                            <span className="material-symbols-rounded">star</span>
+                        <button
+                            className={`btn btn-circle btn-sm ${favorit ? 'btn-active bg-warning text-warning-content border-warning' : 'btn-ghost text-gray-400 hover:text-warning'}`}
+                            onClick={handleFavorite}
+                            title={favorit ? "Eltávolítás a kedvencekből" : "Kedvencekhez"}
+                        >
+                            <span className={`material-symbols-rounded ${favorit ? 'fill-1' : ''}`}>star</span>
                         </button>
                         <button
                             className={`btn btn-circle btn-sm ${subscribed ? 'btn-primary' : 'btn-ghost text-gray-400 hover:text-info'}`}
