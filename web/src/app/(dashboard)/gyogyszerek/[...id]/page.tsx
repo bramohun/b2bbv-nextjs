@@ -31,6 +31,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getMedicineByTk } from '@/lib/data';
 import { MedicineDetailActions } from '@/components/medicines/MedicineDetailActions';
+import { MedicineStatusHistory } from '@/components/medicines/MedicineStatusHistory';
 import { formatDate } from '@/lib/utils';
 
 interface PageProps {
@@ -58,6 +59,70 @@ export default async function MedicineDetailPage({ params }: PageProps) {
         if (s === 'megszűnt') return <span className="badge badge-error badge-lg">{status}</span>;
         return <span className="badge badge-ghost badge-lg">{status}</span>;
     };
+
+    const generateMockHistory = (currentStatus: string) => {
+        const history = [];
+        const count = Math.floor(Math.random() * 5) + 1; // 1-5 entries
+        const now = new Date();
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(now.getFullYear() - 1);
+
+        const activeStatuses = ['Elérhető', 'Készlethiány'];
+        const isDiscontinued = currentStatus === 'Megszűnt';
+
+        // Generate random dates first to ensure order
+        const dates = [];
+        for (let i = 0; i < count; i++) {
+            dates.push(new Date(oneYearAgo.getTime() + Math.random() * (now.getTime() - oneYearAgo.getTime())));
+        }
+        dates.sort((a, b) => b.getTime() - a.getTime()); // Descending (newest first)
+
+        for (let i = 0; i < count; i++) {
+            let status;
+
+            if (i === 0) {
+                // The most recent entry must match the current actual status
+                status = currentStatus;
+            } else {
+                // Historic entries
+                const prevStatus = history[history.length - 1].status;
+
+                if (isDiscontinued) {
+                    // If currently discontinued, previous states must be active
+                    // And different from the one we just generated (which is 'newer' in time)
+                    const options = activeStatuses.filter(s => s !== prevStatus);
+                    status = options.length > 0 ? options[Math.floor(Math.random() * options.length)] : activeStatuses[0];
+                } else {
+                    // If currently active, previous states must also be active
+                    // And different from the one we just generated
+                    const options = activeStatuses.filter(s => s !== prevStatus);
+                    status = options.length > 0 ? options[Math.floor(Math.random() * options.length)] : activeStatuses[0];
+                }
+            }
+
+            history.push({
+                date: dates[i].toISOString(),
+                status: status
+            });
+        }
+
+        return history;
+    };
+
+    const statusHistory = generateMockHistory(medicine.status);
+
+    // Calculate consistent Last Update
+    const latestHistoryDate = statusHistory.length > 0 ? new Date(statusHistory[0].date) : new Date(0);
+
+    // Generate random date within last 6 months
+    const now = new Date();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(now.getMonth() - 6);
+
+    let randomLastUpdate = new Date(sixMonthsAgo.getTime() + Math.random() * (now.getTime() - sixMonthsAgo.getTime()));
+
+    // Ensure Last Update is not older than the latest status change
+    const displayLastUpdate = randomLastUpdate > latestHistoryDate ? randomLastUpdate : latestHistoryDate;
 
     return (
         <div className="container mx-auto py-8 px-4">
@@ -116,14 +181,15 @@ export default async function MedicineDetailPage({ params }: PageProps) {
                         <div>
                             <h3 className="font-semibold text-gray-500 text-sm uppercase tracking-wide mb-1">Utolsó frissítés</h3>
                             <p className="text-sm text-gray-400">
-                                {formatDate(medicine.lastUpdate)}
+                                {formatDate(displayLastUpdate.toISOString())}
                             </p>
                         </div>
                     </div>
 
-
                 </div>
             </div>
+
+            <MedicineStatusHistory history={statusHistory} />
         </div>
     );
 }
