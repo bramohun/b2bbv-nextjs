@@ -1,7 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Medicine } from '@/types';
+import { useToast } from './ToastContext';
 
 /**
  * ============================================================================
@@ -29,6 +31,7 @@ interface Favorite {
     tkSzam: string;
     name: string;
     status: string;
+    kiszereles: string;
     addedAt: string;
 }
 
@@ -66,12 +69,36 @@ export function FavoriteProvider({ children }: { children: React.ReactNode }) {
                 tkSzam: medicine.tkSzam,
                 name: medicine.nev,
                 status: medicine.status,
+                kiszereles: medicine.kiszereles,
                 addedAt: new Date().toISOString()
             }];
         });
     };
 
+    const { addToast } = useToast();
+
     const removeFavorite = (tkSzam: string) => {
+        const itemToRemove = favorites.find(f => f.tkSzam === tkSzam);
+
+        if (itemToRemove) {
+            addToast({
+                message: (
+                    <>
+                        <Link href={`/gyogyszerek/${itemToRemove.tkSzam}`} className="hover:underline font-bold text-primary">
+                            {itemToRemove.name}
+                        </Link>
+                        {itemToRemove.kiszereles ? ` (${itemToRemove.kiszereles})` : ''} kivéve a kedvencek közül.
+                    </>
+                ),
+                onUndo: () => {
+                    setFavorites(prev => {
+                        if (prev.some(s => s.tkSzam === itemToRemove.tkSzam)) return prev;
+                        return [...prev, itemToRemove];
+                    });
+                }
+            });
+        }
+
         setFavorites(prev => prev.filter(s => s.tkSzam !== tkSzam));
     };
 

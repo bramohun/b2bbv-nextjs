@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { FavoriteProvider } from "@/context/FavoriteContext";
+import { ToastProvider } from "@/context/ToastContext";
 
 export default function DashboardLayout({
     children,
@@ -8,15 +9,17 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     return (
-        <FavoriteProvider>
-            <NotificationProvider>
-                <div className="min-h-screen bg-base-200">
-                    <Navbar />
-                    <main className="container mx-auto p-4 md:p-6 lg:p-8">
-                        {children}
-                    </main>
-                </div>
-            </NotificationProvider>
-        </FavoriteProvider>
+        <ToastProvider>
+            <FavoriteProvider>
+                <NotificationProvider>
+                    <div className="min-h-screen bg-base-200">
+                        <Navbar />
+                        <main className="container mx-auto p-4 md:p-6 lg:p-8">
+                            {children}
+                        </main>
+                    </div>
+                </NotificationProvider>
+            </FavoriteProvider>
+        </ToastProvider>
     );
 }
