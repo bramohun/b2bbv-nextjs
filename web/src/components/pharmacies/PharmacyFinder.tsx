@@ -11,7 +11,8 @@
  * FUNKCIÓK:
  * - Gyógyszertár kereső (cím, név, város alapján).
  * - Kétnézetes megjelenítés (Térkép / Lista).
- * - Filterezhető patika lista (kereső és térkép láthatóság alapján).
+ * - Filterezhető patika lista (kereső, térkép láthatóság, nyitvatartás alapján).
+ * - Speciális filterek: Most nyitva, Hétvégén nyitva, 0-24 órában nyitva.
  * - Térkép szinkronizáció: a lista csak a térképen látható patikákat mutatja.
  * - Találati számok kijelzése: összes találat vs. térképen látható találatok.
  * - [Mutasd az összest] funkció: térkép visszaállítása az összes találat megjelenítéséhez.
@@ -51,6 +52,11 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
     const [selectedPharmacyId, setSelectedPharmacyId] = useState<string | null>(null);
     const [visiblePharmacyIds, setVisiblePharmacyIds] = useState<string[] | null>(null);
 
+    // Filters state
+    const [onlyOpenNow, setOnlyOpenNow] = useState(false);
+    const [onlyWeekendOpen, setOnlyWeekendOpen] = useState(false);
+    const [only24h, setOnly24h] = useState(false);
+
     // Map state
     const [mapCenter, setMapCenter] = useState<[number, number]>([47.1625, 19.5033]);
     const [mapZoom, setMapZoom] = useState(7);
@@ -79,12 +85,58 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
     }, [filterIds]);
 
     const filteredPharmacies = useMemo(() => {
-        return pharmacies.filter(pharmacy =>
+        let filtered = pharmacies.filter(pharmacy =>
             pharmacy.nev.toLowerCase().includes(searchTerm.toLowerCase()) ||
             pharmacy.telepules.toLowerCase().includes(searchTerm.toLowerCase()) ||
             pharmacy.cim.toLowerCase().includes(searchTerm.toLowerCase())
         );
-    }, [pharmacies, searchTerm]);
+
+        const now = new Date();
+        const currentDay = now.getDay(); // 0 (Sun) to 6 (Sat)
+        const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+        const isCurrentlyOpen = (p: Pharmacy) => {
+            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const openKey = `${dayNames[currentDay]}Open` as keyof Pharmacy;
+            const closeKey = `${dayNames[currentDay]}Close` as keyof Pharmacy;
+
+            const openTime = p[openKey] as string;
+            const closeTime = p[closeKey] as string;
+
+            if (!openTime || !closeTime) return false;
+            return currentTime >= openTime && currentTime <= closeTime;
+        };
+
+        const isWeekendOpen = (p: Pharmacy) => {
+            return (!!p.saturdayOpen && !!p.saturdayClose) || (!!p.sundayOpen && !!p.sundayClose);
+        };
+
+        const is24h = (p: Pharmacy) => {
+            // Check if any day has 00:00 - 24:00 or similar.
+            // Based on data analysis, we'll look for 00:00 as open and 23:59 or 24:00 as close, or full coverage.
+            // Since we don't have clear 24h indicators in mock data yet, we implement the check.
+            const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            return dayNames.every(day => {
+                const open = p[`${day}Open` as keyof Pharmacy] as string;
+                const close = p[`${day}Close` as keyof Pharmacy] as string;
+                return open === '00:00' && (close === '24:00' || close === '23:59');
+            });
+        };
+
+        if (onlyOpenNow) {
+            filtered = filtered.filter(isCurrentlyOpen);
+        }
+
+        if (onlyWeekendOpen) {
+            filtered = filtered.filter(isWeekendOpen);
+        }
+
+        if (only24h) {
+            filtered = filtered.filter(is24h);
+        }
+
+        return filtered;
+    }, [pharmacies, searchTerm, onlyOpenNow, onlyWeekendOpen, only24h]);
 
     const visiblePharmacies = useMemo(() => {
         if (!visiblePharmacyIds) return filteredPharmacies;
@@ -135,8 +187,8 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
                     </div>
                 </div>
 
-                <div className="mt-4">
-                    <label className="input input-bordered flex items-center gap-2 max-w-md">
+                <div className="mt-4 flex flex-col md:flex-row gap-4 items-start md:items-center">
+                    <label className="input input-bordered flex items-center gap-2 w-full max-w-md">
                         <input
                             type="text"
                             className="grow"
@@ -146,6 +198,30 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
                         />
                         <span className="material-symbols-rounded text-gray-400">search</span>
                     </label>
+
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            className={`btn btn-sm rounded-full ${onlyOpenNow ? 'btn-primary' : 'btn-outline border-base-300'}`}
+                            onClick={() => setOnlyOpenNow(!onlyOpenNow)}
+                        >
+                            <span className="material-symbols-rounded text-sm">schedule</span>
+                            Most nyitva
+                        </button>
+                        <button
+                            className={`btn btn-sm rounded-full ${onlyWeekendOpen ? 'btn-primary' : 'btn-outline border-base-300'}`}
+                            onClick={() => setOnlyWeekendOpen(!onlyWeekendOpen)}
+                        >
+                            <span className="material-symbols-rounded text-sm">calendar_month</span>
+                            Hétvégén nyitva
+                        </button>
+                        <button
+                            className={`btn btn-sm rounded-full ${only24h ? 'btn-primary' : 'btn-outline border-base-300'}`}
+                            onClick={() => setOnly24h(!only24h)}
+                        >
+                            <span className="material-symbols-rounded text-sm">timer_10_alt_1</span>
+                            0-24 órában nyitva
+                        </button>
+                    </div>
                 </div>
             </div>
 
