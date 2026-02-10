@@ -11,12 +11,15 @@
  * FUNKCIÓK:
  * - Gyógyszertár kereső (cím, név, város alapján).
  * - Kétnézetes megjelenítés (Térkép / Lista).
- * - Filterezhető patika lista.
- * - Térkép szinkronizáció.
+ * - Filterezhető patika lista (kereső és térkép láthatóság alapján).
+ * - Térkép szinkronizáció: a lista csak a térképen látható patikákat mutatja.
+ * - Találati számok kijelzése: összes találat vs. térképen látható találatok.
+ * - [Mutasd az összest] funkció: térkép visszaállítása az összes találat megjelenítéséhez.
  * 
  * PARAMÉTEREK:
  * - filterIds?: Csak ezeket a patikákat mutassa (pl. készleten lévők).
  * - title?: Egyedi címsor a kereső felett.
+ * - description?: Opcionális leírás a cím alatt.
  */
 
 'use client';
@@ -46,6 +49,7 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedPharmacyId, setSelectedPharmacyId] = useState<string | null>(null);
+    const [visiblePharmacyIds, setVisiblePharmacyIds] = useState<string[] | null>(null);
 
     // Map state
     const [mapCenter, setMapCenter] = useState<[number, number]>([47.1625, 19.5033]);
@@ -82,6 +86,11 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
         );
     }, [pharmacies, searchTerm]);
 
+    const visiblePharmacies = useMemo(() => {
+        if (!visiblePharmacyIds) return filteredPharmacies;
+        return filteredPharmacies.filter(p => visiblePharmacyIds.includes(p.id));
+    }, [filteredPharmacies, visiblePharmacyIds]);
+
     const handleSelectPharmacy = (id: string) => {
         setSelectedPharmacyId(id);
         const pharmacy = pharmacies.find(p => p.id === id);
@@ -92,6 +101,11 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
                 setShowMapMobile(true);
             }
         }
+    };
+
+    const handleShowAll = () => {
+        setMapCenter([47.1625, 19.5033]);
+        setMapZoom(7);
     };
 
     return (
@@ -148,8 +162,23 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
                         </div>
                     ) : (
                         <>
-                            <div className="text-sm text-gray-500 mb-2">{filteredPharmacies.length} találat</div>
-                            {filteredPharmacies.slice(0, 50).map((pharmacy) => (
+                            <div className="text-sm text-gray-500 mb-4 flex flex-col gap-1">
+                                <div>Összesen {filteredPharmacies.length} gyógyszertár</div>
+                                {visiblePharmacies.length !== filteredPharmacies.length && (
+                                    <>
+                                        <div>a térképen és listában {visiblePharmacies.length} gyógyszertár.</div>
+                                        <div className="mt-1">
+                                            <button
+                                                onClick={handleShowAll}
+                                                className="text-primary hover:underline font-medium"
+                                            >
+                                                [Mutasd az összest]
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                            {visiblePharmacies.slice(0, 50).map((pharmacy) => (
                                 <PharmacyCard
                                     key={pharmacy.id}
                                     pharmacy={pharmacy}
@@ -157,9 +186,9 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
                                     onSelect={handleSelectPharmacy}
                                 />
                             ))}
-                            {filteredPharmacies.length === 0 && (
+                            {visiblePharmacies.length === 0 && (
                                 <div className="text-center py-8 text-gray-500">
-                                    Nincs találat.
+                                    Nincs találat a látható területen.
                                 </div>
                             )}
                         </>
@@ -177,6 +206,7 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
                         zoom={mapZoom}
                         selectedPharmacyId={selectedPharmacyId}
                         onSelectPharmacy={handleSelectPharmacy}
+                        onVisiblePharmaciesChange={setVisiblePharmacyIds}
                     />
                 </div>
             </div>

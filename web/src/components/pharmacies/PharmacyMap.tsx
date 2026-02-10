@@ -14,13 +14,14 @@
  * - Marker-re kattintva felugró ablak (Popup) a patika adataival.
  * - "Közeli patikának jelölöm" funkció a popup-ból.
  * - Térkép automatikus mozgatása (FlyTo) a kívülről kiválasztott patikára.
+ * - Látható patikák detektálása: eseményküldés a látható markerek listájával a szülőnek.
  * 
  * TECHNOLÓGIA:
  * - react-leaflet (Leaflet wrapper React-hez).
  * - SSR tiltása szükséges (dynamic import).
  * 
  * KAPCSOLÓDÓ ELEMEK:
- * - Parent: PharmaciesPage
+ * - Parent: PharmacyFinder, PharmaciesPage
  * - Context: NearbyPharmacyContext
  */
 
@@ -57,6 +58,7 @@ interface PharmacyMapProps {
     zoom?: number;
     selectedPharmacyId?: string | null;
     onSelectPharmacy?: (id: string) => void;
+    onVisiblePharmaciesChange?: (ids: string[]) => void;
 }
 
 // Helper component to fly to location
@@ -68,12 +70,46 @@ const MapUpdater = ({ center, zoom }: { center: [number, number], zoom: number }
     return null;
 }
 
+// Helper component to detect visible markers
+const MapBoundsListener = ({
+    pharmacies,
+    onVisiblePharmaciesChange
+}: {
+    pharmacies: Pharmacy[],
+    onVisiblePharmaciesChange?: (ids: string[]) => void
+}) => {
+    const map = useMap();
+
+    useEffect(() => {
+        if (!onVisiblePharmaciesChange) return;
+
+        const updateVisible = () => {
+            const bounds = map.getBounds();
+            const visibleIds = pharmacies
+                .filter(p => p.latitude && p.longitude && bounds.contains([p.latitude, p.longitude]))
+                .map(p => p.id);
+            onVisiblePharmaciesChange(visibleIds);
+        };
+
+        // Initial check and on every move/zoom
+        updateVisible();
+        map.on('moveend', updateVisible);
+
+        return () => {
+            map.off('moveend', updateVisible);
+        };
+    }, [map, pharmacies, onVisiblePharmaciesChange]);
+
+    return null;
+}
+
 const PharmacyMap: React.FC<PharmacyMapProps> = ({
     pharmacies,
     center = [47.1625, 19.5033], // Default Hungary center
     zoom = 7,
     selectedPharmacyId,
-    onSelectPharmacy
+    onSelectPharmacy,
+    onVisiblePharmaciesChange
 }) => {
     const { isNearby, setNearbyPharmacy, clearNearbyPharmacy } = useNearbyPharmacy();
 
@@ -90,6 +126,10 @@ const PharmacyMap: React.FC<PharmacyMapProps> = ({
             />
 
             <MapUpdater center={center} zoom={zoom} />
+            <MapBoundsListener
+                pharmacies={pharmacies}
+                onVisiblePharmaciesChange={onVisiblePharmaciesChange}
+            />
 
             {pharmacies.map((pharmacy) => {
                 // Skip invalid coordinates
