@@ -94,6 +94,7 @@ export default function MedicinesPage() {
     const [sortKey, setSortKey] = useState<SortKey | null>(null);
     const [sortDirection, setSortDirection] = useState<SortDirection>(null);
     const [cardSortOption, setCardSortOption] = useState<CardSortOption>('name-asc');
+    const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
@@ -176,6 +177,14 @@ export default function MedicinesPage() {
         }));
     };
 
+    const handleColumnFilterChange = (column: string, value: string) => {
+        setColumnFilters(prev => ({
+            ...prev,
+            [column]: value
+        }));
+        setCurrentPage(1);
+    };
+
     // Filter Logic
     const filteredMedicines = medicines.filter(medicine => {
         const nev = medicine.nev || '';
@@ -192,7 +201,20 @@ export default function MedicinesPage() {
         const medStatus = medicine.status || 'Elérhető';
         const matchesStatus = filterStatus === 'all' || medStatus === filterStatus;
 
-        return matchesSearch && matchesStatus;
+        // Column filters
+        const matchesColumnFilters = Object.entries(columnFilters).every(([key, value]) => {
+            if (!value) return true;
+            const itemValue = (medicine as any)[key];
+            if (key === 'lastUpdate' || key === 'authorizationDate') {
+                // For dates, check if formatted date string contains search term 
+                // or raw date string contains it (simplified approach)
+                return String(itemValue).toLowerCase().includes(value.toLowerCase()) ||
+                    formatDate(itemValue).toLowerCase().includes(value.toLowerCase())
+            }
+            return String(itemValue || '').toLowerCase().includes(value.toLowerCase());
+        });
+
+        return matchesSearch && matchesStatus && matchesColumnFilters;
     });
 
     // Reset to page 1 when search/filter changes
@@ -535,6 +557,133 @@ export default function MedicinesPage() {
                                             {viewSettings.tableColumns.lastUpdate && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('lastUpdate')}>Utolsó friss.{sortKey === 'lastUpdate' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
                                             {viewSettings.tableColumns.status && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('status')}>Státusz{sortKey === 'status' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
                                             {viewSettings.tableColumns.actions && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Műveletek</th>}
+                                        </tr>
+                                        <tr>
+                                            {viewSettings.tableColumns.nev && (
+                                                <th className="bg-base-100 p-1">
+                                                    <input
+                                                        type="text"
+                                                        className="input input-bordered input-xs w-full font-normal"
+                                                        placeholder="Szűrés..."
+                                                        value={columnFilters['nev'] || ''}
+                                                        onChange={(e) => handleColumnFilterChange('nev', e.target.value)}
+                                                    />
+                                                </th>
+                                            )}
+                                            {viewSettings.tableColumns.activeSubstance && (
+                                                <th className="bg-base-100 p-1">
+                                                    <input
+                                                        type="text"
+                                                        className="input input-bordered input-xs w-full font-normal"
+                                                        placeholder="Szűrés..."
+                                                        value={columnFilters['activeSubstance'] || ''}
+                                                        onChange={(e) => handleColumnFilterChange('activeSubstance', e.target.value)}
+                                                    />
+                                                </th>
+                                            )}
+                                            {viewSettings.tableColumns.kiszereles && (
+                                                <th className="bg-base-100 p-1">
+                                                    <input
+                                                        type="text"
+                                                        className="input input-bordered input-xs w-full font-normal"
+                                                        placeholder="Szűrés..."
+                                                        value={columnFilters['kiszereles'] || ''}
+                                                        onChange={(e) => handleColumnFilterChange('kiszereles', e.target.value)}
+                                                    />
+                                                </th>
+                                            )}
+                                            {viewSettings.tableColumns.gyarto && (
+                                                <th className="bg-base-100 p-1">
+                                                    <input
+                                                        type="text"
+                                                        className="input input-bordered input-xs w-full font-normal"
+                                                        placeholder="Szűrés..."
+                                                        value={columnFilters['gyarto'] || ''}
+                                                        onChange={(e) => handleColumnFilterChange('gyarto', e.target.value)}
+                                                    />
+                                                </th>
+                                            )}
+                                            {viewSettings.tableColumns.packagingDetails && (
+                                                <th className="bg-base-100 p-1">
+                                                    <input
+                                                        type="text"
+                                                        className="input input-bordered input-xs w-full font-normal"
+                                                        placeholder="Szűrés..."
+                                                        value={columnFilters['packagingDetails'] || ''}
+                                                        onChange={(e) => handleColumnFilterChange('packagingDetails', e.target.value)}
+                                                    />
+                                                </th>
+                                            )}
+                                            {viewSettings.tableColumns.dispensability && (
+                                                <th className="bg-base-100 p-1">
+                                                    <input
+                                                        type="text"
+                                                        className="input input-bordered input-xs w-full font-normal"
+                                                        placeholder="Szűrés..."
+                                                        value={columnFilters['dispensability'] || ''}
+                                                        onChange={(e) => handleColumnFilterChange('dispensability', e.target.value)}
+                                                    />
+                                                </th>
+                                            )}
+                                            {viewSettings.tableColumns.dispensabilitySub && (
+                                                <th className="bg-base-100 p-1">
+                                                    <input
+                                                        type="text"
+                                                        className="input input-bordered input-xs w-full font-normal"
+                                                        placeholder="Szűrés..."
+                                                        value={columnFilters['dispensabilitySub'] || ''}
+                                                        onChange={(e) => handleColumnFilterChange('dispensabilitySub', e.target.value)}
+                                                    />
+                                                </th>
+                                            )}
+                                            {viewSettings.tableColumns.safetyFeatures && (
+                                                <th className="bg-base-100 p-1">
+                                                    <input
+                                                        type="text"
+                                                        className="input input-bordered input-xs w-full font-normal"
+                                                        placeholder="Szűrés..."
+                                                        value={columnFilters['safetyFeatures'] || ''}
+                                                        onChange={(e) => handleColumnFilterChange('safetyFeatures', e.target.value)}
+                                                    />
+                                                </th>
+                                            )}
+                                            {viewSettings.tableColumns.authorizationDate && (
+                                                <th className="bg-base-100 p-1">
+                                                    <input
+                                                        type="text"
+                                                        className="input input-bordered input-xs w-full font-normal"
+                                                        placeholder="Szűrés..."
+                                                        value={columnFilters['authorizationDate'] || ''}
+                                                        onChange={(e) => handleColumnFilterChange('authorizationDate', e.target.value)}
+                                                    />
+                                                </th>
+                                            )}
+                                            {viewSettings.tableColumns.lastUpdate && (
+                                                <th className="bg-base-100 p-1">
+                                                    <input
+                                                        type="text"
+                                                        className="input input-bordered input-xs w-full font-normal"
+                                                        placeholder="Szűrés..."
+                                                        value={columnFilters['lastUpdate'] || ''}
+                                                        onChange={(e) => handleColumnFilterChange('lastUpdate', e.target.value)}
+                                                    />
+                                                </th>
+                                            )}
+                                            {viewSettings.tableColumns.status && (
+                                                <th className="bg-base-100 p-1">
+                                                    <select
+                                                        className="select select-bordered select-xs w-full font-normal"
+                                                        value={columnFilters['status'] || ''}
+                                                        onChange={(e) => handleColumnFilterChange('status', e.target.value)}
+                                                    >
+                                                        <option value="">Mindegy</option>
+                                                        <option value="Elérhető">Elérhető</option>
+                                                        <option value="Készlethiány">Készlethiány</option>
+                                                        <option value="Megszűnt">Megszűnt</option>
+                                                    </select>
+                                                </th>
+                                            )}
+                                            {viewSettings.tableColumns.actions && <th className="bg-base-100 p-1"></th>}
                                         </tr>
                                     </thead>
                                     <tbody>
