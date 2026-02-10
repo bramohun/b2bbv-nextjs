@@ -10,7 +10,7 @@
  * 
  * FUNKCIÓK:
  * - Gyógyszertár adatainak megjelenítése.
- * - Nyitvatartási státusz (Nyitva/Zárva) számítása és megjelenítése az aktuális idő alapján.
+ * - Nyitvatartási státusz (Nyitva/Zárva) és napi nyitvatartási idő (tól-ig) megjelenítése.
  * - "Mutasd térképen" gomb, amely a térképen az adott patikára ugrik.
  * - Kiválasztott állapot vizuális jelzése.
  * - "Közeli patikának jelölöm" gomb (Favorite / Home ikon).
@@ -23,6 +23,7 @@
 import React, { useMemo } from 'react';
 import { Pharmacy } from '@/types';
 import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
+import { getPharmacyOpeningStatus } from '@/lib/pharmacy-utils';
 
 interface PharmacyCardProps {
     pharmacy: Pharmacy;
@@ -34,21 +35,7 @@ export const PharmacyCard: React.FC<PharmacyCardProps> = ({ pharmacy, isSelected
     const { isNearby, setNearbyPharmacy, clearNearbyPharmacy } = useNearbyPharmacy();
     const markedNearby = isNearby(pharmacy.id);
 
-    const isOpen = useMemo(() => {
-        const now = new Date();
-        const currentDay = now.getDay(); // 0 (Sun) to 6 (Sat)
-        const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-        const openKey = `${dayNames[currentDay]}Open` as keyof Pharmacy;
-        const closeKey = `${dayNames[currentDay]}Close` as keyof Pharmacy;
-
-        const openTime = pharmacy[openKey] as string;
-        const closeTime = pharmacy[closeKey] as string;
-
-        if (!openTime || !closeTime) return false;
-
-        const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-        return currentTime >= openTime && currentTime <= closeTime;
-    }, [pharmacy]);
+    const openingStatus = useMemo(() => getPharmacyOpeningStatus(pharmacy), [pharmacy]);
 
     return (
         <div
@@ -63,11 +50,14 @@ export const PharmacyCard: React.FC<PharmacyCardProps> = ({ pharmacy, isSelected
                             <span className="text-[10px] text-primary font-bold uppercase tracking-wider">Közeli gyógyszertár</span>
                         )}
                     </div>
-                    <div className="flex items-center gap-1">
-                        {isOpen ? (
-                            <div className="badge badge-success badge-sm badge-outline">Nyitva</div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500 font-medium">{openingStatus.hoursDisplay}</span>
+                        {openingStatus.status === 'open' ? (
+                            <div className="badge badge-success badge-sm badge-outline font-bold">Nyitva</div>
+                        ) : openingStatus.status === 'closing_soon' ? (
+                            <div className="badge badge-warning badge-sm badge-outline font-bold">Hamarosan zár</div>
                         ) : (
-                            <div className="badge badge-error badge-sm badge-outline">Zárva</div>
+                            <div className="badge badge-error badge-sm badge-outline font-bold">Zárva</div>
                         )}
                     </div>
                 </div>

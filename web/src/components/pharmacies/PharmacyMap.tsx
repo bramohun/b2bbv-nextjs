@@ -11,7 +11,7 @@
  * FUNKCIÓK:
  * - Leaflet térkép megjelenítése OpenStreetMap réteggel.
  * - Gyógyszertárak megjelenítése marker-ként.
- * - Marker-re kattintva felugró ablak (Popup) a patika adataival.
+ * - Marker-re kattintva felugró ablak (Popup) a patika adataival, napi nyitvatartással.
  * - "Közeli patikának jelölöm" funkció a popup-ból.
  * - Térkép automatikus mozgatása (FlyTo) a kívülről kiválasztott patikára.
  * - Látható patikák detektálása: eseményküldés a látható markerek listájával a szülőnek.
@@ -33,6 +33,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Pharmacy } from '@/types';
 import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
+import { getPharmacyOpeningStatus } from '@/lib/pharmacy-utils';
 
 // Fix for default marker icon in Leaflet with Next.js/React
 const iconUrl = 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png';
@@ -157,7 +158,18 @@ const PharmacyMap: React.FC<PharmacyMapProps> = ({
                                     </div>
                                 )}
                                 <p className="text-sm text-gray-600 mb-0.5">{pharmacy.cim}</p>
-                                <p className="text-sm text-gray-500 mb-3">{pharmacy.telepules}</p>
+                                <p className="text-sm text-gray-500 mb-2">{pharmacy.telepules}</p>
+
+                                <div className="flex items-center gap-2 mb-3">
+                                    <span className="text-xs text-gray-500 font-medium">{getPharmacyOpeningStatus(pharmacy).hoursDisplay}</span>
+                                    {getPharmacyOpeningStatus(pharmacy).status === 'open' ? (
+                                        <div className="badge badge-success badge-xs badge-outline font-bold">Nyitva</div>
+                                    ) : getPharmacyOpeningStatus(pharmacy).status === 'closing_soon' ? (
+                                        <div className="badge badge-warning badge-xs badge-outline font-bold whitespace-nowrap">Hamarosan zár</div>
+                                    ) : (
+                                        <div className="badge badge-error badge-xs badge-outline font-bold">Zárva</div>
+                                    )}
+                                </div>
 
                                 <div className="flex flex-col gap-2">
                                     <button
