@@ -6,20 +6,23 @@
  * USER STORY:
  * Felhasználóként látni szeretném egy gyógyszertár alapvető adatait (név, cím,
  * nyitvatartás, elérhetőség) egy listaelemként, hogy kiválaszthassam a számomra
- * legmegfelelőbbet.
+ * legmegfelelőbbet, és megjelölhessem mint "Közeli gyógyszertár".
  * 
  * FUNKCIÓK:
  * - Gyógyszertár adatainak megjelenítése.
  * - Nyitvatartási státusz (Nyitva/Zárva) számítása és megjelenítése.
  * - "Mutasd térképen" gomb, amely a térképen az adott patikára ugrik.
  * - Kiválasztott állapot vizuális jelzése.
+ * - "Közeli patikának jelölöm" gomb (Favorite / Home ikon).
  * 
  * KAPCSOLÓDÓ ELEMEK:
  * - Parent: PharmaciesPage
+ * - Context: NearbyPharmacyContext
  */
 
 import React from 'react';
 import { Pharmacy } from '@/types';
+import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
 
 interface PharmacyCardProps {
     pharmacy: Pharmacy;
@@ -28,16 +31,26 @@ interface PharmacyCardProps {
 }
 
 export const PharmacyCard: React.FC<PharmacyCardProps> = ({ pharmacy, isSelected, onSelect }) => {
+    const { isNearby, setNearbyPharmacy, clearNearbyPharmacy } = useNearbyPharmacy();
+    const markedNearby = isNearby(pharmacy.id);
+
     return (
         <div
-            className={`card bg-base-100 shadow-sm hover:shadow-md transition-all cursor-pointer border-l-4 ${isSelected ? 'border-primary ring-2 ring-primary ring-opacity-50' : 'border-transparent'}`}
+            className={`card bg-base-100 shadow-sm hover:shadow-md transition-all cursor-pointer border-l-4 ${isSelected ? 'border-primary ring-2 ring-primary ring-opacity-50' : 'border-transparent'} ${markedNearby ? 'bg-primary-focus bg-opacity-5' : ''}`}
             onClick={() => onSelect(pharmacy.id)}
         >
             <div className="card-body p-4">
                 <div className="flex justify-between items-start">
-                    <h3 className="card-title text-base font-bold">{pharmacy.nev}</h3>
-                    {/* Placeholder for "Open/Closed" badge - needs logic */}
-                    <div className="badge badge-success badge-sm badge-outline">Nyitva</div>
+                    <div className="flex flex-col">
+                        <h3 className="card-title text-base font-bold">{pharmacy.nev}</h3>
+                        {markedNearby && (
+                            <span className="text-[10px] text-primary font-bold uppercase tracking-wider">Közeli gyógyszertár</span>
+                        )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                        {/* Placeholder for "Open/Closed" badge - needs logic */}
+                        <div className="badge badge-success badge-sm badge-outline">Nyitva</div>
+                    </div>
                 </div>
 
                 <p className="text-sm text-gray-600 mb-1">
@@ -50,9 +63,22 @@ export const PharmacyCard: React.FC<PharmacyCardProps> = ({ pharmacy, isSelected
                     {pharmacy.telefon}
                 </p>
 
-                <div className="card-actions justify-end mt-2">
-                    <button className="btn btn-ghost btn-sm btn-circle text-gray-400 hover:text-red-500">
-                        <span className="material-symbols-rounded text-lg">favorite</span>
+                <div className="card-actions justify-end mt-2 items-center">
+                    <button
+                        title={markedNearby ? "Közeli jelölés eltávolítása" : "Közeli patikának jelölöm"}
+                        className={`btn btn-sm btn-circle ${markedNearby ? 'btn-primary' : 'btn-ghost text-gray-400 hover:text-primary'}`}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (markedNearby) {
+                                clearNearbyPharmacy();
+                            } else {
+                                setNearbyPharmacy(pharmacy);
+                            }
+                        }}
+                    >
+                        <span className={`material-symbols-rounded text-lg ${markedNearby ? 'fill-1' : ''}`}>
+                            {markedNearby ? 'home' : 'add_location'}
+                        </span>
                     </button>
                     <button className="btn btn-sm btn-ghost text-primary text-xs" onClick={(e) => {
                         e.stopPropagation();

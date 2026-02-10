@@ -8,27 +8,30 @@
  * USER STORY:
  * Felhasználóként szeretnék egy központi navigációs sávot használni az oldalak
  * közötti váltáshoz, a kereséshez, a kedvenc gyógyszereim gyors eléréséhez 
- * és a profilbeállításaim kezeléséhez.
+ * és a profilbeállításaim kezeléséhez, valamint látni a számomra megjelölt
+ * közeli gyógyszertárat.
  * 
  * FUNKCIÓK:
  * - Navigációs linkek: Irányítópult, Gyógyszerek, Gyógyszertárak, Közösség.
  * - Gyorskereső gomb.
- * - Kedvencek dropdown: A kedvencnek jelölt gyógyszerek gyorslistája és navigáció a részletes kedvencek oldalra.
+ * - Közeli gyógyszertár kijelzése: Név és cím megjelenítése a navigációs sávban.
+ * - Kedvencek dropdown: A kedvencnek jelölt gyógyszerek gyorslistája.
  * - Felhasználói profil menü: Profil, Beállítások, Kijelentkezés.
- * - Reszponzív megjelenés: Mobil nézetben hamburger menü.
  * 
  * ÜZLETI LOGIKA:
  * - A kedvencek száma dinamikusan frissül a FavoriteContext alapján.
- * - Az értesítések kezelése kikerült a navigációs sávról, azokat csak a terméklapokon,
- *   a listákban és a profil/kedvencek oldalon lehet kezelni.
+ * - A közeli gyógyszertár adatai a NearbyPharmacyContext-ből érkeznek.
+ * - Az értesítések kezelése kikerült a navigációs sávról.
  */
 
 import Link from 'next/link';
 import React from 'react';
 import { useFavorite } from '@/context/FavoriteContext';
+import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
 
 export const Navbar = () => {
     const { favorites } = useFavorite();
+    const { nearbyPharmacy } = useNearbyPharmacy();
 
     return (
         <div className="navbar bg-base-100 shadow-md sticky top-0 z-50">
@@ -48,7 +51,6 @@ export const Navbar = () => {
                     </ul>
                 </div>
                 <Link href="/dashboard" className="btn btn-ghost text-xl">
-                    {/* Placeholder for Logo - In legacy it was an IMG */}
                     <span className="font-bold text-primary">Orvosi Portál</span>
                 </Link>
             </div>
@@ -61,6 +63,19 @@ export const Navbar = () => {
                 </ul>
             </div>
             <div className="navbar-end gap-2">
+                {/* Nearby Pharmacy Info */}
+                {nearbyPharmacy && (
+                    <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-base-200 border-l-4 border-primary rounded-md mr-1 max-w-[200px]">
+                        <span className="material-symbols-rounded text-primary text-sm fill-1">location_on</span>
+                        <div className="flex flex-col leading-tight min-w-0">
+                            <span className="text-[10px] text-base-content/60 font-bold uppercase tracking-tighter">Közeli patika</span>
+                            <span className="text-xs font-bold text-primary truncate" title={nearbyPharmacy.nev}>
+                                {nearbyPharmacy.nev}
+                            </span>
+                        </div>
+                    </div>
+                )}
+
                 <button className="btn btn-ghost btn-circle">
                     <span className="material-symbols-rounded">search</span>
                 </button>
