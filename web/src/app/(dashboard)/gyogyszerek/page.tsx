@@ -204,6 +204,21 @@ export default function MedicinesPage() {
         // Column filters
         const matchesColumnFilters = Object.entries(columnFilters).every(([key, value]) => {
             if (!value) return true;
+
+            // Special handling for Last Update date range
+            if (key === 'lastUpdate_from') {
+                const filterDate = new Date(value);
+                filterDate.setHours(0, 0, 0, 0);
+                const itemDate = new Date(medicine.lastUpdate || 0);
+                return itemDate.getTime() >= filterDate.getTime();
+            }
+            if (key === 'lastUpdate_to') {
+                const filterDate = new Date(value);
+                filterDate.setHours(23, 59, 59, 999);
+                const itemDate = new Date(medicine.lastUpdate || 0);
+                return itemDate.getTime() <= filterDate.getTime();
+            }
+
             const itemValue = (medicine as any)[key];
             if (key === 'lastUpdate' || key === 'authorizationDate') {
                 // For dates, check if formatted date string contains search term 
@@ -660,13 +675,22 @@ export default function MedicinesPage() {
                                             )}
                                             {viewSettings.tableColumns.lastUpdate && (
                                                 <th className="bg-base-100 p-1">
-                                                    <input
-                                                        type="text"
-                                                        className="input input-bordered input-xs w-full font-normal"
-                                                        placeholder="Szűrés..."
-                                                        value={columnFilters['lastUpdate'] || ''}
-                                                        onChange={(e) => handleColumnFilterChange('lastUpdate', e.target.value)}
-                                                    />
+                                                    <div className="flex flex-col gap-1">
+                                                        <input
+                                                            type="date"
+                                                            className="input input-bordered input-xs w-full font-normal"
+                                                            title="Dátumtól"
+                                                            value={columnFilters['lastUpdate_from'] || ''}
+                                                            onChange={(e) => handleColumnFilterChange('lastUpdate_from', e.target.value)}
+                                                        />
+                                                        <input
+                                                            type="date"
+                                                            className="input input-bordered input-xs w-full font-normal"
+                                                            title="Dátumig"
+                                                            value={columnFilters['lastUpdate_to'] || ''}
+                                                            onChange={(e) => handleColumnFilterChange('lastUpdate_to', e.target.value)}
+                                                        />
+                                                    </div>
                                                 </th>
                                             )}
                                             {viewSettings.tableColumns.status && (
