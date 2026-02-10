@@ -184,15 +184,21 @@ export default async function MedicineDetailPage({ params }: PageProps) {
 
                             {stockInfo.show && (
                                 <div className="mt-4 p-3 bg-base-200 rounded-lg text-sm">
-                                    <div className="font-semibold mb-1">
-                                        {stockInfo.total} gyógyszertárban elérhető:
-                                    </div>
-                                    <ul className="list-disc list-inside text-gray-600 space-y-0.5">
-                                        <li>Készleten: <strong>{stockInfo.inStock}</strong> gyógyszertárban</li>
-                                        {!stockInfo.isLimited && (
-                                            <li>Rendelésre 1-2 munkanapon belül: <strong>{stockInfo.onOrder}</strong> gyógyszertárban</li>
-                                        )}
-                                    </ul>
+                                    {stockInfo.isLimited ? (
+                                        <div className="text-gray-600">
+                                            Készleten: <strong>{stockInfo.inStock}</strong> gyógyszertárban
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="font-semibold mb-1">
+                                                {stockInfo.total} gyógyszertárban elérhető:
+                                            </div>
+                                            <ul className="list-disc list-inside text-gray-600 space-y-0.5">
+                                                <li>Készleten: <strong>{stockInfo.inStock}</strong> gyógyszertárban</li>
+                                                <li>Rendelésre 1-2 munkanapon belül: <strong>{stockInfo.onOrder}</strong> gyógyszertárban</li>
+                                            </ul>
+                                        </>
+                                    )}
                                 </div>
                             )}
                         </div>
