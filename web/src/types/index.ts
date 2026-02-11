@@ -25,6 +25,7 @@ export type MedicineCardField = 'status' | 'tkSzam' | 'kiszereles' | 'gyarto' | 
 export interface ViewSettings {
     tableColumns: Record<MedicineTableColumn, boolean>;
     cardFields: Record<MedicineCardField, boolean>;
+    tableColumnOrder: MedicineTableColumn[];
 }
 
 export interface Pharmacy {

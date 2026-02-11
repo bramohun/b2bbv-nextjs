@@ -23,7 +23,9 @@
  *     "Hatóanyag szerint növekvő", "Hatóanyag szerint csökkenő".
  * - Lapozás (Pagination): Az eredmények tördelése a gyorsabb betöltés és áttekinthetőség érdekében.
  * - Reszponzív nézet: Mobil és asztali felületre optimalizált megjelenés.
- * - Nézet testreszabása (Customization): Oszlopok és kártyaadatok láthatóságának kapcsolása, beállítások mentése localStorage-ba.
+ * - Nézet testreszabása (Customization): 
+ *   - Oszlopok és kártyaadatok láthatóságának kapcsolása, beállítások mentése localStorage-ba.
+ *   - Táblázat oszlopainak átrendezése drag & drop segítségével a fejlécet megragadva.
  * 
  * MŰKÖDÉSI LOGIKA:
  * - Kedvencekhez adás / eltávolítás és értesítés kérése / lemondása.
@@ -57,6 +59,11 @@ type SortKey = 'nev' | 'activeSubstance' | 'kiszereles' | 'gyarto' | 'status'
 type CardSortOption = 'name-asc' | 'name-desc' | 'lastUpdate-desc'
     | 'activeSubstance-asc' | 'activeSubstance-desc';
 
+const DEFAULT_COLUMN_ORDER: MedicineTableColumn[] = [
+    'nev', 'activeSubstance', 'kiszereles', 'gyarto', 'status', 'nearbyPharmacyStock', 'actions',
+    'tkSzam', 'packagingDetails', 'dispensability', 'dispensabilitySub', 'safetyFeatures', 'authorizationDate', 'lastUpdate'
+];
+
 const DEFAULT_VIEW_SETTINGS: ViewSettings = {
     tableColumns: {
         tkSzam: true,
@@ -86,7 +93,8 @@ const DEFAULT_VIEW_SETTINGS: ViewSettings = {
         safetyFeatures: false,
         authorizationDate: false,
         lastUpdate: false,
-    }
+    },
+    tableColumnOrder: DEFAULT_COLUMN_ORDER
 };
 
 export default function MedicinesPage() {
@@ -141,7 +149,8 @@ export default function MedicinesPage() {
                 // Deep merge with defaults to ensure all keys exist even if localStorage has partial data
                 setViewSettings({
                     tableColumns: { ...DEFAULT_VIEW_SETTINGS.tableColumns, ...parsed.tableColumns },
-                    cardFields: { ...DEFAULT_VIEW_SETTINGS.cardFields, ...parsed.cardFields }
+                    cardFields: { ...DEFAULT_VIEW_SETTINGS.cardFields, ...parsed.cardFields },
+                    tableColumnOrder: parsed.tableColumnOrder || DEFAULT_COLUMN_ORDER
                 });
             } catch (e) {
                 console.error('Failed to parse view settings', e);
@@ -380,6 +389,269 @@ export default function MedicinesPage() {
         }
         setIsRemovalWarningOpen(false);
         setSelectedMedicineForRemoval(null);
+    };
+
+    // Drag and Drop Logic for Columns
+    const [draggedColumn, setDraggedColumn] = useState<MedicineTableColumn | null>(null);
+
+    const handleDragStart = (e: React.DragEvent, column: MedicineTableColumn) => {
+        setDraggedColumn(column);
+        e.dataTransfer.effectAllowed = 'move';
+        // Add a ghost image or styling if needed
+        if (e.currentTarget instanceof HTMLElement) {
+            e.currentTarget.style.opacity = '0.4';
+        }
+    };
+
+    const handleDragEnd = (e: React.DragEvent) => {
+        if (e.currentTarget instanceof HTMLElement) {
+            e.currentTarget.style.opacity = '1';
+        }
+        setDraggedColumn(null);
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    };
+
+    const handleDrop = (e: React.DragEvent, targetColumn: MedicineTableColumn) => {
+        e.preventDefault();
+        if (!draggedColumn || draggedColumn === targetColumn) return;
+
+        const newOrder = [...viewSettings.tableColumnOrder];
+        const currentIndex = newOrder.indexOf(draggedColumn);
+        const targetIndex = newOrder.indexOf(targetColumn);
+
+        newOrder.splice(currentIndex, 1);
+        newOrder.splice(targetIndex, 0, draggedColumn);
+
+        setViewSettings(prev => ({
+            ...prev,
+            tableColumnOrder: newOrder
+        }));
+    };
+
+    const renderHeaderCell = (col: MedicineTableColumn) => {
+        if (!viewSettings.tableColumns[col]) return null;
+
+        const isSortable = col !== 'actions' && col !== 'nearbyPharmacyStock';
+        const labelMap: Record<string, string> = {
+            tkSzam: 'TK-szám',
+            nev: 'Terméknév',
+            activeSubstance: 'Hatóanyag',
+            kiszereles: 'Kiszerelés',
+            gyarto: 'Gyártó',
+            packagingDetails: 'Csomagolás',
+            dispensability: 'Kiadhatóság',
+            dispensabilitySub: 'Kiad. Alcsop.',
+            safetyFeatures: 'B. Elemek',
+            authorizationDate: 'Eng. Dátum',
+            lastUpdate: 'Utolsó friss.',
+            status: 'Státusz',
+            nearbyPharmacyStock: 'Közeli patika',
+            actions: 'Műveletek'
+        };
+
+        const sortKeyMap: Record<string, SortKey> = {
+            tkSzam: 'tkSzam',
+            nev: 'nev',
+            activeSubstance: 'activeSubstance',
+            kiszereles: 'kiszereles',
+            gyarto: 'gyarto',
+            packagingDetails: 'packagingDetails',
+            dispensability: 'dispensability',
+            dispensabilitySub: 'dispensabilitySub',
+            safetyFeatures: 'safetyFeatures',
+            authorizationDate: 'authorizationDate',
+            lastUpdate: 'lastUpdate',
+            status: 'status'
+        };
+
+        return (
+            <th
+                key={col}
+                draggable
+                onDragStart={(e) => handleDragStart(e, col)}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, col)}
+                className={`sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-grab active:cursor-grabbing select-none hover:bg-base-200 ${draggedColumn === col ? 'bg-base-300' : ''}`}
+                onClick={() => isSortable && handleTableSort(sortKeyMap[col])}
+            >
+                <div className="flex items-center gap-1">
+                    <span className="material-symbols-rounded text-xs opacity-30">drag_indicator</span>
+                    {labelMap[col]}
+                    {sortKey === sortKeyMap[col] && (sortDirection === 'asc' ? ' ▲' : ' ▼')}
+                </div>
+            </th>
+        );
+    };
+
+    const renderFilterCell = (col: MedicineTableColumn) => {
+        if (!viewSettings.tableColumns[col]) return null;
+
+        if (col === 'actions') return <th key={col} className="bg-base-100 p-1"></th>;
+
+        if (col === 'status') {
+            return (
+                <th key={col} className="bg-base-100 p-1">
+                    <select
+                        className="select select-bordered select-xs w-full font-normal"
+                        value={columnFilters['status'] || ''}
+                        onChange={(e) => handleColumnFilterChange('status', e.target.value)}
+                    >
+                        <option value="">Mindegy</option>
+                        <option value="Elérhető">Elérhető</option>
+                        <option value="Készlethiány">Készlethiány</option>
+                        <option value="Megszűnt">Megszűnt</option>
+                    </select>
+                </th>
+            );
+        }
+
+        if (col === 'nearbyPharmacyStock') {
+            return (
+                <th key={col} className="bg-base-100 p-1">
+                    <select
+                        className="select select-bordered select-xs w-full font-normal"
+                        value={columnFilters['nearbyPharmacyStock'] || ''}
+                        onChange={(e) => handleColumnFilterChange('nearbyPharmacyStock', e.target.value)}
+                        disabled={!nearbyPharmacy}
+                    >
+                        <option value="">Mindegy</option>
+                        <option value="available">Elérhető</option>
+                        <option value="not_available">Nem elérhető</option>
+                    </select>
+                </th>
+            );
+        }
+
+        if (col === 'lastUpdate') {
+            return (
+                <th key={col} className="bg-base-100 p-1">
+                    <div className="flex flex-col gap-1">
+                        <input
+                            type="date"
+                            className="input input-bordered input-xs w-full font-normal"
+                            title="Dátumtól"
+                            value={columnFilters['lastUpdate_from'] || ''}
+                            onChange={(e) => handleColumnFilterChange('lastUpdate_from', e.target.value)}
+                        />
+                        <input
+                            type="date"
+                            className="input input-bordered input-xs w-full font-normal"
+                            title="Dátumig"
+                            value={columnFilters['lastUpdate_to'] || ''}
+                            onChange={(e) => handleColumnFilterChange('lastUpdate_to', e.target.value)}
+                        />
+                    </div>
+                </th>
+            );
+        }
+
+        return (
+            <th key={col} className="bg-base-100 p-1">
+                <input
+                    type="text"
+                    className="input input-bordered input-xs w-full font-normal"
+                    placeholder="Szűrés..."
+                    value={columnFilters[col] || ''}
+                    onChange={(e) => handleColumnFilterChange(col, e.target.value)}
+                />
+            </th>
+        );
+    };
+
+    const renderDataCell = (col: MedicineTableColumn, medicine: Medicine) => {
+        if (!viewSettings.tableColumns[col]) return null;
+
+        switch (col) {
+            case 'tkSzam':
+                return <td key={col} className="text-xs font-mono">{medicine.tkSzam}</td>;
+            case 'nev':
+                return (
+                    <td key={col}>
+                        <div className="font-bold text-primary">
+                            <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="hover:underline">
+                                {medicine.nev}
+                            </Link>
+                        </div>
+                    </td>
+                );
+            case 'activeSubstance':
+                return <td key={col}>{medicine.activeSubstance || medicine.inn || '-'}</td>;
+            case 'kiszereles':
+                return <td key={col}>{medicine.kiszereles}</td>;
+            case 'gyarto':
+                return (
+                    <td key={col}>
+                        <div className="tooltip" data-tip={medicine.gyarto}>
+                            <span className="truncate max-w-[150px] block">{medicine.gyarto}</span>
+                        </div>
+                    </td>
+                );
+            case 'packagingDetails':
+                return <td key={col}>{medicine.packagingDetails}</td>;
+            case 'dispensability':
+                return <td key={col}>{medicine.dispensability}</td>;
+            case 'dispensabilitySub':
+                return <td key={col}>{medicine.dispensabilitySub}</td>;
+            case 'safetyFeatures':
+                return <td key={col}>{medicine.safetyFeatures}</td>;
+            case 'authorizationDate':
+                return <td key={col}>{medicine.authorizationDate}</td>;
+            case 'lastUpdate':
+                return <td key={col}>{formatDate(medicine.lastUpdate)}</td>;
+            case 'status':
+                return (
+                    <td key={col}>
+                        <div className={`badge ${medicine.status === 'Elérhető' ? 'badge-success' : medicine.status === 'Készlethiány' ? 'badge-warning' : 'badge-error'} badge-xs whitespace-nowrap`}>
+                            {medicine.status}
+                        </div>
+                    </td>
+                );
+            case 'nearbyPharmacyStock':
+                return (
+                    <td key={col}>
+                        {nearbyPharmacy ? (
+                            <div className={`badge ${isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'badge-success' : 'bg-gray-200 text-gray-500 border-gray-300'} badge-xs whitespace-nowrap`}>
+                                {isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'Elérhető' : 'Nem elérhető'}
+                            </div>
+                        ) : (
+                            <span className="text-xs text-gray-400 italic">Nincs beállítva</span>
+                        )}
+                    </td>
+                );
+            case 'actions':
+                return (
+                    <td key={col} className="bg-base-100 sticky right-0 z-10 shadow-[-5px_0px_5px_-5px_#0000001a]">
+                        <div className="flex items-center gap-1">
+                            <button
+                                className={`btn btn-circle btn-xs ${isFavorite(medicine.tkSzam) ? 'bg-warning text-warning-content border-warning' : 'btn-ghost text-gray-400 hover:text-warning'}`}
+                                onClick={() => handleFavorite(medicine)}
+                                title={isFavorite(medicine.tkSzam) ? "Eltávolítás a kedvencekből" : "Kedvencekhez"}
+                            >
+                                <span className={`material-symbols-rounded text-[18px] ${isFavorite(medicine.tkSzam) ? 'fill-1' : ''}`}>star</span>
+                            </button>
+                            <button
+                                className={`btn btn-circle btn-xs ${isSubscribed(medicine.tkSzam) ? 'btn-primary' : 'btn-ghost text-gray-400 hover:text-info'}`}
+                                onClick={() => handleSubscription(medicine)}
+                                title={isSubscribed(medicine.tkSzam) ? "Leiratkozás" : "Értesítés kérése"}
+                            >
+                                <span className="material-symbols-rounded text-[18px]">
+                                    {isSubscribed(medicine.tkSzam) ? 'notifications_active' : 'notifications'}
+                                </span>
+                            </button>
+                            <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="btn btn-ghost btn-xs">
+                                Részletek
+                            </Link>
+                        </div>
+                    </td>
+                );
+            default:
+                return null;
+        }
     };
 
     return (
@@ -664,251 +936,22 @@ export default function MedicinesPage() {
                                     {/* head */}
                                     <thead>
                                         <tr>
-                                            {viewSettings.tableColumns.nev && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('nev')}>Terméknév / TK-szám{sortKey === 'nev' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
-                                            {viewSettings.tableColumns.activeSubstance && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('activeSubstance')}>Hatóanyag{sortKey === 'activeSubstance' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
-                                            {viewSettings.tableColumns.kiszereles && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('kiszereles')}>Kiszerelés{sortKey === 'kiszereles' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
-                                            {viewSettings.tableColumns.gyarto && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('gyarto')}>Gyártó{sortKey === 'gyarto' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
-                                            {viewSettings.tableColumns.packagingDetails && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('packagingDetails')}>Csomagolás{sortKey === 'packagingDetails' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
-                                            {viewSettings.tableColumns.dispensability && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('dispensability')}>Kiadhatóság{sortKey === 'dispensability' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
-                                            {viewSettings.tableColumns.dispensabilitySub && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('dispensabilitySub')}>Kiad. Alcsop.{sortKey === 'dispensabilitySub' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
-                                            {viewSettings.tableColumns.safetyFeatures && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('safetyFeatures')}>B. Elemek{sortKey === 'safetyFeatures' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
-                                            {viewSettings.tableColumns.authorizationDate && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('authorizationDate')}>Eng. Dátum{sortKey === 'authorizationDate' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
-                                            {viewSettings.tableColumns.lastUpdate && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('lastUpdate')}>Utolsó friss.{sortKey === 'lastUpdate' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
-                                            {viewSettings.tableColumns.status && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('status')}>Státusz{sortKey === 'status' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
-                                            {viewSettings.tableColumns.nearbyPharmacyStock && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200">Közeli patika</th>}
-                                            {viewSettings.tableColumns.actions && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Műveletek</th>}
+                                            {viewSettings.tableColumnOrder.map(renderHeaderCell)}
                                         </tr>
                                         <tr>
-                                            {viewSettings.tableColumns.nev && (
-                                                <th className="bg-base-100 p-1">
-                                                    <input
-                                                        type="text"
-                                                        className="input input-bordered input-xs w-full font-normal"
-                                                        placeholder="Szűrés..."
-                                                        value={columnFilters['nev'] || ''}
-                                                        onChange={(e) => handleColumnFilterChange('nev', e.target.value)}
-                                                    />
-                                                </th>
-                                            )}
-                                            {viewSettings.tableColumns.activeSubstance && (
-                                                <th className="bg-base-100 p-1">
-                                                    <input
-                                                        type="text"
-                                                        className="input input-bordered input-xs w-full font-normal"
-                                                        placeholder="Szűrés..."
-                                                        value={columnFilters['activeSubstance'] || ''}
-                                                        onChange={(e) => handleColumnFilterChange('activeSubstance', e.target.value)}
-                                                    />
-                                                </th>
-                                            )}
-                                            {viewSettings.tableColumns.kiszereles && (
-                                                <th className="bg-base-100 p-1">
-                                                    <input
-                                                        type="text"
-                                                        className="input input-bordered input-xs w-full font-normal"
-                                                        placeholder="Szűrés..."
-                                                        value={columnFilters['kiszereles'] || ''}
-                                                        onChange={(e) => handleColumnFilterChange('kiszereles', e.target.value)}
-                                                    />
-                                                </th>
-                                            )}
-                                            {viewSettings.tableColumns.gyarto && (
-                                                <th className="bg-base-100 p-1">
-                                                    <input
-                                                        type="text"
-                                                        className="input input-bordered input-xs w-full font-normal"
-                                                        placeholder="Szűrés..."
-                                                        value={columnFilters['gyarto'] || ''}
-                                                        onChange={(e) => handleColumnFilterChange('gyarto', e.target.value)}
-                                                    />
-                                                </th>
-                                            )}
-                                            {viewSettings.tableColumns.packagingDetails && (
-                                                <th className="bg-base-100 p-1">
-                                                    <input
-                                                        type="text"
-                                                        className="input input-bordered input-xs w-full font-normal"
-                                                        placeholder="Szűrés..."
-                                                        value={columnFilters['packagingDetails'] || ''}
-                                                        onChange={(e) => handleColumnFilterChange('packagingDetails', e.target.value)}
-                                                    />
-                                                </th>
-                                            )}
-                                            {viewSettings.tableColumns.dispensability && (
-                                                <th className="bg-base-100 p-1">
-                                                    <input
-                                                        type="text"
-                                                        className="input input-bordered input-xs w-full font-normal"
-                                                        placeholder="Szűrés..."
-                                                        value={columnFilters['dispensability'] || ''}
-                                                        onChange={(e) => handleColumnFilterChange('dispensability', e.target.value)}
-                                                    />
-                                                </th>
-                                            )}
-                                            {viewSettings.tableColumns.dispensabilitySub && (
-                                                <th className="bg-base-100 p-1">
-                                                    <input
-                                                        type="text"
-                                                        className="input input-bordered input-xs w-full font-normal"
-                                                        placeholder="Szűrés..."
-                                                        value={columnFilters['dispensabilitySub'] || ''}
-                                                        onChange={(e) => handleColumnFilterChange('dispensabilitySub', e.target.value)}
-                                                    />
-                                                </th>
-                                            )}
-                                            {viewSettings.tableColumns.safetyFeatures && (
-                                                <th className="bg-base-100 p-1">
-                                                    <input
-                                                        type="text"
-                                                        className="input input-bordered input-xs w-full font-normal"
-                                                        placeholder="Szűrés..."
-                                                        value={columnFilters['safetyFeatures'] || ''}
-                                                        onChange={(e) => handleColumnFilterChange('safetyFeatures', e.target.value)}
-                                                    />
-                                                </th>
-                                            )}
-                                            {viewSettings.tableColumns.authorizationDate && (
-                                                <th className="bg-base-100 p-1">
-                                                    <input
-                                                        type="text"
-                                                        className="input input-bordered input-xs w-full font-normal"
-                                                        placeholder="Szűrés..."
-                                                        value={columnFilters['authorizationDate'] || ''}
-                                                        onChange={(e) => handleColumnFilterChange('authorizationDate', e.target.value)}
-                                                    />
-                                                </th>
-                                            )}
-                                            {viewSettings.tableColumns.lastUpdate && (
-                                                <th className="bg-base-100 p-1">
-                                                    <div className="flex flex-col gap-1">
-                                                        <input
-                                                            type="date"
-                                                            className="input input-bordered input-xs w-full font-normal"
-                                                            title="Dátumtól"
-                                                            value={columnFilters['lastUpdate_from'] || ''}
-                                                            onChange={(e) => handleColumnFilterChange('lastUpdate_from', e.target.value)}
-                                                        />
-                                                        <input
-                                                            type="date"
-                                                            className="input input-bordered input-xs w-full font-normal"
-                                                            title="Dátumig"
-                                                            value={columnFilters['lastUpdate_to'] || ''}
-                                                            onChange={(e) => handleColumnFilterChange('lastUpdate_to', e.target.value)}
-                                                        />
-                                                    </div>
-                                                </th>
-                                            )}
-                                            {viewSettings.tableColumns.status && (
-                                                <th className="bg-base-100 p-1">
-                                                    <select
-                                                        className="select select-bordered select-xs w-full font-normal"
-                                                        value={columnFilters['status'] || ''}
-                                                        onChange={(e) => handleColumnFilterChange('status', e.target.value)}
-                                                    >
-                                                        <option value="">Mindegy</option>
-                                                        <option value="Elérhető">Elérhető</option>
-                                                        <option value="Készlethiány">Készlethiány</option>
-                                                        <option value="Megszűnt">Megszűnt</option>
-                                                    </select>
-                                                </th>
-                                            )}
-                                            {viewSettings.tableColumns.nearbyPharmacyStock && (
-                                                <th className="bg-base-100 p-1">
-                                                    <select
-                                                        className="select select-bordered select-xs w-full font-normal"
-                                                        value={columnFilters['nearbyPharmacyStock'] || ''}
-                                                        onChange={(e) => handleColumnFilterChange('nearbyPharmacyStock', e.target.value)}
-                                                        disabled={!nearbyPharmacy}
-                                                    >
-                                                        <option value="">Mindegy</option>
-                                                        <option value="available">Elérhető</option>
-                                                        <option value="not_available">Nem elérhető</option>
-                                                    </select>
-                                                </th>
-                                            )}
-                                            {viewSettings.tableColumns.actions && <th className="bg-base-100 p-1"></th>}
+                                            {viewSettings.tableColumnOrder.map(renderFilterCell)}
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {paginatedItems.length > 0 ? (
                                             paginatedItems.map((medicine) => (
                                                 <tr key={medicine.internalId} className="hover">
-                                                    {viewSettings.tableColumns.nev && (
-                                                        <td>
-                                                            <div className="font-bold text-primary">
-                                                                <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="hover:underline">
-                                                                    {medicine.nev}
-                                                                </Link>
-                                                            </div>
-                                                            {viewSettings.tableColumns.tkSzam && <div className="text-xs opacity-50">{medicine.tkSzam}</div>}
-                                                        </td>
-                                                    )}
-                                                    {viewSettings.tableColumns.activeSubstance && (
-                                                        <td>
-                                                            {medicine.activeSubstance || medicine.inn || '-'}
-                                                        </td>
-                                                    )}
-                                                    {viewSettings.tableColumns.kiszereles && <td>{medicine.kiszereles}</td>}
-                                                    {viewSettings.tableColumns.gyarto && (
-                                                        <td>
-                                                            <div className="tooltip" data-tip={medicine.gyarto}>
-                                                                <span className="truncate max-w-[150px] block">{medicine.gyarto}</span>
-                                                            </div>
-                                                        </td>
-                                                    )}
-
-                                                    {viewSettings.tableColumns.packagingDetails && <td>{medicine.packagingDetails}</td>}
-                                                    {viewSettings.tableColumns.dispensability && <td>{medicine.dispensability}</td>}
-                                                    {viewSettings.tableColumns.dispensabilitySub && <td>{medicine.dispensabilitySub}</td>}
-                                                    {viewSettings.tableColumns.safetyFeatures && <td>{medicine.safetyFeatures}</td>}
-                                                    {viewSettings.tableColumns.authorizationDate && <td>{medicine.authorizationDate}</td>}
-                                                    {viewSettings.tableColumns.lastUpdate && <td>{formatDate(medicine.lastUpdate)}</td>}
-                                                    {viewSettings.tableColumns.status && (
-                                                        <td>
-                                                            <div className={`badge ${medicine.status === 'Elérhető' ? 'badge-success' : medicine.status === 'Készlethiány' ? 'badge-warning' : 'badge-error'} badge-xs whitespace-nowrap`}>
-                                                                {medicine.status}
-                                                            </div>
-                                                        </td>
-                                                    )}
-                                                    {viewSettings.tableColumns.nearbyPharmacyStock && (
-                                                        <td>
-                                                            {nearbyPharmacy ? (
-                                                                <div className={`badge ${isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'badge-success' : 'bg-gray-200 text-gray-500 border-gray-300'} badge-xs whitespace-nowrap`}>
-                                                                    {isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'Elérhető' : 'Nem elérhető'}
-                                                                </div>
-                                                            ) : (
-                                                                <span className="text-xs text-gray-400 italic">Nincs beállítva</span>
-                                                            )}
-                                                        </td>
-                                                    )}
-                                                    <td className="bg-base-100 sticky right-0 z-10 shadow-[-5px_0px_5px_-5px_#0000001a]">
-                                                        <div className="flex items-center gap-1">
-                                                            <button
-                                                                className={`btn btn-circle btn-xs ${isFavorite(medicine.tkSzam) ? 'bg-warning text-warning-content border-warning' : 'btn-ghost text-gray-400 hover:text-warning'}`}
-                                                                onClick={() => handleFavorite(medicine)}
-                                                                title={isFavorite(medicine.tkSzam) ? "Eltávolítás a kedvencekből" : "Kedvencekhez"}
-                                                            >
-                                                                <span className={`material-symbols-rounded text-[18px] ${isFavorite(medicine.tkSzam) ? 'fill-1' : ''}`}>star</span>
-                                                            </button>
-                                                            <button
-                                                                className={`btn btn-circle btn-xs ${isSubscribed(medicine.tkSzam) ? 'btn-primary' : 'btn-ghost text-gray-400 hover:text-info'}`}
-                                                                onClick={() => handleSubscription(medicine)}
-                                                                title={isSubscribed(medicine.tkSzam) ? "Leiratkozás" : "Értesítés kérése"}
-                                                            >
-                                                                <span className="material-symbols-rounded text-[18px]">
-                                                                    {isSubscribed(medicine.tkSzam) ? 'notifications_active' : 'notifications'}
-                                                                </span>
-                                                            </button>
-                                                            <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="btn btn-ghost btn-xs">
-                                                                Részletek
-                                                            </Link>
-                                                        </div>
-                                                    </td>
+                                                    {viewSettings.tableColumnOrder.map(col => renderDataCell(col, medicine))}
                                                 </tr>
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan={Object.values(viewSettings.tableColumns).filter(Boolean).length} className="text-center py-12 text-gray-500">
+                                                <td colSpan={viewSettings.tableColumnOrder.filter(col => viewSettings.tableColumns[col] || col === 'actions').length} className="text-center py-12 text-gray-500">
                                                     Nem található a keresésnek megfelelő gyógyszer.
                                                 </td>
                                             </tr>
