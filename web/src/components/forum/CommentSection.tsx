@@ -2,11 +2,26 @@
 
 /**
  * ============================================================================
- * HOZZÁSZÓLÁSOK SZEKCIÓ KOMPONENS
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - HOZZÁSZÓLÁSOK SZEKCIÓ
  * ============================================================================
  * 
- * Hozzászólások megjelenítése és új komment form.
- * Tartalmazza: kommentek listája, reakció gombok, új hozzászólás űrlap.
+ * CÉL:
+ * Hozzászólások megjelenítése és új komment beküldése.
+ * 
+ * USER STORYK:
+ * - Mint felhasználó, hozzá szeretnék szólni egy témához.
+ * - Mint felhasználó, anonim módon szeretnék hozzászólni, hogy ne 
+ *   látszódjon a nevem a kommentnél.
+ * 
+ * LEHETŐSÉGEK:
+ * - Kommentek listájának megtekintése
+ * - Új komment írása szöveges mezőben
+ * - Anonim hozzászólás opció
+ * - Kommentek kedvelése/nem kedvelése (ReactionButtons-on keresztül)
+ * 
+ * ÜZLETI/MŰKÖDÉSI LOGIKA:
+ * - Az anonim opció kiválasztásakor a komment beküldője "Anonim" néven jelenik meg.
+ * - A lista időrendben (legrégebbi elöl) jeleníti meg a hozzászólásokat.
  */
 
 import { useState } from 'react';
@@ -78,9 +93,9 @@ export function CommentSection({
                                             <div className="flex items-center gap-2 text-sm mb-2">
                                                 <span className="material-symbols-rounded text-xs">person</span>
                                                 <span
-                                                    className={`font-medium ${comment.isAnonymous ? 'opacity-60' : ''}`}
+                                                    className={`font-medium ${comment.isAnonymous ? 'text-base-content/50 italic' : ''}`}
                                                 >
-                                                    {comment.authorName}
+                                                    {comment.isAnonymous ? 'Anonim' : comment.authorName}
                                                 </span>
                                                 <span>•</span>
                                                 <span>{formatDate(comment.createdAt)}</span>

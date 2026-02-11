@@ -34,6 +34,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
     TopicCard,
     TopicFiltersComponent,
@@ -45,12 +46,13 @@ import {
     getAllTags,
     createTopic,
 } from '@/lib/forum-service';
-import { ForumTopic, TopicFilters, CreateTopicInput } from '@/types/forum';
+import { ForumTopic, TopicFilters, CreateTopicInput, MedicalSpecialty } from '@/types/forum';
 
 // Mock current user (in real app this would come from auth)
 const CURRENT_USER = { id: 'user_current', name: 'Dr. Teszt Felhasználó' };
 
 export default function ForumPage() {
+    const searchParams = useSearchParams();
     const [topics, setTopics] = useState<ForumTopic[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -69,6 +71,22 @@ export default function ForumPage() {
         setTopics(loadedTopics);
         setIsLoading(false);
     }, []);
+
+    // Handle search params for initial filtering
+    useEffect(() => {
+        const tag = searchParams.get('tag');
+        const specialty = searchParams.get('specialty');
+
+        if (tag || specialty) {
+            setFilters(prev => ({
+                ...prev,
+                selectedTag: tag || prev.selectedTag,
+                selectedSpecialties: specialty
+                    ? [specialty as MedicalSpecialty]
+                    : prev.selectedSpecialties
+            }));
+        }
+    }, [searchParams]);
 
     // Get all available tags
     const availableTags = useMemo(() => getAllTags(topics), [topics]);

@@ -2,11 +2,26 @@
 
 /**
  * ============================================================================
- * ÚJ TÉMA LÉTREHOZÁSA MODAL
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - ÚJ TÉMA LÉTREHOZÁSA MODAL
  * ============================================================================
  * 
+ * CÉL:
  * Modal ablak új fórumtéma létrehozásához.
- * Mezők: cím, leírás, címkék, szakterületek, anonim opció.
+ * 
+ * USER STORYK:
+ * - Mint felhasználó, új szakmai témát szeretnék indítani a fórumon.
+ * - Mint felhasználó, szeretném anonim módon közzétenni a bejegyzésemet, 
+ *   hogy ne legyen azonosítható a személyazonosságom.
+ * 
+ * LEHETŐSÉGEK:
+ * - Cím és leírás megadása (kötelező)
+ * - Címkék hozzáadása a könnyebb kereshetőségért
+ * - Szakterületek kiválasztása vagy "Általános" megjelölés
+ * - Anonim mód kapcsoló
+ * 
+ * ÜZLETI/MŰKÖDÉSI LOGIKA:
+ * - Az anonim mód bekapcsolásával a szerző neve "Anonim"-ként jelenik meg.
+ * - Validáció ellenőrzi a kötelező mezők kitöltöttségét.
  */
 
 import { useState } from 'react';
@@ -198,11 +213,11 @@ export function CreateTopicModal({ isOpen, onClose, onSubmit }: CreateTopicModal
                                 checked={isAnonymous}
                                 onChange={(e) => setIsAnonymous(e.target.checked)}
                             />
-                            <span className="label-text">Anonim hozzászólás</span>
+                            <span className="label-text">Anonim bejegyzés</span>
                         </label>
                         <label className="label">
                             <span className="label-text-alt">
-                                Ha bejelöli, a neve nem jelenik meg a témánál
+                                Ha bejelöli, a neve nem jelenik meg a bejegyzésnél
                             </span>
                         </label>
                     </div>

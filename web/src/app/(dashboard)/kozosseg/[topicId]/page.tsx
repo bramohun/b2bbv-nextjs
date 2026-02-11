@@ -203,10 +203,19 @@ export default function TopicDetailPage() {
                     {/* Specialty badges */}
                     <div className="flex flex-wrap gap-2 mb-2">
                         {topic.isGeneral ? (
-                            <span className="badge badge-accent">Általános</span>
+                            <span
+                                onClick={() => router.push('/kozosseg')}
+                                className="badge badge-accent cursor-pointer hover:brightness-90 transition-all"
+                            >
+                                Általános
+                            </span>
                         ) : (
                             topic.specialties.map((spec) => (
-                                <span key={spec} className="badge badge-primary">
+                                <span
+                                    key={spec}
+                                    onClick={() => router.push(`/kozosseg?specialty=${encodeURIComponent(spec)}`)}
+                                    className="badge badge-primary cursor-pointer hover:brightness-90 transition-all"
+                                >
                                     {spec}
                                 </span>
                             ))
@@ -219,8 +228,8 @@ export default function TopicDetailPage() {
                     {/* Author and date */}
                     <div className="flex items-center gap-2 text-sm text-base-content/70 mt-1">
                         <span className="material-symbols-rounded text-sm">person</span>
-                        <span className={topic.isAnonymous ? 'opacity-60' : ''}>
-                            {topic.authorName}
+                        <span className={`font-medium ${topic.isAnonymous ? 'text-base-content/50 italic' : ''}`}>
+                            {topic.isAnonymous ? 'Anonim' : topic.authorName}
                         </span>
                         <span>•</span>
                         <span>{formatDate(topic.createdAt)}</span>
@@ -235,7 +244,11 @@ export default function TopicDetailPage() {
                     {/* Tags */}
                     <div className="flex flex-wrap gap-2 mt-4">
                         {topic.tags.map((tag) => (
-                            <span key={tag} className="badge badge-outline">
+                            <span
+                                key={tag}
+                                onClick={() => router.push(`/kozosseg?tag=${encodeURIComponent(tag)}`)}
+                                className="badge badge-outline cursor-pointer hover:bg-base-200 transition-all"
+                            >
                                 {tag}
                             </span>
                         ))}

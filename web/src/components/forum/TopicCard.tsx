@@ -2,21 +2,36 @@
 
 /**
  * ============================================================================
- * TÉMA KÁRTYA KOMPONENS
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - TÉMA KÁRTYA
  * ============================================================================
  * 
- * Fórumtéma megjelenítése kártya formátumban a listában.
- * Tartalmazza: cím, leírás előnézet, szerző, dátum, címkék, reakciók.
+ * CÉL:
+ * Fórumtéma összefoglaló megjelenítése a listában.
+ * 
+ * USER STORYK:
+ * - Mint felhasználó, át szeretném tekinteni a fórum témákat.
+ * - Mint felhasználó, látni szeretném, ha egy bejegyzés anonim módon készült.
+ * 
+ * LEHETŐSÉGEK:
+ * - Kattintás a kártyára a részletek megtekintéséhez
+ * - Szakterület és címke badge-ek megjelenítése
+ * - Szerző, dátum és reakció statisztikák (like, dislike, komment szám)
+ * 
+ * ÜZLETI/MŰKÖDÉSI LOGIKA:
+ * - Anonim szerző esetén a név mellett vizuális megkülönböztetés alkalmazandó (dőlt betű, halványabb szín).
+ * - A leírásból csak egy rövidített előnézet jelenik meg.
  */
 
-import Link from 'next/link';
-import { ForumTopic } from '@/types/forum';
+import { useRouter } from 'next/navigation';
+import { ForumTopic, MedicalSpecialty } from '@/types/forum';
 
 interface TopicCardProps {
     topic: ForumTopic;
 }
 
 export function TopicCard({ topic }: TopicCardProps) {
+    const router = useRouter();
+
     const date = new Date(topic.createdAt);
     const formattedDate = date.toLocaleDateString('hu-HU', {
         year: 'numeric',
@@ -29,72 +44,104 @@ export function TopicCard({ topic }: TopicCardProps) {
         ? topic.description.substring(0, 150) + '...'
         : topic.description;
 
+    const handleCardClick = () => {
+        router.push(`/kozosseg/${topic.id}`);
+    };
+
+    const handleSpecialtyClick = (e: React.MouseEvent, specialty: MedicalSpecialty | 'general') => {
+        e.stopPropagation();
+        if (specialty === 'general') {
+            router.push('/kozosseg'); // Or specific general logic if needed
+        } else {
+            router.push(`/kozosseg?specialty=${encodeURIComponent(specialty)}`);
+        }
+    };
+
+    const handleTagClick = (e: React.MouseEvent, tag: string) => {
+        e.stopPropagation();
+        router.push(`/kozosseg?tag=${encodeURIComponent(tag)}`);
+    };
+
     return (
-        <Link href={`/kozosseg/${topic.id}`}>
-            <div className="card bg-base-100 shadow hover:shadow-lg transition-shadow cursor-pointer">
-                <div className="card-body">
-                    {/* Specialty badges */}
-                    <div className="flex flex-wrap gap-2 mb-1">
-                        {topic.isGeneral ? (
-                            <span className="badge badge-accent badge-sm">Általános</span>
-                        ) : (
-                            topic.specialties.slice(0, 3).map((spec) => (
-                                <span key={spec} className="badge badge-primary badge-sm">
-                                    {spec}
-                                </span>
-                            ))
-                        )}
-                        {topic.specialties.length > 3 && (
-                            <span className="badge badge-outline badge-sm">
-                                +{topic.specialties.length - 3}
+        <div
+            onClick={handleCardClick}
+            className="card bg-base-100 shadow hover:shadow-lg transition-shadow cursor-pointer"
+        >
+            <div className="card-body">
+                {/* Specialty badges */}
+                <div className="flex flex-wrap gap-2 mb-1">
+                    {topic.isGeneral ? (
+                        <span
+                            onClick={(e) => handleSpecialtyClick(e, 'general')}
+                            className="badge badge-accent badge-sm hover:brightness-90 transition-all"
+                        >
+                            Általános
+                        </span>
+                    ) : (
+                        topic.specialties.slice(0, 3).map((spec) => (
+                            <span
+                                key={spec}
+                                onClick={(e) => handleSpecialtyClick(e, spec)}
+                                className="badge badge-primary badge-sm hover:brightness-90 transition-all"
+                            >
+                                {spec}
                             </span>
-                        )}
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="card-title text-lg">{topic.title}</h3>
-
-                    {/* Author and date */}
-                    <p className="text-sm text-base-content/70">
-                        <span className="material-symbols-rounded text-xs align-middle mr-1">
-                            person
+                        ))
+                    )}
+                    {topic.specialties.length > 3 && (
+                        <span className="badge badge-outline badge-sm">
+                            +{topic.specialties.length - 3}
                         </span>
-                        <span className={topic.isAnonymous ? 'opacity-60' : ''}>
-                            {topic.authorName}
-                        </span>
-                        <span className="mx-2">•</span>
-                        {formattedDate}
-                    </p>
+                    )}
+                </div>
 
-                    {/* Description preview */}
-                    <p className="text-sm text-base-content/80 mt-2">{descriptionPreview}</p>
+                {/* Title */}
+                <h3 className="card-title text-lg">{topic.title}</h3>
 
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2 mt-3">
-                        {topic.tags.map((tag) => (
-                            <span key={tag} className="badge badge-outline badge-sm">
-                                {tag}
-                            </span>
-                        ))}
-                    </div>
+                {/* Author and date */}
+                <p className="text-sm text-base-content/70">
+                    <span className="material-symbols-rounded text-xs align-middle mr-1">
+                        person
+                    </span>
+                    <span className={`font-medium ${topic.isAnonymous ? 'text-base-content/50 italic' : ''}`}>
+                        {topic.isAnonymous ? 'Anonim' : topic.authorName}
+                    </span>
+                    <span className="mx-2">•</span>
+                    {formattedDate}
+                </p>
 
-                    {/* Stats */}
-                    <div className="flex items-center gap-4 mt-4 text-sm text-base-content/70">
-                        <span className="flex items-center gap-1">
-                            <span className="material-symbols-rounded text-sm">thumb_up</span>
-                            {topic.likes}
+                {/* Description preview */}
+                <p className="text-sm text-base-content/80 mt-2">{descriptionPreview}</p>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mt-3">
+                    {topic.tags.map((tag) => (
+                        <span
+                            key={tag}
+                            onClick={(e) => handleTagClick(e, tag)}
+                            className="badge badge-outline badge-sm hover:bg-base-200 transition-all"
+                        >
+                            {tag}
                         </span>
-                        <span className="flex items-center gap-1">
-                            <span className="material-symbols-rounded text-sm">thumb_down</span>
-                            {topic.dislikes}
-                        </span>
-                        <span className="flex items-center gap-1">
-                            <span className="material-symbols-rounded text-sm">comment</span>
-                            {topic.commentCount}
-                        </span>
-                    </div>
+                    ))}
+                </div>
+
+                {/* Stats */}
+                <div className="flex items-center gap-4 mt-4 text-sm text-base-content/70">
+                    <span className="flex items-center gap-1">
+                        <span className="material-symbols-rounded text-sm">thumb_up</span>
+                        {topic.likes}
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <span className="material-symbols-rounded text-sm">thumb_down</span>
+                        {topic.dislikes}
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <span className="material-symbols-rounded text-sm">comment</span>
+                        {topic.commentCount}
+                    </span>
                 </div>
             </div>
-        </Link>
+        </div>
     );
 }
