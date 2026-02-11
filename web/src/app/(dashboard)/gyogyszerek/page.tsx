@@ -12,7 +12,9 @@
  * FUNKCIÓK:
  * - Gyógyszerlista megjelenítése rácsos elrendezésben (MedicineCard).
  * - Keresés (Search): Valós idejű szűrés név, INN vagy TK-szám alapján.
- * - Szűrés (Filter): Szűrés gyógyszerstátusz szerint (Elérhető, Készlethiány, Megszűnt).
+ * - Szűrés (Filter): 
+ *   - Szűrés gyógyszerstátusz szerint (Elérhető, Készlethiány, Megszűnt).
+ *   - Szűrés közeli patikában elérhető termékekre.
  * - Rendezés (Sorting):
  *   - Táblázatos nézet: az egyes oszlopok fejlécére kattintva növekvő/csökkenő rendezés.
  *     Az aktuális rendezési irány ▲/▼ jelzéssel látható a fejlécen.
@@ -27,6 +29,7 @@
  * - Kedvencekhez adás / eltávolítás és értesítés kérése / lemondása.
  * - ÉRTESÍTÉS LOGIKA: Értesítésre való feliratkozáskor a termék automatikusan a kedvenc listára kerül.
  * - KEDVENC LOGIKA: Kedvenc eltávolítása esetén figyelmeztetés jelenik meg, ha értesítés is aktív a termékhez.
+ * - KÖZELI PATIKA LOGIKA: Ha közeli patika van beállítva, a "Közeli patika" oszlop automatikusan megjelenik a táblázatban.
  * - Rendezés a szűrt listán (`filteredMedicines`) történik, mielőtt a lapozás alkalmazásra kerül.
  * 
  * KAPCSOLÓDÓ ELEMEK:
@@ -44,6 +47,8 @@ import { formatDate } from '@/lib/utils';
 import { useNotification } from '@/context/NotificationContext';
 import { useFavorite } from '@/context/FavoriteContext';
 import { FavoriteRemovalModal } from '@/components/medicines/FavoriteRemovalModal';
+import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
+import { isAvailableInPharmacy } from '@/lib/utils';
 
 type SortDirection = 'asc' | 'desc' | null;
 type SortKey = 'nev' | 'activeSubstance' | 'kiszereles' | 'gyarto' | 'status'
@@ -58,8 +63,9 @@ const DEFAULT_VIEW_SETTINGS: ViewSettings = {
         nev: true,
         activeSubstance: true,
         kiszereles: true,
-        gyarto: true,
+        gyarto: false,
         status: true,
+        nearbyPharmacyStock: true,
         actions: true,
         packagingDetails: false,
         dispensability: false,
@@ -72,7 +78,7 @@ const DEFAULT_VIEW_SETTINGS: ViewSettings = {
         status: true,
         tkSzam: true,
         kiszereles: true,
-        gyarto: true,
+        gyarto: false,
         actions: true,
         packagingDetails: false,
         dispensability: false,
@@ -95,6 +101,8 @@ export default function MedicinesPage() {
     const { isSubscribed, subscribe, unsubscribe } = useNotification();
     const { isFavorite, addFavorite, removeFavorite } = useFavorite();
     const [favoritesOnly, setFavoritesOnly] = useState(false);
+    const [nearbyOnly, setNearbyOnly] = useState(false);
+    const { nearbyPharmacy } = useNearbyPharmacy();
     const [isRemovalWarningOpen, setIsRemovalWarningOpen] = useState(false);
     const [selectedMedicineForRemoval, setSelectedMedicineForRemoval] = useState<Medicine | null>(null);
 
@@ -145,6 +153,19 @@ export default function MedicinesPage() {
     useEffect(() => {
         localStorage.setItem('medicineViewSettings', JSON.stringify(viewSettings));
     }, [viewSettings]);
+
+    // Automatically show nearby pharmacy column if a pharmacy is selected
+    useEffect(() => {
+        if (nearbyPharmacy) {
+            setViewSettings(prev => ({
+                ...prev,
+                tableColumns: {
+                    ...prev.tableColumns,
+                    nearbyPharmacyStock: true
+                }
+            }));
+        }
+    }, [nearbyPharmacy]);
 
     // Click outside listener
     useEffect(() => {
@@ -239,12 +260,22 @@ export default function MedicinesPage() {
 
         const matchesFavorites = !favoritesOnly || isFavorite(medicine.tkSzam);
 
-        return matchesSearch && matchesStatus && matchesColumnFilters && matchesFavorites;
+        const matchesNearby = !nearbyOnly || (nearbyPharmacy && isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id));
+
+        const matchesNearbyColumnFilter = !columnFilters['nearbyPharmacyStock'] || (
+            nearbyPharmacy && (
+                columnFilters['nearbyPharmacyStock'] === 'available'
+                    ? isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id)
+                    : !isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id)
+            )
+        );
+
+        return matchesSearch && matchesStatus && matchesColumnFilters && matchesFavorites && matchesNearby && matchesNearbyColumnFilter;
     });
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, filterStatus, favoritesOnly]);
+    }, [searchTerm, filterStatus, favoritesOnly, nearbyOnly]);
 
     // Sorting Logic
     const sortedMedicines = useMemo(() => {
@@ -377,6 +408,17 @@ export default function MedicinesPage() {
                         Kedvencek
                     </button>
 
+                    {nearbyPharmacy && (
+                        <button
+                            className={`btn btn-md gap-2 ${nearbyOnly ? 'btn-success' : 'btn-ghost border-base-300'}`}
+                            onClick={() => setNearbyOnly(!nearbyOnly)}
+                            title={nearbyOnly ? "Minden gyógyszer mutatása" : "Csak közeli patikában elérhetőek mutatása"}
+                        >
+                            <span className="material-symbols-rounded">local_pharmacy</span>
+                            Közeli patikában elérhető
+                        </button>
+                    )}
+
                     <div className="join">
                         <button
                             className={`join-item btn btn-md ${viewMode === 'grid' ? 'btn-active btn-primary' : ''}`}
@@ -446,6 +488,12 @@ export default function MedicinesPage() {
                                                 <label className="label cursor-pointer hover:bg-base-200">
                                                     <span className="label-text">Státusz</span>
                                                     <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.status} onChange={() => toggleTableColumn('status')} />
+                                                </label>
+                                            </li>
+                                            <li>
+                                                <label className="label cursor-pointer hover:bg-base-200">
+                                                    <span className="label-text">Közeli patika</span>
+                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.nearbyPharmacyStock} onChange={() => toggleTableColumn('nearbyPharmacyStock')} />
                                                 </label>
                                             </li>
                                             <li>
@@ -627,6 +675,7 @@ export default function MedicinesPage() {
                                             {viewSettings.tableColumns.authorizationDate && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('authorizationDate')}>Eng. Dátum{sortKey === 'authorizationDate' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
                                             {viewSettings.tableColumns.lastUpdate && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('lastUpdate')}>Utolsó friss.{sortKey === 'lastUpdate' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
                                             {viewSettings.tableColumns.status && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200" onClick={() => handleTableSort('status')}>Státusz{sortKey === 'status' && (sortDirection === 'asc' ? ' ▲' : ' ▼')}</th>}
+                                            {viewSettings.tableColumns.nearbyPharmacyStock && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-pointer select-none hover:bg-base-200">Közeli patika</th>}
                                             {viewSettings.tableColumns.actions && <th className="sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm">Műveletek</th>}
                                         </tr>
                                         <tr>
@@ -763,6 +812,20 @@ export default function MedicinesPage() {
                                                     </select>
                                                 </th>
                                             )}
+                                            {viewSettings.tableColumns.nearbyPharmacyStock && (
+                                                <th className="bg-base-100 p-1">
+                                                    <select
+                                                        className="select select-bordered select-xs w-full font-normal"
+                                                        value={columnFilters['nearbyPharmacyStock'] || ''}
+                                                        onChange={(e) => handleColumnFilterChange('nearbyPharmacyStock', e.target.value)}
+                                                        disabled={!nearbyPharmacy}
+                                                    >
+                                                        <option value="">Mindegy</option>
+                                                        <option value="available">Elérhető</option>
+                                                        <option value="not_available">Nem elérhető</option>
+                                                    </select>
+                                                </th>
+                                            )}
                                             {viewSettings.tableColumns.actions && <th className="bg-base-100 p-1"></th>}
                                         </tr>
                                     </thead>
@@ -802,9 +865,20 @@ export default function MedicinesPage() {
                                                     {viewSettings.tableColumns.lastUpdate && <td>{formatDate(medicine.lastUpdate)}</td>}
                                                     {viewSettings.tableColumns.status && (
                                                         <td>
-                                                            <div className={`badge ${medicine.status === 'Elérhető' ? 'badge-success' : medicine.status === 'Készlethiány' ? 'badge-warning' : 'badge-error'} badge-sm`}>
+                                                            <div className={`badge ${medicine.status === 'Elérhető' ? 'badge-success' : medicine.status === 'Készlethiány' ? 'badge-warning' : 'badge-error'} badge-xs whitespace-nowrap`}>
                                                                 {medicine.status}
                                                             </div>
+                                                        </td>
+                                                    )}
+                                                    {viewSettings.tableColumns.nearbyPharmacyStock && (
+                                                        <td>
+                                                            {nearbyPharmacy ? (
+                                                                <div className={`badge ${isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'badge-success' : 'bg-gray-200 text-gray-500 border-gray-300'} badge-xs whitespace-nowrap`}>
+                                                                    {isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'Elérhető' : 'Nem elérhető'}
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-xs text-gray-400 italic">Nincs beállítva</span>
+                                                            )}
                                                         </td>
                                                     )}
                                                     <td className="bg-base-100 sticky right-0 z-10 shadow-[-5px_0px_5px_-5px_#0000001a]">

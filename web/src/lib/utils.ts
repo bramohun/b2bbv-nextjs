@@ -22,3 +22,19 @@ export function formatDate(dateStr: string | undefined | null): string {
         return '-';
     }
 }
+
+/**
+ * Deterministic mock function to simulate stock availability in a specific pharmacy.
+ * @param medicineId Medicine ID (tkSzam)
+ * @param pharmacyId Pharmacy ID
+ * @returns boolean True if available, false otherwise
+ */
+export function isAvailableInPharmacy(medicineId: string, pharmacyId: string): boolean {
+    const str = `${medicineId}-${pharmacyId}`;
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+    }
+    return Math.abs(hash) % 2 === 0; // 50% chance
+}

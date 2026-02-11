@@ -17,6 +17,7 @@
  * - "Részletek" gomb, amely a termék adatlapjára navigál.
  * - Kedvencekhez adás és értesítés kérése gombok.
  * - Kedvenc eltávolítása esetén figyelmeztetés, ha értesítés is aktív.
+ * - Közeli patika készletinformáció megjelenítése (ha be van állítva közeli patika).
  * 
  * KAPCSOLÓDÓ ELEMEK:
  * - src/types/index.ts: Medicine interfész
@@ -28,7 +29,8 @@ import { Medicine } from '@/types';
 import Link from 'next/link';
 import { useNotification } from '@/context/NotificationContext';
 import { useFavorite } from '@/context/FavoriteContext';
-import { formatDate } from '@/lib/utils';
+import { formatDate, isAvailableInPharmacy } from '@/lib/utils';
+import { NearbyPharmacyStockIndicator } from './NearbyPharmacyStockIndicator';
 import { FavoriteRemovalModal } from './FavoriteRemovalModal';
 
 interface MedicineCardProps {
@@ -97,8 +99,11 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine, visibleFie
             <div className="card-body p-5">
                 <div className="flex justify-between items-center mb-2">
                     {(!visibleFields || visibleFields.status) && (
-                        <div className={`badge ${getStatusColor(medicine.status)} font-semibold`}>
-                            {medicine.status}
+                        <div className="flex flex-col gap-1 items-start">
+                            <div className={`badge ${getStatusColor(medicine.status)} font-semibold`}>
+                                {medicine.status}
+                            </div>
+                            <NearbyPharmacyStockIndicator medicineId={medicine.tkSzam} />
                         </div>
                     )}
                 </div>

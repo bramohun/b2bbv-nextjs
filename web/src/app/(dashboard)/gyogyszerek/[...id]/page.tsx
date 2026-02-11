@@ -11,6 +11,7 @@
  * FUNKCIÓK:
  * - Részletes adatok megjelenítése: Név, TK-szám, Hatóanyag, ATC kód, Kiszerelés, Gyártó.
  * - Státusz vizuális jelzése (Badge + Színkód).
+ * - Közeli patika készletinformáció megjelenítése (NearbyPharmacyStockIndicator).
  * - "Vissza a listához" navigáció.
  * - (Tervezett) Helyettesítő termékek ajánlása.
  * - (Tervezett) Betegtájékoztató letöltése/megnyitása.
@@ -33,6 +34,7 @@ import { getMedicineByTk } from '@/lib/data';
 import { MedicineDetailActions } from '@/components/medicines/MedicineDetailActions';
 import { MedicineStockInfo } from '@/components/medicines/MedicineStockInfo';
 import { MedicineStatusHistory } from '@/components/medicines/MedicineStatusHistory';
+import { NearbyPharmacyStockIndicator } from '@/components/medicines/NearbyPharmacyStockIndicator';
 import { formatDate } from '@/lib/utils';
 
 interface PageProps {
@@ -179,8 +181,9 @@ export default async function MedicineDetailPage({ params }: PageProps) {
                         <div className="flex flex-col items-start gap-1">
                             <h1 className="card-title text-3xl mb-1 font-bold">{medicine.nev}</h1>
                             <p className="text-gray-500 font-mono text-sm">TK-szám: {medicine.tkSzam}</p>
-                            <div className="mt-2">
+                            <div className="mt-2 flex flex-col gap-1">
                                 {getStatusBadge(medicine.status)}
+                                <NearbyPharmacyStockIndicator medicineId={medicine.tkSzam} />
                             </div>
 
                             <MedicineStockInfo
