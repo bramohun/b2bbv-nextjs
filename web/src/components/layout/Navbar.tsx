@@ -29,6 +29,7 @@ import React from 'react';
 import { useFavorite } from '@/context/FavoriteContext';
 import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
 import { useAuth } from '@/context/AuthContext';
+import { GlobalSearch } from './GlobalSearch';
 
 export const Navbar = () => {
     const { favorites } = useFavorite();
@@ -78,9 +79,7 @@ export const Navbar = () => {
                     </div>
                 )}
 
-                <button className="btn btn-ghost btn-circle">
-                    <span className="material-symbols-rounded">search</span>
-                </button>
+                <GlobalSearch />
 
                 <div className="dropdown dropdown-end">
                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
