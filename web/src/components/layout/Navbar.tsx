@@ -12,7 +12,7 @@
  * közeli gyógyszertárat.
  * 
  * FUNKCIÓK:
- * - Navigációs linkek: Irányítópult, Gyógyszerek, Gyógyszertárak, Közösség.
+ * - Navigációs linkek: Irányítópult, Gyógyszerek, Gyógyszertárak, Közösség (ikonokkal ellátva).
  * - Gyorskereső gomb.
  * - Közeli gyógyszertár kijelzése: Név és cím megjelenítése a navigációs sávban.
  * - Kedvencek dropdown: A kedvencnek jelölt gyógyszerek gyorslistája.
@@ -46,10 +46,10 @@ export const Navbar = () => {
                         tabIndex={0}
                         className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
                     >
-                        <li><Link href="/dashboard">Irányítópult</Link></li>
-                        <li><Link href="/gyogyszerek">Gyógyszerek</Link></li>
-                        <li><Link href="/gyogyszertarak">Gyógyszertárak</Link></li>
-                        <li><Link href="/kozosseg">Közösség</Link></li>
+                        <li><Link href="/dashboard"><span className="material-symbols-rounded">dashboard</span>Irányítópult</Link></li>
+                        <li><Link href="/gyogyszerek"><span className="material-symbols-rounded">medication</span>Gyógyszerek</Link></li>
+                        <li><Link href="/gyogyszertarak"><span className="material-symbols-rounded">local_pharmacy</span>Gyógyszertárak</Link></li>
+                        <li><Link href="/kozosseg"><span className="material-symbols-rounded">groups</span>Közösség</Link></li>
                     </ul>
                 </div>
                 <Link href="/dashboard" className="btn btn-ghost text-xl">
@@ -58,10 +58,10 @@ export const Navbar = () => {
             </div>
             <div className="navbar-center hidden lg:flex">
                 <ul className="menu menu-horizontal px-1">
-                    <li><Link href="/dashboard">Irányítópult</Link></li>
-                    <li><Link href="/gyogyszerek">Gyógyszerek</Link></li>
-                    <li><Link href="/gyogyszertarak">Gyógyszertárak</Link></li>
-                    <li><Link href="/kozosseg">Közösség</Link></li>
+                    <li><Link href="/dashboard"><span className="material-symbols-rounded">dashboard</span>Irányítópult</Link></li>
+                    <li><Link href="/gyogyszerek"><span className="material-symbols-rounded">medication</span>Gyógyszerek</Link></li>
+                    <li><Link href="/gyogyszertarak"><span className="material-symbols-rounded">local_pharmacy</span>Gyógyszertárak</Link></li>
+                    <li><Link href="/kozosseg"><span className="material-symbols-rounded">groups</span>Közösség</Link></li>
                 </ul>
             </div>
             <div className="navbar-end gap-2">
@@ -136,9 +136,9 @@ export const Navbar = () => {
                         </div>
                     </div>
                     <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                        <li><Link href="/profile">Profil</Link></li>
-                        <li><Link href="/settings">Beállítások</Link></li>
-                        <li><button onClick={logout} className="text-error">Kijelentkezés</button></li>
+                        <li className="menu-title text-base-content/60 px-4 py-2">Dr. Kovács István</li>
+                        <li><Link href="/profile"><span className="material-symbols-rounded">account_circle</span>Profil beállítások</Link></li>
+                        <li><button onClick={logout} className="text-error"><span className="material-symbols-rounded">logout</span>Kijelentkezés</button></li>
                     </ul>
                 </div>
             </div>

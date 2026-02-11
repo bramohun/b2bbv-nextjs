@@ -24,9 +24,9 @@
  * - Nézet testreszabása (Customization): Oszlopok és kártyaadatok láthatóságának kapcsolása, beállítások mentése localStorage-ba.
  * 
  * MŰKÖDÉSI LOGIKA:
- * - Az oldal betöltésekor (/api/medicines) lekéri az összes gyógyszert.
- * - A kliens oldalon történik a szűrés, rendezés és a lapozás a `medicines` state alapján.
- * - Kereséskor, szűréskor vagy rendezéskor a lapozó automatikusan az első oldalra ugrik.
+ * - Kedvencekhez adás / eltávolítás és értesítés kérése / lemondása.
+ * - ÉRTESÍTÉS LOGIKA: Értesítésre való feliratkozáskor a termék automatikusan a kedvenc listára kerül.
+ * - KEDVENC LOGIKA: Kedvenc eltávolítása esetén figyelmeztetés jelenik meg, ha értesítés is aktív a termékhez.
  * - Rendezés a szűrt listán (`filteredMedicines`) történik, mielőtt a lapozás alkalmazásra kerül.
  * 
  * KAPCSOLÓDÓ ELEMEK:
@@ -43,6 +43,7 @@ import { MedicineCard } from '@/components/medicines/MedicineCard';
 import { formatDate } from '@/lib/utils';
 import { useNotification } from '@/context/NotificationContext';
 import { useFavorite } from '@/context/FavoriteContext';
+import { FavoriteRemovalModal } from '@/components/medicines/FavoriteRemovalModal';
 
 type SortDirection = 'asc' | 'desc' | null;
 type SortKey = 'nev' | 'activeSubstance' | 'kiszereles' | 'gyarto' | 'status'
@@ -94,6 +95,8 @@ export default function MedicinesPage() {
     const { isSubscribed, subscribe, unsubscribe } = useNotification();
     const { isFavorite, addFavorite, removeFavorite } = useFavorite();
     const [favoritesOnly, setFavoritesOnly] = useState(false);
+    const [isRemovalWarningOpen, setIsRemovalWarningOpen] = useState(false);
+    const [selectedMedicineForRemoval, setSelectedMedicineForRemoval] = useState<Medicine | null>(null);
 
     // Sorting State
     const [sortKey, setSortKey] = useState<SortKey | null>(null);
@@ -319,19 +322,42 @@ export default function MedicinesPage() {
             unsubscribe(medicine.tkSzam);
         } else {
             subscribe(medicine);
+            // Ha feliratkozik, automatikusan kedvenc is lesz, ha még nem az
+            if (!isFavorite(medicine.tkSzam)) {
+                addFavorite(medicine);
+            }
         }
     };
 
     const handleFavorite = (medicine: Medicine) => {
         if (isFavorite(medicine.tkSzam)) {
-            removeFavorite(medicine.tkSzam);
+            if (isSubscribed(medicine.tkSzam)) {
+                setSelectedMedicineForRemoval(medicine);
+                setIsRemovalWarningOpen(true);
+            } else {
+                removeFavorite(medicine.tkSzam);
+            }
         } else {
             addFavorite(medicine);
         }
     };
 
+    const confirmRemoval = () => {
+        if (selectedMedicineForRemoval) {
+            removeFavorite(selectedMedicineForRemoval.tkSzam);
+            unsubscribe(selectedMedicineForRemoval.tkSzam);
+        }
+        setIsRemovalWarningOpen(false);
+        setSelectedMedicineForRemoval(null);
+    };
+
     return (
         <div className="container mx-auto">
+            <FavoriteRemovalModal
+                isOpen={isRemovalWarningOpen}
+                onClose={() => setIsRemovalWarningOpen(false)}
+                onConfirm={confirmRemoval}
+            />
             {/* Header & Controls */}
             <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                 <h1 className="text-3xl font-bold">
