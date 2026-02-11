@@ -28,10 +28,12 @@ import Link from 'next/link';
 import React from 'react';
 import { useFavorite } from '@/context/FavoriteContext';
 import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
+import { useAuth } from '@/context/AuthContext';
 
 export const Navbar = () => {
     const { favorites } = useFavorite();
     const { nearbyPharmacy } = useNearbyPharmacy();
+    const { logout } = useAuth();
 
     return (
         <div className="navbar bg-base-100 shadow-md sticky top-0 z-50">
@@ -136,7 +138,7 @@ export const Navbar = () => {
                     <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
                         <li><Link href="/profile">Profil</Link></li>
                         <li><Link href="/settings">Beállítások</Link></li>
-                        <li><Link href="/logout">Kijelentkezés</Link></li>
+                        <li><button onClick={logout} className="text-error">Kijelentkezés</button></li>
                     </ul>
                 </div>
             </div>
