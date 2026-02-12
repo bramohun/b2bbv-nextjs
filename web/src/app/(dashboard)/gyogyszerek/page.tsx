@@ -42,9 +42,10 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { Medicine, ViewSettings, MedicineTableColumn, MedicineCardField } from '@/types';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { MedicineCard } from '@/components/medicines/MedicineCard';
 import { formatDate } from '@/lib/utils';
 import { useNotification } from '@/context/NotificationContext';
@@ -100,7 +101,8 @@ const DEFAULT_VIEW_SETTINGS: ViewSettings = {
     tableColumnOrder: DEFAULT_COLUMN_ORDER
 };
 
-export default function MedicinesPage() {
+function MedicinesPageContent() {
+    const searchParams = useSearchParams();
     const [medicines, setMedicines] = useState<Medicine[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -118,8 +120,8 @@ export default function MedicinesPage() {
     const [selectedMedicineForRemoval, setSelectedMedicineForRemoval] = useState<Medicine | null>(null);
 
     // Sorting State
-    const [sortKey, setSortKey] = useState<SortKey | null>('lastUpdate');
-    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+    const [sortKey, setSortKey] = useState<SortKey | null>((searchParams.get('sort') as SortKey) || 'lastUpdate');
+    const [sortDirection, setSortDirection] = useState<SortDirection>((searchParams.get('order') as SortDirection) || 'desc');
     const [cardSortOption, setCardSortOption] = useState<CardSortOption>('name-asc');
     const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
 
@@ -1146,5 +1148,17 @@ export default function MedicinesPage() {
                 )
             }
         </div >
+    );
+}
+
+export default function MedicinesPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-[400px]">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        }>
+            <MedicinesPageContent />
+        </Suspense>
     );
 }

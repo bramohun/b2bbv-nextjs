@@ -54,14 +54,19 @@ export function PharmacyStockWidget({ medicines, pharmacies }: PharmacyStockWidg
                                     changes.map((med) => (
                                         <tr key={med.internalId || med.tkSzam} className="hover:bg-base-200/30">
                                             <td>
-                                                <Link
-                                                    href={`/gyogyszerek/${med.tkSzam}`}
-                                                    className="font-medium text-primary hover:underline truncate max-w-[150px] block"
-                                                >
-                                                    {med.nev}
-                                                </Link>
+                                                <div className="flex flex-col">
+                                                    <Link
+                                                        href={`/gyogyszerek/${med.tkSzam}`}
+                                                        className="font-medium text-primary hover:underline truncate max-w-[150px] block"
+                                                    >
+                                                        {med.nev}
+                                                    </Link>
+                                                    <div className={`badge ${med.status === 'Elérhető' ? 'badge-success' : med.status === 'Készlethiány' ? 'badge-warning' : 'badge-error'} badge-xs whitespace-nowrap mt-1`}>
+                                                        {med.status}
+                                                    </div>
+                                                </div>
                                             </td>
-                                            <td className="text-right text-xs text-base-content/60">
+                                            <td className="text-right text-xs text-base-content/60 align-top pt-3">
                                                 {formatDate(med.lastUpdate)}
                                             </td>
                                         </tr>
@@ -75,6 +80,16 @@ export function PharmacyStockWidget({ medicines, pharmacies }: PharmacyStockWidg
                                 )}
                             </tbody>
                         </table>
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t border-base-200">
+                        <Link
+                            href="/gyogyszerek?sort=nearbyPharmacyLastUpdate&order=desc"
+                            className="btn btn-ghost btn-sm btn-block text-primary gap-2"
+                        >
+                            Összes gyógyszertári változás
+                            <span className="material-symbols-rounded text-sm">arrow_forward</span>
+                        </Link>
                     </div>
                 </div>
             </div>
