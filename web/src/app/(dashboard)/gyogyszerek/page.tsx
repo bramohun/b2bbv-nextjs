@@ -31,7 +31,8 @@
  * - Kedvencekhez adás / eltávolítás és értesítés kérése / lemondása.
  * - ÉRTESÍTÉS LOGIKA: Értesítésre való feliratkozáskor a termék automatikusan a kedvenc listára kerül.
  * - KEDVENC LOGIKA: Kedvenc eltávolítása esetén figyelmeztetés jelenik meg, ha értesítés is aktív a termékhez.
- * - KÖZELI PATIKA LOGIKA: Ha közeli patika van beállítva, a "Közeli patika" oszlop automatikusan megjelenik a táblázatban.
+ * - KÖZELI PATIKA LOGIKA: Ha közeli patika van beállítva, a "Közeli patika" oszlop automatikusan megjelenik a táblázatban, 
+ *   megjelenítve a készletstátuszt és az utolsó frissítés időpontját.
  * - Rendezés a szűrt listán (`filteredMedicines`) történik, mielőtt a lapozás alkalmazásra kerül.
  * 
  * KAPCSOLÓDÓ ELEMEK:
@@ -50,7 +51,7 @@ import { useNotification } from '@/context/NotificationContext';
 import { useFavorite } from '@/context/FavoriteContext';
 import { FavoriteRemovalModal } from '@/components/medicines/FavoriteRemovalModal';
 import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
-import { isAvailableInPharmacy } from '@/lib/utils';
+import { isAvailableInPharmacy, getNearbyPharmacyStatusUpdate } from '@/lib/utils';
 
 type SortDirection = 'asc' | 'desc' | null;
 type SortKey = 'nev' | 'activeSubstance' | 'kiszereles' | 'gyarto' | 'status'
@@ -60,8 +61,8 @@ type CardSortOption = 'name-asc' | 'name-desc' | 'lastUpdate-desc'
     | 'activeSubstance-asc' | 'activeSubstance-desc';
 
 const DEFAULT_COLUMN_ORDER: MedicineTableColumn[] = [
-    'nev', 'activeSubstance', 'kiszereles', 'gyarto', 'status', 'nearbyPharmacyStock', 'actions',
-    'tkSzam', 'packagingDetails', 'dispensability', 'dispensabilitySub', 'safetyFeatures', 'authorizationDate', 'lastUpdate'
+    'lastUpdate', 'status', 'nev', 'activeSubstance', 'kiszereles', 'gyarto', 'nearbyPharmacyStock', 'actions',
+    'tkSzam', 'packagingDetails', 'dispensability', 'dispensabilitySub', 'safetyFeatures', 'authorizationDate'
 ];
 
 const DEFAULT_VIEW_SETTINGS: ViewSettings = {
@@ -79,7 +80,7 @@ const DEFAULT_VIEW_SETTINGS: ViewSettings = {
         dispensabilitySub: false,
         safetyFeatures: false,
         authorizationDate: false,
-        lastUpdate: false,
+        lastUpdate: true,
     },
     cardFields: {
         status: true,
@@ -115,8 +116,8 @@ export default function MedicinesPage() {
     const [selectedMedicineForRemoval, setSelectedMedicineForRemoval] = useState<Medicine | null>(null);
 
     // Sorting State
-    const [sortKey, setSortKey] = useState<SortKey | null>(null);
-    const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+    const [sortKey, setSortKey] = useState<SortKey | null>('lastUpdate');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [cardSortOption, setCardSortOption] = useState<CardSortOption>('name-asc');
     const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
 
@@ -615,8 +616,14 @@ export default function MedicinesPage() {
                 return (
                     <td key={col}>
                         {nearbyPharmacy ? (
-                            <div className={`badge ${isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'badge-success' : 'bg-gray-200 text-gray-500 border-gray-300'} badge-xs whitespace-nowrap`}>
-                                {isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'Elérhető' : 'Nem elérhető'}
+                            <div className="flex flex-col gap-1">
+                                <div className={`badge ${isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'badge-success' : 'bg-gray-200 text-gray-500 border-gray-300'} badge-xs whitespace-nowrap`}>
+                                    {isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'Elérhető' : 'Nem elérhető'}
+                                </div>
+                                <div className="text-[10px] text-gray-400 flex items-center gap-0.5">
+                                    <span className="material-symbols-rounded text-[12px]">schedule</span>
+                                    {getNearbyPharmacyStatusUpdate(medicine.tkSzam, nearbyPharmacy.id, '')}
+                                </div>
                             </div>
                         ) : (
                             <span className="text-xs text-gray-400 italic">Nincs beállítva</span>

@@ -112,7 +112,7 @@ export async function getMedicines(): Promise<Medicine[]> {
                 gyarto: findVal(['Gyártó', 'Gyártó neve', 'Forg_Eng_Jog']),
                 status: status,
                 price: 0,
-                lastUpdate: new Date().toISOString(),
+                lastUpdate: new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)).toISOString(),
                 brand: get('Márkanév') || get('Név'),
                 activeSubstance: get('Hatóanyag') || get('INN'),
                 packagingDetails: get('Csomagolás részletezése'),

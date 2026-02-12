@@ -530,6 +530,7 @@ export function filterTopics(topics: ForumTopic[], filters: TopicFilters): Forum
     return filtered;
 }
 
+
 export function getAllTags(topics: ForumTopic[]): string[] {
     const tags = new Set<string>();
     topics.forEach(topic => {
@@ -537,3 +538,35 @@ export function getAllTags(topics: ForumTopic[]): string[] {
     });
     return Array.from(tags).sort((a, b) => a.localeCompare(b, 'hu'));
 }
+
+export function getLatestForumActivity(limit: number = 10): ForumTopic[] {
+    const topics = getTopics();
+    const allComments = getFromStorage<ForumComment[]>(STORAGE_KEYS.COMMENTS, []);
+
+    // Map to track latest activity timestamp for each topic
+    const latestActivityMap = new Map<string, number>();
+
+    topics.forEach(topic => {
+        // Start with topic creation time
+        let latest = topic.createdAt;
+
+        // Check all comments for this topic
+        allComments.forEach(comment => {
+            if (comment.topicId === topic.id && comment.createdAt > latest) {
+                latest = comment.createdAt;
+            }
+        });
+
+        latestActivityMap.set(topic.id, latest);
+    });
+
+    // Sort topics by the latest activity timestamp
+    return [...topics]
+        .sort((a, b) => {
+            const timeA = latestActivityMap.get(a.id) || a.createdAt;
+            const timeB = latestActivityMap.get(b.id) || b.createdAt;
+            return timeB - timeA;
+        })
+        .slice(0, limit);
+}
+
