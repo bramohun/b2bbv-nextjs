@@ -56,12 +56,13 @@ import { isAvailableInPharmacy, getNearbyPharmacyStatusUpdate } from '@/lib/util
 type SortDirection = 'asc' | 'desc' | null;
 type SortKey = 'nev' | 'activeSubstance' | 'kiszereles' | 'gyarto' | 'status'
     | 'tkSzam' | 'packagingDetails' | 'dispensability' | 'dispensabilitySub'
-    | 'safetyFeatures' | 'authorizationDate' | 'lastUpdate';
+    | 'safetyFeatures' | 'authorizationDate' | 'lastUpdate'
+    | 'nearbyPharmacyStock' | 'nearbyPharmacyLastUpdate';
 type CardSortOption = 'name-asc' | 'name-desc' | 'lastUpdate-desc'
     | 'activeSubstance-asc' | 'activeSubstance-desc';
 
 const DEFAULT_COLUMN_ORDER: MedicineTableColumn[] = [
-    'lastUpdate', 'status', 'nev', 'activeSubstance', 'kiszereles', 'gyarto', 'nearbyPharmacyStock', 'actions',
+    'lastUpdate', 'status', 'nev', 'activeSubstance', 'kiszereles', 'gyarto', 'nearbyPharmacyStock', 'nearbyPharmacyLastUpdate', 'actions',
     'tkSzam', 'packagingDetails', 'dispensability', 'dispensabilitySub', 'safetyFeatures', 'authorizationDate'
 ];
 
@@ -73,7 +74,8 @@ const DEFAULT_VIEW_SETTINGS: ViewSettings = {
         kiszereles: true,
         gyarto: false,
         status: true,
-        nearbyPharmacyStock: true,
+        nearbyPharmacyStock: false,
+        nearbyPharmacyLastUpdate: false,
         actions: true,
         packagingDetails: false,
         dispensability: false,
@@ -147,11 +149,19 @@ export default function MedicinesPage() {
         if (savedSettings) {
             try {
                 const parsed = JSON.parse(savedSettings);
-                // Deep merge with defaults to ensure all keys exist even if localStorage has partial data
+                // Ensure all default columns are present in the order, even if not in saved settings
+                const savedOrder = parsed.tableColumnOrder || DEFAULT_COLUMN_ORDER;
+                const updatedOrder = [...savedOrder];
+                DEFAULT_COLUMN_ORDER.forEach(col => {
+                    if (!updatedOrder.includes(col)) {
+                        updatedOrder.push(col);
+                    }
+                });
+
                 setViewSettings({
                     tableColumns: { ...DEFAULT_VIEW_SETTINGS.tableColumns, ...parsed.tableColumns },
                     cardFields: { ...DEFAULT_VIEW_SETTINGS.cardFields, ...parsed.cardFields },
-                    tableColumnOrder: parsed.tableColumnOrder || DEFAULT_COLUMN_ORDER
+                    tableColumnOrder: updatedOrder
                 });
             } catch (e) {
                 console.error('Failed to parse view settings', e);
@@ -171,7 +181,8 @@ export default function MedicinesPage() {
                 ...prev,
                 tableColumns: {
                     ...prev.tableColumns,
-                    nearbyPharmacyStock: true
+                    nearbyPharmacyStock: true,
+                    nearbyPharmacyLastUpdate: true
                 }
             }));
         }
@@ -280,7 +291,28 @@ export default function MedicinesPage() {
             )
         );
 
-        return matchesSearch && matchesStatus && matchesColumnFilters && matchesFavorites && matchesNearby && matchesNearbyColumnFilter;
+        const matchesNearbyUpdateFilter = (!columnFilters['nearbyPharmacyLastUpdate_from'] && !columnFilters['nearbyPharmacyLastUpdate_to']) || (
+            nearbyPharmacy && (() => {
+                const updateTimeStr = getNearbyPharmacyStatusUpdate(medicine.tkSzam, nearbyPharmacy.id, '');
+                const updateTime = new Date(updateTimeStr).getTime();
+
+                if (columnFilters['nearbyPharmacyLastUpdate_from']) {
+                    const fromDate = new Date(columnFilters['nearbyPharmacyLastUpdate_from']);
+                    fromDate.setHours(0, 0, 0, 0);
+                    if (updateTime < fromDate.getTime()) return false;
+                }
+
+                if (columnFilters['nearbyPharmacyLastUpdate_to']) {
+                    const toDate = new Date(columnFilters['nearbyPharmacyLastUpdate_to']);
+                    toDate.setHours(23, 59, 59, 999);
+                    if (updateTime > toDate.getTime()) return false;
+                }
+
+                return true;
+            })()
+        );
+
+        return matchesSearch && matchesStatus && matchesColumnFilters && matchesFavorites && matchesNearby && matchesNearbyColumnFilter && matchesNearbyUpdateFilter;
     });
 
     useEffect(() => {
@@ -315,6 +347,18 @@ export default function MedicinesPage() {
                 return dir === 'asc'
                     ? new Date(va).getTime() - new Date(vb).getTime()
                     : new Date(vb).getTime() - new Date(va).getTime();
+            }
+            if (key === 'nearbyPharmacyStock' && nearbyPharmacy) {
+                const availableA = isAvailableInPharmacy(a.tkSzam, nearbyPharmacy.id);
+                const availableB = isAvailableInPharmacy(b.tkSzam, nearbyPharmacy.id);
+                return dir === 'asc'
+                    ? (availableA === availableB ? 0 : availableA ? 1 : -1)
+                    : (availableA === availableB ? 0 : availableA ? -1 : 1);
+            }
+            if (key === 'nearbyPharmacyLastUpdate' && nearbyPharmacy) {
+                const dateA = new Date(getNearbyPharmacyStatusUpdate(a.tkSzam, nearbyPharmacy.id, '')).getTime();
+                const dateB = new Date(getNearbyPharmacyStatusUpdate(b.tkSzam, nearbyPharmacy.id, '')).getTime();
+                return dir === 'asc' ? dateA - dateB : dateB - dateA;
             }
             return dir === 'asc'
                 ? String(va).localeCompare(String(vb), 'hu')
@@ -436,7 +480,7 @@ export default function MedicinesPage() {
     const renderHeaderCell = (col: MedicineTableColumn) => {
         if (!viewSettings.tableColumns[col]) return null;
 
-        const isSortable = col !== 'actions' && col !== 'nearbyPharmacyStock';
+        const isSortable = col !== 'actions';
         const labelMap: Record<string, string> = {
             tkSzam: 'TK-szám',
             nev: 'Terméknév',
@@ -451,6 +495,7 @@ export default function MedicinesPage() {
             lastUpdate: 'Utolsó friss.',
             status: 'Státusz',
             nearbyPharmacyStock: 'Közeli patika',
+            nearbyPharmacyLastUpdate: 'Közeli patika frissítve',
             actions: 'Műveletek'
         };
 
@@ -466,6 +511,8 @@ export default function MedicinesPage() {
             safetyFeatures: 'safetyFeatures',
             authorizationDate: 'authorizationDate',
             lastUpdate: 'lastUpdate',
+            nearbyPharmacyStock: 'nearbyPharmacyStock',
+            nearbyPharmacyLastUpdate: 'nearbyPharmacyLastUpdate',
             status: 'status'
         };
 
@@ -524,6 +571,31 @@ export default function MedicinesPage() {
                         <option value="available">Elérhető</option>
                         <option value="not_available">Nem elérhető</option>
                     </select>
+                </th>
+            );
+        }
+
+        if (col === 'nearbyPharmacyLastUpdate') {
+            return (
+                <th key={col} className="bg-base-100 p-1">
+                    <div className="flex flex-col gap-1">
+                        <input
+                            type="date"
+                            className="input input-bordered input-xs w-full font-normal"
+                            title="Dátumtól"
+                            value={columnFilters['nearbyPharmacyLastUpdate_from'] || ''}
+                            onChange={(e) => handleColumnFilterChange('nearbyPharmacyLastUpdate_from', e.target.value)}
+                            disabled={!nearbyPharmacy}
+                        />
+                        <input
+                            type="date"
+                            className="input input-bordered input-xs w-full font-normal"
+                            title="Dátumig"
+                            value={columnFilters['nearbyPharmacyLastUpdate_to'] || ''}
+                            onChange={(e) => handleColumnFilterChange('nearbyPharmacyLastUpdate_to', e.target.value)}
+                            disabled={!nearbyPharmacy}
+                        />
+                    </div>
                 </th>
             );
         }
@@ -616,17 +688,24 @@ export default function MedicinesPage() {
                 return (
                     <td key={col}>
                         {nearbyPharmacy ? (
-                            <div className="flex flex-col gap-1">
-                                <div className={`badge ${isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'badge-success' : 'bg-gray-200 text-gray-500 border-gray-300'} badge-xs whitespace-nowrap`}>
-                                    {isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'Elérhető' : 'Nem elérhető'}
-                                </div>
-                                <div className="text-[10px] text-gray-400 flex items-center gap-0.5">
-                                    <span className="material-symbols-rounded text-[12px]">schedule</span>
-                                    {getNearbyPharmacyStatusUpdate(medicine.tkSzam, nearbyPharmacy.id, '')}
-                                </div>
+                            <div className={`badge ${isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'badge-success' : 'bg-gray-200 text-gray-500 border-gray-300'} badge-xs whitespace-nowrap`}>
+                                {isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'Elérhető' : 'Nem elérhető'}
                             </div>
                         ) : (
                             <span className="text-xs text-gray-400 italic">Nincs beállítva</span>
+                        )}
+                    </td>
+                );
+            case 'nearbyPharmacyLastUpdate':
+                return (
+                    <td key={col}>
+                        {nearbyPharmacy ? (
+                            <div className="text-xs text-gray-400 flex items-center gap-0.5">
+                                <span className="material-symbols-rounded text-[14px]">schedule</span>
+                                {getNearbyPharmacyStatusUpdate(medicine.tkSzam, nearbyPharmacy.id, '')}
+                            </div>
+                        ) : (
+                            <span className="text-xs text-gray-400 italic">-</span>
                         )}
                     </td>
                 );
@@ -773,6 +852,12 @@ export default function MedicinesPage() {
                                                 <label className="label cursor-pointer hover:bg-base-200">
                                                     <span className="label-text">Közeli patika</span>
                                                     <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.nearbyPharmacyStock} onChange={() => toggleTableColumn('nearbyPharmacyStock')} />
+                                                </label>
+                                            </li>
+                                            <li>
+                                                <label className="label cursor-pointer hover:bg-base-200">
+                                                    <span className="label-text">Közeli patika frissítve</span>
+                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.nearbyPharmacyLastUpdate} onChange={() => toggleTableColumn('nearbyPharmacyLastUpdate')} />
                                                 </label>
                                             </li>
                                             <li>
