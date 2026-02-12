@@ -30,6 +30,13 @@ export function formatDate(dateStr: string | undefined | null): string {
  * @returns boolean True if available, false otherwise
  */
 export function isAvailableInPharmacy(medicineId: string, pharmacyId: string): boolean {
+    if (medicineId.startsWith('MOCK-')) {
+        const index = parseInt(medicineId.replace('MOCK-', ''));
+        // 0-15 are Shortage/Discontinued in data.ts, so they should be "Not Available" in pharmacy
+        // 16+ are Available
+        return index >= 16;
+    }
+
     const str = `${medicineId}-${pharmacyId}`;
     let hash = 0;
     for (let i = 0; i < str.length; i++) {

@@ -58,7 +58,9 @@ export function PharmacyStockWidget({ medicines, pharmacies, period = 1 }: Pharm
 
         const periodLabel = period === 1 ? 'Mai nap' : `Elmúlt ${period} nap`;
 
-        const pharmacyMedicines = medicines.filter(m => isAvailableInPharmacy(m.tkSzam, nearbyPharmacy.id));
+        const pharmacyMedicines = medicines.filter(m =>
+            isAvailableInPharmacy(m.tkSzam, nearbyPharmacy.id) || m.tkSzam.startsWith('MOCK-')
+        );
 
         // Filter by date
         const recentPharmacyMedicines = pharmacyMedicines.filter(med => {
@@ -115,7 +117,7 @@ export function PharmacyStockWidget({ medicines, pharmacies, period = 1 }: Pharm
                                     <Link href={`/gyogyszerek?status=Elérhető&nearbyOnly=true&sort=nearbyPharmacyLastUpdate&order=desc${getDateFilterParams()}`} className="hover:underline hover:text-primary transition-colors flex items-center gap-1">
                                         <span className="badge badge-success badge-xs"></span> {stats.elerheto} db újra készleten
                                     </Link>
-                                    <Link href={`/gyogyszerek?status=not_available&nearbyOnly=true&sort=nearbyPharmacyLastUpdate&order=desc${getDateFilterParams()}`} className="hover:underline hover:text-primary transition-colors flex items-center gap-1">
+                                    <Link href={`/gyogyszerek?status=not_available&nearbyPharmacyStock=not_available&sort=nearbyPharmacyLastUpdate&order=desc${getDateFilterParams()}`} className="hover:underline hover:text-primary transition-colors flex items-center gap-1">
                                         <span className="badge badge-error badge-xs"></span> {stats.nemElerheto} db elfogyott
                                     </Link>
                                 </div>

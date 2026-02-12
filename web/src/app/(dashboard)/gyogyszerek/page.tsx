@@ -132,6 +132,9 @@ function MedicinesPageContent() {
     if (searchParams.get('lastUpdate_to')) {
         initialColumnFilters['lastUpdate_to'] = searchParams.get('lastUpdate_to')!;
     }
+    if (searchParams.get('nearbyPharmacyStock')) {
+        initialColumnFilters['nearbyPharmacyStock'] = searchParams.get('nearbyPharmacyStock')!;
+    }
 
     const [columnFilters, setColumnFilters] = useState<Record<string, string>>(initialColumnFilters);
 

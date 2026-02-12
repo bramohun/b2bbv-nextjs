@@ -84,7 +84,7 @@ export async function getMedicines(): Promise<Medicine[]> {
                 return '';
             };
 
-            const tk = get('TK-szám');
+            let tk = get('TK-szám');
 
             // STATUS LOGIC REFINED:
             // Default to "Elérhető" (Available)
@@ -106,28 +106,37 @@ export async function getMedicines(): Promise<Medicine[]> {
 
             // MOCK DATA for Dashboard demonstration: 
             // Force some specific items to be "Today" or "Yesterday" changes
-            if (index < 12) {
+            if (index < 20) {
+                tk = `MOCK-${String(index).padStart(3, '0')}`;
+
                 const now = new Date();
                 if (index < 3) {
                     // Today, Készlethiány
                     status = 'Készlethiány';
                     lastUpdate = now.toISOString();
-                } else if (index < 5) {
+                } else if (index < 6) {
                     // Today, Megszűnt
                     status = 'Megszűnt';
                     lastUpdate = now.toISOString();
-                } else if (index < 9) {
+                } else if (index < 12) {
                     // Yesterday, Készlethiány
                     status = 'Készlethiány';
                     const yesterday = new Date(now);
                     yesterday.setDate(now.getDate() - 1);
                     lastUpdate = yesterday.toISOString();
-                } else {
+                } else if (index < 16) {
                     // Yesterday, Megszűnt
                     status = 'Megszűnt';
                     const yesterday = new Date(now);
                     yesterday.setDate(now.getDate() - 1);
                     lastUpdate = yesterday.toISOString();
+                } else {
+                    // Others in top 20: Available
+                    status = 'Elérhető';
+                    // Just recent date
+                    const recent = new Date(now);
+                    recent.setDate(now.getDate() - 2);
+                    lastUpdate = recent.toISOString();
                 }
             }
 
