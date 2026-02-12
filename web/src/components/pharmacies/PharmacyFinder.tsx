@@ -39,17 +39,21 @@ interface PharmacyFinderProps {
     filterIds?: string[];
     title?: string;
     description?: string;
+    initialSelectedId?: string;
+    onClose?: () => void;
 }
 
 export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
     filterIds,
     title = "Gyógyszertárak",
-    description
+    description,
+    initialSelectedId,
+    onClose
 }) => {
     const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedPharmacyId, setSelectedPharmacyId] = useState<string | null>(null);
+    const [selectedPharmacyId, setSelectedPharmacyId] = useState<string | null>(initialSelectedId || null);
     const [visiblePharmacyIds, setVisiblePharmacyIds] = useState<string[] | null>(null);
 
     // Filters state
@@ -61,6 +65,22 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
     const [mapCenter, setMapCenter] = useState<[number, number]>([47.1625, 19.5033]);
     const [mapZoom, setMapZoom] = useState(7);
     const [showMapMobile, setShowMapMobile] = useState(false);
+
+    useEffect(() => {
+        if (initialSelectedId && pharmacies.length > 0) {
+            const pharmacy = pharmacies.find(p => p.id === initialSelectedId);
+            if (pharmacy && pharmacy.latitude && pharmacy.longitude) {
+                setSelectedPharmacyId(initialSelectedId);
+                setMapCenter([pharmacy.latitude, pharmacy.longitude]);
+                setMapZoom(15);
+                // On mobile, if we have a selection, we might want to show the map or list depending on UX.
+                // Usually map is better to see location.
+                if (window.innerWidth < 1024) {
+                    setShowMapMobile(true);
+                }
+            }
+        }
+    }, [initialSelectedId, pharmacies]);
 
     useEffect(() => {
         async function fetchPharmacies() {
@@ -166,9 +186,21 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
             <div className="flex-none p-4 border-b border-base-200 relative z-10 bg-base-100">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold">{title}</h1>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-2xl font-bold">{title}</h1>
+                        </div>
                         {description && <p className="text-sm text-gray-500 mt-1">{description}</p>}
                     </div>
+
+                    {onClose && (
+                        <button
+                            onClick={onClose}
+                            className="absolute top-4 right-4 btn btn-circle btn-ghost btn-sm z-20"
+                            title="Bezárás"
+                        >
+                            <span className="material-symbols-rounded">close</span>
+                        </button>
+                    )}
 
                     {/* View Toggler (Mobile specific mostly, but reachable) */}
                     <div className="lg:hidden join self-end">

@@ -26,15 +26,18 @@
 
 import Link from 'next/link';
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { useFavorite } from '@/context/FavoriteContext';
 import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
 import { useAuth } from '@/context/AuthContext';
 import { GlobalSearch } from './GlobalSearch';
+import { PharmacyFinder } from '../pharmacies/PharmacyFinder';
 
 export const Navbar = () => {
     const { favorites } = useFavorite();
     const { nearbyPharmacy } = useNearbyPharmacy();
     const { logout } = useAuth();
+    const [isPharmacyModalOpen, setIsPharmacyModalOpen] = React.useState(false);
 
     return (
         <div className="navbar bg-base-100 shadow-md sticky top-0 z-50">
@@ -68,7 +71,10 @@ export const Navbar = () => {
             <div className="navbar-end gap-2">
                 {/* Nearby Pharmacy Info */}
                 {nearbyPharmacy && (
-                    <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-base-200 border-l-4 border-primary rounded-md mr-1 max-w-[200px]">
+                    <button
+                        onClick={() => setIsPharmacyModalOpen(true)}
+                        className="hidden md:flex items-center gap-2 px-3 py-1 bg-base-200 border-l-4 border-primary rounded-md mr-1 max-w-[200px] hover:bg-base-300 transition-colors text-left"
+                    >
                         <span className="material-symbols-rounded text-primary text-sm fill-1">location_on</span>
                         <div className="flex flex-col leading-tight min-w-0">
                             <span className="text-[10px] text-base-content/60 font-bold uppercase tracking-tighter">Közeli patika</span>
@@ -76,7 +82,20 @@ export const Navbar = () => {
                                 {nearbyPharmacy.nev}
                             </span>
                         </div>
-                    </div>
+                    </button>
+                )}
+
+                {/* Pharmacy Finder Modal - Teleport to body to avoid layout/stacking context issues */}
+                {isPharmacyModalOpen && typeof document !== 'undefined' && createPortal(
+                    <div className="fixed inset-0 z-[100] bg-base-100 flex flex-col animate-fade-in">
+                        <PharmacyFinder
+                            title="Közeli patika beállítása"
+                            description="Válassz egy gyógyszertárat a térképről vagy a listából."
+                            initialSelectedId={nearbyPharmacy?.id}
+                            onClose={() => setIsPharmacyModalOpen(false)}
+                        />
+                    </div>,
+                    document.body
                 )}
 
                 <GlobalSearch />
