@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * ============================================================================
  * FUNKCIONÁLIS SPECIFIKÁCIÓ
@@ -12,11 +14,13 @@
  * - Hasonló termékek táblázatos megjelenítése.
  * - Csak az "Elérhető" státuszú termékek szűrése és megjelenítése.
  * - Gyors navigáció a helyettesítő termék adatlapjára.
+ * - **KÖZELI PATIKA ELÉRHETŐSÉG**: Megmutatjuk, hogy az adott termék elérhető-e a felhasználó kedvenc patikájában.
  * 
  * MŰKÖDÉSI LOGIKA:
  * - A komponens kap egy hatóanyag nevet és egy előre leszűrt listát.
  * - Ha a lista üres, a komponens nem jelenik meg.
- * - Táblázatos elrendezés: Név, Kiszerelés, Gyártó, Státusz, Művelet.
+ * - Táblázatos elrendezés: Név, Kiszerelés, Gyártó, Státusz, Közeli patika, Művelet.
+ * - A közeli patika státuszát az `isAvailableInPharmacy` függvény határozza meg.
  * 
  * KAPCSOLÓDÓ ELEMEK:
  * - src/app/(dashboard)/gyogyszerek/[...id]/page.tsx: Felhasználó oldal
@@ -26,6 +30,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { Medicine } from '@/types';
+import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
+import { isAvailableInPharmacy } from '@/lib/utils';
 
 interface SimilarMedicinesProps {
     substance: string;
@@ -33,6 +39,8 @@ interface SimilarMedicinesProps {
 }
 
 export function SimilarMedicines({ substance, medicines }: SimilarMedicinesProps) {
+    const { nearbyPharmacy } = useNearbyPharmacy();
+
     if (medicines.length === 0) return null;
 
     const getStatusBadge = (status: string) => {
@@ -41,6 +49,23 @@ export function SimilarMedicines({ substance, medicines }: SimilarMedicinesProps
         if (s === 'készlethiány') return <span className="badge badge-warning badge-sm">{status}</span>;
         if (s === 'megszűnt') return <span className="badge badge-error badge-sm">{status}</span>;
         return <span className="badge badge-ghost badge-sm">{status}</span>;
+    };
+
+    const getPharmacyAvailabilityBadge = (med: Medicine) => {
+        if (!nearbyPharmacy) {
+            return <span className="text-gray-400 text-xs italic">Nincs patika beállítva</span>;
+        }
+
+        const available = isAvailableInPharmacy(med.tkSzam, nearbyPharmacy.id);
+
+        return (
+            <div className={`badge ${available ? 'badge-success' : 'badge-ghost'} badge-sm gap-1`}>
+                <span className="material-symbols-rounded text-[10px]">
+                    {available ? 'check_circle' : 'block'}
+                </span>
+                {available ? 'Elérhető' : 'Nem elérhető'}
+            </div>
+        );
     };
 
     return (
@@ -68,6 +93,7 @@ export function SimilarMedicines({ substance, medicines }: SimilarMedicinesProps
                                 <th className="bg-base-200">Kiszerelés</th>
                                 <th className="bg-base-200">Gyártó</th>
                                 <th className="bg-base-200">Státusz</th>
+                                <th className="bg-base-200">Közeli patika</th>
                                 <th className="bg-base-200">Művelet</th>
                             </tr>
                         </thead>
@@ -78,6 +104,7 @@ export function SimilarMedicines({ substance, medicines }: SimilarMedicinesProps
                                     <td>{med.kiszereles}</td>
                                     <td>{med.gyarto}</td>
                                     <td>{getStatusBadge(med.status)}</td>
+                                    <td>{getPharmacyAvailabilityBadge(med)}</td>
                                     <td>
                                         <Link
                                             href={`/gyogyszerek/${med.tkSzam}`}
