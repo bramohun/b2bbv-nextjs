@@ -123,7 +123,17 @@ function MedicinesPageContent() {
     const [sortKey, setSortKey] = useState<SortKey | null>((searchParams.get('sort') as SortKey) || 'lastUpdate');
     const [sortDirection, setSortDirection] = useState<SortDirection>((searchParams.get('order') as SortDirection) || 'desc');
     const [cardSortOption, setCardSortOption] = useState<CardSortOption>('name-asc');
-    const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+
+    // Initialize column filters from URL params
+    const initialColumnFilters: Record<string, string> = {};
+    if (searchParams.get('lastUpdate_from')) {
+        initialColumnFilters['lastUpdate_from'] = searchParams.get('lastUpdate_from')!;
+    }
+    if (searchParams.get('lastUpdate_to')) {
+        initialColumnFilters['lastUpdate_to'] = searchParams.get('lastUpdate_to')!;
+    }
+
+    const [columnFilters, setColumnFilters] = useState<Record<string, string>>(initialColumnFilters);
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);

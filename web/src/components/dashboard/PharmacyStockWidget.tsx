@@ -40,43 +40,52 @@ const PharmacyMap = dynamic(() => import('../pharmacies/PharmacyMap'), {
 interface PharmacyStockWidgetProps {
     medicines: Medicine[];
     pharmacies: Pharmacy[];
+    period?: number;
 }
 
-export function PharmacyStockWidget({ medicines, pharmacies }: PharmacyStockWidgetProps) {
+export function PharmacyStockWidget({ medicines, pharmacies, period = 1 }: PharmacyStockWidgetProps) {
     const { nearbyPharmacy } = useNearbyPharmacy();
 
     // If a nearby pharmacy is selected, show its latest stock changes
     if (nearbyPharmacy) {
         const now = new Date();
         const todayStr = now.toISOString().split('T')[0];
-        const yesterday = new Date(now);
-        yesterday.setDate(now.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+        // Calculate start date based on period
+        const startDate = new Date(now);
+        startDate.setDate(now.getDate() - period);
+        startDate.setHours(0, 0, 0, 0);
+
+        const periodLabel = period === 1 ? 'Mai nap' : `Elmúlt ${period} nap`;
 
         const pharmacyMedicines = medicines.filter(m => isAvailableInPharmacy(m.tkSzam, nearbyPharmacy.id));
 
-        const stats = pharmacyMedicines.reduce((acc, med) => {
-            const updateDate = med.lastUpdate.split('T')[0];
-            const isTargetStatus = med.status === 'Készlethiány' || med.status === 'Megszűnt';
+        // Filter by date
+        const recentPharmacyMedicines = pharmacyMedicines.filter(med => {
+            const updateDate = new Date(med.lastUpdate);
+            return updateDate >= startDate;
+        });
 
-            if (updateDate === todayStr) {
-                if (isTargetStatus) {
-                    acc.today++;
-                    acc.nemElerheto++;
-                }
-
-                if (med.status === 'Elérhető') acc.elerheto++;
-            }
-
-            if (updateDate === yesterdayStr && isTargetStatus) {
-                acc.yesterday++;
+        const stats = recentPharmacyMedicines.reduce((acc, med) => {
+            if (med.status === 'Elérhető') {
+                acc.elerheto++;
+            } else if (med.status === 'Készlethiány' || med.status === 'Megszűnt') {
+                acc.nemElerheto++;
             }
             return acc;
-        }, { today: 0, yesterday: 0, nemElerheto: 0, elerheto: 0 });
+        }, { nemElerheto: 0, elerheto: 0 });
 
-        const changes = pharmacyMedicines
+        const totalChanges = stats.elerheto + stats.nemElerheto;
+
+        const changes = recentPharmacyMedicines
             .sort((a, b) => new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime())
             .slice(0, 12);
+
+        // Helper for date link
+        const getDateFilterParams = () => {
+            const fromDateStr = startDate.toISOString().split('T')[0];
+            return `&lastUpdate_from=${fromDateStr}`;
+        };
 
         return (
             <div className="card bg-base-100 shadow-sm border border-base-200 h-full">
@@ -93,28 +102,31 @@ export function PharmacyStockWidget({ medicines, pharmacies }: PharmacyStockWidg
 
                     {/* Summary Stats */}
                     <div className="grid grid-cols-2 gap-3 mb-6">
-                        <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex flex-col items-center justify-center text-center">
-                            <span className="text-xs font-semibold text-primary/70 uppercase tracking-wider mb-1">Mai nap</span>
+                        <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex flex-col items-center justify-center text-center col-span-2">
+                            <span className="text-xs font-semibold text-primary/70 uppercase tracking-wider mb-1">
+                                {periodLabel}
+                            </span>
                             <div className="flex items-baseline gap-1 mb-2">
-                                <span className="text-2xl font-black text-primary">{stats.today}</span>
-                                <span className="text-[10px] font-bold text-primary/50">db</span>
+                                <span className="text-2xl font-black text-primary">{totalChanges}</span>
+                                <span className="text-[10px] font-bold text-primary/50">db változás</span>
                             </div>
-                            <div className="flex flex-col gap-0.5 text-[10px] font-medium text-primary/70">
-                                <Link href="/gyogyszerek?status=not_available&nearbyOnly=true" className="hover:underline hover:text-primary transition-colors">
-                                    • {stats.nemElerheto} db már nem elérhető
-                                </Link>
-                                <Link href="/gyogyszerek?status=Elérhető&nearbyOnly=true" className="hover:underline hover:text-primary transition-colors">
-                                    • {stats.elerheto} db újra elérhető
-                                </Link>
-                            </div>
-                        </div>
-                        <div className="bg-base-200/50 border border-base-300 rounded-xl p-3 flex flex-col items-center justify-center text-center h-full">
-                            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1">Tegnapi nap</span>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-black text-base-content/80">{stats.yesterday}</span>
-                                <span className="text-[10px] font-bold text-base-content/40">db</span>
+                            <div className="flex flex-col gap-0.5 text-[10px] font-medium text-primary/70 w-full">
+                                <div className="flex justify-center gap-4">
+                                    <Link href={`/gyogyszerek?status=Elérhető&nearbyOnly=true&sort=nearbyPharmacyLastUpdate&order=desc${getDateFilterParams()}`} className="hover:underline hover:text-primary transition-colors flex items-center gap-1">
+                                        <span className="badge badge-success badge-xs"></span> {stats.elerheto} db újra készleten
+                                    </Link>
+                                    <Link href={`/gyogyszerek?status=not_available&nearbyOnly=true&sort=nearbyPharmacyLastUpdate&order=desc${getDateFilterParams()}`} className="hover:underline hover:text-primary transition-colors flex items-center gap-1">
+                                        <span className="badge badge-error badge-xs"></span> {stats.nemElerheto} db elfogyott
+                                    </Link>
+                                </div>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="mb-2">
+                        <h3 className="text-sm font-semibold text-base-content/70">
+                            Legutóbbi 10 készletváltozás
+                        </h3>
                     </div>
 
                     <div className="overflow-x-auto min-h-[300px]">
@@ -151,7 +163,7 @@ export function PharmacyStockWidget({ medicines, pharmacies }: PharmacyStockWidg
                                 ) : (
                                     <tr>
                                         <td colSpan={3} className="text-center py-20 text-base-content/50">
-                                            Nincs új változás ennél a patikánál.
+                                            Nincs új változás {periodLabel.toLowerCase()} ennél a patikánál.
                                         </td>
                                     </tr>
                                 )}
@@ -161,7 +173,7 @@ export function PharmacyStockWidget({ medicines, pharmacies }: PharmacyStockWidg
 
                     <div className="card-actions justify-start mt-4 pt-4 border-t border-base-200">
                         <Link
-                            href="/gyogyszerek?sort=nearbyPharmacyLastUpdate&order=desc"
+                            href={`/gyogyszerek?sort=nearbyPharmacyLastUpdate&order=desc${getDateFilterParams()}`}
                             className="btn btn-ghost btn-sm text-primary gap-1"
                         >
                             Összes gyógyszertári változás

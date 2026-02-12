@@ -37,6 +37,7 @@ export default function DashboardPage() {
     const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
     const [forumActivity, setForumActivity] = useState<ForumTopic[]>([]);
     const [loading, setLoading] = useState(true);
+    const [period, setPeriod] = useState(1);
 
     useEffect(() => {
         async function fetchData() {
@@ -70,20 +71,37 @@ export default function DashboardPage() {
 
     return (
         <div className="w-full px-4 py-6">
-            <h1 className="text-3xl font-bold mb-8 flex items-center gap-3">
-                <span className="material-symbols-rounded text-primary text-4xl">dashboard</span>
-                Irányítópult
-            </h1>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <h1 className="text-3xl font-bold flex items-center gap-3">
+                    <span className="material-symbols-rounded text-primary text-4xl">dashboard</span>
+                    Irányítópult
+                </h1>
+
+                <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium text-base-content/70">Időszak:</label>
+                    <select
+                        className="select select-bordered select-sm"
+                        value={period}
+                        onChange={(e) => setPeriod(Number(e.target.value))}
+                    >
+                        <option value={1}>Elmúlt 1 nap (Mai)</option>
+                        <option value={3}>Elmúlt 3 nap</option>
+                        <option value={7}>Elmúlt 1 hét</option>
+                        <option value={14}>Elmúlt 2 hét</option>
+                        <option value={30}>Elmúlt 1 hónap</option>
+                    </select>
+                </div>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Left Column: Medicine Stock Changes */}
                 <div className="lg:col-span-1">
-                    <StockChangesWidget medicines={medicines} />
+                    <StockChangesWidget medicines={medicines} period={period} />
                 </div>
 
                 {/* Middle Column: Pharmacy Activity */}
                 <div className="lg:col-span-1">
-                    <PharmacyStockWidget medicines={medicines} pharmacies={pharmacies} />
+                    <PharmacyStockWidget medicines={medicines} pharmacies={pharmacies} period={period} />
                 </div>
 
                 {/* Right Column: Community Activity */}

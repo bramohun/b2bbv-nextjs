@@ -31,36 +31,50 @@ import { formatDate } from '@/lib/utils';
 
 interface StockChangesWidgetProps {
     medicines: Medicine[];
+    period?: number;
 }
 
-export function StockChangesWidget({ medicines }: StockChangesWidgetProps) {
+export function StockChangesWidget({ medicines, period = 1 }: StockChangesWidgetProps) {
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
-    const yesterday = new Date(now);
-    yesterday.setDate(now.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
 
-    const stats = medicines.reduce((acc, med) => {
-        const updateDate = med.lastUpdate.split('T')[0];
-        const isTargetStatus = med.status === 'Készlethiány' || med.status === 'Megszűnt';
+    // Calculate start date based on period
+    const startDate = new Date(now);
+    startDate.setDate(now.getDate() - period);
+    startDate.setHours(0, 0, 0, 0);
 
-        if (updateDate === todayStr) {
-            if (isTargetStatus) acc.today++;
+    // Calculate "previous period" for comparison or just use "yesterday" logic if period is 1 desc
+    // For simplicity and matching the requirement "Elmúlt {n} visszamenőleg", we will show stats for this period.
+    // The "Yesterday" block might be confusing if we select 30 days. 
+    // Let's change the labels to be dynamic based on period.
 
-            if (med.status === 'Megszűnt') acc.megszunt++;
-            if (med.status === 'Készlethiány') acc.hiany++;
-            if (med.status === 'Elérhető') acc.elerheto++;
-        }
+    const periodLabel = period === 1 ? 'Mai nap' : `Elmúlt ${period} nap`;
 
-        if (updateDate === yesterdayStr && isTargetStatus) {
-            acc.yesterday++;
-        }
+    // Filter medicines updated within the period
+    const recentMedicines = medicines.filter(med => {
+        const updateDate = new Date(med.lastUpdate);
+        return updateDate >= startDate;
+    });
+
+    const stats = recentMedicines.reduce((acc, med) => {
+        // Count statuses in the filtered list
+        if (med.status === 'Megszűnt') acc.megszunt++;
+        if (med.status === 'Készlethiány') acc.hiany++;
+        if (med.status === 'Elérhető') acc.elerheto++;
+
+        acc.total++;
         return acc;
-    }, { today: 0, yesterday: 0, megszunt: 0, hiany: 0, elerheto: 0 });
+    }, { total: 0, megszunt: 0, hiany: 0, elerheto: 0 });
 
     const latestChanges = [...medicines]
         .sort((a, b) => new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime())
         .slice(0, 12);
+
+    // Helper for date link
+    const getDateFilterParams = () => {
+        const fromDateStr = startDate.toISOString().split('T')[0];
+        return `&lastUpdate_from=${fromDateStr}`;
+    };
 
     return (
         <div className="card bg-base-100 shadow-sm border border-base-200 h-full">
@@ -74,31 +88,34 @@ export function StockChangesWidget({ medicines }: StockChangesWidgetProps) {
 
                 {/* Summary Stats */}
                 <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="bg-warning/10 border border-warning/20 rounded-xl p-3 flex flex-col items-center justify-center text-center">
-                        <span className="text-xs font-semibold text-warning-content/70 uppercase tracking-wider mb-1">Mai változások</span>
+                    <div className="bg-warning/10 border border-warning/20 rounded-xl p-3 flex flex-col items-center justify-center text-center col-span-2">
+                        <span className="text-xs font-semibold text-warning-content/70 uppercase tracking-wider mb-1">
+                            {periodLabel} változásai
+                        </span>
                         <div className="flex items-baseline gap-1 mb-2">
-                            <span className="text-2xl font-black text-warning-content">{stats.today}</span>
+                            <span className="text-2xl font-black text-warning-content">{stats.total}</span>
                             <span className="text-[10px] font-bold text-warning-content/50">db</span>
                         </div>
-                        <div className="flex flex-col gap-0.5 text-[10px] font-medium text-warning-content/70">
-                            <Link href="/gyogyszerek?status=Megszűnt" className="hover:underline hover:text-primary transition-colors">
-                                • {stats.megszunt} megszűnt
-                            </Link>
-                            <Link href="/gyogyszerek?status=Készlethiány" className="hover:underline hover:text-primary transition-colors">
-                                • {stats.hiany} hiánycikk lett
-                            </Link>
-                            <Link href="/gyogyszerek?status=Elérhető" className="hover:underline hover:text-primary transition-colors">
-                                • {stats.elerheto} újra elérhető
-                            </Link>
+                        <div className="flex flex-col gap-0.5 text-[10px] font-medium text-warning-content/70 w-full">
+                            <div className="flex justify-center gap-4">
+                                <Link href={`/gyogyszerek?status=Megszűnt${getDateFilterParams()}`} className="hover:underline hover:text-primary transition-colors flex items-center gap-1">
+                                    <span className="badge badge-error badge-xs"></span> {stats.megszunt} megszűnt
+                                </Link>
+                                <Link href={`/gyogyszerek?status=Készlethiány${getDateFilterParams()}`} className="hover:underline hover:text-primary transition-colors flex items-center gap-1">
+                                    <span className="badge badge-warning badge-xs"></span> {stats.hiany} hiány
+                                </Link>
+                                <Link href={`/gyogyszerek?status=Elérhető${getDateFilterParams()}`} className="hover:underline hover:text-primary transition-colors flex items-center gap-1">
+                                    <span className="badge badge-success badge-xs"></span> {stats.elerheto} elérhető
+                                </Link>
+                            </div>
                         </div>
                     </div>
-                    <div className="bg-base-200/50 border border-base-300 rounded-xl p-3 flex flex-col items-center justify-center text-center h-full">
-                        <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1">Tegnapi nap</span>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-2xl font-black text-base-content/80">{stats.yesterday}</span>
-                            <span className="text-[10px] font-bold text-base-content/40">db</span>
-                        </div>
-                    </div>
+                </div>
+
+                <div className="mb-2">
+                    <h3 className="text-sm font-semibold text-base-content/70">
+                        Legutóbbi 10 készletváltozás
+                    </h3>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -146,8 +163,8 @@ export function StockChangesWidget({ medicines }: StockChangesWidgetProps) {
                 </div>
 
                 <div className="card-actions justify-start mt-4 pt-4 border-t border-base-200">
-                    <Link href="/gyogyszerek" className="btn btn-ghost btn-sm text-primary gap-1">
-                        Összes változás
+                    <Link href={`/gyogyszerek?${getDateFilterParams().substring(1)}`} className="btn btn-ghost btn-sm text-primary gap-1">
+                        Összes változás ({periodLabel.toLowerCase()})
                         <span className="material-symbols-rounded text-sm">arrow_forward</span>
                     </Link>
                 </div>
