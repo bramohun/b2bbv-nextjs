@@ -1,3 +1,28 @@
+/**
+ * ============================================================================
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * ============================================================================
+ * 
+ * USER STORY:
+ * Felhasználóként egy központi felületen szeretném látni a legfontosabb 
+ * információkat (készletváltozások, közeli patika állapota, közösségi aktivitás), 
+ * hogy gyorsan képet kapjak az aktuális helyzetről.
+ * 
+ * FUNKCIÓK:
+ * - Összegző nézet: Három fő szekció (Készletváltozások, Közeli patika, Közösség).
+ * - Adatkezelés: Központi adatlekérdezés API végpontokról (medicines, pharmacies, forum).
+ * - Reszponzivitás: 
+ *   - Asztali nézet (lg): 3 oszlopos grid elrendezés.
+ *   - Tablet/Mobil nézet: 1 oszlopos elrendezés (stacking).
+ * - Fluid Layout: A felület kitölti a rendelkezésre álló szélességet.
+ * - Betöltési állapot: Centrált spinner jelzi az adatok betöltését.
+ * 
+ * KAPCSOLÓDÓ ELEMEK:
+ * - src/components/dashboard/StockChangesWidget.tsx
+ * - src/components/dashboard/PharmacyStockWidget.tsx
+ * - src/components/dashboard/CommunityActivityWidget.tsx
+ */
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -44,7 +69,7 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="w-full px-4 py-6">
             <h1 className="text-3xl font-bold mb-8 flex items-center gap-3">
                 <span className="material-symbols-rounded text-primary text-4xl">dashboard</span>
                 Irányítópult

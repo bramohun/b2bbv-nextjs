@@ -102,6 +102,35 @@ export async function getMedicines(): Promise<Medicine[]> {
                 status = 'Megszűnt';
             }
 
+            let lastUpdate = new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)).toISOString();
+
+            // MOCK DATA for Dashboard demonstration: 
+            // Force some specific items to be "Today" or "Yesterday" changes
+            if (index < 12) {
+                const now = new Date();
+                if (index < 3) {
+                    // Today, Készlethiány
+                    status = 'Készlethiány';
+                    lastUpdate = now.toISOString();
+                } else if (index < 5) {
+                    // Today, Megszűnt
+                    status = 'Megszűnt';
+                    lastUpdate = now.toISOString();
+                } else if (index < 9) {
+                    // Yesterday, Készlethiány
+                    status = 'Készlethiány';
+                    const yesterday = new Date(now);
+                    yesterday.setDate(now.getDate() - 1);
+                    lastUpdate = yesterday.toISOString();
+                } else {
+                    // Yesterday, Megszűnt
+                    status = 'Megszűnt';
+                    const yesterday = new Date(now);
+                    yesterday.setDate(now.getDate() - 1);
+                    lastUpdate = yesterday.toISOString();
+                }
+            }
+
             return {
                 internalId: `${tk}-${index}`, // Ensure uniqueness by appending index
                 tkSzam: tk,
@@ -112,7 +141,7 @@ export async function getMedicines(): Promise<Medicine[]> {
                 gyarto: findVal(['Gyártó', 'Gyártó neve', 'Forg_Eng_Jog']),
                 status: status,
                 price: 0,
-                lastUpdate: new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)).toISOString(),
+                lastUpdate: lastUpdate,
                 brand: get('Márkanév') || get('Név'),
                 activeSubstance: get('Hatóanyag') || get('INN'),
                 packagingDetails: get('Csomagolás részletezése'),

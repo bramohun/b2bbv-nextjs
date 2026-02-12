@@ -1,3 +1,24 @@
+/**
+ * ============================================================================
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * ============================================================================
+ * 
+ * USER STORY:
+ * Felhasználóként szeretném látni a közösségi fórum legfrissebb aktivitásait, 
+ * hogy bekapcsolódhassak a beszélgetésekbe és tájékozódjak a közösségi témákról.
+ * 
+ * FUNKCIÓK:
+ * - Aktivitási lista: A legutóbbi 5 fórumtéma megjelenítése.
+ * - Téma részletek: Cím, létrehozó neve, és formázott időbélyeg.
+ * - Kategória jelölés: Specializáció badge-ek (pl. "Belgyógyászat").
+ * - Interakciós adatok: Hozzászólások számának kijelzése.
+ * - Navigáció: Linkek az egyes fórumtémák részletes nézetéhez.
+ * 
+ * KAPCSOLÓDÓ ELEMEK:
+ * - src/app/(dashboard)/kozosseg/page.tsx
+ * - src/types/forum.ts
+ */
+
 'use client';
 
 import React from 'react';

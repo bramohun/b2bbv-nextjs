@@ -1,3 +1,27 @@
+/**
+ * ============================================================================
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * ============================================================================
+ * 
+ * USER STORY:
+ * Felhasználóként szeretném követni a kiválasztott közeli patikám készletének 
+ * változásait, vagy keresni egyet a térképen, ha még nincs kiválasztva.
+ * 
+ * FUNKCIÓK:
+ * - Kiválasztott patika nézet:
+ *   - Patika neve és statisztikai összesítő (ma/tegnap) a patika készletére.
+ *   - TOP 10 változás a patikában (Státusz, Név, Dátum oszlopokkal).
+ *   - Link az összes gyógyszertári változáshoz.
+ * - Patika kiválasztása nézet (Fallback):
+ *   - Interaktív térkép (PharmacyMap) a patikák böngészéséhez.
+ *   - Tájékoztató üzenet a kiválasztás előnyeiről.
+ *   - Link a gyógyszertárkereső oldalra.
+ * 
+ * KAPCSOLÓDÓ ELEMEK:
+ * - src/context/NearbyPharmacyContext.tsx
+ * - src/components/pharmacies/PharmacyMap.tsx
+ */
+
 'use client';
 
 import React from 'react';
@@ -23,8 +47,26 @@ export function PharmacyStockWidget({ medicines, pharmacies }: PharmacyStockWidg
 
     // If a nearby pharmacy is selected, show its latest stock changes
     if (nearbyPharmacy) {
-        const changes = medicines
-            .filter(m => isAvailableInPharmacy(m.tkSzam, nearbyPharmacy.id))
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        const yesterday = new Date(now);
+        yesterday.setDate(now.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+        const pharmacyMedicines = medicines.filter(m => isAvailableInPharmacy(m.tkSzam, nearbyPharmacy.id));
+
+        const stats = pharmacyMedicines.reduce((acc, med) => {
+            const updateDate = med.lastUpdate.split('T')[0];
+            const isTargetStatus = med.status === 'Készlethiány' || med.status === 'Megszűnt';
+
+            if (isTargetStatus) {
+                if (updateDate === todayStr) acc.today++;
+                if (updateDate === yesterdayStr) acc.yesterday++;
+            }
+            return acc;
+        }, { today: 0, yesterday: 0 });
+
+        const changes = pharmacyMedicines
             .sort((a, b) => new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime())
             .slice(0, 10);
 
@@ -41,11 +83,30 @@ export function PharmacyStockWidget({ medicines, pharmacies }: PharmacyStockWidg
                         </div>
                     </div>
 
+                    {/* Summary Stats */}
+                    <div className="grid grid-cols-2 gap-3 mb-6">
+                        <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex flex-col items-center justify-center text-center">
+                            <span className="text-xs font-semibold text-primary/70 uppercase tracking-wider mb-1">Mai nap</span>
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-black text-primary">{stats.today}</span>
+                                <span className="text-[10px] font-bold text-primary/50">db</span>
+                            </div>
+                        </div>
+                        <div className="bg-base-200/50 border border-base-300 rounded-xl p-3 flex flex-col items-center justify-center text-center">
+                            <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1">Tegnapi nap</span>
+                            <div className="flex items-baseline gap-1">
+                                <span className="text-2xl font-black text-base-content/80">{stats.yesterday}</span>
+                                <span className="text-[10px] font-bold text-base-content/40">db</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="overflow-x-auto min-h-[300px]">
                         <table className="table table-sm w-full">
                             <thead>
                                 <tr className="bg-base-200/50">
-                                    <th>Név</th>
+                                    <th>Státusz</th>
+                                    <th className="w-full">Név</th>
                                     <th className="text-right">Dátum</th>
                                 </tr>
                             </thead>
@@ -54,26 +115,26 @@ export function PharmacyStockWidget({ medicines, pharmacies }: PharmacyStockWidg
                                     changes.map((med) => (
                                         <tr key={med.internalId || med.tkSzam} className="hover:bg-base-200/30">
                                             <td>
-                                                <div className="flex flex-col">
-                                                    <Link
-                                                        href={`/gyogyszerek/${med.tkSzam}`}
-                                                        className="font-medium text-primary hover:underline truncate max-w-[150px] block"
-                                                    >
-                                                        {med.nev}
-                                                    </Link>
-                                                    <div className={`badge ${med.status === 'Elérhető' ? 'badge-success' : med.status === 'Készlethiány' ? 'badge-warning' : 'badge-error'} badge-xs whitespace-nowrap mt-1`}>
-                                                        {med.status}
-                                                    </div>
+                                                <div className={`badge ${med.status === 'Elérhető' ? 'badge-success' : med.status === 'Készlethiány' ? 'badge-warning' : med.status === 'Elfogyott' ? 'badge-error' : 'badge-ghost'} badge-xs whitespace-nowrap`}>
+                                                    {med.status}
                                                 </div>
                                             </td>
-                                            <td className="text-right text-xs text-base-content/60 align-top pt-3">
+                                            <td>
+                                                <Link
+                                                    href={`/gyogyszerek/${med.tkSzam}`}
+                                                    className="font-medium text-primary hover:underline block"
+                                                >
+                                                    {med.nev}
+                                                </Link>
+                                            </td>
+                                            <td className="text-right text-xs text-base-content/60 whitespace-nowrap">
                                                 {formatDate(med.lastUpdate)}
                                             </td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={2} className="text-center py-20 text-base-content/50">
+                                        <td colSpan={3} className="text-center py-20 text-base-content/50">
                                             Nincs új változás ennél a patikánál.
                                         </td>
                                     </tr>
