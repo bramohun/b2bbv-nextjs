@@ -105,7 +105,7 @@ function MedicinesPageContent() {
     const searchParams = useSearchParams();
     const [medicines, setMedicines] = useState<Medicine[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
     const [filterStatus, setFilterStatus] = useState(searchParams.get('status') || 'all');
     const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
     const [viewSettings, setViewSettings] = useState<ViewSettings>(DEFAULT_VIEW_SETTINGS);

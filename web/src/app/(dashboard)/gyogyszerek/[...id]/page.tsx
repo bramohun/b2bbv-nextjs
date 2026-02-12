@@ -12,8 +12,8 @@
  * - Részletes adatok megjelenítése: Név, TK-szám, Hatóanyag, ATC kód, Kiszerelés, Gyártó.
  * - Státusz vizuális jelzése (Badge + Színkód).
  * - Közeli patika készletinformáció megjelenítése (NearbyPharmacyStockIndicator).
+ * - Hasonló hatóanyagú, elérhető termékek listázása (SimilarMedicines).
  * - "Vissza a listához" navigáció.
- * - (Tervezett) Helyettesítő termékek ajánlása.
  * - (Tervezett) Betegtájékoztató letöltése/megnyitása.
  * 
  * MŰKÖDÉSI LOGIKA:
@@ -30,11 +30,12 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getMedicineByTk } from '@/lib/data';
 import { MedicineDetailActions } from '@/components/medicines/MedicineDetailActions';
 import { MedicineStockInfo } from '@/components/medicines/MedicineStockInfo';
 import { MedicineStatusHistory } from '@/components/medicines/MedicineStatusHistory';
 import { NearbyPharmacyStockIndicator } from '@/components/medicines/NearbyPharmacyStockIndicator';
+import { SimilarMedicines } from '@/components/medicines/SimilarMedicines';
+import { getMedicineByTk, getMedicinesBySubstance } from '@/lib/data';
 import { formatDate } from '@/lib/utils';
 
 interface PageProps {
@@ -164,6 +165,9 @@ export default async function MedicineDetailPage({ params }: PageProps) {
     // Ensure Last Update is not older than the latest status change
     const displayLastUpdate = randomLastUpdate > latestHistoryDate ? randomLastUpdate : latestHistoryDate;
 
+    // Fetch similar products by INN
+    const similarMedicines = await getMedicinesBySubstance(medicine.inn, medicine.tkSzam);
+
     return (
         <div className="container mx-auto py-8 px-4">
             {/* Breadcrumb / Back Navigation */}
@@ -236,7 +240,16 @@ export default async function MedicineDetailPage({ params }: PageProps) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <h3 className="font-semibold text-gray-500 text-sm uppercase tracking-wide mb-1">Hatóanyag (INN)</h3>
-                            <p className="text-lg font-medium">{medicine.inn || 'N/A'}</p>
+                            <div className="text-lg font-medium">
+                                {medicine.inn ? (
+                                    <Link
+                                        href={`/gyogyszerek?search=${encodeURIComponent(medicine.inn)}`}
+                                        className="text-primary hover:underline"
+                                    >
+                                        {medicine.inn}
+                                    </Link>
+                                ) : 'N/A'}
+                            </div>
                         </div>
 
                         <div>
@@ -269,6 +282,8 @@ export default async function MedicineDetailPage({ params }: PageProps) {
 
                 </div>
             </div>
+
+            <SimilarMedicines substance={medicine.inn} medicines={similarMedicines} />
 
             <MedicineStatusHistory history={statusHistory} />
         </div>

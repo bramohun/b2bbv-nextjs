@@ -20,6 +20,9 @@
  * - Egyedi gyógyszer lekérése (getMedicineByTk):
  *   - Gyors keresés a betöltött listában TK-szám alapján.
  * 
+ * - Hasonló hatóanyagú termékek lekérése (getMedicinesBySubstance):
+ *   - Szűrés hatóanyag (INN) és "Elérhető" státusz alapján.
+ * 
  * - Gyógyszertárlista betöltése (getPharmacies):
  *   - CSV fájl beolvasása (pharmacy_list.csv)
  *   - Geolokációs adatok és nyitvatartás kezelése
@@ -220,6 +223,53 @@ export async function getMedicines(): Promise<Medicine[]> {
 export async function getMedicineByTk(tkSzam: string): Promise<Medicine | undefined> {
     const medicines = await getMedicines();
     return medicines.find(m => m.tkSzam === tkSzam);
+}
+
+export async function getMedicinesBySubstance(substance: string, excludeTk: string, limit: number = 20): Promise<Medicine[]> {
+    if (!substance) return [];
+
+    const medicines = await getMedicines();
+    const normalizedSubstance = substance.toLowerCase().trim();
+
+    const allMatches = medicines.filter(m =>
+        m.tkSzam !== excludeTk &&
+        m.inn &&
+        m.inn.toLowerCase().includes(normalizedSubstance) &&
+        m.status === 'Elérhető'
+    );
+
+    if (allMatches.length <= limit) return allMatches;
+
+    // Diversity logic: Group by brand/family
+    const groups = new Map<string, Medicine[]>();
+    allMatches.forEach(m => {
+        // Fallback to name-based family if brand is missing or too generic
+        const brandOrFamily = m.brand || m.nev.split(' ')[0] || 'Ismeretlen';
+        if (!groups.has(brandOrFamily)) groups.set(brandOrFamily, []);
+        groups.get(brandOrFamily)!.push(m);
+    });
+
+    const result: Medicine[] = [];
+    const brandKeys = Array.from(groups.keys());
+    let i = 0;
+
+    // Round-robin selection from groups
+    while (result.length < limit && brandKeys.length > 0) {
+        const brandIndex = i % brandKeys.length;
+        const brand = brandKeys[brandIndex];
+        const group = groups.get(brand)!;
+
+        if (group.length > 0) {
+            result.push(group.shift()!);
+        } else {
+            // Remove empty group and don't increment i so we check the 'next' brand in the updated array
+            brandKeys.splice(brandIndex, 1);
+            continue;
+        }
+        i++;
+    }
+
+    return result;
 }
 
 export async function getPharmacies(): Promise<Pharmacy[]> {
