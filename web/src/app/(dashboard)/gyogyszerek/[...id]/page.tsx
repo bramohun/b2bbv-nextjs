@@ -192,10 +192,44 @@ export default async function MedicineDetailPage({ params }: PageProps) {
                                 stockInfo={stockInfo}
                             />
                         </div>
-                        <div className="mt-2">
+                        <div className="mt-2 text-right">
                             <MedicineDetailActions medicine={medicine} />
                         </div>
                     </div>
+
+                    {/* Shortage Block */}
+                    {medicine.shortageInfo && (
+                        <div className="mt-6 p-6 rounded-xl bg-amber-50 border border-amber-200 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
+                            <div className="flex items-center gap-2 mb-4 text-amber-800">
+                                <span className="material-symbols-rounded text-2xl">warning</span>
+                                <h2 className="text-xl font-bold">Készlethiány Információ</h2>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                                <div className="space-y-1">
+                                    <h3 className="text-sm font-semibold uppercase tracking-wider text-amber-700/70">Hiány kezdete</h3>
+                                    <p className="text-lg font-medium text-amber-900">{medicine.shortageInfo.start || 'Nincs adat'}</p>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <h3 className="text-sm font-semibold uppercase tracking-wider text-amber-700/70">Tervezett vége</h3>
+                                    <p className="text-lg font-medium text-amber-900">{medicine.shortageInfo.end || 'Folyamatban'}</p>
+                                </div>
+
+                                <div className="md:col-span-2 space-y-1">
+                                    <h3 className="text-sm font-semibold uppercase tracking-wider text-amber-700/70">A hiány oka</h3>
+                                    <p className="text-amber-900 leading-relaxed font-medium">{medicine.shortageInfo.reason || 'Szakmai ok'}</p>
+                                </div>
+
+                                {medicine.shortageInfo.suggestion && (
+                                    <div className="md:col-span-2 mt-2 p-4 rounded-lg bg-amber-100/50 border border-amber-200">
+                                        <h3 className="text-sm font-semibold uppercase tracking-wider text-amber-700/70 mb-2">Javaslat a hiánykészítmény pótlására</h3>
+                                        <p className="text-amber-900 font-medium leading-relaxed">{medicine.shortageInfo.suggestion}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="divider"></div>
 

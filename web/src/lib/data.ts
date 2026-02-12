@@ -69,6 +69,33 @@ export async function getMedicines(): Promise<Medicine[]> {
             console.warn('CSV Parse warnings:', parseResult.errors.slice(0, 5));
         }
 
+        // Load shortage data
+        let shortagesMap = new Map<string, any>();
+        try {
+            const shortagePath = path.join(process.cwd(), '..', '.brief', 'data-brief', 'shortage_lista 20260212.csv');
+            const shortageContent = await fs.readFile(shortagePath, 'latin1');
+            const shortageResult = Papa.parse(shortageContent, {
+                header: true,
+                skipEmptyLines: true,
+                delimiter: ';',
+                transformHeader: (header: string) => header.trim().replace(/^"|"$/g, '')
+            });
+
+            shortageResult.data.forEach((row: any) => {
+                const tk = (row['TK szám'] || '').trim();
+                if (tk) {
+                    shortagesMap.set(tk, {
+                        start: row['A hiány kezdete'],
+                        end: row['A hiány tervezett vége'],
+                        reason: row['A hiány oka'],
+                        suggestion: row['Javaslat a hiánykészítmény pótlására']
+                    });
+                }
+            });
+        } catch (err) {
+            console.error('Error loading shortage list:', err);
+        }
+
         const medicines: Medicine[] = parseResult.data.map((record: any, index: number) => {
             // Helper to safely get value regardless of casing or slight mismatches
             const get = (key: string) => {
@@ -92,7 +119,7 @@ export async function getMedicines(): Promise<Medicine[]> {
 
             // Check for shortage
             const shortage = (get('termékhiánnyal érintett') || '').toLowerCase();
-            if (shortage === 'igen') {
+            if (shortage === 'igen' || shortagesMap.has(tk)) {
                 status = 'Készlethiány';
             }
 
@@ -140,7 +167,7 @@ export async function getMedicines(): Promise<Medicine[]> {
                 }
             }
 
-            return {
+            const medicineBase = {
                 internalId: `${tk}-${index}`, // Ensure uniqueness by appending index
                 tkSzam: tk,
                 nev: get('Név'),
@@ -158,6 +185,26 @@ export async function getMedicines(): Promise<Medicine[]> {
                 dispensabilitySub: get('Kiad_alcsop'),
                 safetyFeatures: get('Biztonsági elemek'),
                 authorizationDate: get('TK dátum'),
+            };
+
+            // Match shortage info: exact first, then by base TK
+            let shortageInfo = shortagesMap.get(tk);
+            if (!shortageInfo && tk.includes('/')) {
+                const baseTk = tk.split('/')[0];
+                // Look for any variant in the shortage map that starts with this base TK
+                // (Since shortagesMap keys are full TKs, we need to find one that matches)
+                for (const [key, value] of shortagesMap.entries()) {
+                    if (key.startsWith(baseTk + '/')) {
+                        shortageInfo = value;
+                        break;
+                    }
+                }
+            }
+
+            return {
+                ...medicineBase,
+                status: (medicineBase.status === 'Készlethiány' || shortageInfo) ? 'Készlethiány' : medicineBase.status,
+                shortageInfo
             };
         }).filter((m: Medicine) => m.tkSzam && m.nev); // Filter invalid rows
 

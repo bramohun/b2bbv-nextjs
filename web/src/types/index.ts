@@ -16,6 +16,12 @@ export interface Medicine {
     dispensabilitySub: string;
     safetyFeatures: string;
     authorizationDate: string;
+    shortageInfo?: {
+        start: string;
+        end: string;
+        reason: string;
+        suggestion: string;
+    };
 }
 
 export type MedicineTableColumn = 'tkSzam' | 'nev' | 'activeSubstance' | 'kiszereles' | 'gyarto' | 'status' | 'nearbyPharmacyStock' | 'nearbyPharmacyLastUpdate' | 'actions' | 'packagingDetails' | 'dispensability' | 'dispensabilitySub' | 'safetyFeatures' | 'authorizationDate' | 'lastUpdate';
