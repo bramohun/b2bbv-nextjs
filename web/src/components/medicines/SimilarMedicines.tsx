@@ -31,7 +31,10 @@ import React from 'react';
 import Link from 'next/link';
 import { Medicine } from '@/types';
 import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
+import { useNotification } from '@/context/NotificationContext';
+import { useFavorite } from '@/context/FavoriteContext';
 import { isAvailableInPharmacy } from '@/lib/utils';
+import { FavoriteRemovalModal } from './FavoriteRemovalModal';
 
 interface SimilarMedicinesProps {
     substance: string;
@@ -40,8 +43,31 @@ interface SimilarMedicinesProps {
 
 export function SimilarMedicines({ substance, medicines }: SimilarMedicinesProps) {
     const { nearbyPharmacy } = useNearbyPharmacy();
+    const { isSubscribed, unsubscribe } = useNotification();
+    const { isFavorite, addFavorite, removeFavorite } = useFavorite();
+    const [pendingRemovalMed, setPendingRemovalMed] = React.useState<Medicine | null>(null);
 
     if (medicines.length === 0) return null;
+
+    const handleFavoriteToggle = (med: Medicine) => {
+        if (isFavorite(med.tkSzam)) {
+            if (isSubscribed(med.tkSzam)) {
+                setPendingRemovalMed(med);
+            } else {
+                removeFavorite(med.tkSzam);
+            }
+        } else {
+            addFavorite(med);
+        }
+    };
+
+    const confirmRemoval = () => {
+        if (pendingRemovalMed) {
+            removeFavorite(pendingRemovalMed.tkSzam);
+            unsubscribe(pendingRemovalMed.tkSzam);
+            setPendingRemovalMed(null);
+        }
+    };
 
     const getStatusBadge = (status: string) => {
         const s = status?.toLowerCase() || '';
@@ -85,10 +111,17 @@ export function SimilarMedicines({ substance, medicines }: SimilarMedicinesProps
                     </h2>
                 </div>
 
+                <FavoriteRemovalModal
+                    isOpen={!!pendingRemovalMed}
+                    onClose={() => setPendingRemovalMed(null)}
+                    onConfirm={confirmRemoval}
+                />
+
                 <div className="overflow-x-auto">
                     <table className="table table-zebra w-full">
                         <thead>
                             <tr>
+                                <th className="bg-base-200">Kedvenc</th>
                                 <th className="bg-base-200">Név</th>
                                 <th className="bg-base-200">Kiszerelés</th>
                                 <th className="bg-base-200">Gyártó</th>
@@ -100,7 +133,20 @@ export function SimilarMedicines({ substance, medicines }: SimilarMedicinesProps
                         <tbody>
                             {medicines.map((med) => (
                                 <tr key={med.tkSzam} className="hover">
-                                    <td className="font-medium">{med.nev}</td>
+                                    <td>
+                                        <button
+                                            className={`btn btn-circle btn-ghost btn-xs ${isFavorite(med.tkSzam) ? 'text-warning' : 'text-gray-400'}`}
+                                            onClick={() => handleFavoriteToggle(med)}
+                                            title={isFavorite(med.tkSzam) ? "Eltávolítás a kedvencekből" : "Kedvencekhez"}
+                                        >
+                                            <span className={`material-symbols-rounded text-base ${isFavorite(med.tkSzam) ? 'fill-1' : ''}`}>star</span>
+                                        </button>
+                                    </td>
+                                    <td className="font-medium">
+                                        <Link href={`/gyogyszerek/${med.tkSzam}`} className="hover:text-primary transition-colors">
+                                            {med.nev}
+                                        </Link>
+                                    </td>
                                     <td>{med.kiszereles}</td>
                                     <td>{med.gyarto}</td>
                                     <td>{getStatusBadge(med.status)}</td>
