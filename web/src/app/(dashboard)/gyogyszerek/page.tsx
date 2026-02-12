@@ -62,8 +62,8 @@ type CardSortOption = 'name-asc' | 'name-desc' | 'lastUpdate-desc'
     | 'activeSubstance-asc' | 'activeSubstance-desc';
 
 const DEFAULT_COLUMN_ORDER: MedicineTableColumn[] = [
-    'lastUpdate', 'status', 'nev', 'activeSubstance', 'kiszereles', 'gyarto', 'nearbyPharmacyStock', 'nearbyPharmacyLastUpdate', 'actions',
-    'tkSzam', 'packagingDetails', 'dispensability', 'dispensabilitySub', 'safetyFeatures', 'authorizationDate'
+    'lastUpdate', 'status', 'nev', 'activeSubstance', 'kiszereles', 'gyarto', 'nearbyPharmacyStock', 'nearbyPharmacyLastUpdate',
+    'tkSzam', 'packagingDetails', 'dispensability', 'dispensabilitySub', 'safetyFeatures', 'authorizationDate', 'actions'
 ];
 
 const DEFAULT_VIEW_SETTINGS: ViewSettings = {
@@ -150,13 +150,20 @@ export default function MedicinesPage() {
             try {
                 const parsed = JSON.parse(savedSettings);
                 // Ensure all default columns are present in the order, even if not in saved settings
-                const savedOrder = parsed.tableColumnOrder || DEFAULT_COLUMN_ORDER;
+                let savedOrder = parsed.tableColumnOrder || DEFAULT_COLUMN_ORDER;
+
+                // Ensure 'actions' is removed from its current position and added to the end
+                savedOrder = savedOrder.filter((col: string) => col !== 'actions');
                 const updatedOrder = [...savedOrder];
+
                 DEFAULT_COLUMN_ORDER.forEach(col => {
-                    if (!updatedOrder.includes(col)) {
+                    if (!updatedOrder.includes(col) && col !== 'actions') {
                         updatedOrder.push(col);
                     }
                 });
+
+                // Always add 'actions' to the end
+                updatedOrder.push('actions');
 
                 setViewSettings({
                     tableColumns: { ...DEFAULT_VIEW_SETTINGS.tableColumns, ...parsed.tableColumns },
@@ -440,6 +447,10 @@ export default function MedicinesPage() {
     const [draggedColumn, setDraggedColumn] = useState<MedicineTableColumn | null>(null);
 
     const handleDragStart = (e: React.DragEvent, column: MedicineTableColumn) => {
+        if (column === 'actions') {
+            e.preventDefault();
+            return;
+        }
         setDraggedColumn(column);
         e.dataTransfer.effectAllowed = 'move';
         // Add a ghost image or styling if needed
@@ -462,7 +473,7 @@ export default function MedicinesPage() {
 
     const handleDrop = (e: React.DragEvent, targetColumn: MedicineTableColumn) => {
         e.preventDefault();
-        if (!draggedColumn || draggedColumn === targetColumn) return;
+        if (!draggedColumn || draggedColumn === targetColumn || targetColumn === 'actions') return;
 
         const newOrder = [...viewSettings.tableColumnOrder];
         const currentIndex = newOrder.indexOf(draggedColumn);
@@ -471,9 +482,15 @@ export default function MedicinesPage() {
         newOrder.splice(currentIndex, 1);
         newOrder.splice(targetIndex, 0, draggedColumn);
 
+        // Safety check to ensure actions is still at the end
+        const finalOrder: MedicineTableColumn[] = [
+            ...newOrder.filter(col => col !== 'actions'),
+            'actions'
+        ];
+
         setViewSettings(prev => ({
             ...prev,
-            tableColumnOrder: newOrder
+            tableColumnOrder: finalOrder
         }));
     };
 
@@ -499,7 +516,7 @@ export default function MedicinesPage() {
             actions: 'Műveletek'
         };
 
-        const sortKeyMap: Record<string, SortKey> = {
+        const sortKeyMap: Record<string, SortKey | undefined> = {
             tkSzam: 'tkSzam',
             nev: 'nev',
             activeSubstance: 'activeSubstance',
@@ -513,22 +530,25 @@ export default function MedicinesPage() {
             lastUpdate: 'lastUpdate',
             nearbyPharmacyStock: 'nearbyPharmacyStock',
             nearbyPharmacyLastUpdate: 'nearbyPharmacyLastUpdate',
-            status: 'status'
+            status: 'status',
+            actions: undefined
         };
 
         return (
             <th
                 key={col}
-                draggable
+                draggable={col !== 'actions'}
                 onDragStart={(e) => handleDragStart(e, col)}
                 onDragEnd={handleDragEnd}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, col)}
-                className={`sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm cursor-grab active:cursor-grabbing select-none hover:bg-base-200 ${draggedColumn === col ? 'bg-base-300' : ''}`}
-                onClick={() => isSortable && handleTableSort(sortKeyMap[col])}
+                className={`sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm ${col !== 'actions' ? 'cursor-grab active:cursor-grabbing hover:bg-base-200' : ''} select-none ${draggedColumn === col ? 'bg-base-300' : ''}`}
+                onClick={() => isSortable && sortKeyMap[col] && handleTableSort(sortKeyMap[col]!)}
             >
                 <div className="flex items-center gap-1">
-                    <span className="material-symbols-rounded text-xs opacity-30">drag_indicator</span>
+                    {col !== 'actions' && (
+                        <span className="material-symbols-rounded text-xs opacity-30">drag_indicator</span>
+                    )}
                     {labelMap[col]}
                     {sortKey === sortKeyMap[col] && (sortDirection === 'asc' ? ' ▲' : ' ▼')}
                 </div>
