@@ -106,7 +106,7 @@ function MedicinesPageContent() {
     const [medicines, setMedicines] = useState<Medicine[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterStatus, setFilterStatus] = useState('all');
+    const [filterStatus, setFilterStatus] = useState(searchParams.get('status') || 'all');
     const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
     const [viewSettings, setViewSettings] = useState<ViewSettings>(DEFAULT_VIEW_SETTINGS);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -114,7 +114,7 @@ function MedicinesPageContent() {
     const { isSubscribed, subscribe, unsubscribe } = useNotification();
     const { isFavorite, addFavorite, removeFavorite } = useFavorite();
     const [favoritesOnly, setFavoritesOnly] = useState(false);
-    const [nearbyOnly, setNearbyOnly] = useState(false);
+    const [nearbyOnly, setNearbyOnly] = useState(searchParams.get('nearbyOnly') === 'true');
     const { nearbyPharmacy } = useNearbyPharmacy();
     const [isRemovalWarningOpen, setIsRemovalWarningOpen] = useState(false);
     const [selectedMedicineForRemoval, setSelectedMedicineForRemoval] = useState<Medicine | null>(null);
@@ -258,7 +258,8 @@ function MedicinesPageContent() {
         // Status normalization for filter matching
         // Make sure we handle potential status variations
         const medStatus = medicine.status || 'Elérhető';
-        const matchesStatus = filterStatus === 'all' || medStatus === filterStatus;
+        const matchesStatus = filterStatus === 'all' ||
+            (filterStatus === 'not_available' ? (medStatus === 'Készlethiány' || medStatus === 'Megszűnt') : medStatus === filterStatus);
 
         // Column filters
         const matchesColumnFilters = Object.entries(columnFilters).every(([key, value]) => {

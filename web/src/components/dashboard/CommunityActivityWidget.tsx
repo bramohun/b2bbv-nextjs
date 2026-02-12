@@ -8,7 +8,7 @@
  * hogy bekapcsolódhassak a beszélgetésekbe és tájékozódjak a közösségi témákról.
  * 
  * FUNKCIÓK:
- * - Aktivitási lista: A legutóbbi 5 fórumtéma megjelenítése.
+ * - Aktivitási lista: A legutóbbi 10 fórumtéma megjelenítése.
  * - Téma részletek: Cím, létrehozó neve, és formázott időbélyeg.
  * - Kategória jelölés: Specializáció badge-ek (pl. "Belgyógyászat").
  * - Interakciós adatok: Hozzászólások számának kijelzése.
@@ -75,7 +75,7 @@ export function CommunityActivityWidget({ activities }: CommunityActivityWidgetP
                     )}
                 </div>
 
-                <div className="card-actions justify-end mt-4 pt-4 border-t border-base-200">
+                <div className="card-actions justify-start mt-4 pt-4 border-t border-base-200">
                     <Link href="/kozosseg" className="btn btn-ghost btn-sm text-primary gap-1">
                         Tovább a Közösség oldalra
                         <span className="material-symbols-rounded text-sm">arrow_forward</span>

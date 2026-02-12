@@ -10,7 +10,7 @@
  * FUNKCIÓK:
  * - Kiválasztott patika nézet:
  *   - Patika neve és statisztikai összesítő (ma/tegnap) a patika készletére.
- *   - TOP 10 változás a patikában (Státusz, Név, Dátum oszlopokkal).
+ *   - TOP 12 változás a patikában (Státusz, Név, Dátum oszlopokkal).
  *   - Link az összes gyógyszertári változáshoz.
  * - Patika kiválasztása nézet (Fallback):
  *   - Interaktív térkép (PharmacyMap) a patikák böngészéséhez.
@@ -59,16 +59,24 @@ export function PharmacyStockWidget({ medicines, pharmacies }: PharmacyStockWidg
             const updateDate = med.lastUpdate.split('T')[0];
             const isTargetStatus = med.status === 'Készlethiány' || med.status === 'Megszűnt';
 
-            if (isTargetStatus) {
-                if (updateDate === todayStr) acc.today++;
-                if (updateDate === yesterdayStr) acc.yesterday++;
+            if (updateDate === todayStr) {
+                if (isTargetStatus) {
+                    acc.today++;
+                    acc.nemElerheto++;
+                }
+
+                if (med.status === 'Elérhető') acc.elerheto++;
+            }
+
+            if (updateDate === yesterdayStr && isTargetStatus) {
+                acc.yesterday++;
             }
             return acc;
-        }, { today: 0, yesterday: 0 });
+        }, { today: 0, yesterday: 0, nemElerheto: 0, elerheto: 0 });
 
         const changes = pharmacyMedicines
             .sort((a, b) => new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime())
-            .slice(0, 10);
+            .slice(0, 12);
 
         return (
             <div className="card bg-base-100 shadow-sm border border-base-200 h-full">
@@ -87,12 +95,20 @@ export function PharmacyStockWidget({ medicines, pharmacies }: PharmacyStockWidg
                     <div className="grid grid-cols-2 gap-3 mb-6">
                         <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex flex-col items-center justify-center text-center">
                             <span className="text-xs font-semibold text-primary/70 uppercase tracking-wider mb-1">Mai nap</span>
-                            <div className="flex items-baseline gap-1">
+                            <div className="flex items-baseline gap-1 mb-2">
                                 <span className="text-2xl font-black text-primary">{stats.today}</span>
                                 <span className="text-[10px] font-bold text-primary/50">db</span>
                             </div>
+                            <div className="flex flex-col gap-0.5 text-[10px] font-medium text-primary/70">
+                                <Link href="/gyogyszerek?status=not_available&nearbyOnly=true" className="hover:underline hover:text-primary transition-colors">
+                                    • {stats.nemElerheto} db már nem elérhető
+                                </Link>
+                                <Link href="/gyogyszerek?status=Elérhető&nearbyOnly=true" className="hover:underline hover:text-primary transition-colors">
+                                    • {stats.elerheto} db újra elérhető
+                                </Link>
+                            </div>
                         </div>
-                        <div className="bg-base-200/50 border border-base-300 rounded-xl p-3 flex flex-col items-center justify-center text-center">
+                        <div className="bg-base-200/50 border border-base-300 rounded-xl p-3 flex flex-col items-center justify-center text-center h-full">
                             <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1">Tegnapi nap</span>
                             <div className="flex items-baseline gap-1">
                                 <span className="text-2xl font-black text-base-content/80">{stats.yesterday}</span>
@@ -143,10 +159,10 @@ export function PharmacyStockWidget({ medicines, pharmacies }: PharmacyStockWidg
                         </table>
                     </div>
 
-                    <div className="mt-4 pt-4 border-t border-base-200">
+                    <div className="card-actions justify-start mt-4 pt-4 border-t border-base-200">
                         <Link
                             href="/gyogyszerek?sort=nearbyPharmacyLastUpdate&order=desc"
-                            className="btn btn-ghost btn-sm btn-block text-primary gap-2"
+                            className="btn btn-ghost btn-sm text-primary gap-1"
                         >
                             Összes gyógyszertári változás
                             <span className="material-symbols-rounded text-sm">arrow_forward</span>
@@ -172,14 +188,14 @@ export function PharmacyStockWidget({ medicines, pharmacies }: PharmacyStockWidg
                     <PharmacyMap pharmacies={pharmacies} />
                 </div>
 
-                <div className="p-4 bg-primary/5">
-                    <div className="alert alert-info py-2 rounded-lg text-xs mb-3">
+                <div className="card-actions justify-start p-4 bg-primary/5 border-t border-base-200">
+                    <div className="alert alert-info py-2 rounded-lg text-xs mb-3 w-full">
                         <span className="material-symbols-rounded text-sm">info</span>
                         <div>Ha kiválaszt egy közeli patikát, láthatja annak készletmódosulását</div>
                     </div>
 
-                    <div className="flex justify-end">
-                        <Link href="/gyogyszertarak" className="text-primary text-sm font-semibold hover:underline flex items-center gap-1">
+                    <div className="flex justify-start w-full">
+                        <Link href="/gyogyszertarak" className="btn btn-ghost btn-sm text-primary gap-1">
                             Tovább a gyógyszertárkeresőre
                             <span className="material-symbols-rounded text-sm">arrow_forward</span>
                         </Link>

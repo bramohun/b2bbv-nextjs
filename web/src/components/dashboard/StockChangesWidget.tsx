@@ -10,7 +10,7 @@
  * 
  * FUNKCIÓK:
  * - Statisztikai összesítő: Mai és tegnapi "Készlethiány" vagy "Megszűnt" státuszú változások száma.
- * - TOP 10 lista: A legutóbbi 10 készletváltozás időrendi sorrendben.
+ * - TOP 12 lista: A legutóbbi 12 készletváltozás időrendi sorrendben.
  * - Táblázatos megjelenítés:
  *   - Státusz: Első oszlop, színes badge jelöléssel.
  *   - Név: Második oszlop, dinamikusan nyúlik a dátumig.
@@ -44,16 +44,23 @@ export function StockChangesWidget({ medicines }: StockChangesWidgetProps) {
         const updateDate = med.lastUpdate.split('T')[0];
         const isTargetStatus = med.status === 'Készlethiány' || med.status === 'Megszűnt';
 
-        if (isTargetStatus) {
-            if (updateDate === todayStr) acc.today++;
-            if (updateDate === yesterdayStr) acc.yesterday++;
+        if (updateDate === todayStr) {
+            if (isTargetStatus) acc.today++;
+
+            if (med.status === 'Megszűnt') acc.megszunt++;
+            if (med.status === 'Készlethiány') acc.hiany++;
+            if (med.status === 'Elérhető') acc.elerheto++;
+        }
+
+        if (updateDate === yesterdayStr && isTargetStatus) {
+            acc.yesterday++;
         }
         return acc;
-    }, { today: 0, yesterday: 0 });
+    }, { today: 0, yesterday: 0, megszunt: 0, hiany: 0, elerheto: 0 });
 
     const latestChanges = [...medicines]
         .sort((a, b) => new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime())
-        .slice(0, 10);
+        .slice(0, 12);
 
     return (
         <div className="card bg-base-100 shadow-sm border border-base-200 h-full">
@@ -69,12 +76,23 @@ export function StockChangesWidget({ medicines }: StockChangesWidgetProps) {
                 <div className="grid grid-cols-2 gap-3 mb-6">
                     <div className="bg-warning/10 border border-warning/20 rounded-xl p-3 flex flex-col items-center justify-center text-center">
                         <span className="text-xs font-semibold text-warning-content/70 uppercase tracking-wider mb-1">Mai változások</span>
-                        <div className="flex items-baseline gap-1">
+                        <div className="flex items-baseline gap-1 mb-2">
                             <span className="text-2xl font-black text-warning-content">{stats.today}</span>
                             <span className="text-[10px] font-bold text-warning-content/50">db</span>
                         </div>
+                        <div className="flex flex-col gap-0.5 text-[10px] font-medium text-warning-content/70">
+                            <Link href="/gyogyszerek?status=Megszűnt" className="hover:underline hover:text-primary transition-colors">
+                                • {stats.megszunt} megszűnt
+                            </Link>
+                            <Link href="/gyogyszerek?status=Készlethiány" className="hover:underline hover:text-primary transition-colors">
+                                • {stats.hiany} hiánycikk lett
+                            </Link>
+                            <Link href="/gyogyszerek?status=Elérhető" className="hover:underline hover:text-primary transition-colors">
+                                • {stats.elerheto} újra elérhető
+                            </Link>
+                        </div>
                     </div>
-                    <div className="bg-base-200/50 border border-base-300 rounded-xl p-3 flex flex-col items-center justify-center text-center">
+                    <div className="bg-base-200/50 border border-base-300 rounded-xl p-3 flex flex-col items-center justify-center text-center h-full">
                         <span className="text-xs font-semibold text-base-content/60 uppercase tracking-wider mb-1">Tegnapi nap</span>
                         <div className="flex items-baseline gap-1">
                             <span className="text-2xl font-black text-base-content/80">{stats.yesterday}</span>
@@ -127,7 +145,7 @@ export function StockChangesWidget({ medicines }: StockChangesWidgetProps) {
                     </table>
                 </div>
 
-                <div className="card-actions justify-end mt-4 pt-4 border-t border-base-200">
+                <div className="card-actions justify-start mt-4 pt-4 border-t border-base-200">
                     <Link href="/gyogyszerek" className="btn btn-ghost btn-sm text-primary gap-1">
                         Összes változás
                         <span className="material-symbols-rounded text-sm">arrow_forward</span>
