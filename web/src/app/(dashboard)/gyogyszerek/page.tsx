@@ -787,35 +787,7 @@ function MedicinesPageContent() {
                 onClose={() => setIsRemovalWarningOpen(false)}
                 onConfirm={confirmRemoval}
             />
-            {/* DEBUG PANEL */}
-            <div className="bg-gray-100 p-4 mb-4 text-xs font-mono overflow-auto border border-red-500">
-                <h3 className="font-bold text-red-500">DEBUG INFO</h3>
-                <p>Medicines Total: {medicines.length}</p>
-                <p>Filtered Total: {filteredMedicines.length}</p>
-                <p>FilterStatus: {filterStatus}</p>
-                <p>NearbyPharmacy: {nearbyPharmacy?.id}</p>
-                <p>NearbyOnly: {String(nearbyOnly)}</p>
-                <p>ColumnFilters: {JSON.stringify(columnFilters)}</p>
-                <div className="mt-2">
-                    <strong>First 5 Items Check:</strong>
-                    {medicines.slice(0, 5).map(m => (
-                        <div key={m.internalId} className="border-b border-gray-300 py-1">
-                            {m.tkSzam} | Status: {m.status} |
-                            NearbyAvailable: {nearbyPharmacy ? String(isAvailableInPharmacy(m.tkSzam, nearbyPharmacy.id)) : 'N/A'} |
-                            MatchStatus: {filterStatus === 'all' || (filterStatus === 'not_available' ? (m.status === 'Készlethiány' || m.status === 'Megszűnt') : m.status === filterStatus) ? 'YES' : 'NO'} |
-                            MatchNearbyColumn: {
-                                !columnFilters['nearbyPharmacyStock'] || (
-                                    nearbyPharmacy && (
-                                        columnFilters['nearbyPharmacyStock'] === 'available'
-                                            ? isAvailableInPharmacy(m.tkSzam, nearbyPharmacy.id)
-                                            : !isAvailableInPharmacy(m.tkSzam, nearbyPharmacy.id)
-                                    )
-                                ) ? 'YES' : 'NO'
-                            }
-                        </div>
-                    ))}
-                </div>
-            </div>
+
             {/* Header & Controls */}
             <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                 <h1 className="text-3xl font-bold">
