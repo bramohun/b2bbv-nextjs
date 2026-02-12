@@ -81,7 +81,7 @@ export function PharmacyStockWidget({ medicines, pharmacies, period = 1 }: Pharm
 
         const changes = recentPharmacyMedicines
             .sort((a, b) => new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime())
-            .slice(0, 12);
+            .slice(0, 10);
 
         // Helper for date link
         const getDateFilterParams = () => {
@@ -127,7 +127,7 @@ export function PharmacyStockWidget({ medicines, pharmacies, period = 1 }: Pharm
 
                     <div className="mb-2">
                         <h3 className="text-sm font-semibold text-base-content/70">
-                            Legutóbbi 10 készletváltozás
+                            Legutóbbi {changes.length} készletváltozás
                         </h3>
                     </div>
 
@@ -175,7 +175,7 @@ export function PharmacyStockWidget({ medicines, pharmacies, period = 1 }: Pharm
 
                     <div className="card-actions justify-start mt-4 pt-4 border-t border-base-200">
                         <Link
-                            href={`/gyogyszerek?sort=nearbyPharmacyLastUpdate&order=desc${getDateFilterParams()}`}
+                            href="/gyogyszerek?sort=nearbyPharmacyLastUpdate&order=desc"
                             className="btn btn-ghost btn-sm text-primary gap-1"
                         >
                             Összes gyógyszertári változás

@@ -68,7 +68,7 @@ export function StockChangesWidget({ medicines, period = 1 }: StockChangesWidget
 
     const latestChanges = [...medicines]
         .sort((a, b) => new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime())
-        .slice(0, 12);
+        .slice(0, 10);
 
     // Helper for date link
     const getDateFilterParams = () => {
@@ -114,7 +114,7 @@ export function StockChangesWidget({ medicines, period = 1 }: StockChangesWidget
 
                 <div className="mb-2">
                     <h3 className="text-sm font-semibold text-base-content/70">
-                        Legutóbbi 10 készletváltozás
+                        Legutóbbi {latestChanges.length} készletváltozás
                     </h3>
                 </div>
 
@@ -163,8 +163,8 @@ export function StockChangesWidget({ medicines, period = 1 }: StockChangesWidget
                 </div>
 
                 <div className="card-actions justify-start mt-4 pt-4 border-t border-base-200">
-                    <Link href={`/gyogyszerek?${getDateFilterParams().substring(1)}`} className="btn btn-ghost btn-sm text-primary gap-1">
-                        Összes változás ({periodLabel.toLowerCase()})
+                    <Link href="/gyogyszerek?sort=lastUpdate&order=desc" className="btn btn-ghost btn-sm text-primary gap-1">
+                        Összes változás
                         <span className="material-symbols-rounded text-sm">arrow_forward</span>
                     </Link>
                 </div>
