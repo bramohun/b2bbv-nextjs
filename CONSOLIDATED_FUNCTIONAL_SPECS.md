@@ -83,7 +83,7 @@ Felhasználóként szeretném látni, hogy az általam figyelt időszakban milye
 ##### Működési logika
 - A widget a kapott gyógyszerlistát szűri a kiválasztott időszak (`period`) alapján.
 - A `lastUpdate` mező alapján dönti el, hogy egy gyógyszer beleesik-e az időszakba.
-- Kattintható statisztikák, amelyek URL paraméterekkel szűrik a gyógyszer listát.
+- Kattintható statisztikák, amelyek URL paraméterekkel (`status`, `lastUpdate_from`) szűrik a gyógyszer listát.
 
 ---
 
@@ -97,9 +97,9 @@ Felhasználóként szeretném látni a beállított közeli patikám készletvá
 ##### Funkciók
 - **Ha van beállított közeli patika:**
   - Összesítő statisztikák (Készleten, Nem elérhető darabszámok) a közeli patikára vonatkozóan.
-  - Az egyes státuszokra kattintva a gyógyszerlistára navigálás, szűrve a közeli patika elérhetőségre.
-  - Legfrissebb készletváltozások listája a kiválasztott patikában (max. 10 elem).
-  - „Összes gyógyszertári változás" link.
+  - Az egyes státuszokra kattintva a gyógyszerlistára navigálás, szűrve a közeli patika elérhetőségre (`nearbyOnly=true` és `nearbyPharmacyStock`).
+  - Legfrissebb készletváltozások listája a kiválasztott patikában (max. 10 elem), Státusz, Név, Dátum oszlopokkal.
+  - „Összes gyógyszertári változás" link, amely a `nearbyPharmacyLastUpdate` szerint rendezett listára visz.
 - **Ha nincs beállított közeli patika:**
   - Térképes nézet megjelenítése.
   - Felkérés a közeli patika beállítására.
@@ -142,16 +142,17 @@ Felhasználóként egy központi áttekintő felületen szeretném böngészni a
 - **Szűrés közeli patika elérhetőség alapján:** Csak a közeli patikában elérhető / nem elérhető termékek.
 - **Rendezés:** Támogatott mezők: Név, TK-szám, Státusz, Utolsó frissítés, Közeli patika elérhetősége, Közeli patika frissítés időpontja. Emelkedő és csökkenő irány.
 - **Nézet váltás:** Táblázatos nézet és kártya nézet között.
-- **Oszlop/mező testreszabás:** Felhasználó kiválaszthatja a látható oszlopokat/mezőket, átrendezheti őket. A „Műveletek" oszlop mindig fix az utolsó helyen. Beállítások `localStorage`-ban tárolódnak.
-- **Lapozás:** 30 elem/oldal.
+- **Oszlop/mező testreszabás:** Felhasználó kiválaszthatja a látható oszlopokat/mezőket, átrendezheti őket drag & drop módszerrel. A „Műveletek" oszlop mindig fix az utolsó helyen. Beállítások `localStorage`-ban tárolódnak.
+- **Lapozás:** 24 elem/oldal (rácsbarát).
 - **Kedvencek kezelése:** Gyógyszerek hozzáadása/eltávolítása a kedvencek közül. Ha az eltávolítandó termékre értesítés is van, figyelmeztető modal megjelenítése.
 - **Értesítés kezelése:** Feliratkozás/leiratkozás készletváltozás értesítésekre. Feliratkozáskor automatikusan kedvenc is lesz.
-- **URL paraméterek támogatása:** `search`, `status`, `nearbyOnly`, `sort`, `order` paraméterek a szűrők és rendezés közvetlen beállítására.
+- **URL paraméterek támogatása:** `search`, `status`, `nearbyOnly`, `sort`, `order`, `lastUpdate_from`, `lastUpdate_to`, `nearbyPharmacyStock`, `nearbyPharmacyLastUpdate_from` paraméterek a szűrők és rendezés közvetlen beállítására.
 
 ##### Működési logika
 - Kliens oldali szűrés és rendezés a betöltött adatokon.
 - `useMemo` a szűrt és rendezett listák hatékony kiszámításához.
-- Nézet beállítások (oszlop sorrend, láthatóság) `localStorage`-ban perzisztálódnak (`medicine_visible_columns`, `medicine_column_order`, stb.).
+- Nézet beállítások (oszlop sorrend, láthatóság) `localStorage`-ban perzisztálódnak (`medicineViewSettings`).
+- **Közeli patika logika:** Ha közeli patika van beállítva, a "Közeli patika" és "Közeli patika frissítve" oszlopok automatikusan megjelennek a táblázatban.
 
 ---
 
@@ -237,7 +238,7 @@ Felhasználóként szeretném látni a termékoldalon, hogy a kedvencnek jelölt
 - Közeli patika azonosítása a `NearbyPharmacyContext` segítségével.
 - Készletinformáció szimulálása determinisztikus mock logikával.
 - Státuszjelző badge megjelenítése (Elérhető – Zöld, Nem elérhető – Szürke).
-- **Utolsó frissítés időpontja** megjelenítése a státusz mellett.
+- **Utolsó frissítés időpontja:** A státusz mellett megjelenik az adat frissítésének időpontja is, hogy a felhasználó lássa az információ aktualitását.
 
 ##### Működési logika
 - Ha nincs beállítva közeli patika, a komponens nem jelenik meg.
@@ -257,8 +258,8 @@ Felhasználóként szeretném látni a kiválasztott gyógyszerrel megegyező ha
 - Hasonló termékek táblázatos megjelenítése.
 - Csak az „Elérhető" státuszú termékek szűrése és megjelenítése.
 - Gyors navigáció a helyettesítő termék adatlapjára (kattintható név link és „Megtekintés" gomb).
-- **Kedvenc funkció:** A hasonló termékek is kedvencnek jelölhetők. Eltávolítás esetén figyelmeztetés, ha értesítés is aktív.
-- **Közeli patika elérhetőség:** Megmutatjuk, hogy az adott termék elérhető-e a felhasználó kedvenc patikájában.
+- **Kedvenc funkció:** A hasonló termékek is kedvencnek jelölhetők a listában. Eltávolítás esetén figyelmeztetés (FavoriteRemovalModal), ha értesítés is aktív.
+- **Közeli patika elérhetőség:** Megmutatjuk, hogy az adott termék elérhető-e a felhasználó kedvenc patikájában (zöld pipa vagy tiltó ikon).
 
 ##### Működési logika
 - A komponens kap egy hatóanyag nevet és egy előre leszűrt listát.
@@ -527,9 +528,12 @@ Felhasználóként intuitív navigációs sávot szeretnék, amelyen gyorsan el�
 ##### Funkciók
 - Navigációs linkek (Dashboard, Gyógyszerek, Gyógyszertárak, Közösség).
 - Globális keresés (GlobalSearch) beágyazása.
-- Közeli patika információ és gyors elérés (térképes modal).
-- Kedvenc gyógyszerek dropdown lista (név, státusz, utolsó frissítés).
+- **Közeli patika információ:** A beállított patika nevének megjelenítése. Kattintásra a patikaválasztó modal nyílik meg.
+- **Kedvencek dropdown:** A kedvencnek jelölt gyógyszerek gyorslistája (Név, TK-szám, Státusz badge).
 - Felhasználói profil menü (felhasználó név, kijelentkezés).
+
+##### Működési logika
+- A patikaválasztó modal `React Portal` segítségével a `document.body`-ra kerül renderelésre, így biztosítva, hogy ne korlátozza a navigációs sáv (z-index/overflow) a megjelenését.
 
 ---
 
