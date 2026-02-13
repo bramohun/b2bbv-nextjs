@@ -106,7 +106,7 @@ export default function DashboardPage() {
 
                 {/* Right Column: Community Activity */}
                 <div className="lg:col-span-1">
-                    <CommunityActivityWidget activities={forumActivity.slice(0, 10)} />
+                    <CommunityActivityWidget activities={forumActivity.slice(0, 10)} period={period} />
                 </div>
             </div>
         </div>

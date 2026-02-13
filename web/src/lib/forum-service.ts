@@ -156,22 +156,33 @@ const PREDEFINED_TOPICS: Omit<ForumTopic, 'id' | 'authorId' | 'authorName' | 'is
 
 function generateMockTopics(): ForumTopic[] {
     return PREDEFINED_TOPICS.map((topicData, index) => {
-        const isAnonymous = Math.random() < 0.15;
+        // Deterministic randomization based on index
+        const isAnonymous = index % 5 === 0;
         const authorName = isAnonymous
             ? 'Anonim'
-            : MOCK_AUTHORS[Math.floor(Math.random() * MOCK_AUTHORS.length)];
-        const daysAgo = Math.floor(Math.random() * 60);
+            : MOCK_AUTHORS[index % MOCK_AUTHORS.length];
+
+        // Distribution of dates: 
+        // 0, 1 -> today/yesterday
+        // 2, 3 -> within 7 days
+        // others -> up to 60 days
+        let daysAgo = 0;
+        if (index === 0) daysAgo = 0;
+        else if (index === 1) daysAgo = 1;
+        else if (index < 4) daysAgo = index + 2;
+        else daysAgo = (index * 7) % 60;
 
         return {
             ...topicData,
             id: `topic_${index + 1}`,
-            authorId: isAnonymous ? null : `user_${Math.floor(Math.random() * 100)}`,
+            authorId: isAnonymous ? null : `user_${index}`,
             authorName,
+            authorNameLower: authorName.toLowerCase(), // In case this is used for sorting
             isAnonymous,
             createdAt: Date.now() - daysAgo * 24 * 60 * 60 * 1000,
-            likes: Math.floor(Math.random() * 45),
-            dislikes: Math.floor(Math.random() * 5),
-            commentCount: Math.floor(Math.random() * 20),
+            likes: (index * 5) % 50,
+            dislikes: index % 5,
+            commentCount: (index * 3) % 20,
         };
     });
 }
@@ -190,26 +201,33 @@ const MOCK_COMMENT_TEXTS = [
 ];
 
 function generateMockComments(topicId: string): ForumComment[] {
-    const count = Math.floor(Math.random() * 6) + 3;
+    // Extract index from topic_1, topic_2
+    const topicIdx = parseInt(topicId.split('_')[1]) || 0;
+    const count = (topicIdx % 5) + 3;
     const comments: ForumComment[] = [];
 
     for (let i = 0; i < count; i++) {
-        const isAnonymous = Math.random() < 0.2;
+        const isAnonymous = (topicIdx + i) % 4 === 0;
         const authorName = isAnonymous
             ? 'Anonim'
-            : MOCK_AUTHORS[Math.floor(Math.random() * MOCK_AUTHORS.length)];
-        const daysAgo = Math.floor(Math.random() * 7);
+            : MOCK_AUTHORS[(topicIdx + i) % MOCK_AUTHORS.length];
+
+        // Distribution of comment dates based on topic index and comment index
+        // Some comments will be very recent
+        let daysAgo = 0;
+        if (i === 0) daysAgo = 0; // At least one very recent comment for some topics
+        else daysAgo = (topicIdx + i) % 10;
 
         comments.push({
             id: `comment_${topicId}_${i + 1}`,
             topicId,
-            authorId: isAnonymous ? null : `user_${Math.floor(Math.random() * 100)}`,
+            authorId: isAnonymous ? null : `user_${i}`,
             authorName,
             isAnonymous,
-            text: MOCK_COMMENT_TEXTS[Math.floor(Math.random() * MOCK_COMMENT_TEXTS.length)],
+            text: MOCK_COMMENT_TEXTS[(topicIdx + i) % MOCK_COMMENT_TEXTS.length],
             createdAt: Date.now() - daysAgo * 24 * 60 * 60 * 1000,
-            likes: Math.floor(Math.random() * 10),
-            dislikes: Math.floor(Math.random() * 3),
+            likes: (topicIdx + i) % 12,
+            dislikes: (topicIdx + i) % 3,
         });
     }
 
@@ -537,6 +555,28 @@ export function getAllTags(topics: ForumTopic[]): string[] {
         topic.tags.forEach(tag => tags.add(tag));
     });
     return Array.from(tags).sort((a, b) => a.localeCompare(b, 'hu'));
+}
+
+export function getForumStats(periodDays: number = 1): { newTopics: number; newComments: number } {
+    const now = Date.now();
+    const startDate = now - periodDays * 24 * 60 * 60 * 1000;
+
+    const topics = getTopics();
+    const allComments = getFromStorage<ForumComment[]>(STORAGE_KEYS.COMMENTS, []);
+
+    // Ensure mock comments exist for all topics
+    topics.forEach(topic => {
+        const hasComments = allComments.some(c => c.topicId === topic.id);
+        if (!hasComments) {
+            const mockComments = generateMockComments(topic.id);
+            allComments.push(...mockComments);
+        }
+    });
+
+    const newTopics = topics.filter(t => t.createdAt >= startDate).length;
+    const newComments = allComments.filter(c => c.createdAt >= startDate).length;
+
+    return { newTopics, newComments };
 }
 
 export function getLatestForumActivity(limit: number = 10): ForumTopic[] {
