@@ -10,7 +10,7 @@
  * 
  * FUNKCIÓK:
  * - Statisztikai összesítő: Mai és tegnapi "Készlethiány" vagy "Megszűnt" státuszú változások száma.
- * - TOP 12 lista: A legutóbbi 12 készletváltozás időrendi sorrendben.
+ * - TOP 20 lista: A legutóbbi 20 készletváltozás időrendi sorrendben.
  * - Táblázatos megjelenítés:
  *   - Státusz: Első oszlop, színes badge jelöléssel.
  *   - Név: Második oszlop, dinamikusan nyúlik a dátumig.
@@ -68,7 +68,7 @@ export function StockChangesWidget({ medicines, period = 1 }: StockChangesWidget
 
     const latestChanges = [...medicines]
         .sort((a, b) => new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime())
-        .slice(0, 10);
+        .slice(0, 20);
 
     // Helper for date link
     const getDateFilterParams = () => {

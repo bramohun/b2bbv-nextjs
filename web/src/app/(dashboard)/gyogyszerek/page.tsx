@@ -43,10 +43,9 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
-import { Medicine, ViewSettings, MedicineTableColumn, MedicineCardField } from '@/types';
+import { Medicine, ViewSettings, MedicineTableColumn } from '@/types';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { MedicineCard } from '@/components/medicines/MedicineCard';
 import { formatDate } from '@/lib/utils';
 import { useNotification } from '@/context/NotificationContext';
 import { useFavorite } from '@/context/FavoriteContext';
@@ -59,8 +58,7 @@ type SortKey = 'nev' | 'activeSubstance' | 'kiszereles' | 'gyarto' | 'status'
     | 'tkSzam' | 'packagingDetails' | 'dispensability' | 'dispensabilitySub'
     | 'safetyFeatures' | 'authorizationDate' | 'lastUpdate'
     | 'nearbyPharmacyStock' | 'nearbyPharmacyLastUpdate';
-type CardSortOption = 'name-asc' | 'name-desc' | 'lastUpdate-desc'
-    | 'activeSubstance-asc' | 'activeSubstance-desc';
+
 
 const DEFAULT_COLUMN_ORDER: MedicineTableColumn[] = [
     'lastUpdate', 'status', 'nev', 'activeSubstance', 'kiszereles', 'gyarto', 'nearbyPharmacyStock', 'nearbyPharmacyLastUpdate',
@@ -85,19 +83,6 @@ const DEFAULT_VIEW_SETTINGS: ViewSettings = {
         authorizationDate: false,
         lastUpdate: true,
     },
-    cardFields: {
-        status: true,
-        tkSzam: true,
-        kiszereles: true,
-        gyarto: false,
-        actions: true,
-        packagingDetails: false,
-        dispensability: false,
-        dispensabilitySub: false,
-        safetyFeatures: false,
-        authorizationDate: false,
-        lastUpdate: false,
-    },
     tableColumnOrder: DEFAULT_COLUMN_ORDER
 };
 
@@ -107,7 +92,7 @@ function MedicinesPageContent() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
     const [filterStatus, setFilterStatus] = useState(searchParams.get('status') || 'all');
-    const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+    const [viewMode] = useState<'grid' | 'table'>('table');
     const [viewSettings, setViewSettings] = useState<ViewSettings>(DEFAULT_VIEW_SETTINGS);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const settingsRef = useRef<HTMLDivElement>(null);
@@ -122,7 +107,6 @@ function MedicinesPageContent() {
     // Sorting State
     const [sortKey, setSortKey] = useState<SortKey | null>((searchParams.get('sort') as SortKey) || 'lastUpdate');
     const [sortDirection, setSortDirection] = useState<SortDirection>((searchParams.get('order') as SortDirection) || 'desc');
-    const [cardSortOption, setCardSortOption] = useState<CardSortOption>('name-asc');
 
     // Initialize column filters from URL params
     const initialColumnFilters: Record<string, string> = {};
@@ -182,7 +166,6 @@ function MedicinesPageContent() {
 
                 setViewSettings({
                     tableColumns: { ...DEFAULT_VIEW_SETTINGS.tableColumns, ...parsed.tableColumns },
-                    cardFields: { ...DEFAULT_VIEW_SETTINGS.cardFields, ...parsed.cardFields },
                     tableColumnOrder: updatedOrder
                 });
             } catch (e) {
@@ -239,15 +222,6 @@ function MedicinesPageContent() {
         }));
     };
 
-    const toggleCardField = (field: MedicineCardField) => {
-        setViewSettings(prev => ({
-            ...prev,
-            cardFields: {
-                ...prev.cardFields,
-                [field]: !prev.cardFields[field]
-            }
-        }));
-    };
 
     const handleColumnFilterChange = (column: string, value: string) => {
         setColumnFilters(prev => ({
@@ -352,17 +326,9 @@ function MedicinesPageContent() {
         let key: string | null = null;
         let dir: 'asc' | 'desc' = 'asc';
 
-        if (viewMode === 'table' && sortKey && sortDirection) {
+        if (sortKey && sortDirection) {
             key = sortKey;
             dir = sortDirection;
-        } else if (viewMode === 'grid') {
-            switch (cardSortOption) {
-                case 'name-asc': key = 'nev'; dir = 'asc'; break;
-                case 'name-desc': key = 'nev'; dir = 'desc'; break;
-                case 'lastUpdate-desc': key = 'lastUpdate'; dir = 'desc'; break;
-                case 'activeSubstance-asc': key = 'activeSubstance'; dir = 'asc'; break;
-                case 'activeSubstance-desc': key = 'activeSubstance'; dir = 'desc'; break;
-            }
         }
 
         if (!key) return list;
@@ -392,7 +358,7 @@ function MedicinesPageContent() {
                 : String(vb).localeCompare(String(va), 'hu');
         });
         return list;
-    }, [filteredMedicines, viewMode, sortKey, sortDirection, cardSortOption]);
+    }, [filteredMedicines, sortKey, sortDirection]);
 
     const handleTableSort = (key: SortKey) => {
         if (sortKey === key) {
@@ -818,22 +784,7 @@ function MedicinesPageContent() {
                         </button>
                     )}
 
-                    <div className="join">
-                        <button
-                            className={`join-item btn btn-md ${viewMode === 'grid' ? 'btn-active btn-primary' : ''}`}
-                            onClick={() => setViewMode('grid')}
-                            title="Rács nézet"
-                        >
-                            <span className="material-symbols-rounded">grid_view</span>
-                        </button>
-                        <button
-                            className={`join-item btn btn-md ${viewMode === 'table' ? 'btn-active btn-primary' : ''}`}
-                            onClick={() => setViewMode('table')}
-                            title="Lista nézet"
-                        >
-                            <span className="material-symbols-rounded">view_list</span>
-                        </button>
-                    </div>
+
 
                     <div className="relative z-50">
                         <button
@@ -850,178 +801,91 @@ function MedicinesPageContent() {
                                 className="absolute right-0 top-full mt-2 z-[50] w-64 p-2 shadow-xl bg-base-100 rounded-box border border-base-200 overflow-y-auto max-h-[80vh]"
                             >
                                 <ul className="menu menu-sm gap-1">
-                                    {viewMode === 'table' ? (
-                                        <>
-                                            <li className="menu-title px-2">Oszlopok megjelenítése</li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">TK-szám</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.tkSzam} onChange={() => toggleTableColumn('tkSzam')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Hatóanyag</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.activeSubstance} onChange={() => toggleTableColumn('activeSubstance')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Kiszerelés</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.kiszereles} onChange={() => toggleTableColumn('kiszereles')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Gyártó</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.gyarto} onChange={() => toggleTableColumn('gyarto')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Csomagolás</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.packagingDetails} onChange={() => toggleTableColumn('packagingDetails')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Státusz</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.status} onChange={() => toggleTableColumn('status')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Közeli patika</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.nearbyPharmacyStock} onChange={() => toggleTableColumn('nearbyPharmacyStock')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Közeli patika frissítve</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.nearbyPharmacyLastUpdate} onChange={() => toggleTableColumn('nearbyPharmacyLastUpdate')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Kiadhatóság</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.dispensability} onChange={() => toggleTableColumn('dispensability')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Kiad. Alcsop.</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.dispensabilitySub} onChange={() => toggleTableColumn('dispensabilitySub')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Biztonsági Elemek</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.safetyFeatures} onChange={() => toggleTableColumn('safetyFeatures')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Engedély Dátuma</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.authorizationDate} onChange={() => toggleTableColumn('authorizationDate')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Utolsó frissítés</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.lastUpdate} onChange={() => toggleTableColumn('lastUpdate')} />
-                                                </label>
-                                            </li>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <li className="menu-title px-2">Kártya mezők</li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Státusz</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.cardFields.status} onChange={() => toggleCardField('status')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">TK-szám</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.cardFields.tkSzam} onChange={() => toggleCardField('tkSzam')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Kiszerelés</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.cardFields.kiszereles} onChange={() => toggleCardField('kiszereles')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Gyártó</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.cardFields.gyarto} onChange={() => toggleCardField('gyarto')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Csomagolás</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.cardFields.packagingDetails} onChange={() => toggleCardField('packagingDetails')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Kiadhatóság</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.cardFields.dispensability} onChange={() => toggleCardField('dispensability')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Kiad. Alcsop.</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.cardFields.dispensabilitySub} onChange={() => toggleCardField('dispensabilitySub')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Biztonsági Elemek</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.cardFields.safetyFeatures} onChange={() => toggleCardField('safetyFeatures')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Engedély Dátuma</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.cardFields.authorizationDate} onChange={() => toggleCardField('authorizationDate')} />
-                                                </label>
-                                            </li>
-                                            <li>
-                                                <label className="label cursor-pointer hover:bg-base-200">
-                                                    <span className="label-text">Utolsó frissítés</span>
-                                                    <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.cardFields.lastUpdate} onChange={() => toggleCardField('lastUpdate')} />
-                                                </label>
-                                            </li>
-                                        </>
-                                    )}
+                                    <li className="menu-title px-2">Oszlopok megjelenítése</li>
+                                    <li>
+                                        <label className="label cursor-pointer hover:bg-base-200">
+                                            <span className="label-text">TK-szám</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.tkSzam} onChange={() => toggleTableColumn('tkSzam')} />
+                                        </label>
+                                    </li>
+                                    <li>
+                                        <label className="label cursor-pointer hover:bg-base-200">
+                                            <span className="label-text">Hatóanyag</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.activeSubstance} onChange={() => toggleTableColumn('activeSubstance')} />
+                                        </label>
+                                    </li>
+                                    <li>
+                                        <label className="label cursor-pointer hover:bg-base-200">
+                                            <span className="label-text">Kiszerelés</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.kiszereles} onChange={() => toggleTableColumn('kiszereles')} />
+                                        </label>
+                                    </li>
+                                    <li>
+                                        <label className="label cursor-pointer hover:bg-base-200">
+                                            <span className="label-text">Gyártó</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.gyarto} onChange={() => toggleTableColumn('gyarto')} />
+                                        </label>
+                                    </li>
+                                    <li>
+                                        <label className="label cursor-pointer hover:bg-base-200">
+                                            <span className="label-text">Csomagolás</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.packagingDetails} onChange={() => toggleTableColumn('packagingDetails')} />
+                                        </label>
+                                    </li>
+                                    <li>
+                                        <label className="label cursor-pointer hover:bg-base-200">
+                                            <span className="label-text">Státusz</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.status} onChange={() => toggleTableColumn('status')} />
+                                        </label>
+                                    </li>
+                                    <li>
+                                        <label className="label cursor-pointer hover:bg-base-200">
+                                            <span className="label-text">Közeli patika</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.nearbyPharmacyStock} onChange={() => toggleTableColumn('nearbyPharmacyStock')} />
+                                        </label>
+                                    </li>
+                                    <li>
+                                        <label className="label cursor-pointer hover:bg-base-200">
+                                            <span className="label-text">Közeli patika frissítve</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.nearbyPharmacyLastUpdate} onChange={() => toggleTableColumn('nearbyPharmacyLastUpdate')} />
+                                        </label>
+                                    </li>
+                                    <li>
+                                        <label className="label cursor-pointer hover:bg-base-200">
+                                            <span className="label-text">Kiadhatóság</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.dispensability} onChange={() => toggleTableColumn('dispensability')} />
+                                        </label>
+                                    </li>
+                                    <li>
+                                        <label className="label cursor-pointer hover:bg-base-200">
+                                            <span className="label-text">Kiad. Alcsop.</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.dispensabilitySub} onChange={() => toggleTableColumn('dispensabilitySub')} />
+                                        </label>
+                                    </li>
+                                    <li>
+                                        <label className="label cursor-pointer hover:bg-base-200">
+                                            <span className="label-text">Biztonsági Elemek</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.safetyFeatures} onChange={() => toggleTableColumn('safetyFeatures')} />
+                                        </label>
+                                    </li>
+                                    <li>
+                                        <label className="label cursor-pointer hover:bg-base-200">
+                                            <span className="label-text">Engedély Dátuma</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.authorizationDate} onChange={() => toggleTableColumn('authorizationDate')} />
+                                        </label>
+                                    </li>
+                                    <li>
+                                        <label className="label cursor-pointer hover:bg-base-200">
+                                            <span className="label-text">Utolsó frissítés</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.lastUpdate} onChange={() => toggleTableColumn('lastUpdate')} />
+                                        </label>
+                                    </li>
                                 </ul>
                             </div>
                         )}
                     </div>
 
-                    <label className="input input-bordered flex items-center gap-2">
-                        <input
-                            type="text"
-                            className="grow"
-                            placeholder="Keresés név, hatóanyag, tk-szám..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <span className="material-symbols-rounded text-gray-400">search</span>
-                    </label>
-                    <select
-                        className="select select-bordered"
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                    >
-                        <option value="all">Minden státusz</option>
-                        <option value="Elérhető">Elérhető</option>
-                        <option value="Készlethiány">Készlethiány</option>
-                        <option value="Megszűnt">Megszűnt</option>
-                    </select>
+
                 </div>
             </div>
 
@@ -1032,68 +896,34 @@ function MedicinesPageContent() {
                     </div>
                 ) : (
                     <>
-                        {viewMode === 'grid' ? (
-                            <>
-                                <div className="flex justify-end mb-4">
-                                    <select
-                                        className="select select-bordered select-sm"
-                                        value={cardSortOption}
-                                        onChange={(e) => { setCardSortOption(e.target.value as CardSortOption); setCurrentPage(1); }}
-                                    >
-                                        <option value="name-asc">ABC sorrendben növekvő</option>
-                                        <option value="name-desc">ABC sorrendben csökkenő</option>
-                                        <option value="lastUpdate-desc">Frissítés szerint</option>
-                                        <option value="activeSubstance-asc">Hatóanyag szerint növekvő</option>
-                                        <option value="activeSubstance-desc">Hatóanyag szerint csökkenő</option>
-                                    </select>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+                        <div className="overflow-x-visible mb-8 bg-base-100 rounded-lg shadow">
+                            <table className="table table-pin-rows">
+                                {/* head */}
+                                <thead>
+                                    <tr>
+                                        {viewSettings.tableColumnOrder.map(renderHeaderCell)}
+                                    </tr>
+                                    <tr>
+                                        {viewSettings.tableColumnOrder.map(renderFilterCell)}
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     {paginatedItems.length > 0 ? (
                                         paginatedItems.map((medicine) => (
-                                            <MedicineCard
-                                                key={medicine.internalId}
-                                                medicine={medicine}
-                                                visibleFields={viewSettings.cardFields}
-                                            />
+                                            <tr key={medicine.internalId} className="hover">
+                                                {viewSettings.tableColumnOrder.map(col => renderDataCell(col, medicine))}
+                                            </tr>
                                         ))
                                     ) : (
-                                        <div className="col-span-full text-center py-12 text-gray-500">
-                                            Nem található a keresésnek megfelelő gyógyszer.
-                                        </div>
+                                        <tr>
+                                            <td colSpan={viewSettings.tableColumnOrder.filter(col => viewSettings.tableColumns[col] || col === 'actions').length} className="text-center py-12 text-gray-500">
+                                                Nem található a keresésnek megfelelő gyógyszer.
+                                            </td>
+                                        </tr>
                                     )}
-                                </div>
-                            </>
-                        ) : (
-                            <div className="overflow-x-visible mb-8 bg-base-100 rounded-lg shadow">
-                                <table className="table table-pin-rows">
-                                    {/* head */}
-                                    <thead>
-                                        <tr>
-                                            {viewSettings.tableColumnOrder.map(renderHeaderCell)}
-                                        </tr>
-                                        <tr>
-                                            {viewSettings.tableColumnOrder.map(renderFilterCell)}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {paginatedItems.length > 0 ? (
-                                            paginatedItems.map((medicine) => (
-                                                <tr key={medicine.internalId} className="hover">
-                                                    {viewSettings.tableColumnOrder.map(col => renderDataCell(col, medicine))}
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan={viewSettings.tableColumnOrder.filter(col => viewSettings.tableColumns[col] || col === 'actions').length} className="text-center py-12 text-gray-500">
-                                                    Nem található a keresésnek megfelelő gyógyszer.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table >
-                            </div >
-                        )
-                        }
+                                </tbody>
+                            </table >
+                        </div >
 
                         {/* Pagination Controls */}
                         {

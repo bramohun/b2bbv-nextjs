@@ -10,7 +10,7 @@
  * FUNKCIÓK:
  * - Kiválasztott patika nézet:
  *   - Patika neve és statisztikai összesítő (ma/tegnap) a patika készletére.
- *   - TOP 12 változás a patikában (Státusz, Név, Dátum oszlopokkal).
+ *   - TOP 20 változás a patikában (Státusz, Név, Dátum oszlopokkal).
  *   - Link az összes gyógyszertári változáshoz.
  * - Patika kiválasztása nézet (Fallback):
  *   - Interaktív térkép (PharmacyMap) a patikák böngészéséhez.
@@ -81,7 +81,7 @@ export function PharmacyStockWidget({ medicines, pharmacies, period = 1 }: Pharm
 
         const changes = recentPharmacyMedicines
             .sort((a, b) => new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime())
-            .slice(0, 10);
+            .slice(0, 20);
 
         // Helper for date link
         const getDateFilterParams = () => {
