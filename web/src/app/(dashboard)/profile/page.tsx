@@ -30,12 +30,12 @@ import { useAuth } from '@/context/AuthContext';
 import { MEDICAL_SPECIALTIES, MedicalSpecialty } from '@/types/forum';
 
 export default function ProfilePage() {
-    const { userEmail, logout } = useAuth();
+    const { user, logout } = useAuth();
 
     // Mock adatok a profilhoz - a valódi alkalmazásban ezek API-ból érkeznének
     const [profileData, setProfileData] = useState({
         name: 'Dr. Kovács István',
-        email: userEmail || 'dr.kovacs@u-nebuah.hu',
+        email: user?.email || 'dr.kovacs@u-nebuah.hu',
         secondaryEmail: 'kovacs.istvan.private@email.hu',
         specialties: ['Háziorvos', 'Belgyógyász'] as MedicalSpecialty[]
     });
