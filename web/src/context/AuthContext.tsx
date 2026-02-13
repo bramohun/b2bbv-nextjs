@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { User, UserService } from '@/lib/user-service';
 
 /**
  * ============================================================================
@@ -11,72 +12,91 @@ import { useRouter } from 'next/navigation';
  * USER STORY:
  * Felhasználóként szeretném, ha a rendszer védett lenne, így csak az illetékesek
  * láthatnák a szenzitív adatokat. Egy egyszerű bejelentkező felületen keresztül
- * szeretnék belépni az email címemmel és egy fix jelszóval.
+ * szeretnék belépni az email címemmel és jelszavammal.
  * 
  * FUNKCIÓK:
  * - Bejelentkezési állapot kezelése (isAuthenticated).
  * - Bejelentkezés (login) és kijelentkezés (logout).
- * - Jelszó ellenőrzése (fix: "vény123").
+ * - Felhasználói szerepkörök kezelése (UserRole).
+ * - Munkamenet érvényességének ellenőrzése (sessionVersion).
  * - Adatok perzisztenciája (localStorage) a munkamenet megőrzéséhez.
- * - Automatikus átirányítás a bejelentkező oldalra, ha a felhasználó nincs belépve.
- * 
- * MŰKÖDÉSI LOGIKA:
- * - A bejelentkezési állapotot az 'auth_session' kulcs alatt tároljuk a localStorage-ban.
- * - Ha a felhasználó sikeresen megadja a jelszót, az `isAuthenticated` true lesz.
- * - A logout törli a munkamenetet és a kezdőoldalra/loginra irányít.
  */
 
 interface AuthContextType {
     isAuthenticated: boolean;
-    userEmail: string | null;
+    user: User | null;
     isLoading: boolean;
     login: (email: string, password: string) => Promise<boolean>;
     logout: () => void;
+    checkAuth: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-    const [userEmail, setUserEmail] = useState<string | null>(null);
+    const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const router = useRouter();
 
-    useEffect(() => {
+    const checkAuth = () => {
         const session = localStorage.getItem('auth_session');
         if (session) {
             try {
-                const data = JSON.parse(session);
-                setIsAuthenticated(true);
-                setUserEmail(data.email);
+                const sessionData = JSON.parse(session);
+                // Validate if user still exists and session version matches
+                const currentUser = UserService.getUser(sessionData.id);
+
+                if (currentUser &&
+                    currentUser.status === 'active' &&
+                    currentUser.sessionVersion === sessionData.sessionVersion) {
+                    setUser(currentUser);
+                } else {
+                    // Session invalidated or user deactivated
+                    logout();
+                }
             } catch (e) {
                 console.error('Session parse error', e);
-                localStorage.removeItem('auth_session');
+                logout();
             }
         }
         setIsLoading(false);
+    };
+
+    useEffect(() => {
+        checkAuth();
     }, []);
 
     const login = async (email: string, password: string): Promise<boolean> => {
-        // Ennél a prototípusnál fix jelszót használunk
-        if (password === 'vény123') {
-            setIsAuthenticated(true);
-            setUserEmail(email);
-            localStorage.setItem('auth_session', JSON.stringify({ email, timestamp: Date.now() }));
+        const authenticatedUser = UserService.validateCredentials(email, password);
+
+        if (authenticatedUser) {
+            setUser(authenticatedUser);
+            localStorage.setItem('auth_session', JSON.stringify({
+                id: authenticatedUser.id,
+                email: authenticatedUser.email,
+                sessionVersion: authenticatedUser.sessionVersion,
+                timestamp: Date.now()
+            }));
             return true;
         }
         return false;
     };
 
     const logout = () => {
-        setIsAuthenticated(false);
-        setUserEmail(null);
+        setUser(null);
         localStorage.removeItem('auth_session');
         router.push('/login');
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, userEmail, isLoading, login, logout }}>
+        <AuthContext.Provider value={{
+            isAuthenticated: !!user,
+            user,
+            isLoading,
+            login,
+            logout,
+            checkAuth
+        }}>
             {children}
         </AuthContext.Provider>
     );

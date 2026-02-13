@@ -36,8 +36,10 @@ import { PharmacyFinder } from '../pharmacies/PharmacyFinder';
 export const Navbar = () => {
     const { favorites } = useFavorite();
     const { nearbyPharmacy } = useNearbyPharmacy();
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
     const [isPharmacyModalOpen, setIsPharmacyModalOpen] = React.useState(false);
+
+    const isAdmin = user?.role === 'admin';
 
     return (
         <div className="navbar bg-base-100 shadow-md sticky top-0 z-50">
@@ -54,6 +56,13 @@ export const Navbar = () => {
                         <li><Link href="/gyogyszerek"><span className="material-symbols-rounded">medication</span>Gyógyszerek</Link></li>
                         <li><Link href="/gyogyszertarak"><span className="material-symbols-rounded">local_pharmacy</span>Gyógyszertárak</Link></li>
                         <li><Link href="/kozosseg"><span className="material-symbols-rounded">groups</span>Közösség</Link></li>
+                        {isAdmin && (
+                            <li className="border-t border-base-200 mt-2 pt-2">
+                                <Link href="/admin/users" className="text-secondary font-bold">
+                                    <span className="material-symbols-rounded">admin_panel_settings</span>Adminisztráció
+                                </Link>
+                            </li>
+                        )}
                     </ul>
                 </div>
                 <Link href="/dashboard" className="btn btn-ghost text-xl">
@@ -66,6 +75,13 @@ export const Navbar = () => {
                     <li><Link href="/gyogyszerek"><span className="material-symbols-rounded">medication</span>Gyógyszerek</Link></li>
                     <li><Link href="/gyogyszertarak"><span className="material-symbols-rounded">local_pharmacy</span>Gyógyszertárak</Link></li>
                     <li><Link href="/kozosseg"><span className="material-symbols-rounded">groups</span>Közösség</Link></li>
+                    {isAdmin && (
+                        <li>
+                            <Link href="/admin/users" className="text-secondary font-bold">
+                                <span className="material-symbols-rounded">admin_panel_settings</span>Admin
+                            </Link>
+                        </li>
+                    )}
                 </ul>
             </div>
             <div className="navbar-end gap-2">
@@ -150,11 +166,13 @@ export const Navbar = () => {
                 <div className="dropdown dropdown-end">
                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar placeholder">
                         <div className="bg-neutral text-neutral-content rounded-full w-10 flex items-center justify-center">
-                            <span className="text-xs font-bold uppercase">DR</span>
+                            <span className="text-xs font-bold uppercase">
+                                {user?.name?.substring(0, 2) || 'US'}
+                            </span>
                         </div>
                     </div>
                     <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                        <li className="menu-title text-base-content/60 px-4 py-2">Dr. Kovács István</li>
+                        <li className="menu-title text-base-content/60 px-4 py-2">{user?.name}</li>
                         <li><Link href="/profile"><span className="material-symbols-rounded">account_circle</span>Profil beállítások</Link></li>
                         <li><button onClick={logout} className="text-error"><span className="material-symbols-rounded">logout</span>Kijelentkezés</button></li>
                     </ul>
