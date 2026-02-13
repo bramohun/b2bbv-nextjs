@@ -29,46 +29,28 @@ import Link from 'next/link';
 import { Medicine } from '@/types';
 import { formatDate } from '@/lib/utils';
 
+export interface StockStats {
+    total: number;
+    megszunt: number;
+    hiany: number;
+    elerheto: number;
+}
+
 interface StockChangesWidgetProps {
-    medicines: Medicine[];
+    stats: StockStats;
+    changes: Medicine[];
     period?: number;
 }
 
-export function StockChangesWidget({ medicines, period = 1 }: StockChangesWidgetProps) {
+export function StockChangesWidget({ stats, changes, period = 1 }: StockChangesWidgetProps) {
     const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
 
-    // Calculate start date based on period
+    // Calculate start date based on period for URL params
     const startDate = new Date(now);
     startDate.setDate(now.getDate() - period);
     startDate.setHours(0, 0, 0, 0);
 
-    // Calculate "previous period" for comparison or just use "yesterday" logic if period is 1 desc
-    // For simplicity and matching the requirement "Elmúlt {n} visszamenőleg", we will show stats for this period.
-    // The "Yesterday" block might be confusing if we select 30 days. 
-    // Let's change the labels to be dynamic based on period.
-
     const periodLabel = period === 1 ? 'Mai nap' : `Elmúlt ${period} nap`;
-
-    // Filter medicines updated within the period
-    const recentMedicines = medicines.filter(med => {
-        const updateDate = new Date(med.lastUpdate);
-        return updateDate >= startDate;
-    });
-
-    const stats = recentMedicines.reduce((acc, med) => {
-        // Count statuses in the filtered list
-        if (med.status === 'Megszűnt') acc.megszunt++;
-        if (med.status === 'Készlethiány') acc.hiany++;
-        if (med.status === 'Elérhető') acc.elerheto++;
-
-        acc.total++;
-        return acc;
-    }, { total: 0, megszunt: 0, hiany: 0, elerheto: 0 });
-
-    const latestChanges = [...medicines]
-        .sort((a, b) => new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime())
-        .slice(0, 20);
 
     // Helper for date link
     const getDateFilterParams = () => {
@@ -114,7 +96,7 @@ export function StockChangesWidget({ medicines, period = 1 }: StockChangesWidget
 
                 <div className="mb-2">
                     <h3 className="text-sm font-semibold text-base-content/70">
-                        Legutóbbi {latestChanges.length} készletváltozás
+                        Legutóbbi {changes.length} készletváltozás
                     </h3>
                 </div>
 
@@ -128,8 +110,8 @@ export function StockChangesWidget({ medicines, period = 1 }: StockChangesWidget
                             </tr>
                         </thead>
                         <tbody>
-                            {latestChanges.length > 0 ? (
-                                latestChanges.map((med) => (
+                            {changes.length > 0 ? (
+                                changes.map((med) => (
                                     <tr key={med.internalId || med.tkSzam} className="hover:bg-base-200/30">
                                         <td>
                                             <div className={`badge ${med.status === 'Elérhető' ? 'badge-success' :

@@ -45,15 +45,17 @@ import fs from 'fs/promises';
 import path from 'path';
 import { Medicine, Pharmacy } from '@/types';
 import Papa from 'papaparse';
+import { unstable_cache } from 'next/cache';
+import { isAvailableInPharmacy } from './utils';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 
-// Simple in-memory cache
-let medicinesCache: Medicine[] | null = null;
-let pharmaciesCache: Pharmacy[] | null = null;
+// Cache keys
+const MEDICINES_CACHE_KEY = 'medicines-data';
+const PHARMACIES_CACHE_KEY = 'pharmacies-data';
 
-export async function getMedicines(): Promise<Medicine[]> {
-    if (medicinesCache) return medicinesCache;
+// Internal function to read and parse medicines
+async function fetchMedicines(): Promise<Medicine[]> {
 
     try {
         const filePath = path.join(DATA_DIR, 'tk_lista.csv');
@@ -99,7 +101,7 @@ export async function getMedicines(): Promise<Medicine[]> {
             console.error('Error loading shortage list:', err);
         }
 
-        const medicines: Medicine[] = parseResult.data.map((record: any, index: number) => {
+        const medicines = parseResult.data.map((record: any, index: number) => {
             // Helper to safely get value regardless of casing or slight mismatches
             const get = (key: string) => {
                 const val = record[key];
@@ -211,7 +213,6 @@ export async function getMedicines(): Promise<Medicine[]> {
             };
         }).filter((m: Medicine) => m.tkSzam && m.nev); // Filter invalid rows
 
-        medicinesCache = medicines;
         return medicines;
 
     } catch (error) {
@@ -219,6 +220,13 @@ export async function getMedicines(): Promise<Medicine[]> {
         return [];
     }
 }
+
+// Cached version of getMedicines
+export const getMedicines = unstable_cache(
+    async () => fetchMedicines(),
+    [MEDICINES_CACHE_KEY],
+    { revalidate: 3600 } // Cache for 1 hour
+);
 
 export async function getMedicineByTk(tkSzam: string): Promise<Medicine | undefined> {
     const medicines = await getMedicines();
@@ -272,8 +280,8 @@ export async function getMedicinesBySubstance(substance: string, excludeTk: stri
     return result;
 }
 
-export async function getPharmacies(): Promise<Pharmacy[]> {
-    if (pharmaciesCache) return pharmaciesCache;
+// Internal function to read and parse pharmacies
+async function fetchPharmacies(): Promise<Pharmacy[]> {
 
     try {
         const filePath = path.join(DATA_DIR, 'benu_pharmacies.csv');
@@ -360,12 +368,100 @@ export async function getPharmacies(): Promise<Pharmacy[]> {
         });
 
         const pharmacies = Array.from(uniquePharmaciesMap.values());
-
-        pharmaciesCache = pharmacies;
         return pharmacies;
 
     } catch (error) {
         console.error('Error reading pharmacies:', error);
         return [];
     }
+}
+
+// Cached version of getPharmacies
+export const getPharmacies = unstable_cache(
+    async () => fetchPharmacies(),
+    [PHARMACIES_CACHE_KEY],
+    { revalidate: 3600 }
+);
+
+/**
+ * Returns aggregated stock statistics and recent changes for the dashboard.
+ * Designed to be called from a Server Component to avoid sending all data to client.
+ */
+export async function getGlobalStockStats(periodDays: number) {
+    const medicines = await getMedicines();
+    const now = new Date();
+
+    // Calculate start date based on period
+    const startDate = new Date(now);
+    startDate.setDate(now.getDate() - periodDays);
+    startDate.setHours(0, 0, 0, 0);
+
+    // Filter medicines updated within the period
+    const recentMedicines = medicines.filter(med => {
+        const updateDate = new Date(med.lastUpdate);
+        return updateDate >= startDate;
+    });
+
+    const stats = recentMedicines.reduce((acc, med) => {
+        // Count statuses in the filtered list
+        if (med.status === 'Megszűnt') acc.megszunt++;
+        if (med.status === 'Készlethiány') acc.hiany++;
+        if (med.status === 'Elérhető') acc.elerheto++;
+
+        acc.total++;
+        return acc;
+    }, { total: 0, megszunt: 0, hiany: 0, elerheto: 0 });
+
+    const latestChanges = [...medicines]
+        .sort((a, b) => new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime())
+        .slice(0, 20);
+
+    return {
+        stats,
+        latestChanges
+    };
+}
+
+/**
+ * Returns stock statistics for a specific pharmacy.
+ */
+export async function getPharmacyStockStats(pharmacyId: string, periodDays: number) {
+    const medicines = await getMedicines();
+    const now = new Date();
+
+    // Calculate start date based on period
+    const startDate = new Date(now);
+    startDate.setDate(now.getDate() - periodDays);
+    startDate.setHours(0, 0, 0, 0);
+
+    const pharmacyMedicines = medicines.filter(m =>
+        isAvailableInPharmacy(m.tkSzam, pharmacyId) || m.tkSzam.startsWith('MOCK-')
+    );
+
+    // Filter by date
+    const recentPharmacyMedicines = pharmacyMedicines.filter(med => {
+        const updateDate = new Date(med.lastUpdate);
+        return updateDate >= startDate;
+    });
+
+    const stats = recentPharmacyMedicines.reduce((acc, med) => {
+        if (med.status === 'Elérhető') {
+            acc.elerheto++;
+        } else if (med.status === 'Készlethiány' || med.status === 'Megszűnt') {
+            acc.nemElerheto++;
+        }
+        return acc;
+    }, { nemElerheto: 0, elerheto: 0 });
+
+    const totalChanges = stats.elerheto + stats.nemElerheto;
+
+    const latestChanges = recentPharmacyMedicines
+        .sort((a, b) => new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime())
+        .slice(0, 20);
+
+    return {
+        stats,
+        totalChanges,
+        latestChanges
+    };
 }

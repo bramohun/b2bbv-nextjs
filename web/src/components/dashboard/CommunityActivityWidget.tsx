@@ -23,38 +23,23 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { ForumTopic } from '@/types/forum';
 import { formatDate } from '@/lib/utils';
 
-interface CommunityActivityWidgetProps {
-    activities: ForumTopic[];
-    period?: number;
-}
-
-interface ForumStats {
+export interface ForumStats {
     newTopics: number;
     newComments: number;
 }
 
-export function CommunityActivityWidget({ activities, period = 1 }: CommunityActivityWidgetProps) {
-    const [stats, setStats] = useState<ForumStats | null>(null);
+interface CommunityActivityWidgetProps {
+    activities: ForumTopic[];
+    stats: ForumStats;
+    period?: number;
+}
 
-    useEffect(() => {
-        async function fetchStats() {
-            try {
-                const res = await fetch(`/api/forum/stats?period=${period}`);
-                if (res.ok) {
-                    setStats(await res.json());
-                }
-            } catch (error) {
-                console.error('Failed to fetch forum stats:', error);
-            }
-        }
-        fetchStats();
-    }, [period]);
-
+export function CommunityActivityWidget({ activities, stats, period = 1 }: CommunityActivityWidgetProps) {
     const periodLabel = period === 1 ? 'MAI NAP' : `ELMÚLT ${period} NAP`;
     const totalChanges = stats ? stats.newTopics + stats.newComments : 0;
 
@@ -69,31 +54,29 @@ export function CommunityActivityWidget({ activities, period = 1 }: CommunityAct
                 </div>
 
                 {/* Summary Stats */}
-                {stats && (
-                    <div className="grid grid-cols-1 gap-3 mb-6">
-                        <div className="bg-info/10 border border-info/20 rounded-xl p-3 flex flex-col items-center justify-center text-center">
-                            <span className="text-[10px] font-bold text-info/70 uppercase tracking-widest mb-1 leading-none">
-                                {periodLabel} aktivitásai
-                            </span>
+                <div className="grid grid-cols-1 gap-3 mb-6">
+                    <div className="bg-info/10 border border-info/20 rounded-xl p-3 flex flex-col items-center justify-center text-center">
+                        <span className="text-[10px] font-bold text-info/70 uppercase tracking-widest mb-1 leading-none">
+                            {periodLabel} aktivitásai
+                        </span>
 
-                            <div className="flex items-baseline gap-1 mb-2">
-                                <span className="text-2xl font-black text-info italic tracking-tight">{totalChanges}</span>
-                                <span className="text-[10px] font-bold text-info/60 uppercase">db változás</span>
+                        <div className="flex items-baseline gap-1 mb-2">
+                            <span className="text-2xl font-black text-info italic tracking-tight">{totalChanges}</span>
+                            <span className="text-[10px] font-bold text-info/60 uppercase">db változás</span>
+                        </div>
+
+                        <div className="flex justify-center gap-4 text-[11px] font-bold text-info">
+                            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-info/10 border border-info/20">
+                                <span className="w-1.5 h-1.5 rounded-full bg-info animate-pulse"></span>
+                                {stats.newTopics} új bejegyzés
                             </div>
-
-                            <div className="flex justify-center gap-4 text-[11px] font-bold text-info">
-                                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-info/10 border border-info/20">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-info animate-pulse"></span>
-                                    {stats.newTopics} új bejegyzés
-                                </div>
-                                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-info/10 border border-info/20">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-info/60"></span>
-                                    {stats.newComments} új komment
-                                </div>
+                            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-info/10 border border-info/20">
+                                <span className="w-1.5 h-1.5 rounded-full bg-info/60"></span>
+                                {stats.newComments} új komment
                             </div>
                         </div>
                     </div>
-                )}
+                </div>
 
                 <div className="space-y-3">
                     {activities.length > 0 ? (

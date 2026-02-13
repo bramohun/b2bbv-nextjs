@@ -24,12 +24,12 @@
 
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { Pharmacy, Medicine } from '@/types';
 import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
-import { formatDate, isAvailableInPharmacy } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 
 // Dynamic import for PharmacyMap to avoid SSR issues
 const PharmacyMap = dynamic(() => import('../pharmacies/PharmacyMap'), {
@@ -38,56 +38,51 @@ const PharmacyMap = dynamic(() => import('../pharmacies/PharmacyMap'), {
 });
 
 interface PharmacyStockWidgetProps {
-    medicines: Medicine[];
     pharmacies: Pharmacy[];
     period?: number;
 }
 
-export function PharmacyStockWidget({ medicines, pharmacies, period = 1 }: PharmacyStockWidgetProps) {
+interface PharmacyStockStats {
+    stats: {
+        nemElerheto: number;
+        elerheto: number;
+    };
+    totalChanges: number;
+    latestChanges: Medicine[];
+}
+
+export function PharmacyStockWidget({ pharmacies, period = 1 }: PharmacyStockWidgetProps) {
     const { nearbyPharmacy } = useNearbyPharmacy();
+    const [stockData, setStockData] = useState<PharmacyStockStats | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (!nearbyPharmacy) {
+            setStockData(null);
+            return;
+        }
+
+        async function fetchStats() {
+            setLoading(true);
+            try {
+                const res = await fetch(`/api/dashboard/pharmacy-status?id=${nearbyPharmacy!.id}&period=${period}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setStockData(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch pharmacy stats:', error);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchStats();
+    }, [nearbyPharmacy, period]);
 
     // If a nearby pharmacy is selected, show its latest stock changes
     if (nearbyPharmacy) {
-        const now = new Date();
-        const todayStr = now.toISOString().split('T')[0];
-
-        // Calculate start date based on period
-        const startDate = new Date(now);
-        startDate.setDate(now.getDate() - period);
-        startDate.setHours(0, 0, 0, 0);
-
         const periodLabel = period === 1 ? 'Mai nap' : `Elmúlt ${period} nap`;
-
-        const pharmacyMedicines = medicines.filter(m =>
-            isAvailableInPharmacy(m.tkSzam, nearbyPharmacy.id) || m.tkSzam.startsWith('MOCK-')
-        );
-
-        // Filter by date
-        const recentPharmacyMedicines = pharmacyMedicines.filter(med => {
-            const updateDate = new Date(med.lastUpdate);
-            return updateDate >= startDate;
-        });
-
-        const stats = recentPharmacyMedicines.reduce((acc, med) => {
-            if (med.status === 'Elérhető') {
-                acc.elerheto++;
-            } else if (med.status === 'Készlethiány' || med.status === 'Megszűnt') {
-                acc.nemElerheto++;
-            }
-            return acc;
-        }, { nemElerheto: 0, elerheto: 0 });
-
-        const totalChanges = stats.elerheto + stats.nemElerheto;
-
-        const changes = recentPharmacyMedicines
-            .sort((a, b) => new Date(b.lastUpdate).getTime() - new Date(a.lastUpdate).getTime())
-            .slice(0, 20);
-
-        // Helper for date link
-        const getDateFilterParams = () => {
-            const fromDateStr = startDate.toISOString().split('T')[0];
-            return `&lastUpdate_from=${fromDateStr}`;
-        };
 
         return (
             <div className="card bg-base-100 shadow-sm border border-base-200 h-full">
@@ -102,86 +97,94 @@ export function PharmacyStockWidget({ medicines, pharmacies, period = 1 }: Pharm
                         </div>
                     </div>
 
-                    {/* Summary Stats */}
-                    <div className="grid grid-cols-2 gap-3 mb-6">
-                        <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex flex-col items-center justify-center text-center col-span-2">
-                            <span className="text-xs font-semibold text-primary/70 uppercase tracking-wider mb-1">
-                                {periodLabel}
-                            </span>
-                            <div className="flex items-baseline gap-1 mb-2">
-                                <span className="text-2xl font-black text-primary">{totalChanges}</span>
-                                <span className="text-[10px] font-bold text-primary/50">db változás</span>
-                            </div>
-                            <div className="flex flex-col gap-0.5 text-[10px] font-medium text-primary/70 w-full">
-                                <div className="flex justify-center gap-4">
-                                    <Link href="/gyogyszerek?status=Elérhető&nearbyOnly=true&sort=nearbyPharmacyLastUpdate&order=desc" className="hover:underline hover:text-primary transition-colors flex items-center gap-1">
-                                        <span className="badge badge-success badge-xs"></span> {stats.elerheto} db újra készleten
-                                    </Link>
-                                    <Link href="/gyogyszerek?status=not_available&nearbyPharmacyStock=not_available&sort=nearbyPharmacyLastUpdate&order=desc" className="hover:underline hover:text-primary transition-colors flex items-center gap-1">
-                                        <span className="badge badge-error badge-xs"></span> {stats.nemElerheto} db elfogyott
-                                    </Link>
+                    {loading || !stockData ? (
+                        <div className="flex-1 flex items-center justify-center min-h-[300px]">
+                            <span className="loading loading-spinner loading-md text-primary"></span>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Summary Stats */}
+                            <div className="grid grid-cols-2 gap-3 mb-6">
+                                <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex flex-col items-center justify-center text-center col-span-2">
+                                    <span className="text-xs font-semibold text-primary/70 uppercase tracking-wider mb-1">
+                                        {periodLabel}
+                                    </span>
+                                    <div className="flex items-baseline gap-1 mb-2">
+                                        <span className="text-2xl font-black text-primary">{stockData.totalChanges}</span>
+                                        <span className="text-[10px] font-bold text-primary/50">db változás</span>
+                                    </div>
+                                    <div className="flex flex-col gap-0.5 text-[10px] font-medium text-primary/70 w-full">
+                                        <div className="flex justify-center gap-4">
+                                            <Link href="/gyogyszerek?status=Elérhető&nearbyOnly=true&sort=nearbyPharmacyLastUpdate&order=desc" className="hover:underline hover:text-primary transition-colors flex items-center gap-1">
+                                                <span className="badge badge-success badge-xs"></span> {stockData.stats.elerheto} db újra készleten
+                                            </Link>
+                                            <Link href="/gyogyszerek?status=not_available&nearbyPharmacyStock=not_available&sort=nearbyPharmacyLastUpdate&order=desc" className="hover:underline hover:text-primary transition-colors flex items-center gap-1">
+                                                <span className="badge badge-error badge-xs"></span> {stockData.stats.nemElerheto} db elfogyott
+                                            </Link>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <div className="mb-2">
-                        <h3 className="text-sm font-semibold text-base-content/70">
-                            Legutóbbi {changes.length} készletváltozás
-                        </h3>
-                    </div>
+                            <div className="mb-2">
+                                <h3 className="text-sm font-semibold text-base-content/70">
+                                    Legutóbbi {stockData.latestChanges.length} készletváltozás
+                                </h3>
+                            </div>
 
-                    <div className="overflow-x-auto min-h-[300px]">
-                        <table className="table table-sm w-full">
-                            <thead>
-                                <tr className="bg-base-200/50">
-                                    <th>Státusz</th>
-                                    <th className="w-full">Név</th>
-                                    <th className="text-right">Dátum</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {changes.length > 0 ? (
-                                    changes.map((med) => (
-                                        <tr key={med.internalId || med.tkSzam} className="hover:bg-base-200/30">
-                                            <td>
-                                                <div className={`badge ${med.status === 'Elérhető' ? 'badge-success' : med.status === 'Készlethiány' ? 'badge-warning' : med.status === 'Elfogyott' ? 'badge-error' : 'badge-ghost'} badge-xs whitespace-nowrap`}>
-                                                    {med.status}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <Link
-                                                    href={`/gyogyszerek/${med.tkSzam}`}
-                                                    className="font-medium text-primary hover:underline block"
-                                                >
-                                                    {med.nev}
-                                                </Link>
-                                            </td>
-                                            <td className="text-right text-xs text-base-content/60 whitespace-nowrap">
-                                                {formatDate(med.lastUpdate)}
-                                            </td>
+                            <div className="overflow-x-auto min-h-[300px]">
+                                <table className="table table-sm w-full">
+                                    <thead>
+                                        <tr className="bg-base-200/50">
+                                            <th>Státusz</th>
+                                            <th className="w-full">Név</th>
+                                            <th className="text-right">Dátum</th>
                                         </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={3} className="text-center py-20 text-base-content/50">
-                                            Nincs új változás {periodLabel.toLowerCase()} ennél a patikánál.
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                    </thead>
+                                    <tbody>
+                                        {stockData.latestChanges.length > 0 ? (
+                                            stockData.latestChanges.map((med) => (
+                                                <tr key={med.internalId || med.tkSzam} className="hover:bg-base-200/30">
+                                                    <td>
+                                                        <div className={`badge ${med.status === 'Elérhető' ? 'badge-success' : med.status === 'Készlethiány' ? 'badge-warning' : med.status === 'Elfogyott' ? 'badge-error' : 'badge-ghost'} badge-xs whitespace-nowrap`}>
+                                                            {med.status}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <Link
+                                                            href={`/gyogyszerek/${med.tkSzam}`}
+                                                            className="font-medium text-primary hover:underline block"
+                                                        >
+                                                            {med.nev}
+                                                        </Link>
+                                                    </td>
+                                                    <td className="text-right text-xs text-base-content/60 whitespace-nowrap">
+                                                        {formatDate(med.lastUpdate)}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan={3} className="text-center py-20 text-base-content/50">
+                                                    Nincs új változás {periodLabel.toLowerCase()} ennél a patikánál.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
 
-                    <div className="card-actions justify-start mt-4 pt-4 border-t border-base-200">
-                        <Link
-                            href="/gyogyszerek?sort=nearbyPharmacyLastUpdate&order=desc"
-                            className="btn btn-ghost btn-sm text-primary gap-1"
-                        >
-                            Összes gyógyszertári változás
-                            <span className="material-symbols-rounded text-sm">arrow_forward</span>
-                        </Link>
-                    </div>
+                            <div className="card-actions justify-start mt-4 pt-4 border-t border-base-200">
+                                <Link
+                                    href="/gyogyszerek?sort=nearbyPharmacyLastUpdate&order=desc"
+                                    className="btn btn-ghost btn-sm text-primary gap-1"
+                                >
+                                    Összes gyógyszertári változás
+                                    <span className="material-symbols-rounded text-sm">arrow_forward</span>
+                                </Link>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         );
