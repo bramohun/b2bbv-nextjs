@@ -18,6 +18,11 @@
  * 
  * LEHETŐSÉGEK AZ OLDALON:
  * - Vissza gomb a fórum listához
+ * - Téma részleteinek megjelenítése (szerző, dátum, szöveg, reakciók).
+ * - Admin státuszok kezelése:
+ *   - Ha `isHidden`: "Nem található" üzenet (normál felhasználóknak).
+ *   - Ha `isLocked`: "Lezárt téma" badge, interakciók letiltása.
+ *   - Ha `isAuthorAnonymized`: Szerző nevének elrejtése.
  * - Téma cím, leírás, szerző, dátum
  * - Szakterület és címke badge-ek
  * - Like/dislike gombok a témához
@@ -70,7 +75,7 @@ export default function TopicDetailPage() {
     // Load data
     useEffect(() => {
         const loadedTopic = getTopic(topicId);
-        if (!loadedTopic) {
+        if (!loadedTopic || loadedTopic.isHidden) {
             setNotFound(true);
             setIsLoading(false);
             return;
@@ -228,11 +233,17 @@ export default function TopicDetailPage() {
                     {/* Author and date */}
                     <div className="flex items-center gap-2 text-sm text-base-content/70 mt-1">
                         <span className="material-symbols-rounded text-sm">person</span>
-                        <span className={`font-medium ${topic.isAnonymous ? 'text-base-content/50 italic' : ''}`}>
-                            {topic.isAnonymous ? 'Anonim' : topic.authorName}
+                        <span className={`font-medium ${topic.isAnonymous || topic.isAuthorAnonymized ? 'text-base-content/50 italic' : ''}`}>
+                            {topic.isAnonymous || topic.isAuthorAnonymized ? 'Anonim' : topic.authorName}
                         </span>
                         <span>•</span>
                         <span>{formatDate(topic.createdAt)}</span>
+                        {topic.isLocked && (
+                            <span className="badge badge-warning badge-sm gap-1 ml-2">
+                                <span className="material-symbols-rounded text-xs">lock</span>
+                                Lezárt téma
+                            </span>
+                        )}
                     </div>
 
                     {/* Description */}
@@ -262,8 +273,8 @@ export default function TopicDetailPage() {
                             dislikes={topic.dislikes}
                             isLiked={userReactions.topicLikes[topic.id] || false}
                             isDisliked={userReactions.topicDislikes[topic.id] || false}
-                            onLike={handleTopicLike}
-                            onDislike={handleTopicDislike}
+                            onLike={() => !topic.isLocked && handleTopicLike()}
+                            onDislike={() => !topic.isLocked && handleTopicDislike()}
                         />
                         <span className="text-sm text-base-content/60 flex items-center gap-1">
                             <span className="material-symbols-rounded text-sm">comment</span>
@@ -280,6 +291,7 @@ export default function TopicDetailPage() {
                 onAddComment={handleAddComment}
                 onLikeComment={handleCommentLike}
                 onDislikeComment={handleCommentDislike}
+                isLocked={topic.isLocked}
             />
         </div>
     );

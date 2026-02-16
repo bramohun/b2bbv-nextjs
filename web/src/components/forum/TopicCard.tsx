@@ -17,6 +17,10 @@
  * - Szakterület és címke badge-ek megjelenítése
  * - Szerző, dátum és reakció statisztikák (like, dislike, komment szám)
  * 
+ * ADMIN FUNKCIÓK MEGJELENÍTÉSE:
+ * - "Lezárt" badge megjelenítése, ha a téma admin által le lett zárva (`isLocked`).
+ * - "Anonim" szerző megjelenítése, ha admin által anonimizálva lett (`isAuthorAnonymized`).
+ * 
  * ÜZLETI/MŰKÖDÉSI LOGIKA:
  * - Anonim szerző esetén a név mellett vizuális megkülönböztetés alkalmazandó (dőlt betű, halványabb szín).
  * - A leírásból csak egy rövidített előnézet jelenik meg.
@@ -103,8 +107,8 @@ export function TopicCard({ topic }: TopicCardProps) {
                     <span className="material-symbols-rounded text-xs align-middle mr-1">
                         person
                     </span>
-                    <span className={`font-medium ${topic.isAnonymous ? 'text-base-content/50 italic' : ''}`}>
-                        {topic.isAnonymous ? 'Anonim' : topic.authorName}
+                    <span className={`font-medium ${topic.isAnonymous || topic.isAuthorAnonymized ? 'text-base-content/50 italic' : ''}`}>
+                        {topic.isAnonymous || topic.isAuthorAnonymized ? 'Anonim' : topic.authorName}
                     </span>
                     <span className="mx-2">•</span>
                     {formattedDate}
@@ -140,6 +144,12 @@ export function TopicCard({ topic }: TopicCardProps) {
                         <span className="material-symbols-rounded text-sm">comment</span>
                         {topic.commentCount}
                     </span>
+                    {topic.isLocked && (
+                        <span className="badge badge-warning badge-sm gap-1 ml-auto">
+                            <span className="material-symbols-rounded text-xs">lock</span>
+                            Lezárt
+                        </span>
+                    )}
                 </div>
             </div>
         </div>

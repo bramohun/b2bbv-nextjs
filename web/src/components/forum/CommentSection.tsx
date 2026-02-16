@@ -19,6 +19,14 @@
  * - Anonim hozzászólás opció
  * - Kommentek kedvelése/nem kedvelése (ReactionButtons-on keresztül)
  * 
+ * ADMIN KORLÁTOZÁSOK KEZELÉSE:
+ * - Ha a téma lezárt (`isLocked` prop):
+ *   - Új komment írása letiltva (info banner jelenik meg).
+ *   - Reakció gombok letiltva.
+ * - Ha a komment szerzője anonimizált (`isAuthorAnonymized`):
+ *   - A név "Anonim"-ként jelenik meg.
+ * - Rejtett (`isHidden`) kommentek kezelése (bár a service szűri, a komponens is fel vannak készítve rá).
+ * 
  * ÜZLETI/MŰKÖDÉSI LOGIKA:
  * - Az anonim opció kiválasztásakor a komment beküldője "Anonim" néven jelenik meg.
  * - A lista időrendben (legrégebbi elöl) jeleníti meg a hozzászólásokat.
@@ -34,6 +42,7 @@ interface CommentSectionProps {
     onAddComment: (text: string, isAnonymous: boolean) => void;
     onLikeComment: (commentId: string) => void;
     onDislikeComment: (commentId: string) => void;
+    isLocked?: boolean;
 }
 
 export function CommentSection({
@@ -42,6 +51,7 @@ export function CommentSection({
     onAddComment,
     onLikeComment,
     onDislikeComment,
+    isLocked = false,
 }: CommentSectionProps) {
     const [commentText, setCommentText] = useState('');
     const [isAnonymous, setIsAnonymous] = useState(false);
@@ -93,9 +103,9 @@ export function CommentSection({
                                             <div className="flex items-center gap-2 text-sm mb-2">
                                                 <span className="material-symbols-rounded text-xs">person</span>
                                                 <span
-                                                    className={`font-medium ${comment.isAnonymous ? 'text-base-content/50 italic' : ''}`}
+                                                    className={`font-medium ${comment.isAnonymous || comment.isAuthorAnonymized ? 'text-base-content/50 italic' : ''}`}
                                                 >
-                                                    {comment.isAnonymous ? 'Anonim' : comment.authorName}
+                                                    {comment.isAnonymous || comment.isAuthorAnonymized ? 'Anonim' : comment.authorName}
                                                 </span>
                                                 <span>•</span>
                                                 <span>{formatDate(comment.createdAt)}</span>
@@ -109,8 +119,8 @@ export function CommentSection({
                                             dislikes={comment.dislikes}
                                             isLiked={userReactions.commentLikes[comment.id] || false}
                                             isDisliked={userReactions.commentDislikes[comment.id] || false}
-                                            onLike={() => onLikeComment(comment.id)}
-                                            onDislike={() => onDislikeComment(comment.id)}
+                                            onLike={() => !isLocked && onLikeComment(comment.id)}
+                                            onDislike={() => !isLocked && onDislikeComment(comment.id)}
                                             size="sm"
                                         />
                                     </div>
@@ -126,39 +136,46 @@ export function CommentSection({
                 <div className="card-body">
                     <h3 className="card-title text-lg">Új hozzászólás</h3>
 
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-control">
-                            <textarea
-                                className="textarea textarea-bordered h-32"
-                                placeholder="Írja ide a hozzászólását..."
-                                value={commentText}
-                                onChange={(e) => setCommentText(e.target.value)}
-                            />
+                    {isLocked ? (
+                        <div className="alert alert-warning">
+                            <span className="material-symbols-rounded">lock</span>
+                            <span>Ez a téma le van zárva, nem lehet új hozzászólást írni.</span>
                         </div>
-
-                        <div className="form-control mt-2">
-                            <label className="label cursor-pointer justify-start gap-2">
-                                <input
-                                    type="checkbox"
-                                    className="checkbox checkbox-sm"
-                                    checked={isAnonymous}
-                                    onChange={(e) => setIsAnonymous(e.target.checked)}
+                    ) : (
+                        <form onSubmit={handleSubmit}>
+                            <div className="form-control">
+                                <textarea
+                                    className="textarea textarea-bordered h-32"
+                                    placeholder="Írja ide a hozzászólását..."
+                                    value={commentText}
+                                    onChange={(e) => setCommentText(e.target.value)}
                                 />
-                                <span className="label-text">Anonim hozzászólás</span>
-                            </label>
-                        </div>
+                            </div>
 
-                        <div className="card-actions justify-end mt-4">
-                            <button
-                                type="submit"
-                                className="btn btn-primary"
-                                disabled={!commentText.trim()}
-                            >
-                                <span className="material-symbols-rounded">send</span>
-                                Hozzászólás
-                            </button>
-                        </div>
-                    </form>
+                            <div className="form-control mt-2">
+                                <label className="label cursor-pointer justify-start gap-2">
+                                    <input
+                                        type="checkbox"
+                                        className="checkbox checkbox-sm"
+                                        checked={isAnonymous}
+                                        onChange={(e) => setIsAnonymous(e.target.checked)}
+                                    />
+                                    <span className="label-text">Anonim hozzászólás</span>
+                                </label>
+                            </div>
+
+                            <div className="card-actions justify-end mt-4">
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary"
+                                    disabled={!commentText.trim()}
+                                >
+                                    <span className="material-symbols-rounded">send</span>
+                                    Hozzászólás
+                                </button>
+                            </div>
+                        </form>
+                    )}
                 </div>
             </div>
         </div>

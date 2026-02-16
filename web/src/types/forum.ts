@@ -87,6 +87,12 @@ export interface ForumTopic {
     dislikes: number;
     /** Hozzászólások száma */
     commentCount: number;
+    /** Admin által elrejtve */
+    isHidden?: boolean;
+    /** Admin által lezárva (nem lehet kommentelni/reagálni) */
+    isLocked?: boolean;
+    /** Admin által anonimizált szerző */
+    isAuthorAnonymized?: boolean;
 }
 
 /**
@@ -111,6 +117,10 @@ export interface ForumComment {
     likes: number;
     /** Nem kedvelések száma */
     dislikes: number;
+    /** Admin által elrejtve */
+    isHidden?: boolean;
+    /** Admin által anonimizált szerző */
+    isAuthorAnonymized?: boolean;
 }
 
 /**

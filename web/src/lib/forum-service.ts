@@ -11,11 +11,20 @@
  * - Mint felhasználó, témákat szeretnék létrehozni, olvasni és szűrni.
  * - Mint felhasználó, hozzászólásokat szeretnék írni témákhoz.
  * - Mint felhasználó, reakciókat szeretnék adni (like/dislike).
+ * - Mint admin, moderálni szeretném a tartalmakat (elrejtés, lezárás, anonimizálás, szerkesztés).
  * 
  * MŰKÖDÉSI LOGIKA:
  * - Minden adat a böngésző localStorage-ában tárolódik
  * - Első betöltéskor mock adatok generálódnak
  * - A reakciók felhasználónként követhetők
+ * - A 'getTopics' és 'getComments' függvények alapértelmezetten szűrik a rejtett tartalmakat,
+ *   kivéve ha az 'includeHidden' paraméter igaz (admin nézet).
+ * 
+ * ADMIN FUNKCIÓK:
+ * - adminHideTopic / adminHideComment: Tartalom láthatóságának kapcsolása.
+ * - adminLockTopic: Téma lezárása (új interakciók tiltása).
+ * - adminUpdateTopicText / adminUpdateCommentText: Tartalom szövegének felülírása.
+ * - adminAnonymizeTopic / adminAnonymizeComment: Szerző nevének elrejtése ("Anonim"-ra vált).
  * 
  * STORAGE KULCSOK:
  * - 'forumTopics': ForumTopic[] - témák listája
@@ -238,7 +247,7 @@ function generateMockComments(topicId: string): ForumComment[] {
 // TOPIC OPERATIONS
 // ============================================================================
 
-export function getTopics(): ForumTopic[] {
+export function getTopics(includeHidden: boolean = false): ForumTopic[] {
     // Check data version and regenerate if needed
     const currentVersion = getFromStorage<string>(STORAGE_KEYS.VERSION, '');
     if (currentVersion !== DATA_VERSION) {
@@ -255,7 +264,10 @@ export function getTopics(): ForumTopic[] {
         return newTopics;
     }
 
-    return topics;
+    if (includeHidden) {
+        return topics;
+    }
+    return topics.filter(t => !t.isHidden);
 }
 
 export function getTopic(id: string): ForumTopic | undefined {
@@ -301,7 +313,7 @@ export function updateTopic(topic: ForumTopic): void {
 // COMMENT OPERATIONS
 // ============================================================================
 
-export function getComments(topicId: string): ForumComment[] {
+export function getComments(topicId: string, includeHidden: boolean = false): ForumComment[] {
     const allComments = getFromStorage<ForumComment[]>(STORAGE_KEYS.COMMENTS, []);
     const topicComments = allComments.filter(c => c.topicId === topicId);
 
@@ -313,7 +325,10 @@ export function getComments(topicId: string): ForumComment[] {
         return mockComments;
     }
 
-    return topicComments.sort((a, b) => a.createdAt - b.createdAt);
+    if (includeHidden) {
+        return topicComments.sort((a, b) => a.createdAt - b.createdAt);
+    }
+    return topicComments.filter(c => !c.isHidden).sort((a, b) => a.createdAt - b.createdAt);
 }
 
 export function addComment(input: CreateCommentInput, currentUser: { id: string; name: string }): ForumComment {
@@ -484,6 +499,75 @@ export function toggleCommentDislike(commentId: string): { disliked: boolean; li
 
 export function getUserReactions(): UserReactions {
     return getReactions();
+}
+
+// ============================================================================
+// ADMIN OPERATIONS
+// ============================================================================
+
+export function adminHideTopic(topicId: string, hidden: boolean): void {
+    const topics = getFromStorage<ForumTopic[]>(STORAGE_KEYS.TOPICS, []);
+    const index = topics.findIndex(t => t.id === topicId);
+    if (index !== -1) {
+        topics[index].isHidden = hidden;
+        setToStorage(STORAGE_KEYS.TOPICS, topics);
+    }
+}
+
+export function adminLockTopic(topicId: string, locked: boolean): void {
+    const topics = getFromStorage<ForumTopic[]>(STORAGE_KEYS.TOPICS, []);
+    const index = topics.findIndex(t => t.id === topicId);
+    if (index !== -1) {
+        topics[index].isLocked = locked;
+        setToStorage(STORAGE_KEYS.TOPICS, topics);
+    }
+}
+
+export function adminUpdateTopicText(topicId: string, newDescription: string): void {
+    const topics = getFromStorage<ForumTopic[]>(STORAGE_KEYS.TOPICS, []);
+    const index = topics.findIndex(t => t.id === topicId);
+    if (index !== -1) {
+        topics[index].description = newDescription;
+        setToStorage(STORAGE_KEYS.TOPICS, topics);
+    }
+}
+
+export function adminAnonymizeTopic(topicId: string): void {
+    const topics = getFromStorage<ForumTopic[]>(STORAGE_KEYS.TOPICS, []);
+    const index = topics.findIndex(t => t.id === topicId);
+    if (index !== -1) {
+        topics[index].isAuthorAnonymized = true;
+        // Opcionálisan törölhetjük az eredeti nevet is, de a specifikáció szerint csak "nem lesz látható"
+        // A biztonság kedvéért kliens oldalon majd kezeljük a megjelenítést
+        setToStorage(STORAGE_KEYS.TOPICS, topics);
+    }
+}
+
+export function adminHideComment(commentId: string, hidden: boolean): void {
+    const allComments = getFromStorage<ForumComment[]>(STORAGE_KEYS.COMMENTS, []);
+    const index = allComments.findIndex(c => c.id === commentId);
+    if (index !== -1) {
+        allComments[index].isHidden = hidden;
+        setToStorage(STORAGE_KEYS.COMMENTS, allComments);
+    }
+}
+
+export function adminUpdateCommentText(commentId: string, newText: string): void {
+    const allComments = getFromStorage<ForumComment[]>(STORAGE_KEYS.COMMENTS, []);
+    const index = allComments.findIndex(c => c.id === commentId);
+    if (index !== -1) {
+        allComments[index].text = newText;
+        setToStorage(STORAGE_KEYS.COMMENTS, allComments);
+    }
+}
+
+export function adminAnonymizeComment(commentId: string): void {
+    const allComments = getFromStorage<ForumComment[]>(STORAGE_KEYS.COMMENTS, []);
+    const index = allComments.findIndex(c => c.id === commentId);
+    if (index !== -1) {
+        allComments[index].isAuthorAnonymized = true;
+        setToStorage(STORAGE_KEYS.COMMENTS, allComments);
+    }
 }
 
 // ============================================================================
