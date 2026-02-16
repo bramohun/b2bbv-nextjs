@@ -48,7 +48,6 @@ A rendszer egy orvosi portál alkalmazás, amely a következő fő modulokból �
 
 ### 2.1. Irányítópult (Dashboard)
 
-#### Felhasználói igény
 Felhasználóként egy gyors áttekintést szeretnék kapni a rendszer legfontosabb adatairól: készletváltozások, közeli patika készletadatok, és a legfrissebb közösségi aktivitás. Az irányítópult összesíti a legfontosabb információkat egyetlen nézetben.
 
 #### Funkciók
@@ -63,7 +62,6 @@ Felhasználóként egy gyors áttekintést szeretnék kapni a rendszer legfontos
 
 #### 2.1.1. Készletváltozások Blokk
 
-##### Felhasználói igény
 Felhasználóként szeretném látni, hogy az általam figyelt időszakban milyen készletváltozások történtek (megszűnés, készlethiány, elérhetőség), és gyorsan el szeretnék jutni a részletekhez.
 
 ##### Funkciók
@@ -80,7 +78,6 @@ Felhasználóként szeretném látni, hogy az általam figyelt időszakban milye
 
 #### 2.1.2. Közeli Patika Készlet Blokk
 
-##### Felhasználói igény
 Felhasználóként szeretném látni a beállított közeli patikám készletváltozásait, vagy ha nincs beállítva, egy térképet a kiválasztáshoz.
 
 ##### Funkciók
@@ -101,7 +98,6 @@ Felhasználóként szeretném látni a beállított közeli patikám készletvá
 
 #### 2.1.3. Közösségi Aktivitás Blokk
 
-##### Felhasználói igény
 Felhasználóként szeretném látni a legfrissebb fórum aktivitásokat, hogy könnyen kapcsolódhassak a szakmai beszélgetésekhez.
 
 ##### Funkciók
@@ -119,7 +115,6 @@ Felhasználóként szeretném látni a legfrissebb fórum aktivitásokat, hogy k
 
 #### 2.2.1. Gyógyszer Lista Oldal
 
-##### Felhasználói igény
 Felhasználóként egy központi áttekintő felületen szeretném böngészni az összes nyilvántartott gyógyszert, amelyet hatékony kereséssel, szűréssel, rendezéssel és testreszabható nézettel használhatok.
 
 ##### Funkciók
@@ -143,7 +138,6 @@ Felhasználóként egy központi áttekintő felületen szeretném böngészni a
 
 #### 2.2.2. Gyógyszer Adatlap
 
-##### Felhasználói igény
 Felhasználóként a kiválasztott gyógyszer összes részletes adatát szeretném egy helyen látni, beleértve a készletinformációkat, státusz előzményeket, és elérhető helyettesítő termékeket.
 
 ##### Funkciók
@@ -163,7 +157,6 @@ Felhasználóként a kiválasztott gyógyszer összes részletes adatát szeretn
 
 #### 2.2.3. Gyógyszer Kártya Nézet
 
-##### Felhasználói igény
 Felhasználóként a gyógyszerlista kártya nézetében szeretném látni a legfontosabb termék adatokat és gyorsan hozzáférni a kedvenc/értesítés funkciókhoz.
 
 ##### Funkciók
@@ -178,7 +171,6 @@ Felhasználóként a gyógyszerlista kártya nézetében szeretném látni a leg
 
 #### 2.2.4. Termék Adatlap Műveletek
 
-##### Felhasználói igény
 Felhasználóként a termék adatlapján szeretném kezelni a kedvenc státuszt és az értesítés feliratkozást.
 
 ##### Funkciók
@@ -190,7 +182,6 @@ Felhasználóként a termék adatlapján szeretném kezelni a kedvenc státuszt 
 
 #### 2.2.5. Készletinformáció
 
-##### Felhasználói igény
 Felhasználóként látni szeretném a termék készletinformációit és a „Megnézem hol" linkre kattintva egy térképes listát a patikákról.
 
 ##### Funkciók
@@ -201,7 +192,6 @@ Felhasználóként látni szeretném a termék készletinformációit és a „M
 
 #### 2.2.6. Közeli Patika Készlet Indikátor
 
-##### Felhasználói igény
 Felhasználóként szeretném látni a termékoldalon, hogy a kedvencnek jelölt közeli patikámban elérhető-e az adott gyógyszer, hogy tudjam, érdemes-e oda mennem.
 
 ##### Funkciók
@@ -214,7 +204,6 @@ Felhasználóként szeretném látni a termékoldalon, hogy a kedvencnek jelölt
 
 #### 2.2.7. Hasonló Hatóanyagú Termékek
 
-##### Felhasználói igény
 Felhasználóként szeretném látni a kiválasztott gyógyszerrel megegyező hatóanyagú, de jelenleg elérhető egyéb készítményeket, hogy készlethiány esetén alternatívát találhassak, vagy összehasonlíthassam a lehetőségeket.
 
 ##### Funkciók
@@ -232,7 +221,6 @@ Felhasználóként szeretném látni a kiválasztott gyógyszerrel megegyező ha
 
 #### 2.2.8. Kedvenc Eltávolítás Figyelmeztetés
 
-##### Felhasználói igény
 Felhasználóként szeretnék figyelmeztetést kapni, ha egy olyan terméket veszek ki a kedvencek közül, amelyre értesítést kértem, mert az értesítés is meg fog szűnni.
 
 ##### Funkciók
@@ -249,7 +237,6 @@ Felhasználóként szeretnék figyelmeztetést kapni, ha egy olyan terméket ves
 
 #### 2.3.1. Gyógyszertárak Oldal
 
-##### Felhasználói igény
 Felhasználóként szeretnék gyógyszertárak után keresni és látni az elhelyezkedésüket.
 
 ##### Funkciók
@@ -259,7 +246,6 @@ Felhasználóként szeretnék gyógyszertárak után keresni és látni az elhel
 
 #### 2.3.2. Gyógyszertár Kereső Modul
 
-##### Felhasználói igény
 Felhasználóként keresni szeretnék a gyógyszertárak között, látni azok elhelyezkedését térképen és listában. Ezt a felületet használom a fő gyógyszertár kereső oldalon és a termék-specifikus készlet nézetben is.
 
 ##### Funkciók
@@ -275,7 +261,6 @@ Felhasználóként keresni szeretnék a gyógyszertárak között, látni azok e
 
 #### 2.3.3. Gyógyszertár Térkép
 
-##### Felhasználói igény
 Felhasználóként vizuálisan szeretném látni a gyógyszertárak elhelyezkedését egy térképen, hogy földrajzi közelség alapján választhassak közülük, és egy kattintással „Közeli gyógyszertárnak" jelölhessem bármelyiket.
 
 ##### Funkciók
@@ -283,13 +268,12 @@ Felhasználóként vizuálisan szeretném látni a gyógyszertárak elhelyezked�
 - Gyógyszertárak jelölése a térképen.
 - Jelölőre kattintva információs ablak a patika adataival és nyitvatartással.
 - „Közeli patikának jelölöm" funkció az ablakból.
-- Térkép automatikus mozgatása a kiválasztott patikára.
+- Térkép automatikus mozgatása a kiválasztott patika.
 
 ---
 
 #### 2.3.4. Gyógyszertár Listaelem
 
-##### Felhasználói igény
 Felhasználóként látni szeretném egy gyógyszertár alapvető adatait (név, cím, nyitvatartás, elérhetőség) egy listaelemként, hogy kiválaszthassam a számomra legmegfelelőbbet, és megjelölhessem mint „Közeli gyógyszertár".
 
 ##### Funkciók
@@ -303,7 +287,6 @@ Felhasználóként látni szeretném egy gyógyszertár alapvető adatait (név,
 
 #### 2.3.5. Gyógyszertári Készlet Nézet
 
-##### Felhasználói igény
 Felhasználóként szeretném látni egy konkrét termék elérhetőségét (készlet vagy rendelés) gyógyszertárakra lebontva, térképes és listás nézetben.
 
 ##### Funkciók
@@ -319,7 +302,6 @@ Felhasználóként szeretném látni egy konkrét termék elérhetőségét (ké
 
 #### 2.4.1. Fórum Főoldal
 
-##### Felhasználói igény
 Felhasználóként szakmai témákat szeretnék böngészni, keresni és új témákat indítani a közösségi fórumon.
 
 ##### Funkciók
@@ -334,7 +316,6 @@ Felhasználóként szakmai témákat szeretnék böngészni, keresni és új té
 
 #### 2.4.2. Téma Részletek Oldal
 
-##### Felhasználói igény
 Felhasználóként egy kiválasztott fórum téma minden részletét szeretném látni (cím, leírás, szerző, reakciók), valamint hozzászólásokat olvasni és írni.
 
 ##### Funkciók
@@ -348,7 +329,6 @@ Felhasználóként egy kiválasztott fórum téma minden részletét szeretném 
 
 #### 2.4.3. Téma Kártya
 
-##### Felhasználói igény
 Felhasználóként át szeretném tekinteni a fórum témákat listában, és szeretném látni, ha egy bejegyzés anonim módon készült.
 
 ##### Funkciók
@@ -362,7 +342,6 @@ Felhasználóként át szeretném tekinteni a fórum témákat listában, és sz
 
 #### 2.4.4. Új Téma Létrehozása
 
-##### Felhasználói igény
 Felhasználóként új szakmai témát szeretnék indítani a fórumon, és szeretném anonim módon közzétenni a bejegyzésemet, hogy ne legyen azonosítható a személyazonosságom.
 
 ##### Funkciók
@@ -377,7 +356,6 @@ Felhasználóként új szakmai témát szeretnék indítani a fórumon, és szer
 
 #### 2.4.5. Hozzászólások Kezelése
 
-##### Felhasználói igény
 Felhasználóként hozzá szeretnék szólni egy témához, és anonim módon is hozzá szeretnék szólni, hogy ne látszódjon a nevem.
 
 ##### Funkciók
@@ -390,7 +368,6 @@ Felhasználóként hozzá szeretnék szólni egy témához, és anonim módon is
 
 ### 2.5. Globális Keresés
 
-#### Felhasználói igény
 Felhasználóként gyorsan szeretnék keresni a rendszer teljes tartalmában (gyógyszerek, gyógyszertárak, fórum témák), hogy egyetlen bemeneti mezőből elérhessem a keresett információt.
 
 #### Funkciók
@@ -408,7 +385,6 @@ Felhasználóként gyorsan szeretnék keresni a rendszer teljes tartalmában (gy
 
 #### 2.6.1. Navigációs Sáv
 
-##### Felhasználói igény
 Felhasználóként intuitív navigációs sávot szeretnék, amelyen gyorsan elérem a keresőt, a kedvenceimet, a közeli patikámat és a profilomat.
 
 ##### Funkciók
@@ -416,13 +392,12 @@ Felhasználóként intuitív navigációs sávot szeretnék, amelyen gyorsan el�
 - Globális keresés beágyazása.
 - **Közeli patika információ:** A beállított patika nevének megjelenítése és gyors elérése.
 - **Kedvencek menü:** A kedvencnek jelölt gyógyszerek gyorslistája.
-- Felhasználói profil menü.
+- **Felhasználói profil menü.**
 
 ---
 
 #### 2.6.2. Hitelesítés Kezelése
 
-##### Felhasználói igény
 Felhasználóként szeretném, ha a rendszer védett lenne, így csak az illetékesek láthatnák a szenzitív adatokat. Egy egyszerű bejelentkező felületen keresztül szeretnék belépni.
 
 ##### Funkciók
@@ -436,7 +411,6 @@ Felhasználóként szeretném, ha a rendszer védett lenne, így csak az illeté
 
 #### 2.6.3. Bejelentkezés Oldal
 
-##### Felhasználói igény
 Felhasználóként szeretnék bejelentkezni a rendszerbe az email címemmel és jelszavammal, hogy hozzáférjek a belső funkciókhoz.
 
 ##### Funkciók
@@ -448,7 +422,6 @@ Felhasználóként szeretnék bejelentkezni a rendszerbe az email címemmel és 
 
 #### 2.6.4. Elfelejtett Jelszó
 
-##### Felhasználói igény
 Felhasználóként, ha elfelejtem a jelszavamat, szeretnék lehetőséget kapni a belépésre egy egyszer használatos kód vagy mágikus link segítségével.
 
 ##### Funkciók
@@ -464,7 +437,6 @@ Felhasználóként, ha elfelejtem a jelszavamat, szeretnék lehetőséget kapni 
 
 #### 2.7.1. Adminisztrációs Felület
 
-##### Felhasználói igény
 Adminisztrátorként egy elkülönített felületen szeretném kezelni a rendszer adminisztratív funkcióit, ahol fülekkel navigálhatok a különböző kezelési területek között.
 
 ##### Funkciók
@@ -475,7 +447,6 @@ Adminisztrátorként egy elkülönített felületen szeretném kezelni a rendsze
 
 #### 2.7.2. Felhasználók Kezelése
 
-##### Felhasználói igény
 Adminisztrátorként szeretném kezelni a rendszer felhasználóit: listázni, hozzáadni, szerkeszteni, deaktiválni, kijelentkeztetni és jelszavakat visszaállítani.
 
 ##### Funkciók
@@ -490,7 +461,6 @@ Adminisztrátorként szeretném kezelni a rendszer felhasználóit: listázni, h
 
 #### 2.7.3. Fórum Moderálás
 
-##### Felhasználói igény
 Adminisztrátorként szeretném moderálni a fórum tartalmakat: témákat elrejteni, lezárni, szerkeszteni és anonimizálni, valamint a hozzászólásokat kezelni.
 
 ##### Funkciók
@@ -504,7 +474,6 @@ Adminisztrátorként szeretném moderálni a fórum tartalmakat: témákat elrej
 
 #### 2.7.4. Gyógyszertárak Áttekintése
 
-##### Felhasználói igény
 Adminisztrátorként szeretném áttekinteni a rendszerben nyilvántartott gyógyszertárakat, keresni közöttük, és megtekinteni az alapvető információkat.
 
 ##### Funkciók
@@ -520,7 +489,6 @@ Adminisztrátorként szeretném áttekinteni a rendszerben nyilvántartott gyóg
 
 #### 2.8.1. Profil Oldal
 
-##### Felhasználói igény
 Felhasználóként szeretném megtekinteni és kezelni a saját profiladataimat, hogy naprakészen tarthassam az adataimat, valamint biztonsági és kényelmi funkciókat érhessek el.
 
 ##### Funkciók
@@ -536,7 +504,6 @@ Felhasználóként szeretném megtekinteni és kezelni a saját profiladataimat,
 
 #### 2.8.2. Kedvencek Oldal
 
-##### Felhasználói igény
 Felhasználóként szeretném egy külön felületen látni az összes kedvencnek jelölt gyógyszeremet, hogy gyorsan elérhessem őket és szükség esetén eltávolíthassak elemeket a listából, illetve feliratkozhassak értesítésekre.
 
 ##### Funkciók
@@ -548,7 +515,6 @@ Felhasználóként szeretném egy külön felületen látni az összes kedvencne
 
 #### 2.8.3. Értesítések Oldal
 
-##### Felhasználói igény
 Felhasználóként szeretném áttekinteni az összes aktív értesítés-feliratkozásomat, hogy szükség esetén leiratkozhassak róluk.
 
 ##### Funkciók
@@ -564,7 +530,6 @@ Felhasználóként szeretném áttekinteni az összes aktív értesítés-felira
 
 ### 3.1. Kedvencek Kezelése
 
-#### Felhasználói igény
 Felhasználóként szeretném a számomra fontos gyógyszereket kedvencnek jelölni, hogy később gyorsan elérhessem őket a listában anélkül, hogy értesítéseket kapnék a változásaikról.
 
 #### Funkciók
@@ -576,7 +541,6 @@ Felhasználóként szeretném a számomra fontos gyógyszereket kedvencnek jelö
 
 ### 3.2. Közeli Gyógyszertár Kezelése
 
-#### Felhasználói igény
 Felhasználóként szeretnék beállítani egy „Közeli gyógyszertárat", ami számomra kiemelt fontosságú (pl. az orvosi rendelőmhöz legközelebbi), hogy gyorsan elérhessem annak adatait a navigációs sávban.
 
 #### Funkciók
@@ -588,7 +552,6 @@ Felhasználóként szeretnék beállítani egy „Közeli gyógyszertárat", ami
 
 ### 3.3. Értesítés Kezelése
 
-#### Felhasználói igény
 Felhasználóként szeretnék értesítéseket kérni bizonyos gyógyszerek készletváltozásairól, hogy időben értesüljek a státuszváltozásokról.
 
 #### Funkciók
@@ -600,7 +563,6 @@ Felhasználóként szeretnék értesítéseket kérni bizonyos gyógyszerek kés
 
 ### 3.4. Rendszerüzenetek
 
-#### Felhasználói igény
 Felhasználóként szeretnék visszajelzést kapni bizonyos műveletek után (pl. kedvenc eltávolítása), és lehetőséget kapni a művelet visszavonására egy rövid időablakon belül.
 
 #### Funkciók
