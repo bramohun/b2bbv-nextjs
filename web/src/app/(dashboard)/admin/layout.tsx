@@ -36,7 +36,7 @@ export default function AdminLayout({
         <div className="space-y-6">
             <div className="flex flex-col gap-1">
                 <h1 className="text-3xl font-bold text-base-content">Adminisztrációs felület</h1>
-                <p className="text-base-content/60">Rendszerfelhasználók és a közösségi fórum kezelése</p>
+                <p className="text-base-content/60">Rendszerfelhasználók, gyógyszertárak és a közösségi fórum kezelése</p>
             </div>
 
             <div role="tablist" className="tabs tabs-lifted">
@@ -46,6 +46,13 @@ export default function AdminLayout({
                     href="/admin/users"
                 >
                     Felhasználók
+                </Link>
+                <Link
+                    role="tab"
+                    className={`tab ${pathname.includes('/pharmacies') ? 'tab-active' : ''}`}
+                    href="/admin/pharmacies"
+                >
+                    Gyógyszertárak
                 </Link>
                 <Link
                     role="tab"
