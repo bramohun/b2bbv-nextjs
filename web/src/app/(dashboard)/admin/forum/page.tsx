@@ -48,6 +48,8 @@ import { ForumTopic, ForumComment } from '@/types/forum';
  * - AuthContext (jogosultság ellenőrzés a layout szintjén).
  */
 
+type ConfirmActionType = 'hide-topic' | 'show-topic' | 'lock-topic' | 'unlock-topic' | 'anonymize-topic' | 'hide-comment' | 'show-comment' | 'anonymize-comment';
+
 export default function AdminForumPage() {
     const [topics, setTopics] = useState<ForumTopic[]>([]);
     const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
@@ -60,7 +62,7 @@ export default function AdminForumPage() {
 
     // Action states
     const [confirmAction, setConfirmAction] = useState<{
-        type: 'hide-topic' | 'show-topic' | 'lock-topic' | 'unlock-topic' | 'anonymize-topic' | 'hide-comment' | 'show-comment' | 'anonymize-comment';
+        type: ConfirmActionType;
         id: string;
         title?: string;
     } | null>(null);
@@ -109,7 +111,7 @@ export default function AdminForumPage() {
 
     // --- Action Handlers ---
 
-    const openConfirm = (type: typeof confirmAction.type, id: string, title?: string) => {
+    const openConfirm = (type: ConfirmActionType, id: string, title?: string) => {
         setConfirmAction({ type, id, title });
         setIsConfirmModalOpen(true);
     };
