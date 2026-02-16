@@ -61,6 +61,14 @@
 *   *Demo: Anonim kérdésfeltevés lehetősége.*
 *   **Kérdés:** Hiányzik Önnek egy zárt, orvosi szakmai fórum? Használna ilyet, vagy a jelenlegi csatornák (Facebook csoportok, stb.) megfelelnek?
 
+**VI. Értesítések és Hírlevelek - A "Passzív tájékozódás" teszt**
+*   "A rendszer képes emailben vagy felugró üzenetben értesíteni Önt a fontos változásokról (pl. egy hiánycikk újra elérhető), anélkül, hogy be kellene lépnie a felületre."
+*   **Kérdés:**
+    *   "Milyen gyakran és milyen formában (email, hírlevél) szeretne értesülni a készletváltozásokról?"
+    *   "Segítené a munkáját, ha reggelente kapna egy rövid összefoglalót a releváns változásokról, így nem kellene belépnie, hogy tájékozódjon?"
+    *   "Mi az az információ, amiért biztosan megnyitna egy ilyen emailt?"
+    *   **Kérdés:** "Lát értelmet abban, hogy két email címet rögzítsen a profiljában (pl. egy hivatalosat és egyet értesítésekhez)? Vagy felesleges adminisztrációnak érezné?"
+
 ## 4. Összegzés és Értékajánlat (10 perc)
 *Cél: A "Must have" vs. "Nice to have" eldöntése.*
 
