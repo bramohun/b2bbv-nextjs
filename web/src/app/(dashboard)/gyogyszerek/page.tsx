@@ -786,7 +786,7 @@ function MedicinesPageContent() {
 
 
 
-                    <div className="relative z-50">
+                    <div className="relative z-30">
                         <button
                             className="btn btn-md m-1"
                             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
