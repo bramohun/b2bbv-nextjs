@@ -104,7 +104,7 @@ export const MedicineStockInfo: React.FC<MedicineStockInfoProps> = ({
                     <span>Készleten: <strong>{stockInfo.inStock}</strong> gyógyszertárban</span>
                     <button
                         onClick={() => setModalConfig({ isOpen: true, type: 'stock' })}
-                        className="btn btn-link btn-xs lowercase h-auto min-h-0 p-0 text-primary"
+                        className="btn btn-xs btn-outline btn-primary ml-2"
                     >
                         Megnézem hol
                     </button>
@@ -119,7 +119,7 @@ export const MedicineStockInfo: React.FC<MedicineStockInfoProps> = ({
                             <span>Készleten: <strong>{stockInfo.inStock}</strong> gyógyszertárban</span>
                             <button
                                 onClick={() => setModalConfig({ isOpen: true, type: 'stock' })}
-                                className="btn btn-link btn-xs lowercase h-auto min-h-0 p-0 text-primary"
+                                className="btn btn-xs btn-outline btn-primary ml-2"
                             >
                                 Megnézem hol
                             </button>
@@ -128,7 +128,7 @@ export const MedicineStockInfo: React.FC<MedicineStockInfoProps> = ({
                             <span>Rendelésre 1-2 munkanapon belül: <strong>{stockInfo.onOrder}</strong> gyógyszertárban</span>
                             <button
                                 onClick={() => setModalConfig({ isOpen: true, type: 'order' })}
-                                className="btn btn-link btn-xs lowercase h-auto min-h-0 p-0 text-primary"
+                                className="btn btn-xs btn-outline btn-primary ml-2"
                             >
                                 Megnézem hol
                             </button>
