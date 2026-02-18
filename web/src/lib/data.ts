@@ -262,12 +262,22 @@ async function fetchMedicines(): Promise<Medicine[]> {
     }
 }
 
-// Cached version of getMedicines
-export const getMedicines = unstable_cache(
-    async () => fetchMedicines(),
-    [MEDICINES_CACHE_KEY],
-    { revalidate: 3600 } // Cache for 1 hour
-);
+// Global cache to persist across HMR in development
+const globalForMedicines = global as unknown as { medicinesPromise: Promise<Medicine[]> | null };
+
+// Cached version of getMedicines using in-memory singleton
+export const getMedicines = async (): Promise<Medicine[]> => {
+    // If we have a cached promise, return it
+    if (globalForMedicines.medicinesPromise) {
+        return globalForMedicines.medicinesPromise;
+    }
+
+    // Otherwise, create a new promise and cache it
+    const promise = fetchMedicines();
+    globalForMedicines.medicinesPromise = promise;
+
+    return promise;
+};
 
 export async function getMedicineByTk(tkSzam: string): Promise<Medicine | undefined> {
     const medicines = await getMedicines();
