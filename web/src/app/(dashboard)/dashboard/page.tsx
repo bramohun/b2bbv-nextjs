@@ -33,8 +33,9 @@ import { PeriodSelector } from '@/components/dashboard/PeriodSelector';
 
 export const dynamic = 'force-dynamic';
 
-export default async function DashboardPage({ searchParams }: { searchParams: { period?: string } }) {
-    const period = parseInt(searchParams.period || '1', 10);
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ period?: string }> }) {
+    const { period: periodParam } = await searchParams;
+    const period = parseInt(periodParam || '1', 10);
 
     // Fetch data in parallel on the server
     const [stockStats, pharmacies, forumActivity, forumStats] = await Promise.all([
