@@ -101,44 +101,47 @@ export default async function MedicineDetailPage({ params }: PageProps) {
 
     const stockInfo = getStockInfo(medicine.status);
 
-    const generateMockHistory = (currentStatus: string) => {
+    const generateMockHistory = (currentStatus: string, lastUpdateStr: string, tk: string) => {
         const history: { date: string; status: string }[] = [];
-        const count = Math.floor(Math.random() * 5) + 1; // 1-5 entries
-        const now = new Date();
-        const oneYearAgo = new Date();
-        oneYearAgo.setFullYear(now.getFullYear() - 1);
+        const lastUpdateDate = new Date(lastUpdateStr);
+
+        // Deterministic random using djb2 + xorshift (same as data.ts)
+        const seededVal = (s: string) => {
+            let h = 5381;
+            for (let i = 0; i < s.length; i++) {
+                h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+            }
+            h ^= h >>> 16;
+            h = Math.imul(h, 0x45d9f3b);
+            h ^= h >>> 16;
+            return (h >>> 0) / 4294967296;
+        };
+
+        const count = Math.floor(seededVal(tk + "count") * 5) + 1; // 1-5 entries
+        const spreadDays = 1500;
+        const fourYearsAgo = new Date();
+        fourYearsAgo.setDate(fourYearsAgo.getDate() - spreadDays);
 
         const activeStatuses = ['Elérhető', 'Készlethiány'];
         const isDiscontinued = currentStatus === 'Megszűnt';
 
-        // Generate random dates first to ensure order
-        const dates = [];
-        for (let i = 0; i < count; i++) {
-            dates.push(new Date(oneYearAgo.getTime() + Math.random() * (now.getTime() - oneYearAgo.getTime())));
+        // Generate random dates first to ensure order, seeded by TK
+        const dates = [lastUpdateDate];
+        for (let i = 1; i < count; i++) {
+            const randomTime = fourYearsAgo.getTime() + seededVal(tk + i) * (lastUpdateDate.getTime() - fourYearsAgo.getTime());
+            dates.push(new Date(randomTime));
         }
         dates.sort((a, b) => b.getTime() - a.getTime()); // Descending (newest first)
 
-        for (let i = 0; i < count; i++) {
+        for (let i = 0; i < dates.length; i++) {
             let status;
 
             if (i === 0) {
-                // The most recent entry must match the current actual status
                 status = currentStatus;
             } else {
-                // Historic entries
                 const prevStatus = history[history.length - 1].status;
-
-                if (isDiscontinued) {
-                    // If currently discontinued, previous states must be active
-                    // And different from the one we just generated (which is 'newer' in time)
-                    const options = activeStatuses.filter(s => s !== prevStatus);
-                    status = options.length > 0 ? options[Math.floor(Math.random() * options.length)] : activeStatuses[0];
-                } else {
-                    // If currently active, previous states must also be active
-                    // And different from the one we just generated
-                    const options = activeStatuses.filter(s => s !== prevStatus);
-                    status = options.length > 0 ? options[Math.floor(Math.random() * options.length)] : activeStatuses[0];
-                }
+                const options = activeStatuses.filter(s => s !== prevStatus);
+                status = options.length > 0 ? options[Math.floor(seededVal(tk + "status" + i) * options.length)] : activeStatuses[0];
             }
 
             history.push({
@@ -150,7 +153,7 @@ export default async function MedicineDetailPage({ params }: PageProps) {
         return history;
     };
 
-    const statusHistory = generateMockHistory(medicine.status);
+    const statusHistory = generateMockHistory(medicine.status, medicine.lastUpdate, medicine.tkSzam);
 
     // Calculate consistent Last Update
     const latestHistoryDate = statusHistory.length > 0 ? new Date(statusHistory[0].date) : new Date(0);

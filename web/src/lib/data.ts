@@ -54,6 +54,23 @@ const DATA_DIR = path.join(process.cwd(), 'data');
 const MEDICINES_CACHE_KEY = 'medicines-data';
 const PHARMACIES_CACHE_KEY = 'pharmacies-data';
 
+// Helper for deterministic random values based on a string seed
+// Uses djb2 hash + xorshift for uniform distribution in [0, 1)
+function seededRandom(seed: string): number {
+    let h = 5381;
+    for (let i = 0; i < seed.length; i++) {
+        h = ((h << 5) + h + seed.charCodeAt(i)) | 0;
+    }
+    // Xorshift to improve bit distribution
+    h ^= h >>> 16;
+    h = Math.imul(h, 0x45d9f3b);
+    h ^= h >>> 16;
+    return (h >>> 0) / 4294967296;
+}
+
+// How many products should change status per day on the dashboard
+const TARGET_CHANGES_PER_DAY = 25;
+
 // Internal function to read and parse medicines
 async function fetchMedicines(): Promise<Medicine[]> {
 
@@ -134,12 +151,15 @@ async function fetchMedicines(): Promise<Medicine[]> {
                 status = 'Megszűnt';
             }
 
-            let lastUpdate = new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)).toISOString();
+            // Placeholder lastUpdate - will be overridden after filter
+            let lastUpdate = new Date(0).toISOString();
+            let isMock = false;
 
             // MOCK DATA for Dashboard demonstration: 
             // Force some specific items to be "Today" or "Yesterday" changes
             if (index < 20) {
                 tk = `MOCK-${String(index).padStart(3, '0')}`;
+                isMock = true;
 
                 const now = new Date();
                 if (index < 3) {
@@ -190,6 +210,7 @@ async function fetchMedicines(): Promise<Medicine[]> {
                 dispensabilitySub: get('Kiad_alcsop'),
                 safetyFeatures: get('Biztonsági elemek'),
                 authorizationDate: get('TK dátum'),
+                _isMock: isMock, // Internal flag for post-filter processing
             };
 
             // Match shortage info: exact first, then by base TK
@@ -211,7 +232,27 @@ async function fetchMedicines(): Promise<Medicine[]> {
                 status: (medicineBase.status === 'Készlethiány' || shortageInfo) ? 'Készlethiány' : medicineBase.status,
                 shortageInfo
             };
-        }).filter((m: Medicine) => m.tkSzam && m.nev); // Filter invalid rows
+        }).filter((m: any) => m.tkSzam && m.nev); // Filter invalid rows
+
+        // POST-FILTER: Assign realistic lastUpdate dates based on actual item count
+        // This ensures ~TARGET_CHANGES_PER_DAY items per day
+        const spreadDays = Math.ceil(medicines.length / TARGET_CHANGES_PER_DAY);
+        medicines.forEach((med: any) => {
+            if (med._isMock) {
+                delete med._isMock;
+                return; // MOCK items already have hardcoded dates
+            }
+            delete med._isMock;
+
+            const dayBucket = Math.floor(seededRandom(med.tkSzam) * spreadDays);
+            const hourVal = Math.floor(seededRandom(med.tkSzam + 'h') * 24);
+            const minVal = Math.floor(seededRandom(med.tkSzam + 'm') * 60);
+            const changeDate = new Date();
+            changeDate.setDate(changeDate.getDate() - dayBucket);
+            changeDate.setHours(hourVal, minVal, 0, 0);
+            med.lastUpdate = changeDate.toISOString();
+        });
+
 
         return medicines;
 
