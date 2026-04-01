@@ -2,8 +2,11 @@
 
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ - TÉMA RÉSZLETEK OLDAL
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - TÉMA RÉSZLETEK OLDAL [HASZNÁLATON KÍVÜL]
  * ============================================================================
+ * 
+ * FIGYELEM: Ez az oldal jelenleg nincs hivatkozva a felületen.
+ * A funkcióját a BENU Képzési Program vette át.
  * 
  * ÚTVONAL: /kozosseg/[topicId]
  * 

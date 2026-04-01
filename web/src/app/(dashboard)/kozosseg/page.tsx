@@ -2,8 +2,11 @@
 
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ - FÓRUM FŐOLDAL
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - FÓRUM FŐOLDAL [HASZNÁLATON KÍVÜL]
  * ============================================================================
+ * 
+ * FIGYELEM: Ez az oldal jelenleg nincs hivatkozva a navigációban.
+ * A funkcióját a BENU Képzési Program (/kepzesek) vette át.
  * 
  * ÚTVONAL: /kozosseg
  * 

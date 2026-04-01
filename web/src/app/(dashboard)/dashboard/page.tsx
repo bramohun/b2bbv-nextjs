@@ -25,9 +25,8 @@
 
 import React from 'react';
 import { getGlobalStockStats, getPharmacies } from '@/lib/data';
-import { getLatestForumActivity, getForumStats } from '@/lib/forum-service';
 import { StockChangesWidget } from '@/components/dashboard/StockChangesWidget';
-import { CommunityActivityWidget } from '@/components/dashboard/CommunityActivityWidget';
+import { TrainingPromoWidget } from '@/components/dashboard/TrainingPromoWidget';
 import { PharmacyStockWidget } from '@/components/dashboard/PharmacyStockWidget';
 import { PeriodSelector } from '@/components/dashboard/PeriodSelector';
 
@@ -38,11 +37,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     const period = parseInt(periodParam || '1', 10);
 
     // Fetch data in parallel on the server
-    const [stockStats, pharmacies, forumActivity, forumStats] = await Promise.all([
+    const [stockStats, pharmacies] = await Promise.all([
         getGlobalStockStats(period),
         getPharmacies(),
-        getLatestForumActivity(10),
-        getForumStats(period)
     ]);
 
     return (
@@ -74,13 +71,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
                     />
                 </div>
 
-                {/* Right Column: Community Activity */}
+                {/* Right Column: Training Program Promo */}
                 <div className="lg:col-span-1">
-                    <CommunityActivityWidget
-                        activities={forumActivity}
-                        stats={forumStats}
-                        period={period}
-                    />
+                    <TrainingPromoWidget />
                 </div>
             </div>
         </div>

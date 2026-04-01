@@ -1,7 +1,10 @@
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - [HASZNÁLATON KÍVÜL]
  * ============================================================================
+ * 
+ * FIGYELEM: Ez a modul jelenleg nincsen hivatkozva a felületen. 
+ * A funkcióját a BENU Képzési Program (TrainingPromoWidget) vette át.
  * 
  * USER STORY:
  * Felhasználóként szeretném látni a közösségi fórum legfrissebb aktivitásait, 

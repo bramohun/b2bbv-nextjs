@@ -55,7 +55,7 @@ export const Navbar = () => {
                         <li><Link href="/dashboard"><span className="material-symbols-rounded">dashboard</span>Irányítópult</Link></li>
                         <li><Link href="/gyogyszerek"><span className="material-symbols-rounded">medication</span>Gyógyszerek</Link></li>
                         <li><Link href="/gyogyszertarak"><span className="material-symbols-rounded">local_pharmacy</span>Gyógyszertárak</Link></li>
-                        <li><Link href="/kozosseg"><span className="material-symbols-rounded">groups</span>Közösség</Link></li>
+                        <li><Link href="/kepzesek"><span className="material-symbols-rounded">school</span>BENU Képzési Program</Link></li>
                         {isAdmin && (
                             <li className="border-t border-base-200 mt-2 pt-2">
                                 <Link href="/admin/users" className="text-secondary font-bold">
@@ -74,7 +74,7 @@ export const Navbar = () => {
                     <li><Link href="/dashboard"><span className="material-symbols-rounded">dashboard</span>Irányítópult</Link></li>
                     <li><Link href="/gyogyszerek"><span className="material-symbols-rounded">medication</span>Gyógyszerek</Link></li>
                     <li><Link href="/gyogyszertarak"><span className="material-symbols-rounded">local_pharmacy</span>Gyógyszertárak</Link></li>
-                    <li><Link href="/kozosseg"><span className="material-symbols-rounded">groups</span>Közösség</Link></li>
+                    <li><Link href="/kepzesek"><span className="material-symbols-rounded">school</span>BENU Képzési Program</Link></li>
                     {isAdmin && (
                         <li>
                             <Link href="/admin/users" className="text-secondary font-bold">
