@@ -14,7 +14,7 @@
  * - Hasonló termékek táblázatos megjelenítése.
  * - Csak az "Elérhető" státuszú termékek szűrése és megjelenítése.
  * - Gyors navigáció a helyettesítő termék adatlapjára.
- * - **KÖZELI PATIKA ELÉRHETŐSÉG**: Megmutatjuk, hogy az adott termék elérhető-e a felhasználó kedvenc patikájában.
+ * - **KÖZELI PATIKA ELÉRHETŐSÉG**: Megmutatjuk, hogy az adott termék elérhető-e a felhasználó mentett patikájában.
  * 
  * MŰKÖDÉSI LOGIKA:
  * - A komponens kap egy hatóanyag nevet és egy előre leszűrt listát.
@@ -121,7 +121,7 @@ export function SimilarMedicines({ substance, medicines }: SimilarMedicinesProps
                     <table className="table table-zebra w-full">
                         <thead>
                             <tr>
-                                <th className="bg-base-200">Kedvenc</th>
+                                <th className="bg-base-200">Mentés</th>
                                 <th className="bg-base-200">Név</th>
                                 <th className="bg-base-200">Kiszerelés</th>
                                 <th className="bg-base-200">Gyártó</th>
@@ -137,9 +137,11 @@ export function SimilarMedicines({ substance, medicines }: SimilarMedicinesProps
                                         <button
                                             className={`btn btn-circle btn-ghost btn-xs ${isFavorite(med.tkSzam) ? 'text-warning' : 'text-gray-400'}`}
                                             onClick={() => handleFavoriteToggle(med)}
-                                            title={isFavorite(med.tkSzam) ? "Eltávolítás a kedvencekből" : "Kedvencekhez"}
+                                            title={isFavorite(med.tkSzam) ? "Eltávolítás a mentettek közül" : "Mentés a listához"}
                                         >
-                                            <span className={`material-symbols-rounded text-base ${isFavorite(med.tkSzam) ? 'fill-1' : ''}`}>star</span>
+                                            <span className={`material-symbols-rounded text-base ${isFavorite(med.tkSzam) ? 'fill-1' : ''}`}>
+                                                {isFavorite(med.tkSzam) ? 'bookmark_added' : 'bookmark_add'}
+                                            </span>
                                         </button>
                                     </td>
                                     <td className="font-medium">

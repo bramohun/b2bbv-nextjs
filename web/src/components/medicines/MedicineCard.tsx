@@ -15,8 +15,8 @@
  * - Adatok dinamikus megjelenítése: A szülő komponenstől kapott beállítások alapján a mezők elrejtése/megjelenítése.
  * - Státuszjelző badge megjelenítése (pl. Elérhető - Zöld, Készlethiány - Sárga).
  * - "Részletek" gomb, amely a termék adatlapjára navigál.
- * - Kedvencekhez adás és értesítés kérése gombok.
- * - Kedvenc eltávolítása esetén figyelmeztetés, ha értesítés is aktív.
+ * - Mentés a listához és értesítés kérése gombok.
+ * - Mentett gyógyszer eltávolítása esetén figyelmeztetés, ha értesítés is aktív.
  * - Közeli patika készletinformáció megjelenítése (ha be van állítva közeli patika).
  * 
  * KAPCSOLÓDÓ ELEMEK:
@@ -178,9 +178,11 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine, visibleFie
                         <button
                             className={`btn btn-circle btn-sm ${favorit ? 'btn-active bg-warning text-warning-content border-warning' : 'btn-ghost text-gray-400 hover:text-warning'}`}
                             onClick={handleFavorite}
-                            title={favorit ? "Eltávolítás a kedvencekből" : "Kedvencekhez"}
+                            title={favorit ? "Eltávolítás a mentettek közül" : "Mentés a mentett gyógyszerek közé"}
                         >
-                            <span className={`material-symbols-rounded ${favorit ? 'fill-1' : ''}`}>star</span>
+                            <span className={`material-symbols-rounded ${favorit ? 'fill-1' : ''}`}>
+                                {favorit ? 'bookmark_added' : 'bookmark_add'}
+                            </span>
                         </button>
                         <button
                             className={`btn btn-circle btn-sm ${subscribed ? 'btn-primary' : 'btn-ghost text-gray-400 hover:text-info'}`}

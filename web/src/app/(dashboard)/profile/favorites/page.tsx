@@ -11,10 +11,10 @@ import { useNotification } from '@/context/NotificationContext';
  * illetve feliratkozhassak értesítésekre a kedvenc termékeimnél.
  * 
  * Funkciók:
- * - Kedvenc gyógyszerek listázása táblázatos formában.
+ * - Mentett gyógyszerek listázása táblázatos formában.
  * - Közvetlen navigáció a gyógyszer adatlapjára.
- * - Eltávolítás a kedvencek közül egy kattintással.
- * - Kedvenc eltávolítása esetén figyelmeztetés, ha értesítés is aktív.
+ * - Eltávolítás a mentett gyógyszerek közül egy kattintással.
+ * - Mentett gyógyszer eltávolítása esetén figyelmeztetés, ha értesítés is aktív.
  * - Értesítésre feliratkozás és leiratkozás.
  * - Üres állapot kezelése.
  */
@@ -66,13 +66,13 @@ export default function FavoritesPage() {
                 onClose={() => setPendingRemovalTkSzam(null)}
                 onConfirm={confirmRemoval}
             />
-            <h1 className="text-3xl font-bold mb-6">Kedvenc gyógyszerek</h1>
+            <h1 className="text-3xl font-bold mb-6">Mentett gyógyszerek</h1>
 
             <div className="bg-base-100 rounded-lg shadow border border-base-200">
                 {favorites.length === 0 ? (
                     <div className="p-12 text-center text-gray-500">
-                        <span className="material-symbols-rounded text-6xl mb-4 block opacity-20">star_outline</span>
-                        <p className="text-lg">Jelenleg nincs kedvencnek jelölt gyógyszered.</p>
+                        <span className="material-symbols-rounded text-6xl mb-4 block opacity-20">bookmarks</span>
+                        <p className="text-lg">Jelenleg nincs mentett gyógyszered.</p>
                         <Link href="/gyogyszerek" className="btn btn-warning mt-4">
                             Gyógyszerek böngészése
                         </Link>
@@ -128,9 +128,9 @@ export default function FavoritesPage() {
                                             <button
                                                 className="btn btn-sm btn-ghost text-error hover:bg-error/10"
                                                 onClick={() => handleRemoveClick(fav.tkSzam)}
-                                                title="Eltávolítás a kedvencekből"
+                                                title="Eltávolítás a mentettek közül"
                                             >
-                                                <span className="material-symbols-rounded">star_half</span>
+                                                <span className="material-symbols-rounded">bookmark_remove</span>
                                                 <span className="hidden sm:inline ml-1">Eltávolítás</span>
                                             </button>
                                         </td>

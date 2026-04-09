@@ -7,7 +7,7 @@
  * 
  * USER STORY:
  * Felhasználóként szeretnék egy központi navigációs sávot használni az oldalak
- * közötti váltáshoz, a kereséshez, a kedvenc gyógyszereim gyors eléréséhez 
+ * közötti váltáshoz, a kereséshez, a mentett gyógyszereim gyors eléréséhez 
  * és a profilbeállításaim kezeléséhez, valamint látni a számomra megjelölt
  * közeli gyógyszertárat.
  * 
@@ -15,7 +15,7 @@
  * - Navigációs linkek: Irányítópult, Gyógyszerek, Gyógyszertárak, Közösség (ikonokkal ellátva).
  * - Gyorskereső gomb.
  * - Közeli gyógyszertár kijelzése: Név és cím megjelenítése a navigációs sávban.
- * - Kedvencek dropdown: A kedvencnek jelölt gyógyszerek gyorslistája.
+ * - Mentett gyógyszerek dropdown: A mentettnek jelölt gyógyszerek gyorslistája.
  * - Felhasználói profil menü: Profil, Beállítások, Kijelentkezés.
  * 
  * ÜZLETI LOGIKA:
@@ -120,7 +120,7 @@ export const Navbar = () => {
                 <div className="dropdown dropdown-end">
                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
                         <div className="indicator">
-                            <span className="material-symbols-rounded">star</span>
+                            <span className={`material-symbols-rounded ${favorites.length > 0 ? 'fill-1' : ''}`}>bookmarks</span>
                             {favorites.length > 0 && (
                                 <span className="badge badge-xs badge-warning indicator-item">
                                     {favorites.length}
@@ -133,10 +133,10 @@ export const Navbar = () => {
                         className="card card-compact dropdown-content bg-base-100 z-[1] mt-3 w-80 shadow"
                     >
                         <div className="card-body">
-                            <span className="text-lg font-bold">{favorites.length} kedvenc</span>
+                            <span className="text-lg font-bold">{favorites.length} mentett gyógyszer</span>
                             <div className="max-h-60 overflow-y-auto">
                                 {favorites.length === 0 ? (
-                                    <p className="text-sm text-gray-500">Nincs kedvencnek jelölt gyógyszer.</p>
+                                    <p className="text-sm text-gray-500">Nincs mentett gyógyszered.</p>
                                 ) : (
                                     <ul className="menu menu-sm bg-base-100 rounded-box p-0">
                                         {favorites.map((fav) => (

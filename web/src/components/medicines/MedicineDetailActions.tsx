@@ -10,9 +10,9 @@
  * és az értesítés feliratkozást.
  * 
  * FUNKCIÓK:
- * - Kedvencekhez adás / eltávolítás.
+ * - Mentés a listához / eltávolítás.
  * - Értesítés kérése / lemondása.
- * - Kedvenc eltávolítása esetén figyelmeztetés, ha értesítés is aktív.
+ * - Mentett gyógyszer eltávolítása esetén figyelmeztetés, ha értesítés is aktív.
  */
 
 import React from 'react';
@@ -74,8 +74,10 @@ export const MedicineDetailActions = ({ medicine }: MedicineDetailActionsProps) 
                 className={`btn gap-2 ${favorit ? 'btn-active bg-warning text-warning-content border-warning' : 'btn-outline border-base-300'}`}
                 onClick={handleFavorite}
             >
-                <span className={`material-symbols-rounded ${favorit ? 'fill-1' : ''}`}>star</span>
-                {favorit ? 'Eltávolítás a kedvencekből' : 'Kedvencekhez'}
+                <span className={`material-symbols-rounded ${favorit ? 'fill-1' : ''}`}>
+                    {favorit ? 'bookmark_added' : 'bookmark_add'}
+                </span>
+                {favorit ? 'Eltávolítás a mentettek közül' : 'Mentés a listához'}
             </button>
             <button
                 className={`btn gap-2 ${subscribed ? 'btn-primary' : 'btn-outline border-base-300'}`}

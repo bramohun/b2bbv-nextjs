@@ -54,7 +54,7 @@ export default function AdminUsersPage() {
                 newsletterSettings: u.newsletterSettings || {
                     primary: {
                         community: { subscribed: true, sendTime: 8, frequency: 'Napi', topic: 'Minden', ownTopicOnly: false },
-                        stock: { subscribed: true, frequency: 'Heti', sendTime: 9, topics: ['Újra elérhető', 'Készlethiány'], scope: 'Szakterület + kedvenc' }
+                        stock: { subscribed: true, frequency: 'Heti', sendTime: 9, topics: ['Újra elérhető', 'Készlethiány'], scope: 'Szakterület + mentett gyógyszerek' }
                     },
                     secondary: {
                         community: { subscribed: false, sendTime: 8, frequency: 'Heti', topic: 'Csak szakterület', ownTopicOnly: true },
@@ -80,7 +80,7 @@ export default function AdminUsersPage() {
             newsletterSettings: {
                 primary: {
                     community: { subscribed: true, sendTime: 8, frequency: 'Napi', topic: 'Minden', ownTopicOnly: false },
-                    stock: { subscribed: true, frequency: 'Heti', sendTime: 9, topics: ['Újra elérhető', 'Készlethiány'], scope: 'Szakterület + kedvenc' }
+                    stock: { subscribed: true, frequency: 'Heti', sendTime: 9, topics: ['Újra elérhető', 'Készlethiány'], scope: 'Szakterület + mentett gyógyszerek' }
                 },
                 secondary: {
                     community: { subscribed: false, sendTime: 8, frequency: 'Heti', topic: 'Csak szakterület', ownTopicOnly: true },
@@ -300,7 +300,7 @@ export default function AdminUsersPage() {
                                     value={config.stock.scope}
                                     onChange={(e) => updateNewsletter(type, 'stock', 'scope', e.target.value)}
                                 >
-                                    <option>Minden</option><option>Szakterület + kedvenc</option><option>Csak szakterület</option><option>Csak kedvenc</option>
+                                    <option>Minden</option><option>Szakterület + mentett gyógyszerek</option><option>Csak szakterület</option><option>Csak mentett gyógyszer</option>
                                 </select>
                             </div>
                         </div>

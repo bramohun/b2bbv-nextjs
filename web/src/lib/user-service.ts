@@ -31,7 +31,7 @@ export interface NewsletterConfig {
         frequency: 'Napi' | 'Heti' | 'Mavi';
         sendTime: number;
         topics: string[];
-        scope: 'Minden' | 'Szakterület + kedvenc' | 'Csak szakterület' | 'Csak kedvenc';
+        scope: 'Minden' | 'Szakterület + mentett gyógyszerek' | 'Csak szakterület' | 'Csak mentett gyógyszer';
     };
 }
 
@@ -59,7 +59,7 @@ const UNIVERSAL_PASSWORD = 'vény123';
 const DEFAULT_NEWSLETTER_SETTINGS: { primary: NewsletterConfig; secondary: NewsletterConfig } = {
     primary: {
         community: { subscribed: true, sendTime: 8, frequency: 'Napi', topic: 'Minden', ownTopicOnly: false },
-        stock: { subscribed: true, frequency: 'Heti', sendTime: 9, topics: ['Újra elérhető', 'Készlethiány'], scope: 'Szakterület + kedvenc' }
+        stock: { subscribed: true, frequency: 'Heti', sendTime: 9, topics: ['Újra elérhető', 'Készlethiány'], scope: 'Szakterület + mentett gyógyszerek' }
     },
     secondary: {
         community: { subscribed: false, sendTime: 8, frequency: 'Heti', topic: 'Csak szakterület', ownTopicOnly: true },

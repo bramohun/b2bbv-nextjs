@@ -11,18 +11,18 @@ import { useToast } from './ToastContext';
  * ============================================================================
  * 
  * USER STORY:
- * Felhasználóként szeretném a számomra fontos gyógyszereket kedvencnek jelölni,
+ * Felhasználóként szeretném a számomra fontos gyógyszereket menteni a listámba,
  * hogy később gyorsan elérhessem őket a listában anélkül, hogy értesítéseket
  * kapnék a változásaikról.
  * 
  * FUNKCIÓK:
- * - Gyógyszerek hozzáadása a kedvencekhez.
- * - Gyógyszerek eltávolítása a kedvencekből.
- * - Kedvenc státusz ellenőrzése (isFavorite).
+ * - Gyógyszerek mentése a listába.
+ * - Gyógyszerek eltávolítása a mentett listáról.
+ * - Mentett státusz ellenőrzése (isFavorite).
  * - Adatok perzisztenciája (localStorage).
  * 
  * MŰKÖDÉSI LOGIKA:
- * - A kedvenceket a `medicine_favorites` kulcs alatt tároljuk a localStorage-ban.
+ * - A mentett gyógyszereket a `medicine_favorites` kulcs alatt tároljuk a localStorage-ban.
  * - Csak a legszükségesebb adatokat tároljuk (tkSzam, név, státusz).
  * - A Context API biztosítja az adatok elérhetőségét az egész alkalmazásban.
  */
@@ -87,7 +87,7 @@ export function FavoriteProvider({ children }: { children: React.ReactNode }) {
                         <Link href={`/gyogyszerek/${itemToRemove.tkSzam}`} className="hover:underline font-bold text-primary">
                             {itemToRemove.name}
                         </Link>
-                        {itemToRemove.kiszereles ? ` (${itemToRemove.kiszereles})` : ''} kivéve a kedvencek közül.
+                        {itemToRemove.kiszereles ? ` (${itemToRemove.kiszereles})` : ''} eltávolítva a mentett gyógyszerek közül.
                     </>
                 ),
                 onUndo: () => {

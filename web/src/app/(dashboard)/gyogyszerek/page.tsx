@@ -28,9 +28,9 @@
  *   - Táblázat oszlopainak átrendezése drag & drop segítségével a fejlécet megragadva.
  * 
  * MŰKÖDÉSI LOGIKA:
- * - Kedvencekhez adás / eltávolítás és értesítés kérése / lemondása.
- * - ÉRTESÍTÉS LOGIKA: Értesítésre való feliratkozáskor a termék automatikusan a kedvenc listára kerül.
- * - KEDVENC LOGIKA: Kedvenc eltávolítása esetén figyelmeztetés jelenik meg, ha értesítés is aktív a termékhez.
+ * - Mentés a listához / eltávolítás és értesítés kérése / lemondása.
+ * - ÉRTESÍTÉS LOGIKA: Értesítésre való feliratkozáskor a termék automatikusan a mentett listára kerül.
+ * - MENTÉS LOGIKA: Mentett gyógyszer eltávolítása esetén figyelmeztetés jelenik meg, ha értesítés is aktív a termékhez.
  * - KÖZELI PATIKA LOGIKA: Ha közeli patika van beállítva, a "Közeli patika" oszlop automatikusan megjelenik a táblázatban, 
  *   megjelenítve a készletstátuszt és az utolsó frissítés időpontját.
  * - Rendezés a szűrt listán (`filteredMedicines`) történik, mielőtt a lapozás alkalmazásra kerül.
@@ -400,7 +400,7 @@ function MedicinesPageContent() {
             unsubscribe(medicine.tkSzam);
         } else {
             subscribe(medicine);
-            // Ha feliratkozik, automatikusan kedvenc is lesz, ha még nem az
+            // Ha feliratkozik, automatikusan mentett is lesz, ha még nem az
             if (!isFavorite(medicine.tkSzam)) {
                 addFavorite(medicine);
             }
@@ -722,9 +722,11 @@ function MedicinesPageContent() {
                             <button
                                 className={`btn btn-circle btn-xs ${isFavorite(medicine.tkSzam) ? 'bg-warning text-warning-content border-warning' : 'btn-ghost text-gray-400 hover:text-warning'}`}
                                 onClick={() => handleFavorite(medicine)}
-                                title={isFavorite(medicine.tkSzam) ? "Eltávolítás a kedvencekből" : "Kedvencekhez"}
+                                title={isFavorite(medicine.tkSzam) ? "Eltávolítás a mentettek közül" : "Mentés a listához"}
                             >
-                                <span className={`material-symbols-rounded text-[18px] ${isFavorite(medicine.tkSzam) ? 'fill-1' : ''}`}>star</span>
+                                <span className={`material-symbols-rounded text-[18px] ${isFavorite(medicine.tkSzam) ? 'fill-1' : ''}`}>
+                                    {isFavorite(medicine.tkSzam) ? 'bookmark_added' : 'bookmark_add'}
+                                </span>
                             </button>
                             <button
                                 className={`btn btn-circle btn-xs ${isSubscribed(medicine.tkSzam) ? 'btn-primary' : 'btn-ghost text-gray-400 hover:text-info'}`}
@@ -767,10 +769,10 @@ function MedicinesPageContent() {
                     <button
                         className={`btn btn-md gap-2 ${favoritesOnly ? 'btn-warning' : 'btn-ghost border-base-300'}`}
                         onClick={() => setFavoritesOnly(!favoritesOnly)}
-                        title={favoritesOnly ? "Minden gyógyszer mutatása" : "Csak kedvencek mutatása"}
+                        title={favoritesOnly ? "Minden gyógyszer mutatása" : "Csak mentettek mutatása"}
                     >
-                        <span className={`material-symbols-rounded ${favoritesOnly ? 'fill-1' : ''}`}>star</span>
-                        Kedvencek
+                        <span className={`material-symbols-rounded ${favoritesOnly ? 'fill-1' : ''}`}>bookmarks</span>
+                        Mentett gyógyszerek
                     </button>
 
                     {nearbyPharmacy && (

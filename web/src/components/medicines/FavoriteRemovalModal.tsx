@@ -9,16 +9,16 @@ import React from 'react';
  * 
  * USER STORY:
  * Felhasználóként szeretnék figyelmeztetést kapni, ha egy olyan terméket veszek ki
- * a kedvencek közül, amelyre értesítést kértem, mert az értesítés is meg fog szűnni.
+ * a mentett gyógyszerek közül, amelyre értesítést kértem, mert az értesítés is meg fog szűnni.
  * 
  * FUNKCIÓK:
  * - Figyelmeztető üzenet megjelenítése.
- * - Megerősítés (Kedvenc + Értesítés eltávolítása).
+ * - Megerősítés (Mentett gyógyszer + Értesítés eltávolítása).
  * - Megszakítás (Visszatérés az eredeti állapothoz).
  * 
  * ÜZLETI/MŰKÖDÉSI LOGIKA:
- * - Ha a termék kedvenc ÉS van rá aktív értesítés feliratkozás, akkor
- *   a kedvenc eltávolítása gombra kattintva ez a modal jelenik meg.
+ * - Ha a termék mentett ÉS van rá aktív értesítés feliratkozás, akkor
+ *   a mentés eltávolítása gombra kattintva ez a modal jelenik meg.
  * - "Mégsem" a nézet elsődleges gombja (visszavonás).
  * - "Igen, biztosan" az eltávolítást hajtja végre.
  */
@@ -42,10 +42,10 @@ export const FavoriteRemovalModal: React.FC<FavoriteRemovalModalProps> = ({ isOp
 
                 <div className="py-2 space-y-4">
                     <p className="font-semibold text-lg leading-tight">
-                        Ha kiveszi a kedvencek közül a terméket, nem kap több értesítést!
+                        Ha kiveszi a mentett gyógyszerek közül a terméket, nem kap több értesítést!
                     </p>
                     <p className="text-base-content/70">
-                        Biztosan szeretné kivenni a kedvencek közül és ezzel nem kap a termékről több értesítést sem?
+                        Biztosan szeretné kivenni a mentett gyógyszerek közül és ezzel nem kap a termékről több értesítést sem?
                     </p>
                 </div>
 

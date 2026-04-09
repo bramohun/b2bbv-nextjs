@@ -55,7 +55,7 @@ export default function ProfilePage() {
             frequency: 'Napi' | 'Heti' | 'Mavi';
             sendTime: number;
             topics: string[]; // Újra elérhető, Készlethiány, Megszűnt
-            scope: 'Minden' | 'Szakterület + kedvenc' | 'Csak szakterület' | 'Csak kedvenc';
+            scope: 'Minden' | 'Szakterület + mentett gyógyszerek' | 'Csak szakterület' | 'Csak mentett gyógyszer';
         };
     };
 
@@ -63,7 +63,7 @@ export default function ProfilePage() {
     const [newsletterSettings, setNewsletterSettings] = useState<{ primary: NewsletterConfig; secondary: NewsletterConfig }>({
         primary: {
             training: { subscribed: true, topics: ['Akkreditált', 'Gyártói'] },
-            stock: { subscribed: true, frequency: 'Heti', sendTime: 9, topics: ['Újra elérhető', 'Készlethiány'], scope: 'Szakterület + kedvenc' }
+            stock: { subscribed: true, frequency: 'Heti', sendTime: 9, topics: ['Újra elérhető', 'Készlethiány'], scope: 'Szakterület + mentett gyógyszerek' }
         },
         secondary: {
             training: { subscribed: false, topics: [] },
@@ -251,9 +251,9 @@ export default function ProfilePage() {
                                         onChange={(e) => updateNewsletter(emailType, 'stock', 'scope', e.target.value)}
                                     >
                                         <option>Minden</option>
-                                        <option>Szakterület + kedvenc</option>
+                                        <option>Szakterület + mentett gyógyszerek</option>
                                         <option>Csak szakterület</option>
-                                        <option>Csak kedvenc</option>
+                                        <option>Csak mentett gyógyszer</option>
                                     </select>
                                 </div>
                             </div>

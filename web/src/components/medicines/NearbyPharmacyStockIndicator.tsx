@@ -10,7 +10,7 @@ import { getNearbyPharmacyStatusUpdate, isAvailableInPharmacy } from '@/lib/util
  * ============================================================================
  * 
  * USER STORY:
- * Felhasználóként szeretném látni a termékoldalon, hogy a kedvencnek jelölt 
+ * Felhasználóként szeretném látni a termékoldalon, hogy a mentett 
  * közeli patikámban elérhető-e az adott gyógyszer, hogy tudjam, érdemes-e oda mennem.
  * 
  * FUNKCIÓK:
