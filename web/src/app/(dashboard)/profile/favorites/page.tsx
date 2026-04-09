@@ -68,6 +68,39 @@ export default function FavoritesPage() {
             />
             <h1 className="text-3xl font-bold mb-6">Mentett gyógyszerek</h1>
 
+            {/* Explanation Section */}
+            <div className="card bg-primary/5 border border-primary/10 mb-8 overflow-hidden">
+                <div className="card-body p-6">
+                    <div className="flex flex-col md:flex-row gap-6 md:gap-12">
+                        <div className="flex-1 flex gap-4">
+                            <div className="bg-primary/10 w-12 h-12 rounded-2xl flex items-center justify-center shrink-0">
+                                <span className="material-symbols-rounded text-primary text-2xl">bookmarks</span>
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-lg text-primary mb-1">Mentett gyógyszerek</h3>
+                                <p className="text-sm text-base-content/70 leading-relaxed">
+                                    A könyvjelzővel megjelölt gyógyszerek ezen a listán gyűlnek, így bármikor gyorsan elérheted őket anélkül, hogy újra rájuk kellene keresned.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="hidden md:block w-px bg-primary/10 h-full"></div>
+
+                        <div className="flex-1 flex gap-4">
+                            <div className="bg-warning/10 w-12 h-12 rounded-2xl flex items-center justify-center shrink-0">
+                                <span className="material-symbols-rounded text-warning text-2xl">notifications</span>
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-lg text-warning mb-1">Értesítések kérése</h3>
+                                <p className="text-sm text-base-content/70 leading-relaxed">
+                                    Ha bekapcsolod az értesítést (harang ikon), a rendszer automatikusan jelezni fog neked, ha a gyógyszer készlete vagy elérhetősége megváltozik.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div className="bg-base-100 rounded-lg shadow border border-base-200">
                 {favorites.length === 0 ? (
                     <div className="p-12 text-center text-gray-500">

@@ -26,8 +26,15 @@
  */
 
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useAuth } from '@/context/AuthContext';
+import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
 import { MEDICAL_SPECIALTIES, MedicalSpecialty } from '@/types/forum';
+
+const PharmacyFinder = dynamic(() => import('@/components/pharmacies/PharmacyFinder').then(mod => mod.PharmacyFinder), {
+    ssr: false,
+    loading: () => <div className="h-[600px] w-full bg-base-200 animate-pulse flex items-center justify-center text-gray-400">Patika kereső betöltése...</div>
+});
 
 export default function ProfilePage() {
     const { user, logout } = useAuth();
@@ -43,6 +50,9 @@ export default function ProfilePage() {
     const [isEditing, setIsEditing] = useState(false);
     const [tempSpecialties, setTempSpecialties] = useState<MedicalSpecialty[]>(profileData.specialties);
     const [specialtySearch, setSpecialtySearch] = useState('');
+
+    const { nearbyPharmacy, clearNearbyPharmacy } = useNearbyPharmacy();
+    const [isPharmacyModalOpen, setIsPharmacyModalOpen] = useState(false);
 
     // Hírlevél beállítások típusai és állapota
     type NewsletterConfig = {
@@ -414,6 +424,73 @@ export default function ProfilePage() {
                     </div>
                 </section>
 
+                {/* Közeli Patika Szekció */}
+                <section className="card bg-base-100 shadow-xl border border-base-200">
+                    <div className="card-body">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="card-title flex items-center gap-2">
+                                <span className="material-symbols-rounded text-primary">home_pin</span>
+                                Közeli Patikám
+                            </h2>
+                            <button 
+                                onClick={() => setIsPharmacyModalOpen(true)}
+                                className="btn btn-primary btn-sm gap-2"
+                            >
+                                <span className="material-symbols-rounded text-sm">edit_location_alt</span>
+                                {nearbyPharmacy ? 'Módosítás' : 'Beállítás'}
+                            </button>
+                        </div>
+
+                        {nearbyPharmacy ? (
+                            <div className="flex flex-col md:flex-row items-center justify-between p-4 bg-primary/5 rounded-2xl gap-4 border border-primary/10">
+                                <div className="flex gap-4 items-center">
+                                    <div className="bg-primary/10 p-4 rounded-2xl text-primary">
+                                        <span className="material-symbols-rounded text-3xl">local_pharmacy</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-lg">{nearbyPharmacy.nev}</h3>
+                                        <p className="text-sm opacity-70 flex items-center gap-1">
+                                            <span className="material-symbols-rounded text-xs">location_on</span>
+                                            {nearbyPharmacy.irsz} {nearbyPharmacy.telepules}, {nearbyPharmacy.cim}
+                                        </p>
+                                        <p className="text-sm opacity-70 flex items-center gap-1 mt-1">
+                                            <span className="material-symbols-rounded text-xs">call</span>
+                                            {nearbyPharmacy.telefon}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2 w-full md:w-auto">
+                                    <button 
+                                        onClick={() => clearNearbyPharmacy()}
+                                        className="btn btn-ghost btn-sm text-error hover:bg-error/10 w-full md:w-auto"
+                                        title="Kijelölés eltávolítása"
+                                    >
+                                        <span className="material-symbols-rounded text-sm">delete</span>
+                                        Törlés
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center p-8 bg-base-200/30 rounded-2xl border border-dashed border-base-300 text-center">
+                                <div className="bg-base-200 p-4 rounded-full mb-4 text-base-content/30">
+                                    <span className="material-symbols-rounded text-4xl">add_location</span>
+                                </div>
+                                <h3 className="font-bold text-lg mb-1">Nincs beállítva közeli patika</h3>
+                                <p className="text-sm opacity-60 max-w-sm">
+                                    Jelölje meg az Ön számára legfontosabb patikát, hogy a készletinformációkat azonnal láthassa!
+                                </p>
+                                <button 
+                                    onClick={() => setIsPharmacyModalOpen(true)}
+                                    className="btn btn-primary mt-4 gap-2"
+                                >
+                                    <span className="material-symbols-rounded">location_searching</span>
+                                    Patika keresése
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </section>
+
                 {/* Hírlevél Beállítások Szekció */}
                 <section className="card bg-base-100 shadow-xl border border-base-200">
                     <div className="card-body">
@@ -469,6 +546,42 @@ export default function ProfilePage() {
                     </button>
                 </div>
             </div>
+
+            {/* Patika Választó Modal */}
+            {isPharmacyModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-base-100 rounded-3xl shadow-2xl max-w-6xl w-full h-[90vh] overflow-hidden relative border border-base-300 flex flex-col animate-in zoom-in-95 duration-300">
+                        {/* Header */}
+                        <div className="p-4 border-b border-base-200 flex justify-between items-center bg-base-100 flex-none">
+                            <h3 className="text-xl font-bold flex items-center gap-2 text-primary">
+                                <span className="material-symbols-rounded">add_location_alt</span>
+                                Közeli patika kiválasztása
+                            </h3>
+                            <button 
+                                onClick={() => setIsPharmacyModalOpen(false)}
+                                className="btn btn-circle btn-ghost btn-sm"
+                            >
+                                <span className="material-symbols-rounded">close</span>
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 overflow-hidden">
+                            <PharmacyFinder 
+                                title="Válassza ki közeli patikáját"
+                                description="Kattintson a ház ikonra a patika kártyáján a beállításhoz."
+                                initialSelectedId={nearbyPharmacy?.id}
+                                onClose={() => setIsPharmacyModalOpen(false)}
+                            />
+                        </div>
+
+                        {/* Footer Notification */}
+                        <div className="p-3 bg-primary/5 text-xs text-center font-medium text-primary border-t border-primary/10">
+                            A kiválasztott patikát a rendszer automatikusan menti. A bezáráshoz kattintson a jobb felső sarokban lévő gombra.
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -33,6 +33,11 @@ const projectIcons = [
     { name: 'arrow_back', purpose: 'Visszanavigálás', context: 'Adatlap fejléc' },
     { name: 'logout', purpose: 'Kijelentkezés', context: 'User profil dropdown' },
     { name: 'account_circle', purpose: 'Profil kezelés', context: 'User profil dropdown' },
+    { name: 'home_pin', purpose: 'Közeli patika jelölése', context: 'Profil oldal' },
+    { name: 'edit_location_alt', purpose: 'Közeli patika módosítása', context: 'Profil oldal' },
+    { name: 'add_location_alt', purpose: 'Új közeli patika rögzítése', context: 'Profil oldal, Patika kereső' },
+    { name: 'delete', purpose: 'Elem törlése (pl. közeli patika)', context: 'Profil oldal' },
+    { name: 'location_searching', purpose: 'Patika keresése', context: 'Profil oldal (üres állapot)' },
 ];
 
 export default function IconSystemPage() {
