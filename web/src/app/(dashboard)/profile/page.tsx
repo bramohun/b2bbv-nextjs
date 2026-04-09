@@ -46,12 +46,9 @@ export default function ProfilePage() {
 
     // Hírlevél beállítások típusai és állapota
     type NewsletterConfig = {
-        community: {
+        training: {
             subscribed: boolean;
-            sendTime: number;
-            frequency: 'Napi' | 'Heti' | 'Mavi';
-            topic: 'Minden' | 'Csak szakterület';
-            ownTopicOnly: boolean;
+            topics: string[]; // Akkreditált, Gyártói, Eladásösztönző
         };
         stock: {
             subscribed: boolean;
@@ -65,18 +62,18 @@ export default function ProfilePage() {
 
     const [newsletterSettings, setNewsletterSettings] = useState<{ primary: NewsletterConfig; secondary: NewsletterConfig }>({
         primary: {
-            community: { subscribed: true, sendTime: 8, frequency: 'Napi', topic: 'Minden', ownTopicOnly: false },
+            training: { subscribed: true, topics: ['Akkreditált', 'Gyártói'] },
             stock: { subscribed: true, frequency: 'Heti', sendTime: 9, topics: ['Újra elérhető', 'Készlethiány'], scope: 'Szakterület + kedvenc' }
         },
         secondary: {
-            community: { subscribed: false, sendTime: 8, frequency: 'Heti', topic: 'Csak szakterület', ownTopicOnly: true },
+            training: { subscribed: false, topics: [] },
             stock: { subscribed: false, frequency: 'Havi' as any, sendTime: 10, topics: [], scope: 'Csak szakterület' }
         }
     });
 
     const updateNewsletter = (
         emailType: 'primary' | 'secondary',
-        category: 'community' | 'stock',
+        category: 'training' | 'stock',
         field: string,
         value: any
     ) => {
@@ -90,6 +87,14 @@ export default function ProfilePage() {
                 }
             }
         }));
+    };
+
+    const toggleTrainingTopic = (emailType: 'primary' | 'secondary', topic: string) => {
+        const currentTopics = newsletterSettings[emailType].training.topics;
+        const newTopics = currentTopics.includes(topic)
+            ? currentTopics.filter(t => t !== topic)
+            : [...currentTopics, topic];
+        updateNewsletter(emailType, 'training', 'topics', newTopics);
     };
 
     const toggleStockTopic = (emailType: 'primary' | 'secondary', topic: string) => {
@@ -109,101 +114,52 @@ export default function ProfilePage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Közösség, Fórum kártya */}
+                {/* BENU Képzési Program kártya */}
                 <div className="card bg-base-200/50 border border-base-300">
                     <div className="card-body p-6">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold flex items-center gap-2 text-lg text-primary">
-                                <span className="material-symbols-rounded">forum</span>
-                                Közösség, Fórum
+                                <span className="material-symbols-rounded">school</span>
+                                BENU Képzési Program
                             </h3>
                             <div className="form-control">
                                 <label className="label cursor-pointer p-0 gap-2">
-                                    <span className="label-text font-medium">{newsletterSettings[emailType].community.subscribed ? 'Feliratkozva' : 'Leiratkozva'}</span>
+                                    <span className="label-text font-medium">{newsletterSettings[emailType].training.subscribed ? 'Feliratkozva' : 'Leiratkozva'}</span>
                                     <input
                                         type="checkbox"
                                         className="toggle toggle-primary toggle-sm"
-                                        checked={newsletterSettings[emailType].community.subscribed}
-                                        onChange={(e) => updateNewsletter(emailType, 'community', 'subscribed', e.target.checked)}
+                                        checked={newsletterSettings[emailType].training.subscribed}
+                                        onChange={(e) => updateNewsletter(emailType, 'training', 'subscribed', e.target.checked)}
                                     />
                                 </label>
                             </div>
                         </div>
 
-                        {newsletterSettings[emailType].community.subscribed && (
+                        {newsletterSettings[emailType].training.subscribed && (
                             <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="form-control w-full">
-                                        <label className="label">
-                                            <span className="label-text font-bold">Kiküldés ideje</span>
-                                        </label>
-                                        <div className="join">
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                max="23"
-                                                className="input input-bordered input-sm w-full join-item"
-                                                value={newsletterSettings[emailType].community.sendTime}
-                                                onChange={(e) => updateNewsletter(emailType, 'community', 'sendTime', parseInt(e.target.value))}
-                                            />
-                                            <span className="btn btn-sm join-item pointer-events-none">óra</span>
-                                        </div>
-                                    </div>
-                                    <div className="form-control w-full">
-                                        <label className="label">
-                                            <span className="label-text font-bold">Rendszeresség</span>
-                                        </label>
-                                        <select
-                                            className="select select-bordered select-sm w-full"
-                                            value={newsletterSettings[emailType].community.frequency}
-                                            onChange={(e) => updateNewsletter(emailType, 'community', 'frequency', e.target.value)}
-                                        >
-                                            <option>Napi</option>
-                                            <option>Heti</option>
-                                            <option>Havi</option>
-                                        </select>
-                                    </div>
-                                </div>
-
+                                <p className="text-sm text-base-content/60">Értesítést kérek az új képzésekről a megjelölt témakörökben.</p>
+                                
                                 <div className="form-control w-full">
                                     <label className="label">
-                                        <span className="label-text font-bold">Téma</span>
+                                        <span className="label-text font-bold text-xs uppercase tracking-wider">Érdekelt képzési témakörök</span>
                                     </label>
-                                    <select
-                                        className="select select-bordered select-sm w-full"
-                                        value={newsletterSettings[emailType].community.topic}
-                                        onChange={(e) => updateNewsletter(emailType, 'community', 'topic', e.target.value)}
-                                    >
-                                        <option>Minden</option>
-                                        <option>Csak szakterület</option>
-                                    </select>
-                                </div>
-
-                                <div className="form-control">
-                                    <label className="label">
-                                        <span className="label-text font-bold">Saját témák esetén</span>
-                                    </label>
-                                    <div className="flex flex-col gap-2">
-                                        <label className="label cursor-pointer justify-start gap-3">
-                                            <input
-                                                type="radio"
-                                                name={`community-topic-${emailType}`}
-                                                className="radio radio-primary radio-sm"
-                                                checked={!newsletterSettings[emailType].community.ownTopicOnly}
-                                                onChange={() => updateNewsletter(emailType, 'community', 'ownTopicOnly', false)}
-                                            />
-                                            <span className="label-text text-sm">Minden amiben részt vettem</span>
-                                        </label>
-                                        <label className="label cursor-pointer justify-start gap-3">
-                                            <input
-                                                type="radio"
-                                                name={`community-topic-${emailType}`}
-                                                className="radio radio-primary radio-sm"
-                                                checked={newsletterSettings[emailType].community.ownTopicOnly}
-                                                onChange={() => updateNewsletter(emailType, 'community', 'ownTopicOnly', true)}
-                                            />
-                                            <span className="label-text text-sm">Csak amit én hoztam létre</span>
-                                        </label>
+                                    <div className="flex flex-wrap gap-2 mt-1">
+                                        {['Akkreditált', 'Gyártói', 'Eladásösztönző'].map(topic => (
+                                            <button
+                                                key={topic}
+                                                onClick={() => toggleTrainingTopic(emailType, topic)}
+                                                className={`btn btn-sm rounded-xl px-4 normal-case font-bold transition-all ${
+                                                    newsletterSettings[emailType].training.topics.includes(topic) 
+                                                    ? 'btn-primary shadow-md' 
+                                                    : 'btn-outline border-base-300 hover:bg-base-300 hover:border-transparent'
+                                                }`}
+                                            >
+                                                {topic}
+                                                {newsletterSettings[emailType].training.topics.includes(topic) && (
+                                                    <span className="material-symbols-rounded text-sm ml-2">check_circle</span>
+                                                )}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
