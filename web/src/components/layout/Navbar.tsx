@@ -65,24 +65,25 @@ export const Navbar = () => {
                         )}
                     </ul>
                 </div>
-                <Link href="/dashboard" className="btn btn-ghost text-xl">
+                <Link href="/dashboard" className="btn btn-ghost text-xl shrink-0">
                     <span className="font-bold text-primary">Orvosi Portál</span>
                 </Link>
-            </div>
-            <div className="navbar-center hidden lg:flex">
-                <ul className="menu menu-horizontal px-1">
-                    <li><Link href="/dashboard"><span className="material-symbols-rounded">dashboard</span>Irányítópult</Link></li>
-                    <li><Link href="/gyogyszerek"><span className="material-symbols-rounded">medication</span>Gyógyszerek</Link></li>
-                    <li><Link href="/gyogyszertarak"><span className="material-symbols-rounded">local_pharmacy</span>Gyógyszertárak</Link></li>
-                    <li><Link href="/kepzesek"><span className="material-symbols-rounded">school</span>BENU Képzési Program</Link></li>
-                    {isAdmin && (
-                        <li>
-                            <Link href="/admin/users" className="text-secondary font-bold">
-                                <span className="material-symbols-rounded">admin_panel_settings</span>Admin
-                            </Link>
-                        </li>
-                    )}
-                </ul>
+
+                <div className="ml-4 hidden lg:flex flex-1">
+                    <ul className="menu menu-horizontal px-1 gap-1 flex-nowrap whitespace-nowrap">
+                        <li><Link href="/dashboard" className="flex items-center gap-1.5"><span className="material-symbols-rounded text-xl">dashboard</span>Irányítópult</Link></li>
+                        <li><Link href="/gyogyszerek" className="flex items-center gap-1.5"><span className="material-symbols-rounded text-xl">medication</span>Gyógyszerek</Link></li>
+                        <li><Link href="/gyogyszertarak" className="flex items-center gap-1.5"><span className="material-symbols-rounded text-xl">local_pharmacy</span>Gyógyszertárak</Link></li>
+                        <li><Link href="/kepzesek" className="flex items-center gap-1.5"><span className="material-symbols-rounded text-xl">school</span>BENU Képzési Program</Link></li>
+                        {isAdmin && (
+                            <li>
+                                <Link href="/admin/users" className="text-secondary font-bold flex items-center gap-1.5">
+                                    <span className="material-symbols-rounded text-xl">admin_panel_settings</span>Admin
+                                </Link>
+                            </li>
+                        )}
+                    </ul>
+                </div>
             </div>
             <div className="navbar-end gap-2">
                 {/* Nearby Pharmacy Info */}
