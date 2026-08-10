@@ -35,6 +35,12 @@ export interface NewsletterConfig {
     };
 }
 
+export interface PasskeyCredential {
+    id: string;
+    name: string;
+    createdAt: string;
+}
+
 export interface User {
     id: string;
     name: string;
@@ -51,10 +57,18 @@ export interface User {
         primary: NewsletterConfig;
         secondary: NewsletterConfig;
     };
+
+    // 2FA and Security Fields
+    twoFactorEnabled?: boolean;
+    twoFactorType?: 'email' | 'sms' | 'totp';
+    phoneNumber?: string;
+    passkeys?: PasskeyCredential[];
+    trustedDevices?: string[];
 }
 
 const STORAGE_KEY = 'portal_users';
 const UNIVERSAL_PASSWORD = 'vény123';
+const DEMO_OTP_CODE = '123456';
 
 const DEFAULT_NEWSLETTER_SETTINGS: { primary: NewsletterConfig; secondary: NewsletterConfig } = {
     primary: {
@@ -77,7 +91,14 @@ const DEFAULT_USERS: User[] = [
         sessionVersion: 1,
         secondaryEmail: 'admin.backup@example.com',
         specialties: [],
-        newsletterSettings: DEFAULT_NEWSLETTER_SETTINGS
+        newsletterSettings: DEFAULT_NEWSLETTER_SETTINGS,
+        twoFactorEnabled: true,
+        twoFactorType: 'email',
+        phoneNumber: '+36301234567',
+        passkeys: [
+            { id: 'pk-1', name: 'Work Mac TouchID', createdAt: '2026-01-15' }
+        ],
+        trustedDevices: ['device-demo-1']
     },
     {
         id: 'user-1',
@@ -88,7 +109,12 @@ const DEFAULT_USERS: User[] = [
         sessionVersion: 1,
         secondaryEmail: 'kovacs.istvan.private@email.hu',
         specialties: ['Háziorvos', 'Belgyógyász'],
-        newsletterSettings: DEFAULT_NEWSLETTER_SETTINGS
+        newsletterSettings: DEFAULT_NEWSLETTER_SETTINGS,
+        twoFactorEnabled: true,
+        twoFactorType: 'email',
+        phoneNumber: '+36209876543',
+        passkeys: [],
+        trustedDevices: []
     },
     {
         id: 'user-2',
@@ -99,7 +125,11 @@ const DEFAULT_USERS: User[] = [
         sessionVersion: 1,
         secondaryEmail: '',
         specialties: ['Kardiológus'],
-        newsletterSettings: DEFAULT_NEWSLETTER_SETTINGS
+        newsletterSettings: DEFAULT_NEWSLETTER_SETTINGS,
+        twoFactorEnabled: false,
+        twoFactorType: 'email',
+        passkeys: [],
+        trustedDevices: []
     }
 ];
 
@@ -108,10 +138,6 @@ export const UserService = {
         if (typeof window === 'undefined') return [];
         const stored = localStorage.getItem(STORAGE_KEY);
         if (!stored) {
-            // Check if stored data is stale (missing new fields) - simple check by role property or just overwrite for prototype safety
-            // For now, we just return defaults if empty. In real app we would migrate.
-            // Since this is a prototype and we just added fields, existing localhost data might be broken/missing fields.
-            // We'll proceed with standard getting.
             localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_USERS));
             return DEFAULT_USERS;
         }
@@ -131,7 +157,11 @@ export const UserService = {
         const newUser: User = {
             ...userData,
             id: `user-${Date.now()}`,
-            sessionVersion: 1
+            sessionVersion: 1,
+            twoFactorEnabled: userData.twoFactorEnabled ?? false,
+            twoFactorType: userData.twoFactorType ?? 'email',
+            passkeys: userData.passkeys ?? [],
+            trustedDevices: userData.trustedDevices ?? []
         };
         const updatedUsers = [...users, newUser];
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedUsers));
@@ -155,9 +185,47 @@ export const UserService = {
         const user = UserService.getUserByEmail(email);
         if (!user || user.status !== 'active') return null;
 
-        // Update last login
-        UserService.updateUser(user.id, { lastLogin: new Date().toISOString() });
         return user;
+    },
+
+    verifyOtpCode: (userId: string, code: string): boolean => {
+        // Demóban 123456 a helyes kód
+        return code.trim() === DEMO_OTP_CODE;
+    },
+
+    addPasskey: (userId: string, name: string): User => {
+        const user = UserService.getUser(userId);
+        if (!user) throw new Error('User not found');
+        const passkeys = user.passkeys || [];
+        const newPasskey: PasskeyCredential = {
+            id: `pk-${Date.now()}`,
+            name: name || 'Biometrikus kulcs',
+            createdAt: new Date().toISOString().split('T')[0]
+        };
+        return UserService.updateUser(userId, { passkeys: [...passkeys, newPasskey] });
+    },
+
+    removePasskey: (userId: string, passkeyId: string): User => {
+        const user = UserService.getUser(userId);
+        if (!user) throw new Error('User not found');
+        const passkeys = (user.passkeys || []).filter(p => p.id !== passkeyId);
+        return UserService.updateUser(userId, { passkeys });
+    },
+
+    addTrustedDevice: (userId: string, deviceId: string): User => {
+        const user = UserService.getUser(userId);
+        if (!user) throw new Error('User not found');
+        const trusted = user.trustedDevices || [];
+        if (!trusted.includes(deviceId)) {
+            return UserService.updateUser(userId, { trustedDevices: [...trusted, deviceId] });
+        }
+        return user;
+    },
+
+    isTrustedDevice: (userId: string, deviceId: string): boolean => {
+        const user = UserService.getUser(userId);
+        if (!user) return false;
+        return (user.trustedDevices || []).includes(deviceId);
     },
 
     revokeSessions: (id: string): void => {
@@ -171,8 +239,8 @@ export const UserService = {
         const user = UserService.getUserByEmail(email);
         if (!user) return false;
 
-        // Mock sending email
         console.log(`[MOCK] Password reset email sent to ${email}`);
         return true;
     }
 };
+

@@ -2,27 +2,26 @@
 
 /**
  * ============================================================================
- * FUNKCIÓS SPECIFIKÁCIÓ
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ (FSR) - FELHASZNÁLÓI PROFIL ÉS BIZTONSÁG
  * ============================================================================
  * 
- * USER STORY:
- * Felhasználóként szeretném megtekinteni és kezelni a saját profiladataimat,
- * hogy naprakészen tarthassam az adataimat, valamint biztonsági és kényelmi
- * funkciókat érhessek el (jelszókezelés, kijelentkezés).
+ * MIRE HASZNÁLJUK:
+ * A bejelentkezett szakmai felhasználó saját adatlapja, ahol kezeli alapadatait,
+ * szakterületeit, preferált gyógyszertárát, hírlevél beállításait, valamint a
+ * fiók biztonsági funkcióit (2FA bekapcsolása/csatornája, Passkey biometrikus kulcsok
+ * hozzáadása/törlése, megbízható eszközök kezelése).
  * 
- * FUNKCIÓK:
- * - Alapadatok megjelenítése (Név, E-mail, Másodlagos e-mail).
- * - Szakterületek módosítása (több is választható egy fix listából).
- * - Jelszó módosítási szekció.
- * - Hírlevél beállítások kezelése (Közösség/Fórum és Készletinfó témakörökben).
- * - Kijelentkezés gomb.
+ * KAPCSOLÓDÓ USER STORY-K:
+ * - Felhasználóként szeretném megtekinteni és módosítani a szakterületeimet és patikámat.
+ * - Felhasználóként szeretném bekapcsolni a kétfaktoros azonosítást (Email/SMS OTP).
+ * - Felhasználóként szeretnék új biometrikus Passkey-t hozzáadni az eszközömhöz (TouchID/Windows Hello).
+ * - Felhasználóként szeretném törölni a megbízható eszközeimet, ha elhagyom a munkaterületet.
  * 
- * ÜZLETI LOGIKA:
- * - A név és az email címek a prototípus szintjén nem módosíthatók.
- * - A szakterületek a fórummal konzekvens `MEDICAL_SPECIALTIES` listából választhatók.
- * - A hírlevél beállítások külön-külön kezelhetők az elsődleges és a másodlagos e-mail címre.
- * - Ha egy kategóriában a felhasználó leiratkozik, a részletes beállítások elrejtésre kerülnek.
- * - A kijelentkezés az AuthContext-et használva törli a munkamenetet.
+ * KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
+ * - Bejelentkezés oldal: https://bvorvosi.vercel.app/login
+ * - Irányítópult: https://bvorvosi.vercel.app/dashboard
+ * - Gyógyszertár kereső: https://bvorvosi.vercel.app/gyogyszertarak
+ * ============================================================================
  */
 
 import React, { useState } from 'react';
@@ -30,6 +29,7 @@ import dynamic from 'next/dynamic';
 import { useAuth } from '@/context/AuthContext';
 import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
 import { MEDICAL_SPECIALTIES, MedicalSpecialty } from '@/types/forum';
+import { UserService, PasskeyCredential } from '@/lib/user-service';
 
 const PharmacyFinder = dynamic(() => import('@/components/pharmacies/PharmacyFinder').then(mod => mod.PharmacyFinder), {
     ssr: false,
@@ -37,19 +37,24 @@ const PharmacyFinder = dynamic(() => import('@/components/pharmacies/PharmacyFin
 });
 
 export default function ProfilePage() {
-    const { user, logout } = useAuth();
+    const { user, logout, refreshUser } = useAuth();
 
     // Mock adatok a profilhoz - a valódi alkalmazásban ezek API-ból érkeznének
     const [profileData, setProfileData] = useState({
-        name: 'Dr. Kovács István',
-        email: user?.email || 'dr.kovacs@u-nebuah.hu',
-        secondaryEmail: 'kovacs.istvan.private@email.hu',
-        specialties: ['Háziorvos', 'Belgyógyász'] as MedicalSpecialty[]
+        name: user?.name || 'Dr. Kovács István',
+        email: user?.email || 'demo@example.com',
+        secondaryEmail: user?.secondaryEmail || 'kovacs.istvan.private@email.hu',
+        specialties: (user?.specialties as MedicalSpecialty[]) || ['Háziorvos', 'Belgyógyász']
     });
 
     const [isEditing, setIsEditing] = useState(false);
     const [tempSpecialties, setTempSpecialties] = useState<MedicalSpecialty[]>(profileData.specialties);
     const [specialtySearch, setSpecialtySearch] = useState('');
+
+    // Security state
+    const [newPasskeyName, setNewPasskeyName] = useState('');
+    const [showPasskeyModal, setShowPasskeyModal] = useState(false);
+    const [securitySuccess, setSecuritySuccess] = useState<string | null>(null);
 
     const { nearbyPharmacy, clearNearbyPharmacy } = useNearbyPharmacy();
     const [isPharmacyModalOpen, setIsPharmacyModalOpen] = useState(false);
@@ -68,7 +73,6 @@ export default function ProfilePage() {
             scope: 'Minden' | 'Szakterület + mentett gyógyszerek' | 'Csak szakterület' | 'Csak mentett gyógyszer';
         };
     };
-
 
     const [newsletterSettings, setNewsletterSettings] = useState<{ primary: NewsletterConfig; secondary: NewsletterConfig }>({
         primary: {
@@ -115,6 +119,49 @@ export default function ProfilePage() {
         updateNewsletter(emailType, 'stock', 'topics', newTopics);
     };
 
+    // 2FA & Security actions
+    const handleToggle2FA = (enabled: boolean) => {
+        if (!user) return;
+        UserService.updateUser(user.id, { twoFactorEnabled: enabled });
+        refreshUser();
+        setSecuritySuccess(enabled ? 'Kétfaktoros azonosítás (2FA) bekapcsolva!' : 'Kétfaktoros azonosítás kikapcsolva.');
+        setTimeout(() => setSecuritySuccess(null), 3000);
+    };
+
+    const handleChange2FAType = (type: 'email' | 'sms' | 'totp') => {
+        if (!user) return;
+        UserService.updateUser(user.id, { twoFactorType: type });
+        refreshUser();
+        setSecuritySuccess(`2FA csatorna átállítva: ${type.toUpperCase()}`);
+        setTimeout(() => setSecuritySuccess(null), 3000);
+    };
+
+    const handleAddPasskey = () => {
+        if (!user || !newPasskeyName.trim()) return;
+        UserService.addPasskey(user.id, newPasskeyName.trim());
+        setNewPasskeyName('');
+        setShowPasskeyModal(false);
+        refreshUser();
+        setSecuritySuccess('Új Passkey sikeresen regisztrálva!');
+        setTimeout(() => setSecuritySuccess(null), 3000);
+    };
+
+    const handleRemovePasskey = (passkeyId: string) => {
+        if (!user) return;
+        UserService.removePasskey(user.id, passkeyId);
+        refreshUser();
+        setSecuritySuccess('Passkey törölve.');
+        setTimeout(() => setSecuritySuccess(null), 3000);
+    };
+
+    const handleClearTrustedDevices = () => {
+        if (!user) return;
+        UserService.updateUser(user.id, { trustedDevices: [] });
+        refreshUser();
+        setSecuritySuccess('Összes megbízható eszköz elfelejtve.');
+        setTimeout(() => setSecuritySuccess(null), 3000);
+    };
+
     const renderNewsletterSection = (emailType: 'primary' | 'secondary', emailAddress: string, label: string) => (
         <div key={emailType} className="space-y-6">
             <div className="flex items-center gap-2 px-2 py-1 bg-primary/10 rounded-lg self-start">
@@ -148,7 +195,7 @@ export default function ProfilePage() {
                         {newsletterSettings[emailType].training.subscribed && (
                             <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
                                 <p className="text-sm text-base-content/60">Értesítést kérek az új képzésekről a megjelölt témakörökben.</p>
-                                
+
                                 <div className="form-control w-full">
                                     <label className="label">
                                         <span className="label-text font-bold text-xs uppercase tracking-wider">Érdekelt képzési témakörök</span>
@@ -158,11 +205,10 @@ export default function ProfilePage() {
                                             <button
                                                 key={topic}
                                                 onClick={() => toggleTrainingTopic(emailType, topic)}
-                                                className={`btn btn-sm rounded-xl px-4 normal-case font-bold transition-all ${
-                                                    newsletterSettings[emailType].training.topics.includes(topic) 
-                                                    ? 'btn-primary shadow-md' 
+                                                className={`btn btn-sm rounded-xl px-4 normal-case font-bold transition-all ${newsletterSettings[emailType].training.topics.includes(topic)
+                                                    ? 'btn-primary shadow-md'
                                                     : 'btn-outline border-base-300 hover:bg-base-300 hover:border-transparent'
-                                                }`}
+                                                    }`}
                                             >
                                                 {topic}
                                                 {newsletterSettings[emailType].training.topics.includes(topic) && (
@@ -296,6 +342,13 @@ export default function ProfilePage() {
                 </h1>
                 <p className="text-base-content/60 mt-2">Kezelje személyes adatait és szakmai beállításait.</p>
             </header>
+
+            {securitySuccess && (
+                <div className="alert alert-success text-sm mb-6 shadow text-success-content">
+                    <span className="material-symbols-rounded">check_circle</span>
+                    <span>{securitySuccess}</span>
+                </div>
+            )}
 
             <div className="grid gap-8">
                 {/* Alapadatok Szekció */}
@@ -432,7 +485,7 @@ export default function ProfilePage() {
                                 <span className="material-symbols-rounded text-primary">home_pin</span>
                                 Közeli Patikám
                             </h2>
-                            <button 
+                            <button
                                 onClick={() => setIsPharmacyModalOpen(true)}
                                 className="btn btn-primary btn-sm gap-2"
                             >
@@ -460,7 +513,7 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2 w-full md:w-auto">
-                                    <button 
+                                    <button
                                         onClick={() => clearNearbyPharmacy()}
                                         className="btn btn-ghost btn-sm text-error hover:bg-error/10 w-full md:w-auto"
                                         title="Kijelölés eltávolítása"
@@ -479,7 +532,7 @@ export default function ProfilePage() {
                                 <p className="text-sm opacity-60 max-w-sm">
                                     Jelölje meg az Ön számára legfontosabb patikát, hogy a készletinformációkat azonnal láthassa!
                                 </p>
-                                <button 
+                                <button
                                     onClick={() => setIsPharmacyModalOpen(true)}
                                     className="btn btn-primary mt-4 gap-2"
                                 >
@@ -509,28 +562,159 @@ export default function ProfilePage() {
                     </div>
                 </section>
 
-                {/* Biztonsági Szekció */}
+                {/* BIZTONSÁG ÉS KÉTFAKTOROS HITELESÍTÉS (2FA / PASSKEY) SZEKCIÓ */}
                 <section className="card bg-base-100 shadow-xl border border-base-200">
                     <div className="card-body">
-                        <h2 className="card-title mb-4 flex items-center gap-2 text-warning">
-                            <span className="material-symbols-rounded">security</span>
-                            Biztonság
+                        <h2 className="card-title mb-6 flex items-center gap-2 text-primary">
+                            <span className="material-symbols-rounded text-primary text-3xl">shield_lock</span>
+                            Biztonság és Azonosítás
                         </h2>
 
-                        <div className="flex flex-col md:flex-row items-center justify-between p-4 bg-base-200/50 rounded-lg gap-4 border border-warning/20">
-                            <div className="flex gap-4 items-center">
-                                <div className="bg-warning/10 p-3 rounded-full">
-                                    <span className="material-symbols-rounded text-warning">vpn_key</span>
+                        <div className="space-y-6">
+                            {/* 2FA Toggle & Settings */}
+                            <div className="p-5 bg-base-200/50 rounded-2xl border border-base-300">
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                                    <div>
+                                        <h3 className="font-bold text-base flex items-center gap-2">
+                                            <span className="material-symbols-rounded text-primary">verified_user</span>
+                                            Kétfaktoros Azonosítás (2FA)
+                                        </h3>
+                                        <p className="text-xs text-base-content/70 mt-0.5">
+                                            Magasabb szintű védelem 6-jegyű egyszeri kóddal a jelszavas belépés után.
+                                        </p>
+                                    </div>
+                                    <div className="form-control">
+                                        <label className="label cursor-pointer gap-3 p-0">
+                                            <span className="label-text font-semibold text-xs">
+                                                {user?.twoFactorEnabled ? 'Aktív' : 'Kikapcsolva'}
+                                            </span>
+                                            <input
+                                                type="checkbox"
+                                                className="toggle toggle-primary"
+                                                checked={!!user?.twoFactorEnabled}
+                                                onChange={(e) => handleToggle2FA(e.target.checked)}
+                                            />
+                                        </label>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="font-bold">Jelszó módosítás</h3>
-                                    <p className="text-sm opacity-70">A fiókja biztonsága érdekében javasoljuk a jelszó rendszeres megváltoztatását.</p>
+
+                                {user?.twoFactorEnabled && (
+                                    <div className="pt-3 border-t border-base-300 space-y-4">
+                                        <div className="form-control">
+                                            <label className="label py-1">
+                                                <span className="label-text font-semibold text-xs">2FA Csatorna választás</span>
+                                            </label>
+                                            <div className="flex flex-wrap gap-3">
+                                                <label className="flex items-center gap-2 cursor-pointer bg-base-100 px-3 py-2 rounded-lg border border-base-300 text-xs font-medium">
+                                                    <input
+                                                        type="radio"
+                                                        name="2fa-type"
+                                                        className="radio radio-primary radio-xs"
+                                                        checked={user?.twoFactorType === 'email'}
+                                                        onChange={() => handleChange2FAType('email')}
+                                                    />
+                                                    <span>E-mail OTP (alapértelmezett)</span>
+                                                </label>
+
+                                                <label className="flex items-center gap-2 cursor-pointer bg-base-100 px-3 py-2 rounded-lg border border-base-300 text-xs font-medium">
+                                                    <input
+                                                        type="radio"
+                                                        name="2fa-type"
+                                                        className="radio radio-primary radio-xs"
+                                                        checked={user?.twoFactorType === 'sms'}
+                                                        onChange={() => handleChange2FAType('sms')}
+                                                    />
+                                                    <span>SMS OTP ({user?.phoneNumber || '+36...'})</span>
+                                                </label>
+
+                                                <label className="flex items-center gap-2 cursor-pointer bg-base-100 px-3 py-2 rounded-lg border border-base-300 text-xs font-medium">
+                                                    <input
+                                                        type="radio"
+                                                        name="2fa-type"
+                                                        className="radio radio-primary radio-xs"
+                                                        checked={user?.twoFactorType === 'totp'}
+                                                        onChange={() => handleChange2FAType('totp')}
+                                                    />
+                                                    <span>Hitelesítő App (TOTP)</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Passkeys Management */}
+                            <div className="p-5 bg-base-200/50 rounded-2xl border border-base-300">
+                                <div className="flex justify-between items-center mb-3">
+                                    <div>
+                                        <h3 className="font-bold text-base flex items-center gap-2">
+                                            <span className="material-symbols-rounded text-primary">fingerprint</span>
+                                            Passkey Kulcsok (Biometria)
+                                        </h3>
+                                        <p className="text-xs text-base-content/70 mt-0.5">
+                                            Touch ID, Face ID vagy Windows Hello azonosítás regisztrált eszközein.
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPasskeyModal(true)}
+                                        className="btn btn-primary btn-sm text-xs gap-1"
+                                    >
+                                        <span className="material-symbols-rounded text-base">add_fingerprint</span>
+                                        Új Passkey
+                                    </button>
+                                </div>
+
+                                {user?.passkeys && user.passkeys.length > 0 ? (
+                                    <div className="space-y-2 mt-3">
+                                        {user.passkeys.map((pk: PasskeyCredential) => (
+                                            <div key={pk.id} className="flex justify-between items-center bg-base-100 p-3 rounded-xl border border-base-300 text-xs">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="material-symbols-rounded text-primary text-xl">devices</span>
+                                                    <div>
+                                                        <span className="font-bold text-base-content block">{pk.name}</span>
+                                                        <span className="text-[11px] text-base-content/60">Hozzáadva: {pk.createdAt}</span>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleRemovePasskey(pk.id)}
+                                                    className="btn btn-ghost btn-xs text-error"
+                                                    title="Passkey törlése"
+                                                >
+                                                    <span className="material-symbols-rounded text-base">delete</span>
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-base-content/50 italic mt-2">
+                                        Még nincs regisztrált Passkey ehhez a fiókhoz.
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Trusted Devices Management */}
+                            <div className="p-5 bg-base-200/50 rounded-2xl border border-base-300">
+                                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <h3 className="font-bold text-base flex items-center gap-2">
+                                            <span className="material-symbols-rounded text-primary">laptop_mac</span>
+                                            Megbízható Eszközök (30 nap)
+                                        </h3>
+                                        <p className="text-xs text-base-content/70 mt-0.5">
+                                            Aktív megbízható munkamenetek száma: <span className="font-bold text-primary">{user?.trustedDevices?.length || 0}</span>
+                                        </p>
+                                    </div>
+                                    {(user?.trustedDevices?.length || 0) > 0 && (
+                                        <button
+                                            onClick={handleClearTrustedDevices}
+                                            className="btn btn-outline btn-error btn-xs text-xs"
+                                        >
+                                            Eszközök elfelejtése
+                                        </button>
+                                    )}
                                 </div>
                             </div>
-                            <button className="btn btn-warning w-full md:w-auto shadow-sm">
-                                <span className="material-symbols-rounded">key</span>
-                                Jelszó kezelése
-                            </button>
                         </div>
                     </div>
                 </section>
@@ -547,6 +731,50 @@ export default function ProfilePage() {
                 </div>
             </div>
 
+            {/* Új Passkey Regisztrációs Modal */}
+            {showPasskeyModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-base-100 rounded-2xl p-6 shadow-2xl max-w-sm w-full border border-base-300">
+                        <h3 className="text-lg font-bold flex items-center gap-2 text-primary mb-2">
+                            <span className="material-symbols-rounded">fingerprint</span>
+                            Új Passkey Regisztrálása
+                        </h3>
+                        <p className="text-xs text-base-content/70 mb-4">
+                            Adjon nevet az eszköznek (pl. MacBook Pro TouchID vagy Rendelői PC Windows Hello).
+                        </p>
+
+                        <div className="form-control mb-4">
+                            <input
+                                type="text"
+                                placeholder="Eszköz neve..."
+                                className="input input-bordered input-sm focus:input-primary text-xs"
+                                value={newPasskeyName}
+                                onChange={(e) => setNewPasskeyName(e.target.value)}
+                                autoFocus
+                            />
+                        </div>
+
+                        <div className="flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setShowPasskeyModal(false)}
+                                className="btn btn-ghost btn-sm text-xs"
+                            >
+                                Mégse
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleAddPasskey}
+                                className="btn btn-primary btn-sm text-xs"
+                                disabled={!newPasskeyName.trim()}
+                            >
+                                Kulcs Hozzáadása
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Patika Választó Modal */}
             {isPharmacyModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
@@ -557,7 +785,7 @@ export default function ProfilePage() {
                                 <span className="material-symbols-rounded">add_location_alt</span>
                                 Közeli patika kiválasztása
                             </h3>
-                            <button 
+                            <button
                                 onClick={() => setIsPharmacyModalOpen(false)}
                                 className="btn btn-circle btn-ghost btn-sm"
                             >
@@ -567,7 +795,7 @@ export default function ProfilePage() {
 
                         {/* Content */}
                         <div className="flex-1 overflow-hidden">
-                            <PharmacyFinder 
+                            <PharmacyFinder
                                 title="Válassza ki közeli patikáját"
                                 description="Kattintson a ház ikonra a patika kártyáján a beállításhoz."
                                 initialSelectedId={nearbyPharmacy?.id}
@@ -585,3 +813,4 @@ export default function ProfilePage() {
         </div>
     );
 }
+

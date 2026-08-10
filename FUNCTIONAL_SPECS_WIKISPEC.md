@@ -361,38 +361,45 @@ A navigációs fejlécbe épített rendszerszintű kereső.
 
 **Útvonal:** [https://bvorvosi.vercel.app/login](https://bvorvosi.vercel.app/login)
 
-#### Beviteli Mezők és Validációk
+A bejelentkezési felület háromféle kényelmi és biztonsági belépési mód közül enged választani a fejlécben elhelyezett fülválasztó (Tabok) segítségével:
 
-1. **E-mail cím:**
-   - **Típus:** Egysoros email mező (`type="email"`).
-   - **Megadható adatok:** Szabványos email formátum (`user@domain.hu`).
-   - **Példák:** `demo@example.com`, `admin@example.com`.
-   - **Limitáció:** Kötelező mező. Szintaktikai ellenőrzés (érvényes `@` és domain).
+1. **Jelszavas bejelentkezés (alapértelmezett):**
+   - **E-mail cím:** Egysoros email mező (`type="email"`). Szabványos email formátum. Példa: `demo@example.com`, `admin@example.com`. Kötelező.
+   - **Jelszó:** Maszkolt jelszómező (`type="password"`). Példa: `vény123`. Kötelező.
+   - **"Elfelejtett jelszó?" link:** Átirányítás a `/forgot-password` oldalra.
+   - **"Bejelentkezés" gomb:** Beküldéskor ellenőrzi az adatokat.
 
-2. **Jelszó:**
-   - **Típus:** Egysoros jelszómező (`type="password"`, maszkolt karakterekkel).
-   - **Megadható adatok:** Karakterlánc.
-   - **Példa:** `vény123`.
-   - **Limitáció:** Kötelező mező.
+2. **Passkey biometrikus bejelentkezés (1-kattintásos kényelmi funkció):**
+   - **Működés:** Felhasználói név/email megadása után a felületen a biometrikus azonosítás gombra kattintva az eszköz beépített azonosítójával (Touch ID, Face ID, Windows Hello) jelszó és kódok beírása nélkül azonnal belépteti a felhasználót.
+   - **"Belépés Passkey-vel" gomb:** Megnyomása után szimulálja a biometrikus megerősítést és közvetlenül a Dashboardra navigál.
 
-3. **Gombok & Hibaüzenetek:**
-   - `"Bejelentkezés"` submit gomb.
-   - `"Elfelejtett jelszó?"` link -> átirányítás a `/forgot-password` oldalra.
-   - *Hiba híváskor:* `"Érvénytelen e-mail cím vagy jelszó."`
-   - *Hiba felfüggesztett fióknál:* `"A fiók fel van függesztve. Kérjük, lépjen kapcsolatba az adminisztrátorral."`
+3. **E-mail kódos bejelentkezés (Magic Code - Jelszó nélküli belépés):**
+   - **E-mail cím mező:** Szabványos email mező. Példa: `demo@example.com`.
+   - **"Egyszeri belépőkód küldése" gomb:** Kattintásra a rendszer kiküldi a 6 jegyű belépési kódot az e-mail címre, majd átvált a 2FA igazoló nézetre.
 
-#### 4.6.2. Elfelejtett Jelszó Oldal
+#### 4.6.2. Kétfaktoros Azonosítás (2FA) Igazolási Felület
+
+Amennyiben a felhasználónál aktív a kétfaktoros azonosítás (és az aktuális eszköz nincs megjelölve megbízhatóként), a jelszó megadása vagy az e-mail kódos belépés kezdeményezése után egy 6-jegyű OTP kódbeviteli felület jelenik meg:
+
+- **6-jegyű OTP kód mező:** Számszerű beviteli mező. Példa: `123456`. Limitáció: Kizárólag 6 számjegy.
+- **"Megbízható eszköz megjegyzése (30 napig)" jelölőnégyzet:** Bejelölése esetén a rendszer megjegyzi az adott böngészőt, így a rákövetkező 30 napban nem kér 2FA kódot ezen az eszközzön.
+- **Gombok:** `"Kód igazolása"` submit gomb, és `"Vissza"` gomb a bejelentkezési mód megváltoztatásához.
+- **Hibaüzenet:** `"Hibás 6-jegyű ellenőrző kód! Próbálja újra (Demó kód: 123456)."`
+- **Tesztelési segédlet:** A felületen megjelenik a demo 2FA kód (`123456`) a gyors tesztelhetőség érdekében.
+
+#### 4.6.3. Elfelejtett Jelszó Oldal
 
 **Útvonal:** [https://bvorvosi.vercel.app/forgot-password](https://bvorvosi.vercel.app/forgot-password)
 
 - **E-mail cím mező:** Szabványos email mező. Példa: `demo@example.com`. Kötelező.
 - **"Visszaállító link küldése" gomb:** Kattintásra megerősítő üzenet jelenik meg a felületen: `"Ha az e-mail cím regisztrálva van a rendszerben, kiküldtük a jelszó-visszaállító utasításokat."`
 
-#### 4.6.3. Jogosultságkezelés és Munkamenet Biztonság
+#### 4.6.4. Jogosultságkezelés és Munkamenet Biztonság
 - Szerepkörök: `Admin` (teljes hozzáférés az `/admin/*` útvonalakhoz) és `User` (szakmai felhasználó access).
 - **Munkamenet biztonság:** Ha az adminisztrátor felfüggeszti a fiókot vagy gombnyomással lezárja az aktív munkamenetet, a felhasználó a következő műveletnél azonnal kijelentkeztetésre kerül és a login oldalra irányítódik.
 
 ---
+
 
 ### 4.7. Adminisztráció
 
@@ -493,24 +500,26 @@ A felhasználó saját adataik és preferenciáik kezelési központja.
    - **Típus:** Jelszó mező (`type="password"`).
    - **Validáció:** Pontosan meg kell egyezzen az Új jelszó mezőbe írt értékkel.
 
-- **Gomb:** `"Jelszó frissítése"`. Sikeres mentéskor zöld megerősítő üzenet jelenik meg.
+#### 4.8.6. Biztonság és Kétfaktoros Azonosítás (2FA / Passkey)
 
-#### 4.8.5. Hírlevél Beállítások (Fejlett Értesítéskezelés)
+A felhasználó a felületen önkiszolgáló módon konfigurálhatja a fiókjához tartozó extra biztonsági rétegeket:
 
-Külön-külön konfigurálható az **Elsődleges e-mail címre** és a **Másodlagos e-mail címre**:
+1. **Kétfaktoros Azonosítás (2FA) Kapcsoló:**
+   - **Típus:** Interaktív kapcsoló (Toggle ON/OFF).
+   - **Leírás:** Be- vagy kikapcsolja a 6-jegyű kódos másodlagos azonosítást jelszavas belépésnél.
+   - **2FA Csatorna választás:** Rádiógombok: `E-mail OTP (alapértelmezett)`, `SMS OTP (mobil telefonszámra)`, `Hitelesítő App (TOTP)`.
 
-1. **BENU Képzési Program Hírlevél:**
-   - **Kapcsoló (Toggle):** `Feliratkozva` / `Leiratkozva`.
-   - **Témakör Jelölőnégyzetek (Checkboxok):** `Akkreditált`, `Gyártói`, `Eladásösztönző`.
+2. **Passkey Kulcsok Kezelése (Biometrikus Azonosítók):**
+   - **Regisztrált eszközök listája:** Megjeleníti a fiókhoz kapcsolt eszközök nevét és regisztrációs dátumát (pl. *"Work Mac TouchID - 2026-01-15"*).
+   - **"Új Passkey" gomb:** Megnyit egy modális ablakot, amelyben megadható az eszköz neve (pl. *"Rendelői PC Windows Hello"*), majd hozzáadható a biometrikus kulcs a fiókhoz.
+   - **Törlés gomb:** Előzőleg eltárolt Passkey visszavonása és törlése.
 
-2. **Készletinfó Hírlevél:**
-   - **Kapcsoló (Toggle):** `Feliratkozva` / `Leiratkozva`.
-   - **Gyakoriság (Frekvencia):** Rádiógomb / Select: `Napi`, `Heti`, `Havi`.
-   - **Kiküldési időpont:** Legördülő menü (pl. `08:00`, `09:00`, `10:00`).
-   - **Esemény típusok (Jelölőnégyzetek):** `Újra elérhető`, `Készlethiány`, `Megszűnt`.
-   - **Hatókör (Scope - Rádiógombok):** `Minden gyógyszer`, `Szakterület + mentett gyógyszerek`, `Csak szakterület`, `Csak mentett gyógyszer`.
+3. **Megbízható Eszközök Kezelése:**
+   - **Aktív megbízható eszközök száma:** Kijelzi a 30 napra megjegyzett munkamenetek számát.
+   - **"Eszközök elfelejtése" gomb:** Azonnal érvényteleníti az összes megjegyzett eszközt, így a rákövetkező belépéskor az összes böngészőn kötelezővé válik a 2FA kód megadása.
 
 ---
+
 
 ## 5. Korábban tervezett, de elvetett funkciók
 
