@@ -400,4 +400,3 @@ export const GlobalSearch = () => {
         </>
     );
 };
-

@@ -126,14 +126,14 @@ export default function LoginPage() {
                 <div className="card-body p-6">
                     {/* Header */}
                     <div className="flex justify-center mb-4">
-                        <img src="/logo-icon.png" alt="BENU B2B Logo" className="h-16 w-16 object-contain" />
+                        <img src="/logo-icon.png" alt="BENUvény Logo" className="h-16 w-16 object-contain" />
                     </div>
 
                     <h2 className="text-2xl font-bold text-center text-primary mb-1">
                         Szakmai Bejelentkezés
                     </h2>
-                    <p className="text-sm text-center text-base-content/70 mb-6">
-                        BENU B2B Betegútvezérlő & Orvosi Portál
+                    <p className="text-sm text-center text-base-content/70 mb-6 font-medium">
+                        BENUvény Orvosi Portál
                     </p>
 
                     {/* Notification alerts */}

@@ -66,7 +66,7 @@ export const Navbar = () => {
                     </ul>
                 </div>
                 <Link href="/dashboard" className="btn btn-ghost text-xl shrink-0">
-                    <span className="font-bold text-primary">Orvosi Portál</span>
+                    <span className="font-bold text-primary">BENUvény Orvosi Portál</span>
                 </Link>
 
                 <div className="ml-4 hidden lg:flex flex-1">
