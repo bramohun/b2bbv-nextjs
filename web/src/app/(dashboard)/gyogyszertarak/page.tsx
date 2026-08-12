@@ -28,12 +28,15 @@
 
 'use client';
 
+import { Suspense } from 'react';
 import { PharmacyFinder } from '@/components/pharmacies/PharmacyFinder';
 
 export default function PharmaciesPage() {
     return (
         <div className="h-[calc(100vh-64px)]"> {/* Full height minus navbar */}
-            <PharmacyFinder />
+            <Suspense fallback={<div className="h-full w-full bg-base-200 animate-pulse flex items-center justify-center text-gray-400">Gyógyszertárak betöltése...</div>}>
+                <PharmacyFinder />
+            </Suspense>
         </div>
     );
 }

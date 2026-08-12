@@ -112,7 +112,7 @@ export const GlobalSearch = () => {
                 title: p.nev,
                 subtitle: `${p.telepules}, ${p.cim}`,
                 type: 'pharmacy',
-                url: `/gyogyszertarak` // Ideally would link to specific pharmacy, but detail page might not exist yet or we just navigate to finder
+                url: `/gyogyszertarak?id=${encodeURIComponent(p.id)}`
             }));
 
         const filteredForum: SearchResult[] = forumTopics

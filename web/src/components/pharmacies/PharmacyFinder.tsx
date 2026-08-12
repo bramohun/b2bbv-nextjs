@@ -27,8 +27,10 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
+import { useSearchParams } from 'next/navigation';
 import { Pharmacy } from '@/types';
 import { PharmacyCard } from './PharmacyCard';
+import { PharmacyDetailModal } from './PharmacyDetailModal';
 import { fetchStaticData } from '@/lib/static-fetch';
 
 const PharmacyMap = dynamic(() => import('./PharmacyMap'), {
@@ -51,11 +53,15 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
     initialSelectedId,
     onClose
 }) => {
+    const searchParams = useSearchParams();
+    const urlPharmacyId = searchParams ? (searchParams.get('id') || searchParams.get('pharmacyId')) : null;
+
     const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedPharmacyId, setSelectedPharmacyId] = useState<string | null>(initialSelectedId || null);
+    const [selectedPharmacyId, setSelectedPharmacyId] = useState<string | null>(initialSelectedId || urlPharmacyId || null);
     const [visiblePharmacyIds, setVisiblePharmacyIds] = useState<string[] | null>(null);
+    const [detailPharmacy, setDetailPharmacy] = useState<Pharmacy | null>(null);
 
     // Filters state
     const [onlyOpenNow, setOnlyOpenNow] = useState(false);
@@ -68,20 +74,22 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
     const [showMapMobile, setShowMapMobile] = useState(false);
 
     useEffect(() => {
-        if (initialSelectedId && pharmacies.length > 0) {
-            const pharmacy = pharmacies.find(p => p.id === initialSelectedId);
-            if (pharmacy && pharmacy.latitude && pharmacy.longitude) {
-                setSelectedPharmacyId(initialSelectedId);
-                setMapCenter([pharmacy.latitude, pharmacy.longitude]);
-                setMapZoom(15);
-                // On mobile, if we have a selection, we might want to show the map or list depending on UX.
-                // Usually map is better to see location.
+        const targetId = initialSelectedId || urlPharmacyId;
+        if (targetId && pharmacies.length > 0) {
+            const pharmacy = pharmacies.find(p => p.id === targetId);
+            if (pharmacy) {
+                setSelectedPharmacyId(targetId);
+                if (pharmacy.latitude && pharmacy.longitude) {
+                    setMapCenter([pharmacy.latitude, pharmacy.longitude]);
+                    setMapZoom(15);
+                }
+                setDetailPharmacy(pharmacy);
                 if (window.innerWidth < 1024) {
                     setShowMapMobile(true);
                 }
             }
         }
-    }, [initialSelectedId, pharmacies]);
+    }, [initialSelectedId, urlPharmacyId, pharmacies]);
 
     useEffect(() => {
         async function fetchPharmacies() {
@@ -292,6 +300,7 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
                                     pharmacy={pharmacy}
                                     isSelected={selectedPharmacyId === pharmacy.id}
                                     onSelect={handleSelectPharmacy}
+                                    onViewDetails={(p) => setDetailPharmacy(p)}
                                 />
                             ))}
                             {visiblePharmacies.length === 0 && (
@@ -315,9 +324,18 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
                         selectedPharmacyId={selectedPharmacyId}
                         onSelectPharmacy={handleSelectPharmacy}
                         onVisiblePharmaciesChange={setVisiblePharmacyIds}
+                        onViewDetails={(p) => setDetailPharmacy(p)}
                     />
                 </div>
             </div>
+
+            {/* Pharmacy Details Modal */}
+            <PharmacyDetailModal
+                pharmacy={detailPharmacy}
+                isOpen={Boolean(detailPharmacy)}
+                onClose={() => setDetailPharmacy(null)}
+                onSelectOnMap={handleSelectPharmacy}
+            />
         </div>
     );
 };

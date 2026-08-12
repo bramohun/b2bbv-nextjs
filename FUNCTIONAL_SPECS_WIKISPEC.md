@@ -421,6 +421,19 @@ Interaktív térképes és szinkronizált listás kereső a patikák megtalálá
    - Gomb a patikakártyán és a térképes felugró ablakban: Ház / helyszín hozzáadása ikon (`"Közeli patikának jelölöm"`).
    - Visszajelzés: A kiválasztott patikán egyértelmű `"Közeli gyógyszertár"` kitűző jelenik meg, és beállítása érvényesül az egész portálon.
 
+8. **Gyógyszertár Részletek Modal és Mélylinkelés (URL query paraméter):**
+   - **Megnyitás:** A patikakártyán és a térképes marker felugró ablakában lévő `"Részletek"` gombra kattintva megnyílik a gyógyszertár részletes adatlapja egy reszponzív felugró modális ablakban.
+   - **Mélylinkelés (Deep Linking):** Ha a felhasználó a Globális keresőből vagy más felületről hivatkozással érkezik (pl. `/gyogyszertarak?id=BF133`), a rendszer a térképen automatikusan az adott patikára fókuszál (zoom 15) és megnyitja a részletes modális ablakot.
+   - **A Modal Tartalma:**
+     - *Fejléc:* Gyógyszertár neve, belső azonosító kódja (pl. `BF133`), esetleges `"Közeli gyógyszertár"` jelvény és bezáró `X` gomb.
+     - *Aktuális státusz & Elérhetőségek:* Háromállapotú jelvény (`Nyitva`, `Hamarosan zár`, `Zárva`), pontos cím, kattintható telefonszám (`tel:` hivatkozással azonnali hívásindításhoz) és kattintható e-mail cím (`mailto:` hivatkozással levelezéshez).
+     - *Heti nyitvatartási rend:* Hétfőtől Vasárnapig napokra lebontott nyitvatartási idők. Az aktuális nap kiemelésre kerül (kiemelt háttér és `"Ma"` badge). A zárva tartó napoknál `"ZÁRVA"` felirat jelenik meg.
+   - **Reszponzivitás:** Mobilon és asztali kijelzőn egyaránt görgethető, érintésbarát felületet nyújt (`max-h-[90vh]`).
+   - **Akciógombok:**
+     - `"Közeli patikának jelölöm"` / `"Közeli jelölés eltávolítása"` (szinkronizálja a preferált patika állapotot).
+     - `"Mutasd térképen"` (bezárja a modalt és ráfókuszál a gyógyszertárra a térképen).
+     - `"Bezárás"` (lezárja a modális ablakot).
+
 ---
 
 #### 4.3.2. Gyógyszertári Készlet Nézet (Modális Nézet)

@@ -60,6 +60,7 @@ interface PharmacyMapProps {
     selectedPharmacyId?: string | null;
     onSelectPharmacy?: (id: string) => void;
     onVisiblePharmaciesChange?: (ids: string[]) => void;
+    onViewDetails?: (pharmacy: Pharmacy) => void;
 }
 
 // Helper component to fly to location
@@ -110,7 +111,8 @@ const PharmacyMap: React.FC<PharmacyMapProps> = ({
     zoom = 7,
     selectedPharmacyId,
     onSelectPharmacy,
-    onVisiblePharmaciesChange
+    onVisiblePharmaciesChange,
+    onViewDetails
 }) => {
     const { isNearby, setNearbyPharmacy, clearNearbyPharmacy } = useNearbyPharmacy();
 
@@ -188,7 +190,13 @@ const PharmacyMap: React.FC<PharmacyMapProps> = ({
                                         {markedNearby ? 'Jelölés törlése' : 'Közeli patikának jelölöm'}
                                     </button>
                                     <button
-                                        onClick={() => onSelectPharmacy && onSelectPharmacy(pharmacy.id)}
+                                        onClick={() => {
+                                            if (onViewDetails) {
+                                                onViewDetails(pharmacy);
+                                            } else if (onSelectPharmacy) {
+                                                onSelectPharmacy(pharmacy.id);
+                                            }
+                                        }}
                                         className="btn btn-xs btn-ghost text-primary w-full"
                                     >
                                         Részletek

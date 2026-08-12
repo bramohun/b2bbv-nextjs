@@ -29,9 +29,10 @@ interface PharmacyCardProps {
     pharmacy: Pharmacy;
     isSelected: boolean;
     onSelect: (id: string) => void;
+    onViewDetails?: (pharmacy: Pharmacy) => void;
 }
 
-export const PharmacyCard: React.FC<PharmacyCardProps> = ({ pharmacy, isSelected, onSelect }) => {
+export const PharmacyCard: React.FC<PharmacyCardProps> = ({ pharmacy, isSelected, onSelect, onViewDetails }) => {
     const { isNearby, setNearbyPharmacy, clearNearbyPharmacy } = useNearbyPharmacy();
     const markedNearby = isNearby(pharmacy.id);
 
@@ -91,7 +92,9 @@ export const PharmacyCard: React.FC<PharmacyCardProps> = ({ pharmacy, isSelected
                     </button>
                     <button className="btn btn-sm btn-ghost text-primary text-xs" onClick={(e) => {
                         e.stopPropagation();
-                        // Navigate to details
+                        if (onViewDetails) {
+                            onViewDetails(pharmacy);
+                        }
                     }}>
                         Részletek
                     </button>
