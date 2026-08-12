@@ -127,7 +127,7 @@ export default function FavoritesPage() {
                                 {favorites.map((fav) => (
                                     <tr key={fav.tkSzam} className="hover">
                                         <td>
-                                            <Link href={`/gyogyszerek/${fav.tkSzam}`} className="font-bold hover:text-warning hover:underline">
+                                            <Link href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(fav.tkSzam)}`} className="font-bold hover:text-warning hover:underline">
                                                 {fav.name}
                                             </Link>
                                         </td>

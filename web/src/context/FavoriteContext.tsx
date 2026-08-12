@@ -84,7 +84,7 @@ export function FavoriteProvider({ children }: { children: React.ReactNode }) {
             addToast({
                 message: (
                     <>
-                        <Link href={`/gyogyszerek/${itemToRemove.tkSzam}`} className="hover:underline font-bold text-primary">
+                        <Link href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(itemToRemove.tkSzam)}`} className="hover:underline font-bold text-primary">
                             {itemToRemove.name}
                         </Link>
                         {itemToRemove.kiszereles ? ` (${itemToRemove.kiszereles})` : ''} eltávolítva a mentett gyógyszerek közül.

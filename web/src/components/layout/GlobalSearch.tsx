@@ -101,7 +101,7 @@ export const GlobalSearch = () => {
                 title: m.nev,
                 subtitle: m.activeSubstance,
                 type: 'medicine',
-                url: `/gyogyszerek/${m.tkSzam}`
+                url: `/gyogyszerek/adatlap?tk=${encodeURIComponent(m.tkSzam)}`
             }));
 
         const filteredPharmacies: SearchResult[] = pharmacies

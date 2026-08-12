@@ -145,7 +145,7 @@ export function SimilarMedicines({ substance, medicines }: SimilarMedicinesProps
                                         </button>
                                     </td>
                                     <td className="font-medium">
-                                        <Link href={`/gyogyszerek/${med.tkSzam}`} className="hover:text-primary transition-colors">
+                                        <Link href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(med.tkSzam)}`} className="hover:text-primary transition-colors">
                                             {med.nev}
                                         </Link>
                                     </td>
@@ -155,7 +155,7 @@ export function SimilarMedicines({ substance, medicines }: SimilarMedicinesProps
                                     <td>{getPharmacyAvailabilityBadge(med)}</td>
                                     <td>
                                         <Link
-                                            href={`/gyogyszerek/${med.tkSzam}`}
+                                            href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(med.tkSzam)}`}
                                             className="btn btn-ghost btn-xs text-primary gap-1"
                                         >
                                             Megtekintés

@@ -233,7 +233,7 @@ A portál tetején rögzített (sticky) központi navigációs sáv, amely minde
    - **Számláló jelvény:** Megjeleníti a felhasználó által mentett gyógyszerek aktuális darabszámát.
    - **Lenyíló panel (Dropdown):**
      - Megjeleníti a mentett gyógyszerek listáját: Terméknév, TK-szám, és színessel kódolt Státusz címke (`Elérhető` - zöld, `Készlethiány` - sárga, `Megszűnt` - piros).
-     - Bármelyik termékre kattintva a rendszer közvetlenül az adott gyógyszer adatlapjára navigál (`/gyogyszerek/[tkSzam]`).
+     - Bármelyik termékre kattintva a rendszer közvetlenül az adott gyógyszer adatlapjára navigál (`/gyogyszerek/adatlap?tk=[tkSzam]`).
      - Ha nincs mentett gyógyszer, a panel a `"Nincs mentett gyógyszered."` szöveget mutatja.
    - **"Összes megtekintése" gomb:** Átirányít a mentett kedvencek részletes profiloldalára (`/profile/favorites`).
 
@@ -349,8 +349,8 @@ A listaoldalon nincs különálló felső fő keresőmező vagy státusz legörd
 
 Egy konkrét gyógyszer részletes szakmai adatlapja.
 
-**Útvonal:** `https://bvorvosi.vercel.app/gyogyszerek/[...id]`  
-*(Példa: [https://bvorvosi.vercel.app/gyogyszerek/OGYI-T-8898%2F01](https://bvorvosi.vercel.app/gyogyszerek/OGYI-T-8898%2F01))*
+**Útvonal:** `https://bvo.uneb.hu/gyogyszerek/adatlap?tk=[tkSzam]`  
+*(Példa: [https://bvo.uneb.hu/gyogyszerek/adatlap?tk=OGYI-T-8898%2F01](https://bvo.uneb.hu/gyogyszerek/adatlap?tk=OGYI-T-8898%2F01))*
 
 #### Részletes Adatmezők és Funkciók
 
@@ -489,7 +489,7 @@ A navigációs fejlécbe épített rendszerszintű instant kereső.
   - **Kategória fülek:** `Minden`, `Gyógyszerek`, `Patikák`, `Közösség`.
   - **Találati korlátok:** Kategóriánként max. 5 találat jelenik meg, a `Minden` fülön összesen max. 10 találat.
   - **Navigáció találatra kattintva:**
-    - Gyógyszer találat → gyógyszer adatlapjára navigál (`/gyogyszerek/[tkSzam]`).
+    - Gyógyszer találat → gyógyszer adatlapjára navigál (`/gyogyszerek/adatlap?tk=[tkSzam]`).
     - Gyógyszertár találat → a gyógyszertár keresőre navigál (`/gyogyszertarak`).
     - Közösségi találat → a közösségi főoldalra navigál (`/kozosseg`).
   - **Lábléc:** `"Összes találat megtekintése"` gomb (jelenleg elvetett/előkészített funkció).

@@ -652,7 +652,7 @@ function MedicinesPageContent() {
                 return (
                     <td key={col}>
                         <div className="font-bold text-primary">
-                            <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="hover:underline">
+                            <Link href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(medicine.tkSzam)}`} className="hover:underline">
                                 {medicine.nev}
                             </Link>
                         </div>
@@ -737,7 +737,7 @@ function MedicinesPageContent() {
                                     {isSubscribed(medicine.tkSzam) ? 'notifications_active' : 'notifications'}
                                 </span>
                             </button>
-                            <Link href={`/gyogyszerek/${medicine.tkSzam}`} className="btn btn-ghost btn-xs">
+                            <Link href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(medicine.tkSzam)}`} className="btn btn-ghost btn-xs">
                                 Részletek
                             </Link>
                         </div>

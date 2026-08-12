@@ -141,7 +141,7 @@ export const Navbar = () => {
                                     <ul className="menu menu-sm bg-base-100 rounded-box p-0">
                                         {favorites.map((fav) => (
                                             <li key={fav.tkSzam} className="border-b border-base-200 last:border-none">
-                                                <Link href={`/gyogyszerek/${fav.tkSzam}`} className="flex flex-col items-start py-2">
+                                                <Link href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(fav.tkSzam)}`} className="flex flex-col items-start py-2">
                                                     <span className="font-medium truncate w-full">{fav.name}</span>
                                                     <span className="text-xs text-gray-400">{fav.tkSzam}</span>
                                                     <span className={`badge badge-xs mt-1 ${fav.status === 'Elérhető' ? 'badge-success' :

@@ -45,7 +45,7 @@ export default function NotificationsPage() {
                                 {subscriptions.map((sub) => (
                                     <tr key={sub.tkSzam} className="hover">
                                         <td>
-                                            <Link href={`/gyogyszerek/${sub.tkSzam}`} className="font-bold hover:text-primary hover:underline">
+                                            <Link href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(sub.tkSzam)}`} className="font-bold hover:text-primary hover:underline">
                                                 {sub.name}
                                             </Link>
                                         </td>

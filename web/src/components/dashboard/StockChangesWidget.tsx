@@ -122,7 +122,7 @@ export function StockChangesWidget({ stats, changes, period = 1 }: StockChangesW
                                         </td>
                                         <td>
                                             <Link
-                                                href={`/gyogyszerek/${med.tkSzam}`}
+                                                href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(med.tkSzam)}`}
                                                 className="font-medium text-primary hover:underline block"
                                             >
                                                 {med.nev}
