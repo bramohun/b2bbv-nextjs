@@ -503,7 +503,7 @@ A navigációs fejlécbe épített rendszerszintű instant kereső.
   - **Találati korlátok:** Kategóriánként max. 5 találat jelenik meg, a `Minden` fülön összesen max. 10 találat.
   - **Navigáció találatra kattintva:**
     - Gyógyszer találat → gyógyszer adatlapjára navigál (`/gyogyszerek/adatlap?tk=[tkSzam]`).
-    - Gyógyszertár találat → a gyógyszertár keresőre navigál (`/gyogyszertarak`).
+    - Gyógyszertár találat → a gyógyszertár keresőre navigál a kiválasztott patika mélylinkjével, fókuszált térképpel és megnyitott adatlapjával (`/gyogyszertarak?id=[pharmacyId]`).
     - Közösségi találat → a közösségi főoldalra navigál (`/kozosseg`).
   - **Lábléc:** `"Összes találat megtekintése"` gomb (jelenleg elvetett/előkészített funkció).
 
