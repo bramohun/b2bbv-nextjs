@@ -25,9 +25,9 @@ KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
 - Gyógyszertár Kereső (Térkép + Készlet): https://bvo.uneb.hu/gyogyszertarak
 - BENU Képzési Program: https://bvo.uneb.hu/kepzesek
 - Közösség és Fórum: https://bvo.uneb.hu/kozosseg
-- Képzési Program (Képzések): https://bvorvosi.vercel.app/kepzesek
-- Hitelesítés & Profilkezelés: https://bvorvosi.vercel.app/login, https://bvorvosi.vercel.app/profile
-- Adminisztráció (Felhasználók, Patikák, Moderálás): https://bvorvosi.vercel.app/admin/users
+- Képzési Program (Képzések): https://bvo.uneb.hu/kepzesek
+- Hitelesítés & Profilkezelés: https://bvo.uneb.hu/login, https://bvo.uneb.hu/profile
+- Adminisztráció (Felhasználók, Patikák, Moderálás): https://bvo.uneb.hu/admin/users
 ============================================================================
 -->
 
@@ -36,7 +36,7 @@ KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
 > **Verzió:** 6.1  
 > **Dátum:** 2026.08.12.  
 > **Státusz:** Aktualizált (Prototípus kódbázisa alapján teljes körűen felülvizsgált és frissített)  
-> **Prototípus URL:** [https://bvorvosi.vercel.app/](https://bvorvosi.vercel.app/)
+> **Prototípus URL:** [https://bvo.uneb.hu/](https://bvo.uneb.hu/)
 
 ---
 
@@ -90,7 +90,7 @@ Egy orvosi szakmai portál biztosítása, amely támogatja a gyógyszerészeket 
 
 ### Live Prototípus
 A működő prototípus felülete elérhető az alábbi hivatkozáson:  
-🔗 [https://bvorvosi.vercel.app/](https://bvorvosi.vercel.app/)
+🔗 [https://bvo.uneb.hu/](https://bvo.uneb.hu/)
 
 ### Felhasználói Szerepkörök
 - **Szakmai Felhasználó (User):** Orvos, gyógyszerész vagy egészségügyi szakdolgozó. Hozzáfér a gyógyszer-nyilvántartáshoz, patikakeresőhöz, képzésekhez és a saját profilbeállításaihoz.
@@ -254,7 +254,7 @@ A portál tetején rögzített (sticky) központi navigációs sáv, amely minde
 #### Brief
 A bejelentkezést követő nyitóoldal. Gyors áttekintést nyújt a piaci gyógyszer-státuszváltozásokról, a kiválasztott preferált patika állapotáról és az aktuális képzésekről.
 
-**Útvonal:** [https://bvorvosi.vercel.app/dashboard](https://bvorvosi.vercel.app/dashboard)
+**Útvonal:** [https://bvo.uneb.hu/dashboard](https://bvo.uneb.hu/dashboard)
 
 #### Felületi elemek és Beviteli Mezők
 
@@ -292,7 +292,7 @@ A bejelentkezést követő nyitóoldal. Gyors áttekintést nyújt a piaci gyóg
 
 A portál központi kereső- és szűrőfelülete a gyógyszerkészítmények táblázatos böngészésére.
 
-**Útvonal:** [https://bvorvosi.vercel.app/gyogyszerek](https://bvorvosi.vercel.app/gyogyszerek)
+**Útvonal:** [https://bvo.uneb.hu/gyogyszerek](https://bvo.uneb.hu/gyogyszerek)
 
 #### Beviteli Mezők, Fejléc alatti Szűrősor és Funkciók Specifikációja
 
@@ -390,7 +390,7 @@ Egy konkrét gyógyszer részletes szakmai adatlapja.
 
 Interaktív térképes és szinkronizált listás kereső a patikák megtalálására.
 
-**Útvonal:** [https://bvorvosi.vercel.app/gyogyszertarak](https://bvorvosi.vercel.app/gyogyszertarak)
+**Útvonal:** [https://bvo.uneb.hu/gyogyszertarak](https://bvo.uneb.hu/gyogyszertarak)
 
 #### Beviteli Mezők és Szűrők
 
@@ -449,7 +449,7 @@ Interaktív térképes és szinkronizált listás kereső a patikák megtalálá
 
 A szakmai és akkreditált képzések böngészőfelülete.
 
-**Útvonal:** [https://bvorvosi.vercel.app/kepzesek](https://bvorvosi.vercel.app/kepzesek)
+**Útvonal:** [https://bvo.uneb.hu/kepzesek](https://bvo.uneb.hu/kepzesek)
 
 #### Felületi elemek és Szűrők
 
@@ -470,8 +470,8 @@ A szakmai és akkreditált képzések böngészőfelülete.
 
 #### 4.4.2. Képzés Részletes Oldal és BENU LMS Integráció
 
-**Útvonal:** `https://bvorvosi.vercel.app/kepzesek/[courseId]`  
-*(Példa: [https://bvorvosi.vercel.app/kepzesek/c1](https://bvorvosi.vercel.app/kepzesek/c1))*
+**Útvonal:** `https://bvo.uneb.hu/kepzesek/[courseId]`  
+*(Példa: [https://bvo.uneb.hu/kepzesek/c1](https://bvo.uneb.hu/kepzesek/c1))*
 
 #### Adatlap felépítése és működési logika
 
@@ -513,7 +513,7 @@ A navigációs fejlécbe épített rendszerszintű instant kereső.
 
 #### 4.6.1. Bejelentkezés Oldal
 
-**Útvonal:** [https://bvorvosi.vercel.app/login](https://bvorvosi.vercel.app/login)
+**Útvonal:** [https://bvo.uneb.hu/login](https://bvo.uneb.hu/login)
 
 A bejelentkezési felület háromféle belépési módot kínál a fejlécben lévő fülek segítségével:
 
@@ -540,7 +540,7 @@ Jelszavas belépés vagy e-mail kód kérése után (ha a 2FA aktív és az eszk
 
 #### 4.6.3. Elfelejtett Jelszó Oldal
 
-**Útvonal:** [https://bvorvosi.vercel.app/forgot-password](https://bvorvosi.vercel.app/forgot-password)
+**Útvonal:** [https://bvo.uneb.hu/forgot-password](https://bvo.uneb.hu/forgot-password)
 
 - *E-mail cím mező:* Szabványos email mező.
 - *"Belépési kód küldése" gomb:* Kattintásra a felületen megjelenik a generált 6 jegyű belépési kód prototípus gépelési tájékoztatóval (`"Prototípus mód: ... itt láthatja a belépési kódot"`).
@@ -559,7 +559,7 @@ Kizárólag `Admin` szerepkörrel rendelkező felhasználók számára elérhet�
 
 #### 4.7.1. Felhasználókezelés
 
-**Útvonal:** [https://bvorvosi.vercel.app/admin/users](https://bvorvosi.vercel.app/admin/users)
+**Útvonal:** [https://bvo.uneb.hu/admin/users](https://bvo.uneb.hu/admin/users)
 
 #### Felhasználó Lista és Szerkesztő Modal (Fülek)
 
@@ -588,7 +588,7 @@ Kizárólag `Admin` szerepkörrel rendelkező felhasználók számára elérhet�
 
 #### 4.7.2. Fórum és Tartalom Moderálás
 
-**Útvonal:** [https://bvorvosi.vercel.app/admin/forum](https://bvorvosi.vercel.app/admin/forum)
+**Útvonal:** [https://bvo.uneb.hu/admin/forum](https://bvo.uneb.hu/admin/forum)
 
 - Témák és Hozzászólások áttekintése (az admin számára a rejtett tartalmak is láthatók).
 - **Moderációs műveletek:**
@@ -602,7 +602,7 @@ Kizárólag `Admin` szerepkörrel rendelkező felhasználók számára elérhet�
 
 #### 4.7.3. Gyógyszertár Karbantartás
 
-**Útvonal:** [https://bvorvosi.vercel.app/admin/pharmacies](https://bvorvosi.vercel.app/admin/pharmacies)
+**Útvonal:** [https://bvo.uneb.hu/admin/pharmacies](https://bvo.uneb.hu/admin/pharmacies)
 
 #### Csak Olvasható Áttekintő Felület Specifikációja
 
@@ -623,7 +623,7 @@ A prototípusban **NINCS patika-szerkesztő űrlap**. A felületen az alábbi t�
 
 A felhasználó saját adataik, preferenciáik és fiókbiztonságuk kezelési központja.
 
-**Útvonal:** [https://bvorvosi.vercel.app/profile](https://bvorvosi.vercel.app/profile)
+**Útvonal:** [https://bvo.uneb.hu/profile](https://bvo.uneb.hu/profile)
 
 #### 4.8.1. Személyes Adatok és Szakterületek
 - **Név, Elsődleges e-mail, Másodlagos e-mail:** Megjelenítő mezők olvasási módban. *Magyarázó felirat:* `"Szerkesztéséhez keresse az adminisztrációt."`
@@ -652,11 +652,11 @@ A profil egyik legterjedelmesebb funkcióblokkja, amely **külön konfigurálhat
    - *Témakör / Hatókör (Select):* `Minden`, `Szakterület + mentett gyógyszerek`, `Csak szakterület`, `Csak mentett gyógyszer`.
 
 #### 4.8.4. Mentett Kedvencek Oldal
-- **Útvonal:** [https://bvorvosi.vercel.app/profile/favorites](https://bvorvosi.vercel.app/profile/favorites)
+- **Útvonal:** [https://bvo.uneb.hu/profile/favorites](https://bvo.uneb.hu/profile/favorites)
 - Tájékoztató infó-kártya, mentett gyógyszerek listája törlési lehetőséggel és értesítések közvetlen kezelésével.
 
 #### 4.8.5. Készletértesítések Oldal
-- **Útvonal:** [https://bvorvosi.vercel.app/profile/notifications](https://bvorvosi.vercel.app/profile/notifications)
+- **Útvonal:** [https://bvo.uneb.hu/profile/notifications](https://bvo.uneb.hu/profile/notifications)
 - Aktív készletértesítések táblázata a **feliratkozás időpontjával** és egykattintásos leiratkozási opcióval.
 
 #### 4.8.6. Biztonság és Kétfaktoros Azonosítás (2FA / Passkey)
@@ -684,7 +684,7 @@ Ez a szekció azokat a funkciókat tartalmazza, amelyek korábbi tervekben szere
 
 ### ~~Közösségi Fórum a Felhasználói Főmenüben~~
 > **Státusz:** Nem aktív a fő navigációs menüben – szerepét a Képzési Program vette át.  
-> **Elérhetőség:** Korábbi útvonal: `https://bvorvosi.vercel.app/kozosseg`. A témák és hozzászólások közvetlen URL-lel és a globális keresőből továbbra is elérhetők (témalétrehozás, hozzászólások működnek). A moderációs felület az adminisztrációban megmaradt (`/admin/forum`).
+> **Elérhetőség:** Korábbi útvonal: `https://bvo.uneb.hu/kozosseg`. A témák és hozzászólások közvetlen URL-lel és a globális keresőből továbbra is elérhetők (témalétrehozás, hozzászólások működnek). A moderációs felület az adminisztrációban megmaradt (`/admin/forum`).
 
 ### ~~Közösségi Aktivitás Dashboard-Widget~~
 > **Státusz:** Elvetve (a kódban explicit `"HASZNÁLATON KÍVÜL"` jelöléssel).  
@@ -718,13 +718,13 @@ Ez a szekció azokat a funkciókat tartalmazza, amelyek korábbi tervekben szere
 
 ## 6. Tesztfiókok és Hozzáférések
 
-> **Megjegyzés:** Az alábbi tesztfiókok a prototípus élő kipróbálására szolgálnak a [https://bvorvosi.vercel.app/login](https://bvorvosi.vercel.app/login) oldalon.
+> **Megjegyzés:** Az alábbi tesztfiókok a prototípus élő kipróbálására szolgálnak a [https://bvo.uneb.hu/login](https://bvo.uneb.hu/login) oldalon.
 
 **Minden fiók egységes jelszava:** `vény123`
 
 | # | Fiók neve | Email | Jelszó | Szerepkör | Státusz | Szakterületek | Tesztelési Rendeltetés |
 |---|---|---|---|---|---|---|---|
-| 1 | Adminisztrátor | `admin@example.com` | `vény123` | Admin | Aktív | – | Adminisztrációs felület és felhasználókezelés tesztelése ([https://bvorvosi.vercel.app/admin/users](https://bvorvosi.vercel.app/admin/users)). |
+| 1 | Adminisztrátor | `admin@example.com` | `vény123` | Admin | Aktív | – | Adminisztrációs felület és felhasználókezelés tesztelése ([https://bvo.uneb.hu/admin/users](https://bvo.uneb.hu/admin/users)). |
 | 2 | Dr. Kovács István (Orvos) | `demo@example.com` | `vény123` | User | Aktív | Háziorvos, Belgyógyász | Szakmai portál teljes körű tesztelése (keresés, kedvencek, értesítések, profilbeállítások). Az admin felület elérése számára korlátozott. |
 | 3 | Dr. Teszt Szabolcs (Inaktív) | `teszt@example.com` | `vény123` | User | Inaktív | Kardiológus | Felfüggesztett/Inaktív fiók bejelentkezési elutasításának és védelmének tesztelése. |
 
