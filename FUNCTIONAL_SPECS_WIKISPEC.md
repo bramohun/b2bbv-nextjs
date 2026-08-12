@@ -517,10 +517,17 @@ A szakmai és akkreditált képzések böngészőfelülete.
 
 ### 4.5. Globális Keresés
 
-A navigációs fejlécbe épített rendszerszintű instant kereső.
+A navigációs fejlécbe épített rendszerszintű instant kereső, amely reszponzív elrendezéssel támogatja az asztali és a mobil felületeket egyaránt.
 
 #### Beviteli Mező Specifikáció és Működés
-- **Típus:** Egysoros keresőmező kereső ikonnal a fejlécben.
+- **Reszponzív Megjelenés:**
+  - **Asztali nézet (≥768px / md):** Egysoros keresőmező kereső ikonnal a fejlécben, amely alatt gépeléskor élő legördülő találati kártya (`w-[400px]`) jelenik meg.
+  - **Mobil nézet (<768px / md):** A fejlécben egy jól érinthető **kereső ikon gomb** (nagyító ikon) jelenik meg. A gombra koppintva egy **teljes képernyős Mobil Kereső Overlay (Modális felület)** nyílik meg kiterjesztett rétegen (`fixed inset-0 z-[100]`), letiltva a háttér oldal görgetését.
+- **Mobil Kereső Overlay felületi elemei:**
+  - **Vissza gomb (`arrow_back`):** Az overlay azonnali bezárása és visszatérés az eredeti oldalra.
+  - **Kereső beviteli mező:** Lekerekített keresősáv automatikus fókusszal (`autoFocus`), hogy a felnyíló virtuális billentyűzetről azonnal lehessen gépelni.
+  - **Törlés gomb (X):** Kifejezés beírása esetén megjelenő gyors törlés ikon a mező kiürítésére.
+  - **Kategória fülek:** Vízszintesen kényelmesen választható szűrő gombok (`Minden`, `Gyógyszerek`, `Patikák`, `Közösség`).
 - **Keresési tartomány:**
   - *Gyógyszerek:* Gyógyszer kereskedelmi neve és Hatóanyaga (INN). *(TK-szám alapján a globális kereső nem keres).*
   - *Gyógyszertárak:* Patika neve, Település és Cím.
@@ -533,7 +540,8 @@ A navigációs fejlécbe épített rendszerszintű instant kereső.
     - Gyógyszer találat → gyógyszer adatlapjára navigál (`/gyogyszerek/adatlap?tk=[tkSzam]`).
     - Gyógyszertár találat → a gyógyszertár keresőre navigál a kiválasztott patika mélylinkjével, fókuszált térképpel és megnyitott adatlapjával (`/gyogyszertarak?id=[pharmacyId]`).
     - Közösségi találat → a közösségi főoldalra navigál (`/kozosseg`).
-  - **Lábléc:** `"Összes találat megtekintése"` gomb (jelenleg elvetett/előkészített funkció).
+    - Találatra kattintáskor a mobil overlay automatikusan bezárul és helyreáll a háttér görgetése.
+  - **Lábléc:** `"Összes találat megtekintése"` gomb.
 
 ---
 
