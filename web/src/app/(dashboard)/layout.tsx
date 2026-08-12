@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { NotificationProvider } from "@/context/NotificationContext";
 import { FavoriteProvider } from "@/context/FavoriteContext";
 import { ToastProvider } from "@/context/ToastContext";
@@ -42,11 +43,12 @@ export default function DashboardLayout({
             <NearbyPharmacyProvider>
                 <FavoriteProvider>
                     <NotificationProvider>
-                        <div className="min-h-screen bg-base-200">
+                        <div className="min-h-screen flex flex-col bg-base-200">
                             <Navbar />
-                            <main className="w-full p-4 md:p-6 lg:p-8">
+                            <main className="w-full flex-1 p-4 md:p-6 lg:p-8">
                                 {children}
                             </main>
+                            <Footer />
                         </div>
                     </NotificationProvider>
                 </FavoriteProvider>

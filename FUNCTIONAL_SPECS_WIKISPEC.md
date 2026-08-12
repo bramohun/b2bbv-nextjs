@@ -51,6 +51,7 @@ KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
    - [3.5. Patikai Készletrekord Adatmodell](#35-patikai-készletrekord-adatmodell)
 4. [Modulok és Funkciók Részletes Leírása](#4-modulok-és-funkciók-részletes-leírása)
    - [4.0. Fejléc és Navigációs Sáv Modul](#40-fejléc-és-navigációs-sáv-modul)
+     - [4.0.2. Globális Lábléc (Footer) és Verzió Mátrix Modul](#402-globális-lábléc-footer-és-verzió-mátrix-modul)
    - [4.1. Irányítópult (Dashboard)](#41-irányítópult-dashboard)
    - [4.2. Gyógyszer Nyilvántartás](#42-gyógyszer-nyilvántartás)
      - [4.2.1. Gyógyszer Lista Oldal](#421-gyógyszer-lista-oldal)
@@ -246,6 +247,33 @@ A portál tetején rögzített (sticky) központi navigációs sáv, amely minde
 
 5. **Mobil Hamburger Menü:**
    - Kisebb kijelzőméret (mobil) esetén a navigációs linkek összecsukódnak egy hamburger menü gomb mögé.
+
+#### 4.0.2. Globális Lábléc (Footer) és Verzió Mátrix Modul
+
+##### Brief
+A portál alján található központi lábléc (Footer), amely minden bejelentkezett és nyilvános oldalon megjelenik. Elsődleges célja az alkalmazás (Weboldal) és a Funkcionális Specifikáció (FSR WikiSpec) verziójának konzekvens kijelzése, a szinkronizációs státusz transzparens megjelenítése a felhasználók és tesztelők számára, valamint az alapvető navigációs és jogi nyilatkozatok biztosítása.
+
+##### Felületi elemek és Beviteli Mezők
+
+1. **Rendszerazonosító és Márka jelzés:**
+   - **Megjelenés:** BENU B2B Betegútvezérlő logó és megnevezés, valamint a portál rövid szakmai leírása.
+
+2. **Verzió és Specifikáció Szinkron Kijelző Badge Bar:**
+   - **Alkalmazás Verzió Badge:** Szöveges kijelző (pl. `App v6.1.0`), amely a weboldal aktuális SemVer (`MAJOR.MINOR.PATCH`) szoftververzióját mutatja.
+   - **Specifikáció Verzió Badge:** Szöveges kijelző (pl. `Spec v6.1`), amely a funkcionális specifikáció szinkronizált verzióját jelzi.
+   - **Státusz Címke:** Zöld visszajelző jelvény (`Szinkronizált`), amely igazolja, hogy a weboldal funkcionális működése teljes mértékben megegyezik a specifikáció leírásával.
+   - **Interakció:** A verzió jelvényre kattintva felugrik a **Verzió & Specifikáció Szinkron Modális Ablak**.
+
+3. **Verzió & Specifikáció Szinkron Modális Ablak:**
+   - **Felületi működés:** Vezérelt React állapot alapú felugró ablak kiterjesztett elhomályosított sötét háttérrel (backdrop).
+   - **Tartalom:**
+     - Weboldal verzió (`MAJOR.MINOR.PATCH`, pl. `6.1.0`)
+     - Specifikáció verzió (`MAJOR.MINOR`, pl. `6.1`)
+     - Részletes leírás a verziózási logikáról (`MAJOR` = mérföldkő / architektúra váltás, `MINOR` = funkcionális szinkron, `PATCH` = technikai javítás)
+     - Szinkronizációs igazolás az `FUNCTIONAL_SPECS_WIKISPEC.md` v6.1 dokumentum meglétéről és utolsó frissítési dátumáról.
+
+4. **Navigációs és Specifikációs Gyorshivatkozások:**
+   - Hivatkozások az Irányítópult (`/dashboard`), Gyógyszerkereső (`/gyogyszerek`), Gyógyszertárak (`/gyogyszertarak`) és BENU Képzés (`/kepzesek`) modulokra, valamint közvetlen hivatkozás a verziózási mátrix felugró ablakára.
 
 ---
 
