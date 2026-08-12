@@ -7,8 +7,9 @@
  * 
  * USER STORY:
  * Felhasználóként szeretnék egy központi keresőt a navigációs sávban, ahol
- * egyetlen keresőmezővel elérhetem a gyógyszereket, gyógyszertárakat és a
- * közösségi fórum témáit mind asztali (desktop), mind mobil kijelzőkön.
+ * egyetlen keresőmezővel elérhetem az aktívan használt tartalmakat:
+ * Gyógyszereket, Gyógyszertárakat és a BENU Képzési Program anyagait
+ * mind asztali (desktop), mind mobil kijelzőkön.
  * 
  * FUNKCIÓK:
  * - Reszponzív megjelenés:
@@ -21,31 +22,35 @@
  *   - Minden találat: Összesített lista ikonokkal jelölve a forrást.
  *   - Gyógyszerek: Keresés névben és hatóanyagban.
  *   - Gyógyszertárak: Keresés névben, településben és címben.
- *   - Közösség: Keresés fórum témák címében.
+ *   - Képzések: Keresés tanfolyamok címében, rövid leírásában és kategóriájában.
  * - Automatikus bezárás: a listán kívülre kattintva, a vissza gombra nyomva vagy eredmény választásakor bezárul.
  * - Munkamenet és görgetés védelme: Nyitott mobil keresőnél a háttér görgetése letiltásra kerül.
  * 
  * ÜZLETI LOGIKA:
- * - A találatok az adatszolgáltatásokból (gyógyszerek, patikák és fórum) érkeznek.
+ * - A találatok az adatszolgáltatásokból (gyógyszerek, patikák és képzési program) érkeznek.
  * - A keresés kis- és nagybetű érzéketlen.
- * - A találatok között a forrás (gyógyszer, patika, fórum) ikonnal van megkülönböztetve.
+ * - A találatok között a forrás (gyógyszer, patika, képzés) ikonnal van megkülönböztetve.
+ * 
+ * KAPCSOLÓDÓ FELÜLETEK:
+ * - Gyógyszer adatlap (`/gyogyszerek/adatlap?tk=...`)
+ * - Gyógyszertár részletek (`/gyogyszertarak?id=...`)
+ * - BENU Képzési Program tanfolyam adatlap (`/kepzesek/[courseId]`)
  */
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { Medicine, Pharmacy } from '@/types';
-import { getTopics } from '@/lib/forum-service';
-import { ForumTopic } from '@/types/forum';
+import { COURSES, Course } from '@/lib/training-data';
 import { fetchStaticData } from '@/lib/static-fetch';
 
-type SearchCategory = 'all' | 'medicines' | 'pharmacies' | 'community';
+type SearchCategory = 'all' | 'medicines' | 'pharmacies' | 'courses';
 
 interface SearchResult {
     id: string;
     title: string;
     subtitle?: string;
-    type: 'medicine' | 'pharmacy' | 'forum';
+    type: 'medicine' | 'pharmacy' | 'course';
     url: string;
 }
 
@@ -57,7 +62,7 @@ export const GlobalSearch = () => {
     const [activeCategory, setActiveCategory] = useState<SearchCategory>('all');
     const [medicines, setMedicines] = useState<Medicine[]>([]);
     const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
-    const [forumTopics, setForumTopics] = useState<ForumTopic[]>([]);
+    const [courses, setCourses] = useState<Course[]>([]);
     const [loading, setLoading] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -88,7 +93,7 @@ export const GlobalSearch = () => {
                 ]);
                 setMedicines(medData);
                 setPharmacies(pharmData);
-                setForumTopics(getTopics());
+                setCourses(COURSES);
             } catch (error) {
                 console.error('Error loading search data:', error);
             } finally {
@@ -112,7 +117,7 @@ export const GlobalSearch = () => {
     }, []);
 
     const results = useMemo(() => {
-        if (!searchTerm.trim()) return { medicines: [], pharmacies: [], community: [], all: [] };
+        if (!searchTerm.trim()) return { medicines: [], pharmacies: [], courses: [], all: [] };
 
         const query = searchTerm.toLowerCase();
 
@@ -138,29 +143,30 @@ export const GlobalSearch = () => {
                 url: `/gyogyszertarak?id=${encodeURIComponent(p.id)}`
             }));
 
-        const filteredForum: SearchResult[] = forumTopics
-            .filter(t => t.title.toLowerCase().includes(query))
+        const filteredCourses: SearchResult[] = courses
+            .filter(c => c.title.toLowerCase().includes(query) || c.shortDescription.toLowerCase().includes(query) || c.category.toLowerCase().includes(query))
             .slice(0, 5)
-            .map(t => ({
-                id: t.id,
-                title: t.title,
-                type: 'forum',
-                url: `/kozosseg`
+            .map(c => ({
+                id: c.id,
+                title: c.title,
+                subtitle: `${c.category} • ${c.durationMinutes} perc`,
+                type: 'course',
+                url: `/kepzesek/${c.id}`
             }));
 
         return {
             medicines: filteredMedicines,
             pharmacies: filteredPharmacies,
-            community: filteredForum,
-            all: [...filteredMedicines, ...filteredPharmacies, ...filteredForum].slice(0, 10)
+            courses: filteredCourses,
+            all: [...filteredMedicines, ...filteredPharmacies, ...filteredCourses].slice(0, 10)
         };
-    }, [searchTerm, medicines, pharmacies, forumTopics]);
+    }, [searchTerm, medicines, pharmacies, courses]);
 
     const displayResults = useMemo(() => {
         switch (activeCategory) {
             case 'medicines': return results.medicines;
             case 'pharmacies': return results.pharmacies;
-            case 'community': return results.community;
+            case 'courses': return results.courses;
             case 'all': default: return results.all;
         }
     }, [activeCategory, results]);
@@ -169,7 +175,7 @@ export const GlobalSearch = () => {
         switch (type) {
             case 'medicine': return 'medication';
             case 'pharmacy': return 'local_pharmacy';
-            case 'forum': return 'groups';
+            case 'course': return 'school';
             default: return 'search';
         }
     };
@@ -226,7 +232,7 @@ export const GlobalSearch = () => {
                                 { id: 'all', label: 'Minden' },
                                 { id: 'medicines', label: 'Gyógyszerek' },
                                 { id: 'pharmacies', label: 'Patikák' },
-                                { id: 'community', label: 'Közösség' }
+                                { id: 'courses', label: 'Képzések' }
                             ].map((cat) => (
                                 <button
                                     key={cat.id}
@@ -263,10 +269,11 @@ export const GlobalSearch = () => {
                                                 className="flex items-center gap-3 p-2 hover:bg-primary/5 rounded-lg active:bg-primary/10 transition-colors"
                                                 onClick={handleSelectResult}
                                             >
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${res.type === 'medicine' ? 'bg-blue-100 text-blue-600' :
-                                                        res.type === 'pharmacy' ? 'bg-green-100 text-green-600' :
-                                                            'bg-purple-100 text-purple-600'
-                                                    }`}>
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                                                    res.type === 'medicine' ? 'bg-blue-100 text-blue-600' :
+                                                    res.type === 'pharmacy' ? 'bg-green-100 text-green-600' :
+                                                    'bg-purple-100 text-purple-600'
+                                                }`}>
                                                     <span className="material-symbols-rounded text-lg">{getIcon(res.type)}</span>
                                                 </div>
                                                 <div className="flex flex-col min-w-0">
@@ -311,7 +318,7 @@ export const GlobalSearch = () => {
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Gyógyszer, patika, fórum keresése..."
+                                placeholder="Gyógyszer, patika, képzés keresése..."
                                 className="bg-transparent border-none outline-none w-full text-sm py-0.5 text-base-content"
                             />
                             {searchTerm && (
@@ -332,7 +339,7 @@ export const GlobalSearch = () => {
                             { id: 'all', label: 'Minden' },
                             { id: 'medicines', label: 'Gyógyszerek' },
                             { id: 'pharmacies', label: 'Patikák' },
-                            { id: 'community', label: 'Közösség' }
+                            { id: 'courses', label: 'Képzések' }
                         ].map((cat) => (
                             <button
                                 key={cat.id}
@@ -350,7 +357,7 @@ export const GlobalSearch = () => {
                             <div className="flex flex-col items-center justify-center p-8 text-base-content/40 text-center">
                                 <span className="material-symbols-rounded text-5xl mb-3 opacity-20">search</span>
                                 <p className="text-sm font-medium">Írj be egy keresőkifejezést!</p>
-                                <p className="text-xs text-base-content/50 mt-1">Gyógyszerekre, gyógyszertárakra és közösségi témákra kereshetsz.</p>
+                                <p className="text-xs text-base-content/50 mt-1">Gyógyszerekre, gyógyszertárakra és képzésekre kereshetsz.</p>
                             </div>
                         )}
 
@@ -377,10 +384,11 @@ export const GlobalSearch = () => {
                                             className="flex items-center gap-3 p-3 hover:bg-primary/5 rounded-xl active:bg-primary/10 transition-colors border border-base-200/50"
                                             onClick={handleSelectResult}
                                         >
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${res.type === 'medicine' ? 'bg-blue-100 text-blue-600' :
-                                                    res.type === 'pharmacy' ? 'bg-green-100 text-green-600' :
-                                                        'bg-purple-100 text-purple-600'
-                                                }`}>
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                                                res.type === 'medicine' ? 'bg-blue-100 text-blue-600' :
+                                                res.type === 'pharmacy' ? 'bg-green-100 text-green-600' :
+                                                'bg-purple-100 text-purple-600'
+                                            }`}>
                                                 <span className="material-symbols-rounded text-xl">{getIcon(res.type)}</span>
                                             </div>
                                             <div className="flex flex-col min-w-0 flex-1">

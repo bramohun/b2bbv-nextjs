@@ -35,7 +35,7 @@ A képernyő tetején egy állandó menüsor található, amely minden oldalról
 | **Logo / „Orvosi Portál"** | Visszavisz az Irányítópultra |
 | **Menüpontok** | Irányítópult · Gyógyszerek · Gyógyszertárak · BENU Képzési Program |
 | **Közeli patika jelzés** | Ha be van állítva, a navigációs sávban látható a kiválasztott patika neve és címe. Rákattintva módosítható. |
-| **Globális kereső** | Egy keresőmező, amelybe bármit beírva azonnal megjelennek a találatok gyógyszerek és gyógyszertárak között |
+| **Globális kereső** | Egy keresőmező, amelybe bármit beírva azonnal megjelennek a találatok gyógyszerek, gyógyszertárak és képzések között |
 | **Mentett gyógyszerek ikon** | Könyvjelző ikon, mellette egy szám jelzi a mentett gyógyszerek számát. Rákattintva egy gyorslista jelenik meg a mentett gyógyszerekről. |
 | **Profil menü** | A felhasználó nevének kezdőbetűi, rákattintva legördülő menü: Profil beállítások, Kijelentkezés |
 
@@ -44,6 +44,7 @@ A képernyő tetején egy állandó menüsor található, amely minden oldalról
 A keresőmezőbe gépelve azonnal megjelennek a találatok, típus szerint csoportosítva:
 - **Gyógyszerek** – név és hatóanyag alapján keres
 - **Gyógyszertárak** – név, település és cím alapján keres
+- **Képzések** – a BENU Képzési Program tanfolyamainak címe, rövid leírása és kategóriája alapján keres
 
 A találatokra kattintva közvetlenül az adott elemre navigálhatunk.
 

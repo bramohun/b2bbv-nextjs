@@ -133,11 +133,11 @@ Szakmai diskurzus platform ellenőrzött felhasználók (orvosok) számára.
     *   Tartalmazza a "Közeli Patika" gyorsinformációját: a kiválasztott patika neve megjelenik; kattintásra teljes képernyős modális ablakban nyílik meg a Gyógyszertár Kereső.
     *   Gyorselérés a kedvenc gyógyszerekhez (dropdown menü a csillag ikonra kattintva).
 *   **Globális Kereső:**
-    *   Intelligens keresőmező, amely egyszerre keres:
+    *   Intelligens keresőmező, amely egyszerre keres az aktívan használt tartalmakban:
         *   Gyógyszerek között (név, hatóanyag).
-        *   Gyógyszertárak között (név, cím).
-        *   Fórum témák között.
-    *   Kategóriák szerinti találati lista (ikonokkal jelölve a típust).
+        *   Gyógyszertárak között (név, település, cím).
+        *   BENU Képzési Program tanfolyamai között (cím, leírás, kategória).
+    *   Kategóriák szerinti találati lista (ikonokkal jelölve a típust: `medication`, `local_pharmacy`, `school`).
     *   A keresés kis- és nagybetű érzéketlen.
 
 ### 3.6. Autentikáció és Profil

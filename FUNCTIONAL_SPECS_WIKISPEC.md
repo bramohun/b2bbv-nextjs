@@ -517,19 +517,19 @@ A navigációs fejlécbe épített rendszerszintű instant kereső, amely reszpo
   - **Vissza gomb (`arrow_back`):** Az overlay azonnali bezárása és visszatérés az eredeti oldalra.
   - **Kereső beviteli mező:** Lekerekített keresősáv automatikus fókusszal (`autoFocus`), hogy a felnyíló virtuális billentyűzetről azonnal lehessen gépelni.
   - **Törlés gomb (X):** Kifejezés beírása esetén megjelenő gyors törlés ikon a mező kiürítésére.
-  - **Kategória fülek:** Vízszintesen kényelmesen választható szűrő gombok (`Minden`, `Gyógyszerek`, `Patikák`, `Közösség`).
+  - **Kategória fülek:** Vízszintesen kényelmesen választható szűrő gombok (`Minden`, `Gyógyszerek`, `Patikák`, `Képzések`).
 - **Keresési tartomány:**
   - *Gyógyszerek:* Gyógyszer kereskedelmi neve és Hatóanyaga (INN). *(TK-szám alapján a globális kereső nem keres).*
   - *Gyógyszertárak:* Patika neve, Település és Cím.
-  - *Közösség:* Fórum témák címe.
+  - *Képzések:* BENU Képzési Program tanfolyamainak címe, rövid leírása és kategóriája (`Gyártói`, `Eladásösztönző`, `Akkreditált`).
 - **Működés és Találati Panel:**
   - Már **1 karakter** beírása után megnyílik az élő találati panel.
-  - **Kategória fülek:** `Minden`, `Gyógyszerek`, `Patikák`, `Közösség`.
+  - **Kategória fülek:** `Minden`, `Gyógyszerek`, `Patikák`, `Képzések`.
   - **Találati korlátok:** Kategóriánként max. 5 találat jelenik meg, a `Minden` fülön összesen max. 10 találat.
   - **Navigáció találatra kattintva:**
     - Gyógyszer találat → gyógyszer adatlapjára navigál (`/gyogyszerek/adatlap?tk=[tkSzam]`).
     - Gyógyszertár találat → a gyógyszertár keresőre navigál a kiválasztott patika mélylinkjével, fókuszált térképpel és megnyitott adatlapjával (`/gyogyszertarak?id=[pharmacyId]`).
-    - Közösségi találat → a közösségi főoldalra navigál (`/kozosseg`).
+    - Képzés találat → a BENU Képzési Program adott tanfolyamának adatlapjára navigál (`/kepzesek/[courseId]`).
     - Találatra kattintáskor a mobil overlay automatikusan bezárul és helyreáll a háttér görgetése.
   - **Lábléc:** `"Összes találat megtekintése"` gomb.
 
@@ -708,9 +708,9 @@ A profil egyik legterjedelmesebb funkcióblokkja, amely **külön konfigurálhat
 
 Ez a szekció azokat a funkciókat tartalmazza, amelyek korábbi tervekben szerepeltek, de a jelenlegi felületen nem aktívak, módosultak vagy külső rendszerbe kerültek át.
 
-### ~~Közösségi Fórum a Felhasználói Főmenüben~~
-> **Státusz:** Nem aktív a fő navigációs menüben – szerepét a Képzési Program vette át.  
-> **Elérhetőség:** Korábbi útvonal: `https://bvo.uneb.hu/kozosseg`. A témák és hozzászólások közvetlen URL-lel és a globális keresőből továbbra is elérhetők (témalétrehozás, hozzászólások működnek). A moderációs felület az adminisztrációban megmaradt (`/admin/forum`).
+### ~~Közösségi Fórum a Felhasználói Főmenüben és a Globális Keresőben~~
+> **Státusz:** Nem aktív a fő navigációs menüben és a globális keresőben – szerepét a Képzési Program vette át.  
+> **Elérhetőség:** Korábbi útvonal: `https://bvo.uneb.hu/kozosseg`. A témák és hozzászólások közvetlen URL-lel továbbra is elérhetők (témalétrehozás, hozzászólások működnek). A moderációs felület az adminisztrációban megmaradt (`/admin/forum`).
 
 ### ~~Közösségi Aktivitás Dashboard-Widget~~
 > **Státusz:** Elvetve (a kódban explicit `"HASZNÁLATON KÍVÜL"` jelöléssel).  
