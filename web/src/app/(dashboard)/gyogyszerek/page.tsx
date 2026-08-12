@@ -52,6 +52,7 @@ import { useFavorite } from '@/context/FavoriteContext';
 import { FavoriteRemovalModal } from '@/components/medicines/FavoriteRemovalModal';
 import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
 import { isAvailableInPharmacy, getNearbyPharmacyStatusUpdate } from '@/lib/utils';
+import { fetchStaticData } from '@/lib/static-fetch';
 
 type SortDirection = 'asc' | 'desc' | null;
 type SortKey = 'nev' | 'activeSubstance' | 'kiszereles' | 'gyarto' | 'status'
@@ -129,8 +130,7 @@ function MedicinesPageContent() {
     useEffect(() => {
         async function fetchMedicines() {
             try {
-                const response = await fetch('/api/medicines');
-                const data = await response.json();
+                const data = await fetchStaticData<Medicine[]>('/data/medicines.json');
                 setMedicines(data);
             } catch (error) {
                 console.error('Failed to load medicines:', error);

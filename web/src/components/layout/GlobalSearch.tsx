@@ -32,6 +32,7 @@ import Link from 'next/link';
 import { Medicine, Pharmacy } from '@/types';
 import { getTopics } from '@/lib/forum-service';
 import { ForumTopic } from '@/types/forum';
+import { fetchStaticData } from '@/lib/static-fetch';
 
 type SearchCategory = 'all' | 'medicines' | 'pharmacies' | 'community';
 
@@ -58,12 +59,10 @@ export const GlobalSearch = () => {
         const loadData = async () => {
             setLoading(true);
             try {
-                const [medRes, pharmRes] = await Promise.all([
-                    fetch('/api/medicines'),
-                    fetch('/api/pharmacies')
+                const [medData, pharmData] = await Promise.all([
+                    fetchStaticData<Medicine[]>('/data/medicines.json'),
+                    fetchStaticData<Pharmacy[]>('/data/pharmacies.json')
                 ]);
-                const medData = await medRes.json();
-                const pharmData = await pharmRes.json();
                 setMedicines(medData);
                 setPharmacies(pharmData);
                 setForumTopics(getTopics());

@@ -16,6 +16,8 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { PharmacyStockModal } from '@/components/pharmacies/PharmacyStockModal';
+import { fetchStaticData } from '@/lib/static-fetch';
+import { Pharmacy } from '@/types';
 
 interface MedicineStockInfoProps {
     medicineName: string;
@@ -43,9 +45,8 @@ export const MedicineStockInfo: React.FC<MedicineStockInfoProps> = ({
     useEffect(() => {
         async function fetchIds() {
             try {
-                const response = await fetch('/api/pharmacies');
-                const data = await response.json();
-                setAllPharmacyIds(data.map((p: any) => p.id));
+                const data = await fetchStaticData<Pharmacy[]>('/data/pharmacies.json');
+                setAllPharmacyIds(data.map((p) => p.id));
             } catch (error) {
                 console.error('Failed to fetch pharmacy IDs:', error);
             }

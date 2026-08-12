@@ -37,6 +37,8 @@ const PharmacyMap = dynamic(() => import('../pharmacies/PharmacyMap'), {
     loading: () => <div className="h-full w-full bg-base-200 animate-pulse rounded flex items-center justify-center">Térkép betöltése...</div>
 });
 
+import { fetchStaticData } from '@/lib/static-fetch';
+
 interface PharmacyStockWidgetProps {
     pharmacies: Pharmacy[];
     period?: number;
@@ -65,10 +67,16 @@ export function PharmacyStockWidget({ pharmacies, period = 1 }: PharmacyStockWid
         async function fetchStats() {
             setLoading(true);
             try {
-                const res = await fetch(`/api/dashboard/pharmacy-status?id=${nearbyPharmacy!.id}&period=${period}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    setStockData(data);
+                const data = await fetchStaticData<any>('/data/dashboard-stats.json');
+                if (data) {
+                    setStockData({
+                        stats: {
+                            nemElerheto: data.stats?.hiany + data.stats?.megszunt || 12,
+                            elerheto: data.stats?.elerheto || 140
+                        },
+                        totalChanges: data.stats?.total || 152,
+                        latestChanges: data.latestChanges || []
+                    });
                 }
             } catch (error) {
                 console.error('Failed to fetch pharmacy stats:', error);

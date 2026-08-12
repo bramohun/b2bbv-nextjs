@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Pharmacy } from '@/types';
 import Link from 'next/link';
 import { getPharmacyOpeningStatus } from '@/lib/pharmacy-utils';
+import { fetchStaticData } from '@/lib/static-fetch';
 
 /**
  * ============================================================================
@@ -55,8 +56,7 @@ export default function AdminPharmaciesPage() {
     useEffect(() => {
         async function load() {
             try {
-                const res = await fetch('/api/pharmacies');
-                const data = await res.json();
+                const data = await fetchStaticData<Pharmacy[]>('/data/pharmacies.json');
                 setPharmacies(data);
             } catch (e) {
                 console.error('Failed to load pharmacies', e);

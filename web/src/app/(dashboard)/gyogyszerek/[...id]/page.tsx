@@ -35,8 +35,15 @@ import { MedicineStockInfo } from '@/components/medicines/MedicineStockInfo';
 import { MedicineStatusHistory } from '@/components/medicines/MedicineStatusHistory';
 import { NearbyPharmacyStockIndicator } from '@/components/medicines/NearbyPharmacyStockIndicator';
 import { SimilarMedicines } from '@/components/medicines/SimilarMedicines';
-import { getMedicineByTk, getMedicinesBySubstance } from '@/lib/data';
+import { getMedicineByTk, getMedicinesBySubstance, getMedicines } from '@/lib/data';
 import { formatDate } from '@/lib/utils';
+
+export async function generateStaticParams() {
+    const medicines = await getMedicines();
+    return medicines.slice(0, 100).map((m) => ({
+        id: m.tkSzam.split('/')
+    }));
+}
 
 interface PageProps {
     params: Promise<{ id: string[] }>;

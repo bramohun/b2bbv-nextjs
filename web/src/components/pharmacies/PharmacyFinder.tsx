@@ -29,6 +29,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { Pharmacy } from '@/types';
 import { PharmacyCard } from './PharmacyCard';
+import { fetchStaticData } from '@/lib/static-fetch';
 
 const PharmacyMap = dynamic(() => import('./PharmacyMap'), {
     ssr: false,
@@ -85,8 +86,7 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
     useEffect(() => {
         async function fetchPharmacies() {
             try {
-                const response = await fetch('/api/pharmacies');
-                const data = await response.json();
+                const data = await fetchStaticData<Pharmacy[]>('/data/pharmacies.json');
 
                 // If filterIds is provided, only keep those
                 if (filterIds) {

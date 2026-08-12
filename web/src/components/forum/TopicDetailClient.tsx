@@ -1,0 +1,255 @@
+'use client';
+
+/**
+ * ============================================================================
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - TÉMA RÉSZLETEK OLDAL
+ * ============================================================================
+ * 
+ * ÚTVONAL: /kozosseg/[topicId]
+ */
+
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import {
+    getTopic,
+    getComments,
+    addComment,
+    toggleTopicLike,
+    toggleTopicDislike,
+    toggleCommentLike,
+    toggleCommentDislike,
+    getUserReactions,
+} from '@/lib/forum-service';
+import { ForumTopic, ForumComment, UserReactions } from '@/types/forum';
+import { ReactionButtons, CommentSection } from '@/components/forum';
+
+const CURRENT_USER = { id: 'user_current', name: 'Dr. Teszt Felhasználó' };
+
+export default function TopicDetailClient() {
+    const params = useParams();
+    const router = useRouter();
+    const topicId = params.topicId as string;
+
+    const [topic, setTopic] = useState<ForumTopic | null>(null);
+    const [comments, setComments] = useState<ForumComment[]>([]);
+    const [userReactions, setUserReactions] = useState<UserReactions>({
+        topicLikes: {},
+        topicDislikes: {},
+        commentLikes: {},
+        commentDislikes: {},
+    });
+    const [isLoading, setIsLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
+
+    useEffect(() => {
+        const loadedTopic = getTopic(topicId);
+        if (!loadedTopic || loadedTopic.isHidden) {
+            setNotFound(true);
+            setIsLoading(false);
+            return;
+        }
+
+        setTopic(loadedTopic);
+        setComments(getComments(topicId));
+        setUserReactions(getUserReactions());
+        setIsLoading(false);
+    }, [topicId]);
+
+    const handleTopicLike = () => {
+        if (!topic) return;
+        const result = toggleTopicLike(topic.id);
+        setTopic({ ...topic, likes: result.likes, dislikes: result.dislikes });
+        setUserReactions({
+            ...userReactions,
+            topicLikes: { ...userReactions.topicLikes, [topic.id]: result.liked },
+            topicDislikes: { ...userReactions.topicDislikes, [topic.id]: false },
+        });
+    };
+
+    const handleTopicDislike = () => {
+        if (!topic) return;
+        const result = toggleTopicDislike(topic.id);
+        setTopic({ ...topic, likes: result.likes, dislikes: result.dislikes });
+        setUserReactions({
+            ...userReactions,
+            topicDislikes: { ...userReactions.topicDislikes, [topic.id]: result.disliked },
+            topicLikes: { ...userReactions.topicLikes, [topic.id]: false },
+        });
+    };
+
+    const handleAddComment = (text: string, isAnonymous: boolean) => {
+        const newComment = addComment(
+            { topicId, text, isAnonymous },
+            CURRENT_USER
+        );
+        setComments([...comments, newComment]);
+        if (topic) {
+            setTopic({ ...topic, commentCount: topic.commentCount + 1 });
+        }
+    };
+
+    const handleCommentLike = (commentId: string) => {
+        const result = toggleCommentLike(commentId);
+        setComments(comments.map(c =>
+            c.id === commentId
+                ? { ...c, likes: result.likes, dislikes: result.dislikes }
+                : c
+        ));
+        setUserReactions({
+            ...userReactions,
+            commentLikes: { ...userReactions.commentLikes, [commentId]: result.liked },
+            commentDislikes: { ...userReactions.commentDislikes, [commentId]: false },
+        });
+    };
+
+    const handleCommentDislike = (commentId: string) => {
+        const result = toggleCommentDislike(commentId);
+        setComments(comments.map(c =>
+            c.id === commentId
+                ? { ...c, likes: result.likes, dislikes: result.dislikes }
+                : c
+        ));
+        setUserReactions({
+            ...userReactions,
+            commentDislikes: { ...userReactions.commentDislikes, [commentId]: result.disliked },
+            commentLikes: { ...userReactions.commentLikes, [commentId]: false },
+        });
+    };
+
+    const formatDate = (timestamp: number) => {
+        return new Date(timestamp).toLocaleDateString('hu-HU', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+        );
+    }
+
+    if (notFound || !topic) {
+        return (
+            <div className="max-w-4xl mx-auto">
+                <div className="card bg-base-100 shadow">
+                    <div className="card-body items-center text-center py-12">
+                        <span className="material-symbols-rounded text-6xl text-error">
+                            error
+                        </span>
+                        <h2 className="text-xl font-semibold mt-4">Téma nem található</h2>
+                        <p className="text-base-content/60">
+                            A keresett téma nem létezik vagy törölve lett.
+                        </p>
+                        <Link href="/kozosseg" className="btn btn-primary mt-4">
+                            <span className="material-symbols-rounded">arrow_back</span>
+                            Vissza a fórumhoz
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="max-w-4xl mx-auto">
+            <Link
+                href="/kozosseg"
+                className="btn btn-ghost btn-sm gap-2 mb-4"
+            >
+                <span className="material-symbols-rounded">arrow_back</span>
+                Vissza a fórumhoz
+            </Link>
+
+            <div className="card bg-base-100 shadow-lg mb-6">
+                <div className="card-body">
+                    <div className="flex flex-wrap gap-2 mb-2">
+                        {topic.isGeneral ? (
+                            <span
+                                onClick={() => router.push('/kozosseg')}
+                                className="badge badge-accent cursor-pointer hover:brightness-90 transition-all"
+                            >
+                                Általános
+                            </span>
+                        ) : (
+                            topic.specialties.map((spec) => (
+                                <span
+                                    key={spec}
+                                    onClick={() => router.push(`/kozosseg?specialty=${encodeURIComponent(spec)}`)}
+                                    className="badge badge-primary cursor-pointer hover:brightness-90 transition-all"
+                                >
+                                    {spec}
+                                </span>
+                            ))
+                        )}
+                    </div>
+
+                    <h1 className="text-2xl font-bold">{topic.title}</h1>
+
+                    <div className="flex items-center gap-2 text-sm text-base-content/70 mt-1">
+                        <span className="material-symbols-rounded text-sm">person</span>
+                        <span className={`font-medium ${topic.isAnonymous || topic.isAuthorAnonymized ? 'text-base-content/50 italic' : ''}`}>
+                            {topic.isAnonymous || topic.isAuthorAnonymized ? 'Anonim' : topic.authorName}
+                        </span>
+                        <span>•</span>
+                        <span>{formatDate(topic.createdAt)}</span>
+                        {topic.isLocked && (
+                            <span className="badge badge-warning badge-sm gap-1 ml-2">
+                                <span className="material-symbols-rounded text-xs">lock</span>
+                                Lezárt téma
+                            </span>
+                        )}
+                    </div>
+
+                    <div className="divider"></div>
+                    <div className="prose max-w-none">
+                        <p className="whitespace-pre-wrap">{topic.description}</p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 mt-4">
+                        {topic.tags.map((tag) => (
+                            <span
+                                key={tag}
+                                onClick={() => router.push(`/kozosseg?tag=${encodeURIComponent(tag)}`)}
+                                className="badge badge-outline cursor-pointer hover:bg-base-200 transition-all"
+                            >
+                                {tag}
+                            </span>
+                        ))}
+                    </div>
+
+                    <div className="divider"></div>
+                    <div className="flex items-center justify-between">
+                        <ReactionButtons
+                            likes={topic.likes}
+                            dislikes={topic.dislikes}
+                            isLiked={userReactions.topicLikes[topic.id] || false}
+                            isDisliked={userReactions.topicDislikes[topic.id] || false}
+                            onLike={() => !topic.isLocked && handleTopicLike()}
+                            onDislike={() => !topic.isLocked && handleTopicDislike()}
+                        />
+                        <span className="text-sm text-base-content/60 flex items-center gap-1">
+                            <span className="material-symbols-rounded text-sm">comment</span>
+                            {comments.length} hozzászólás
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <CommentSection
+                comments={comments}
+                userReactions={userReactions}
+                onAddComment={handleAddComment}
+                onLikeComment={handleCommentLike}
+                onDislikeComment={handleCommentDislike}
+                isLocked={topic.isLocked}
+            />
+        </div>
+    );
+}
