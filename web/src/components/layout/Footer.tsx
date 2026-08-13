@@ -16,7 +16,7 @@
  * 
  * KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
  * - Globális elrendezés (DashboardLayout, RootLayout)
- * - WikiSpec Funkcionális Specifikáció (FUNCTIONAL_SPECS_WIKISPEC.md)
+ * - BENUvény orvosi portál funkcionális specifikáció (FUNCTIONAL_SPECS_WIKISPEC.md)
  * ============================================================================
  */
 

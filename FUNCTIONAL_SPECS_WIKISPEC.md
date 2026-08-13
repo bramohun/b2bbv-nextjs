@@ -1,6 +1,6 @@
 <!-- 
 ============================================================================
-FUNKCIONÁLIS SPECIFIKÁCIÓ (FSR) - WIKISPEC FŐDOKUMENTUM
+FUNKCIONÁLIS SPECIFIKÁCIÓ (FSR) - BENUVÉNY ORVOSI PORTÁL FŐDOKUMENTUM
 ============================================================================
 
 MIRE HASZNÁLJUK:
@@ -11,8 +11,8 @@ mezőkhöz tartozó adatformátumokat, példákat és limitációkat, a felhaszn
 interakciókat, valamint a tesztelési hozzáféréseket.
 
 KAPCSOLÓDÓ USER STORY-K:
-- Egészségügyi szakemberként (orvos/gyógyszerész) szeretnék naprakész információt kapni 
-  a gyógyszerek piaci elérhetőségéről, készlethiányáról és a helyettesíthetőségről.
+- Egészségügyi szakemberként (orvos/gyógyszerész) szeretnék naprakész és megbízható információt kapni 
+  a gyógyszerek piaci elérhetőségéről, készlethiányáról (a BENU hálózati adatok és az OGYÉI hatósági hiánylista összevetésével) és a helyettesíthetőségről.
 - Felhasználóként szeretném megtalálni a legközelebbi preferált gyógyszertáramat és 
   ellenőrizni annak aktuális készletét.
 - Felhasználóként szeretnék szakmai és akkreditált képzéseken részt venni.
@@ -31,7 +31,7 @@ KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
 ============================================================================
 -->
 
-# WikiSpec Funkcionális Specifikáció
+# BENUvény orvosi portál funkcionális specifikáció
 
 > **Verzió:** 6.1  
 > **Dátum:** 2026.08.12.  
@@ -87,7 +87,7 @@ KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
 ## 1. Brief
 
 ### Cél
-Egy orvosi szakmai portál biztosítása, amely támogatja a gyógyszerészeket és orvosokat a napi munkájukban. A rendszer célja, hogy naprakész információt nyújtson a gyógyszerkészletekről, a piaci készlethiányról, a helyettesíthetőségről, a legközelebbi preferált patika elérhetőségéről, valamint szakmai és akkreditált képzési lehetőségeket mutasson be.
+Egy orvosi szakmai portál biztosítása, amely támogatja a gyógyszerészeket és orvosokat a napi munkájukban. A rendszer célja, hogy naprakész és megbízható információt nyújtson a gyógyszerkészletekről, a piaci készlethiányról (amely a BENU.hu és BENUvény.hu által használt hálózati adatok, valamint az OGYÉI Gyógyszeradatbázis "Összes termékhiány" hivatalos nyilvántartása — [https://ogyei.gov.hu/generalt_listak/shortage_lista.csv](https://ogyei.gov.hu/generalt_listak/shortage_lista.csv) — összevetésével kerül meghatározásra, növelve az adatok hitelességét; az OGYÉI CSV fájl nyers adatai egyelőre nem kerülnek közvetlenül kijelzésre a felületen), a helyettesíthetőségről, a legközelebbi preferált patika elérhetőségéről, valamint szakmai és akkreditált képzési lehetőségeket mutasson be.
 
 ### Live Prototípus
 A működő prototípus felülete elérhető az alábbi hivatkozáson:  
@@ -112,18 +112,39 @@ A rendszer moduláris felépítésű, központjában a biztonságos szakmai azon
 
 ## 2. Fogalomtár
 
-| Kifejezés | Definíció és Üzleti Jelentés | Konkrét Felületi Példa |
-|---|---|---|
-| **Közeli Patika (Preferált Patika)** | A felhasználó által megjelölt gyógyszertár. A rendszer ezen patika készletadatait és státuszfrissítéseit kiemelten kezeli az egész portálon. | *"BENU Gyógyszertár Arany Sas"* |
-| **Kedvenc Gyógyszer (Mentett Gyógyszer)** | A felhasználó által könyvjelzővel megjelölt gyógyszer, amely bekerül a mentett listába a gyors elérés érdekében. | *"Algopyrin 500 mg filmtabletta"* |
-| **Készletértesítés** | Feliratkozás egy adott gyógyszer piaci vagy patikai státuszváltozására (pl. készlethiány vagy újra elérhető állapot). Feliratkozáskor a termék automatikusan mentetté is válik. | Értesítés küldése hírlevélben vagy felületi visszajelzésben. |
-| **TK-szám** | Törzskönyvi szám - a gyógyszerek hatósági egyedi azonosítója. | `"OGYI-T-8898/01"` |
-| **INN** | Nemzetközi Szabadnév (International Nonproprietary Name) - a gyógyszer hatóanyaga. | `"metamizol-nátrium"` |
-| **ATC-kód** | Anatómiai, Terápiás és Kémiai osztályozási rendszer kódja. | `"N02BB02"` |
-| **Hírlevél Hatókör (Scope)** | A készletértesítő hírlevelek szűrési köre (pl. teljes adatbázis, csak a felhasználó szakterülete, vagy csak a mentett kedvenc gyógyszerei). | `"Szakterület + mentett gyógyszerek"` |
-| **BENU LMS Rendszer** | A BENU külső e-learning és továbbképzési rendszere, ahol a tananyagok tényleges feldolgozása, a tesztkitöltés és a kreditpont-jóváírás történik. | *"BENU LMS felület"* |
-| **Passkey (Biometrikus azonosító)** | Eszközalapú biometrikus kulcs (Touch ID, Face ID, Windows Hello), amely jelszó nélküli 1-kattintásos belépést tesz lehetővé. | *"Work Mac TouchID"* |
-| **Kényszerített Munkamenet Lezárás** | Adminisztrátori vagy biztonsági művelet, amely azonnal érvényteleníti a felhasználó aktív belépését. | Felhasználó azonnali átirányítása a bejelentkezési oldalra. |
+- **Közeli Patika (Preferált Patika):**
+  - **Definíció és Üzleti Jelentés:** A felhasználó által megjelölt gyógyszertár. A rendszer ezen patika készletadatait és státuszfrissítéseit kiemelten kezeli az egész portálon.
+  - **Konkrét Felületi Példa:** *"BENU Gyógyszertár Arany Sas"*
+- **Kedvenc Gyógyszer (Mentett Gyógyszer):**
+  - **Definíció és Üzleti Jelentés:** A felhasználó által könyvjelzővel megjelölt gyógyszer, amely bekerül a mentett listába a gyors elérés érdekében.
+  - **Konkrét Felületi Példa:** *"Algopyrin 500 mg filmtabletta"*
+- **Készletértesítés:**
+  - **Definíció és Üzleti Jelentés:** Feliratkozás egy adott gyógyszer piaci vagy patikai státuszváltozására (pl. készlethiány vagy újra elérhető állapot). Feliratkozáskor a termék automatikusan mentetté is válik.
+  - **Konkrét Felületi Példa:** Értesítés küldése hírlevélben vagy felületi visszajelzésben.
+- **TK-szám:**
+  - **Definíció és Üzleti Jelentés:** Törzskönyvi szám - a gyógyszerek hatósági egyedi azonosítója.
+  - **Konkrét Felületi Példa:** `"OGYI-T-8898/01"`
+- **INN:**
+  - **Definíció és Üzleti Jelentés:** Nemzetközi Szabadnév (International Nonproprietary Name) - a gyógyszer hatóanyaga.
+  - **Konkrét Felületi Példa:** `"metamizol-nátrium"`
+- **ATC-kód:**
+  - **Definíció és Üzleti Jelentés:** Anatómiai, Terápiás és Kémiai osztályozási rendszer kódja.
+  - **Konkrét Felületi Példa:** `"N02BB02"`
+- **Hírlevél Hatókör (Scope):**
+  - **Definíció és Üzleti Jelentés:** A készletértesítő hírlevelek szűrési köre (pl. teljes adatbázis, csak a felhasználó szakterülete, vagy csak a mentett kedvenc gyógyszerei).
+  - **Konkrét Felületi Példa:** `"Szakterület + mentett gyógyszerek"`
+- **BENU LMS Rendszer:**
+  - **Definíció és Üzleti Jelentés:** A BENU külső e-learning és továbbképzési rendszere, ahol a tananyagok tényleges feldolgozása, a tesztkitöltés és a kreditpont-jóváírás történik.
+  - **Konkrét Felületi Példa:** *"BENU LMS felület"*
+- **Passkey (Biometrikus azonosító):**
+  - **Definíció és Üzleti Jelentés:** Eszközalapú biometrikus kulcs (Touch ID, Face ID, Windows Hello), amely jelszó nélküli 1-kattintásos belépést tesz lehetővé.
+  - **Konkrét Felületi Példa:** *"Work Mac TouchID"*
+- **Kényszerített Munkamenet Lezárás:**
+  - **Definíció és Üzleti Jelentés:** Adminisztrátori vagy biztonsági művelet, amely azonnal érvényteleníti a felhasználó aktív belépését.
+  - **Konkrét Felületi Példa:** Felhasználó azonnali átirányítása a bejelentkezési oldalra.
+- **Piaci Készlethiány Adatforrás:**
+  - **Definíció és Üzleti Jelentés:** A gyógyszerek piaci készlethiányi státuszának meghatározására és ellenőrzésére szolgáló információforrás. A megbízhatóság növelése érdekében a rendszer a BENU.hu és BENUvény.hu által használt hálózati/kereskedelmi készletinformációkat, valamint az OGYÉI (NNGYK) *"Összes termékhiány"* hivatalos nyilvántartását (`https://ogyei.gov.hu/generalt_listak/shortage_lista.csv`) veti össze.
+  - **Üzleti & Felületi Limitációk:** A két adatforrás összevetése és visszaigazolása a háttérben történik az adathitelesség garantálására. Az OGYÉI CSV fájl nyers adatai egyelőre nem kerülnek közvetlenül megjelenítésre a felhasználói felületen, a portál a konszolidált készlethiányi állapotot mutatja.
 
 ---
 
@@ -133,82 +154,288 @@ Ez a szakasz a rendszer fő üzleti entitásait mutatja be a beviteli mezők, ad
 
 ### 3.1. Felhasználó (User) Adatmodell
 
-| Mező neve | Felületi Típus | Megadható Adatok / Formátum | Példa Érték | Üzleti & Felületi Limitációk |
-|---|---|---|---|---|
-| **Teljes név** | Egysoros szövegmező | Szöveg (vezetéknév + keresztnév) | `"Dr. Kovács István"` | Kötelező. Min. 3, max. 100 karakter. A profilban csak olvasható. |
-| **Elsődleges e-mail** | Egysoros email mező | Érvényes e-mail formátum (`user@domain.hu`) | `"demo@example.com"` | Kötelező. Egyedi belépési azonosító. A profilban nem módosítható. |
-| **Másodlagos e-mail** | Egysoros email mező | Érvényes e-mail formátum | `"kovacs.private@email.hu"` | Opcionális. Értesítések és hírlevelek másodlagos címe. |
-| **Telefonszám** | Szövegmező | Telefonszám formátum (`+36...`) | `"+36 30 123 4567"` | Opcionális. Az SMS alapú 2FA azonosítás csatornája. |
-| **Szerepkör** | Legördülő menü | `User` (Szakmai) / `Admin` (Rendszeradmin) | `User` | Kötelező. Kizárólag az adminisztrátor módosíthatja. |
-| **Fiók Státusz** | Legördülő menü | `Active` (Aktív) / `Inactive` (Inaktív) | `Active` | Inaktív fiókkal a bejelentkezés elutasításra kerül. |
-| **Szakterületek** | Kereshető multi-select | Orvosi kódlista elemei | `["Háziorvos", "Belgyógyász"]` | Több opció is kiválasztható a megadott kódlistából. |
-| **2FA Állapot & Csatorna** | Kapcsoló + Rádiógombok | `Be` / `Ki`; Csatornák: `E-mail`, `SMS`, `TOTP` | `Be (E-mail OTP)` | Önkiszolgáló módon állítható a Profilban. |
-| **Passkey Kulcsok** | Lista + Modal | Eszköznév + Regisztrációs dátum | `[{ name: "MacBook", createdAt: "2026-01-15" }]` | Egy fiókhoz több biometrikus eszköz is rendelhető. |
-| **Megbízható Eszközök** | Számláló / Gomb | Megjegyzett 30 napos munkamenetek azonosítói | `3 aktív eszköz` | Egy kattintással az összes eszköz elfelejthető. |
-| **Hírlevél (Képzés)** | Kapcsoló + Checkboxok | Be/Ki; Kategóriák: `Akkreditált`, `Gyártói`, `Eladásösztönző` | `Feliratkozva: Akkreditált` | Külön konfigurálható az elsődleges és másodlagos e-mail címre. |
-| **Hírlevél (Készlet)** | Kapcsoló + Select/Radio | Frekvencia (`Napi`/`Heti`/`Havi`), Időpont (0-23h), Téma multiselect, Hatókör | `Heti, 09:00, Készlethiány, Szakterület + mentett` | Külön konfigurálható az elsődleges és másodlagos e-mail címre. |
-| **Preferált Patika** | Kiválasztó komponens | Egy kijelölt gyógyszertár azonosítója | `"BENU Gyógyszertár Arany Sas"` | Opcionális. Bármikor módosítható vagy törölhető. |
+- **Teljes név:**
+  - **Felületi Típus:** Egysoros szövegmező
+  - **Megadható Adatok / Formátum:** Szöveg (vezetéknév + keresztnév)
+  - **Példa Érték:** `"Dr. Kovács István"`
+  - **Üzleti & Felületi Limitációk:** Kötelező. Min. 3, max. 100 karakter. A profilban csak olvasható.
+- **Elsődleges e-mail:**
+  - **Felületi Típus:** Egysoros email mező
+  - **Megadható Adatok / Formátum:** Érvényes e-mail formátum (`user@domain.hu`)
+  - **Példa Érték:** `"demo@example.com"`
+  - **Üzleti & Felületi Limitációk:** Kötelező. Egyedi belépési azonosító. A profilban nem módosítható.
+- **Másodlagos e-mail:**
+  - **Felületi Típus:** Egysoros email mező
+  - **Megadható Adatok / Formátum:** Érvényes e-mail formátum
+  - **Példa Érték:** `"kovacs.private@email.hu"`
+  - **Üzleti & Felületi Limitációk:** Opcionális. Értesítések és hírlevelek másodlagos címe.
+- **Telefonszám:**
+  - **Felületi Típus:** Szövegmező
+  - **Megadható Adatok / Formátum:** Telefonszám formátum (`+36...`)
+  - **Példa Érték:** `"+36 30 123 4567"`
+  - **Üzleti & Felületi Limitációk:** Opcionális. Az SMS alapú 2FA azonosítás csatornája.
+- **Szerepkör:**
+  - **Felületi Típus:** Legördülő menü
+  - **Megadható Adatok / Formátum:** `User` (Szakmai) / `Admin` (Rendszeradmin)
+  - **Példa Érték:** `User`
+  - **Üzleti & Felületi Limitációk:** Kötelező. Kizárólag az adminisztrátor módosíthatja.
+- **Fiók Státusz:**
+  - **Felületi Típus:** Legördülő menü
+  - **Megadható Adatok / Formátum:** `Active` (Aktív) / `Inactive` (Inaktív)
+  - **Példa Érték:** `Active`
+  - **Üzleti & Felületi Limitációk:** Inaktív fiókkal a bejelentkezés elutasításra kerül.
+- **Szakterületek:**
+  - **Felületi Típus:** Kereshető multi-select
+  - **Megadható Adatok / Formátum:** Orvosi kódlista elemei
+  - **Példa Érték:** `["Háziorvos", "Belgyógyász"]`
+  - **Üzleti & Felületi Limitációk:** Több opció is kiválasztható a megadott kódlistából.
+- **2FA Állapot & Csatorna:**
+  - **Felületi Típus:** Kapcsoló + Rádiógombok
+  - **Megadható Adatok / Formátum:** `Be` / `Ki`; Csatornák: `E-mail`, `SMS`, `TOTP`
+  - **Példa Érték:** `Be (E-mail OTP)`
+  - **Üzleti & Felületi Limitációk:** Önkiszolgáló módon állítható a Profilban.
+- **Passkey Kulcsok:**
+  - **Felületi Típus:** Lista + Modal
+  - **Megadható Adatok / Formátum:** Eszköznév + Regisztrációs dátum
+  - **Példa Érték:** `[{ name: "MacBook", createdAt: "2026-01-15" }]`
+  - **Üzleti & Felületi Limitációk:** Egy fiókhoz több biometrikus eszköz is rendelhető.
+- **Megbízható Eszközök:**
+  - **Felületi Típus:** Számláló / Gomb
+  - **Megadható Adatok / Formátum:** Megjegyzett 30 napos munkamenetek azonosítói
+  - **Példa Érték:** `3 aktív eszköz`
+  - **Üzleti & Felületi Limitációk:** Egy kattintással az összes eszköz elfelejthető.
+- **Hírlevél (Képzés):**
+  - **Felületi Típus:** Kapcsoló + Checkboxok
+  - **Megadható Adatok / Formátum:** Be/Ki; Kategóriák: `Akkreditált`, `Gyártói`, `Eladásösztönző`
+  - **Példa Érték:** `Feliratkozva: Akkreditált`
+  - **Üzleti & Felületi Limitációk:** Külön konfigurálható az elsődleges és másodlagos e-mail címre.
+- **Hírlevél (Készlet):**
+  - **Felületi Típus:** Kapcsoló + Select/Radio
+  - **Megadható Adatok / Formátum:** Frekvencia (`Napi`/`Heti`/`Havi`), Időpont (0-23h), Téma multiselect, Hatókör
+  - **Példa Érték:** `Heti, 09:00, Készlethiány, Szakterület + mentett`
+  - **Üzleti & Felületi Limitációk:** Külön konfigurálható az elsődleges és másodlagos e-mail címre.
+- **Preferált Patika:**
+  - **Felületi Típus:** Kiválasztó komponens
+  - **Megadható Adatok / Formátum:** Egy kijelölt gyógyszertár azonosítója
+  - **Példa Érték:** `"BENU Gyógyszertár Arany Sas"`
+  - **Üzleti & Felületi Limitációk:** Opcionális. Bármikor módosítható vagy törölhető.
 
 ### 3.2. Gyógyszer (Medicine) Adatmodell
 
-| Mező neve | Felületi Típus | Megadható Adatok / Formátum | Példa Érték | Üzleti & Felületi Limitációk |
-|---|---|---|---|---|
-| **Kereskedelmi Név** | Megjelenítő / Szöveg | Szöveg | `"Algopyrin 500 mg filmtabletta"` | Kötelező azonosító elnevezés. |
-| **TK-szám** | Megjelenítő / Szöveg | Hatósági azonosító formátum | `"OGYI-T-8898/01"` | Egyedi törzskönyvi szám. Rendszerazonosító. |
-| **INN (Hatóanyag)** | Megjelenítő / Link | Szöveg (Hatóanyag neve) | `"metamizol-nátrium"` | Kattintható hivatkozás: szűr a listában. |
-| **Márkanév** | Megjelenítő / Szöveg | Kereskedelmi márkaneve | `"Algopyrin"` | A termékcsalád márkaneve. |
-| **ATC-kód** | Megjelenítő / Címke | 7 karakteres kód | `"N02BB02"` | Szabványos anatómiai-terápiás osztályozás. |
-| **Gyártó** | Megjelenítő / Szöveg | Cégnév | `"Sanofi-Aventis Zrt."` | A forgalomba hozatali engedélyes / gyártó. |
-| **Kiszerelés** | Megjelenítő / Szöveg | Mennyiség és csomagolási forma | `"20x filmtabletta"` | A dobozban található kiszerelés. |
-| **Csomagolási részletek**| Megjelenítő / Szöveg | Részletes csomagolás leírása | `"bliszterben és dobozban"` | Opcionális oszlop a nyilvántartásban. |
-| **Kiadhatóság** | Megjelenítő / Szöveg | `Vényköteles` / `Vény nélkül kapható` | `Vényköteles` | Fő kiadhatósági besorolás. |
-| **Kiadhatósági alcsoport**| Megjelenítő / Szöveg | Részletes kiadhatósági kód/szöveg | `"VN"` | Opcionális oszlop a nyilvántartásban. |
-| **Biztonsági elemek** | Megjelenítő / Szöveg | `Van` / `Nincs` | `Van` | Egyedi azonosító és dézsmálásgátló megléte. |
-| **Engedélyezés dátuma** | Megjelenítő / Dátum | Dátum formátum (`ÉÉÉÉ.MM.NN`) | `2010.05.12` | Hatósági engedélyezés időpontja. |
-| **Státusz** | Címke (Színkódolt) | `Elérhető` / `Készlethiány` / `Megszűnt` | `Készlethiány` | Zöld (Elérhető), Sárga (Készlethiány), Piros (Megszűnt). |
-| **Utolsó frissítés** | Megjelenítő / Dátum | Dátum és időbélyeg | `2026.08.10 14:32` | A piaci státusz utolsó módosításának ideje. |
-| **Hiány kezdete** | Dátum kijelző | Dátum formátum (`ÉÉÉÉ.MM.NN`) | `2026.07.15` | Kizárólag készlethiány esetén jelenik meg. |
-| **Hiány várható vége**| Dátum kijelző | Dátum formátum (`ÉÉÉÉ.MM.NN`) | `2026.09.30` | Becsült lejárati dátum (ha hiányzik: "Folyamatban"). |
-| **Hiány oka** | Szövegblokk | Szöveges leírás | `"Gyártási kapacitáshiány"` | Részletes tájékoztatás (ha hiányzik: "Szakmai ok"). |
-| **Pótlási javaslat** | Szövegblokk | Szöveges leírás | `"Helyettesíthető azonos INN készítménnyel."` | Szakmai javaslat a betegellátáshoz. |
+- **Kereskedelmi Név:**
+  - **Felületi Típus:** Megjelenítő / Szöveg
+  - **Megadható Adatok / Formátum:** Szöveg
+  - **Példa Érték:** `"Algopyrin 500 mg filmtabletta"`
+  - **Üzleti & Felületi Limitációk:** Kötelező azonosító elnevezés.
+- **TK-szám:**
+  - **Felületi Típus:** Megjelenítő / Szöveg
+  - **Megadható Adatok / Formátum:** Hatósági azonosító formátum
+  - **Példa Érték:** `"OGYI-T-8898/01"`
+  - **Üzleti & Felületi Limitációk:** Egyedi törzskönyvi szám. Rendszerazonosító.
+- **INN (Hatóanyag):**
+  - **Felületi Típus:** Megjelenítő / Link
+  - **Megadható Adatok / Formátum:** Szöveg (Hatóanyag neve)
+  - **Példa Érték:** `"metamizol-nátrium"`
+  - **Üzleti & Felületi Limitációk:** Kattintható hivatkozás: szűr a listában.
+- **Márkanév:**
+  - **Felületi Típus:** Megjelenítő / Szöveg
+  - **Megadható Adatok / Formátum:** Kereskedelmi márkaneve
+  - **Példa Érték:** `"Algopyrin"`
+  - **Üzleti & Felületi Limitációk:** A termékcsalád márkaneve.
+- **ATC-kód:**
+  - **Felületi Típus:** Megjelenítő / Címke
+  - **Megadható Adatok / Formátum:** 7 karakteres kód
+  - **Példa Érték:** `"N02BB02"`
+  - **Üzleti & Felületi Limitációk:** Szabványos anatómiai-terápiás osztályozás.
+- **Gyártó:**
+  - **Felületi Típus:** Megjelenítő / Szöveg
+  - **Megadható Adatok / Formátum:** Cégnév
+  - **Példa Érték:** `"Sanofi-Aventis Zrt."`
+  - **Üzleti & Felületi Limitációk:** A forgalomba hozatali engedélyes / gyártó.
+- **Kiszerelés:**
+  - **Felületi Típus:** Megjelenítő / Szöveg
+  - **Megadható Adatok / Formátum:** Mennyiség és csomagolási forma
+  - **Példa Érték:** `"20x filmtabletta"`
+  - **Üzleti & Felületi Limitációk:** A dobozban található kiszerelés.
+- **Csomagolási részletek:**
+  - **Felületi Típus:** Megjelenítő / Szöveg
+  - **Megadható Adatok / Formátum:** Részletes csomagolás leírása
+  - **Példa Érték:** `"bliszterben és dobozban"`
+  - **Üzleti & Felületi Limitációk:** Opcionális oszlop a nyilvántartásban.
+- **Kiadhatóság:**
+  - **Felületi Típus:** Megjelenítő / Szöveg
+  - **Megadható Adatok / Formátum:** `Vényköteles` / `Vény nélkül kapható`
+  - **Példa Érték:** `Vényköteles`
+  - **Üzleti & Felületi Limitációk:** Fő kiadhatósági besorolás.
+- **Kiadhatósági alcsoport:**
+  - **Felületi Típus:** Megjelenítő / Szöveg
+  - **Megadható Adatok / Formátum:** Részletes kiadhatósági kód/szöveg
+  - **Példa Érték:** `"VN"`
+  - **Üzleti & Felületi Limitációk:** Opcionális oszlop a nyilvántartásban.
+- **Biztonsági elemek:**
+  - **Felületi Típus:** Megjelenítő / Szöveg
+  - **Megadható Adatok / Formátum:** `Van` / `Nincs`
+  - **Példa Érték:** `Van`
+  - **Üzleti & Felületi Limitációk:** Egyedi azonosító és dézsmálásgátló megléte.
+- **Engedélyezés dátuma:**
+  - **Felületi Típus:** Megjelenítő / Dátum
+  - **Megadható Adatok / Formátum:** Dátum formátum (`ÉÉÉÉ.MM.NN`)
+  - **Példa Érték:** `2010.05.12`
+  - **Üzleti & Felületi Limitációk:** Hatósági engedélyezés időpontja.
+- **Státusz:**
+  - **Felületi Típus:** Címke (Színkódolt)
+  - **Megadható Adatok / Formátum:** `Elérhető` / `Készlethiány` / `Megszűnt`
+  - **Példa Érték:** `Készlethiány`
+  - **Üzleti & Felületi Limitációk:** Zöld (Elérhető), Sárga (Készlethiány), Piros (Megszűnt). A státusz a BENU hálózati adatok és az OGYÉI "Összes termékhiány" CSV nyilvántartásának összevetésén alapul (az OGYÉI CSV nyers adatai egyelőre nem láthatók közvetlenül a felületen).
+- **Utolsó frissítés:**
+  - **Felületi Típus:** Megjelenítő / Dátum
+  - **Megadható Adatok / Formátum:** Dátum és időbélyeg
+  - **Példa Érték:** `2026.08.10 14:32`
+  - **Üzleti & Felületi Limitációk:** A piaci státusz utolsó módosításának ideje.
+- **Hiány kezdete:**
+  - **Felületi Típus:** Dátum kijelző
+  - **Megadható Adatok / Formátum:** Dátum formátum (`ÉÉÉÉ.MM.NN`)
+  - **Példa Érték:** `2026.07.15`
+  - **Üzleti & Felületi Limitációk:** Kizárólag készlethiány esetén jelenik meg.
+- **Hiány várható vége:**
+  - **Felületi Típus:** Dátum kijelző
+  - **Megadható Adatok / Formátum:** Dátum formátum (`ÉÉÉÉ.MM.NN`)
+  - **Példa Érték:** `2026.09.30`
+  - **Üzleti & Felületi Limitációk:** Becsült lejárati dátum (ha hiányzik: "Folyamatban").
+- **Hiány oka:**
+  - **Felületi Típus:** Szövegblokk
+  - **Megadható Adatok / Formátum:** Szöveges leírás
+  - **Példa Érték:** `"Gyártási kapacitáshiány"`
+  - **Üzleti & Felületi Limitációk:** Részletes tájékoztatás (ha hiányzik: "Szakmai ok").
+- **Pótlási javaslat:**
+  - **Felületi Típus:** Szövegblokk
+  - **Megadható Adatok / Formátum:** Szöveges leírás
+  - **Példa Érték:** `"Helyettesíthető azonos INN készítménnyel."`
+  - **Üzleti & Felületi Limitációk:** Szakmai javaslat a betegellátáshoz.
 
 ### 3.3. Gyógyszertár (Pharmacy) Adatmodell
 
-| Mező neve | Felületi Típus | Megadható Adatok / Formátum | Példa Érték | Üzleti & Felületi Limitációk |
-|---|---|---|---|---|
-| **BF azonosító kód** | Megjelenítő / Szöveg | Egyedi hatósági/rendszer kód | `"BF001"` | A patika egyedi azonosítója. |
-| **Patika neve** | Szövegmező | Szöveg | `"BENU Gyógyszertár Arany Sas"` | Kötelező megnevezés. |
-| **Irányítószám** | Szövegmező | 4 számjegy | `"1052"` | Magyarországi irányítószám. |
-| **Város** | Szövegmező | Szöveg | `"Budapest"` | Kötelező településnév. |
-| **Utca, házszám** | Szövegmező | Szöveg | `"Károly körút 1."` | Pontos közterület megnevezés. |
-| **Vármegye** | Legördülő menü | Vármegyék listája | `"Pest / Budapest"` | Területi besorolás. |
-| **Szélesség (Lat)** | Számos mező | Tizedes tört (`-90` és `+90` között) | `47.4979` | Földrajzi koordináta térképhez. |
-| **Hosszúság (Lng)** | Számos mező | Tizedes tört (`-180` és `+180` között)| `19.0543` | Földrajzi koordináta térképhez. |
-| **Nyitvatartás** | Napi Időpontok | Nyitás-Zárás naptári naponként (H-Va) | `"08:00 - 19:00"` | Naponta állítható nyitási/zárási időpont vagy "Zárva". |
-| **Telefonszám** | Szövegmező | Telefonszám formátum | `"+36 1 234 5678"` | Kapcsolattartási telefonszám. |
-| **E-mail cím** | Email mező | Érvényes e-mail formátum | `"aranysas@benu.hu"` | Elektronikus elérhetőség. |
+- **BF azonosító kód:**
+  - **Felületi Típus:** Megjelenítő / Szöveg
+  - **Megadható Adatok / Formátum:** Egyedi hatósági/rendszer kód
+  - **Példa Érték:** `"BF001"`
+  - **Üzleti & Felületi Limitációk:** A patika egyedi azonosítója.
+- **Patika neve:**
+  - **Felületi Típus:** Szövegmező
+  - **Megadható Adatok / Formátum:** Szöveg
+  - **Példa Érték:** `"BENU Gyógyszertár Arany Sas"`
+  - **Üzleti & Felületi Limitációk:** Kötelező megnevezés.
+- **Irányítószám:**
+  - **Felületi Típus:** Szövegmező
+  - **Megadható Adatok / Formátum:** 4 számjegy
+  - **Példa Érték:** `"1052"`
+  - **Üzleti & Felületi Limitációk:** Magyarországi irányítószám.
+- **Város:**
+  - **Felületi Típus:** Szövegmező
+  - **Megadható Adatok / Formátum:** Szöveg
+  - **Példa Érték:** `"Budapest"`
+  - **Üzleti & Felületi Limitációk:** Kötelező településnév.
+- **Utca, házszám:**
+  - **Felületi Típus:** Szövegmező
+  - **Megadható Adatok / Formátum:** Szöveg
+  - **Példa Érték:** `"Károly körút 1."`
+  - **Üzleti & Felületi Limitációk:** Pontos közterület megnevezés.
+- **Vármegye:**
+  - **Felületi Típus:** Legördülő menü
+  - **Megadható Adatok / Formátum:** Vármegyék listája
+  - **Példa Érték:** `"Pest / Budapest"`
+  - **Üzleti & Felületi Limitációk:** Területi besorolás.
+- **Szélesség (Lat):**
+  - **Felületi Típus:** Számos mező
+  - **Megadható Adatok / Formátum:** Tizedes tört (`-90` és `+90` között)
+  - **Példa Érték:** `47.4979`
+  - **Üzleti & Felületi Limitációk:** Földrajzi koordináta térképhez.
+- **Hosszúság (Lng):**
+  - **Felületi Típus:** Számos mező
+  - **Megadható Adatok / Formátum:** Tizedes tört (`-180` és `+180` között)
+  - **Példa Érték:** `19.0543`
+  - **Üzleti & Felületi Limitációk:** Földrajzi koordináta térképhez.
+- **Nyitvatartás:**
+  - **Felületi Típus:** Napi Időpontok
+  - **Megadható Adatok / Formátum:** Nyitás-Zárás naptári naponként (H-Va)
+  - **Példa Érték:** `"08:00 - 19:00"`
+  - **Üzleti & Felületi Limitációk:** Naponta állítható nyitási/zárási időpont vagy "Zárva".
+- **Telefonszám:**
+  - **Felületi Típus:** Szövegmező
+  - **Megadható Adatok / Formátum:** Telefonszám formátum
+  - **Példa Érték:** `"+36 1 234 5678"`
+  - **Üzleti & Felületi Limitációk:** Kapcsolattartási telefonszám.
+- **E-mail cím:**
+  - **Felületi Típus:** Email mező
+  - **Megadható Adatok / Formátum:** Érvényes e-mail formátum
+  - **Példa Érték:** `"aranysas@benu.hu"`
+  - **Üzleti & Felületi Limitációk:** Elektronikus elérhetőség.
 
 ### 3.4. Képzés / Kurzus (Course) Adatmodell
 
-| Mező neve | Felületi Típus | Megadható Adatok / Formátum | Példa Érték | Üzleti & Felületi Limitációk |
-|---|---|---|---|---|
-| **Kurzus azonosító** | Szöveg azonosító | Karakterlánc | `"c1"` | Egyedi kurzusazonosító. |
-| **Cím** | Szöveg | Karakterlánc | `"A hipertónia legújabb terápiás irányelvei"` | A képzés megnevezése. |
-| **Kategória** | Címke | `Akkreditált` / `Gyártói` / `Eladásösztönző` | `Akkreditált` | A képzés szakmai kategóriája. |
-| **Becsült időtartam** | Szám / Kijelző | Percek száma | `45 perc` | A tananyag feldolgozásához szükséges becsült idő. |
-| **Tartalomtípus** | Ikon / Szöveg | `Videó` / `PDF` | `Videó` | A tananyag fő formátuma. |
-| **Rövid leírás** | Szövegblokk | Részlet | `"Összefoglaló a legújabb kardiológiai irányelvekről..."` | Kártyás nézeten megjelenő összefoglaló. |
-| **Részletes leírás** | Szövegblokk | Formázott szöveg | `"A kurzus részletesen bemutatja..."` | A kurzus adatlapján megjelenő teljes leírás. |
-| **Akkreditált pontok**| Kártya / Kijelző | Egész szám | `2 kreditpont` | Akkreditált képzéseknél megszerezhető pontszám. |
+- **Kurzus azonosító:**
+  - **Felületi Típus:** Szöveg azonosító
+  - **Megadható Adatok / Formátum:** Karakterlánc
+  - **Példa Érték:** `"c1"`
+  - **Üzleti & Felületi Limitációk:** Egyedi kurzusazonosító.
+- **Cím:**
+  - **Felületi Típus:** Szöveg
+  - **Megadható Adatok / Formátum:** Karakterlánc
+  - **Példa Érték:** `"A hipertónia legújabb terápiás irányelvei"`
+  - **Üzleti & Felületi Limitációk:** A képzés megnevezése.
+- **Kategória:**
+  - **Felületi Típus:** Címke
+  - **Megadható Adatok / Formátum:** `Akkreditált` / `Gyártói` / `Eladásösztönző`
+  - **Példa Érték:** `Akkreditált`
+  - **Üzleti & Felületi Limitációk:** A képzés szakmai kategóriája.
+- **Becsült időtartam:**
+  - **Felületi Típus:** Szám / Kijelző
+  - **Megadható Adatok / Formátum:** Percek száma
+  - **Példa Érték:** `45 perc`
+  - **Üzleti & Felületi Limitációk:** A tananyag feldolgozásához szükséges becsült idő.
+- **Tartalomtípus:**
+  - **Felületi Típus:** Ikon / Szöveg
+  - **Megadható Adatok / Formátum:** `Videó` / `PDF`
+  - **Példa Érték:** `Videó`
+  - **Üzleti & Felületi Limitációk:** A tananyag fő formátuma.
+- **Rövid leírás:**
+  - **Felületi Típus:** Szövegblokk
+  - **Megadható Adatok / Formátum:** Részlet
+  - **Példa Érték:** `"Összefoglaló a legújabb kardiológiai irányelvekről..."`
+  - **Üzleti & Felületi Limitációk:** Kártyás nézeten megjelenő összefoglaló.
+- **Részletes leírás:**
+  - **Felületi Típus:** Szövegblokk
+  - **Megadható Adatok / Formátum:** Formázott szöveg
+  - **Példa Érték:** `"A kurzus részletesen bemutatja..."`
+  - **Üzleti & Felületi Limitációk:** A kurzus adatlapján megjelenő teljes leírás.
+- **Akkreditált pontok:**
+  - **Felületi Típus:** Kártya / Kijelző
+  - **Megadható Adatok / Formátum:** Egész szám
+  - **Példa Érték:** `2 kreditpont`
+  - **Üzleti & Felületi Limitációk:** Akkreditált képzéseknél megszerezhető pontszám.
 
 ### 3.5. Patikai Készletrekord Adatmodell
 
-| Mező neve | Felületi Típus | Megadható Adatok / Formátum | Példa Érték | Üzleti & Felületi Limitációk |
-|---|---|---|---|---|
-| **TK-szám** | Szövegmező | Törzskönyvi szám | `"OGYI-T-8898/01"` | Hivatkozott gyógyszer azonosítója. |
-| **Raktári darabszám** | Számmező | Pozitív egész szám | `42` | A kiválasztott patikában lévő fizikai darabszám. |
-| **Utolsó adatszinkron** | Dátum és idő | `ÉÉÉÉ.MM.NN ÓÓ:PP:SS` | `2026.08.12 08:15:30` | Patikai alapadatok utolsó frissítési ideje. |
-| **Utolsó készletszinkron**| Dátum és idő | `ÉÉÉÉ.MM.NN ÓÓ:PP:SS` | `2026.08.12 09:00:12` | Készletadatok utolsó frissítési ideje. |
+- **TK-szám:**
+  - **Felületi Típus:** Szövegmező
+  - **Megadható Adatok / Formátum:** Törzskönyvi szám
+  - **Példa Érték:** `"OGYI-T-8898/01"`
+  - **Üzleti & Felületi Limitációk:** Hivatkozott gyógyszer azonosítója.
+- **Raktári darabszám:**
+  - **Felületi Típus:** Számmező
+  - **Megadható Adatok / Formátum:** Pozitív egész szám
+  - **Példa Érték:** `42`
+  - **Üzleti & Felületi Limitációk:** A kiválasztott patikában lévő fizikai darabszám.
+- **Utolsó adatszinkron:**
+  - **Felületi Típus:** Dátum és idő
+  - **Megadható Adatok / Formátum:** `ÉÉÉÉ.MM.NN ÓÓ:PP:SS`
+  - **Példa Érték:** `2026.08.12 08:15:30`
+  - **Üzleti & Felületi Limitációk:** Patikai alapadatok utolsó frissítési ideje.
+- **Utolsó készletszinkron:**
+  - **Felületi Típus:** Dátum és idő
+  - **Megadható Adatok / Formátum:** `ÉÉÉÉ.MM.NN ÓÓ:PP:SS`
+  - **Példa Érték:** `2026.08.12 09:00:12`
+  - **Üzleti & Felületi Limitációk:** Készletadatok utolsó frissítési ideje.
 
 ---
 
@@ -393,6 +620,7 @@ Egy konkrét gyógyszer részletes szakmai adatlapja.
    - *Hiány várható vége:* Dátum (pl. `2026.09.30`, ha nincs megadva: `"Folyamatban"`).
    - *Hiány oka:* Szöveges megnevezés (ha nincs megadva: `"Szakmai ok"`).
    - *Pótlási javaslat:* Szakmai javaslat a pótlásra.
+   - *Adatforrás háttér-ellenőrzés:* A készlethiányi adatok megbízhatóságát a BENU hálózati adatok és az OGYÉI hatósági nyilvántartás (`shortage_lista.csv`) összevetése biztosítja (az OGYÉI CSV nyers adatai egyelőre nem kerülnek közvetlenül megjelenítésre a felületen).
 
 6. **Helyettesítő Termékek Ajánlója:**
    - Azonos hatóanyagú (INN) elérhető készítmények listája kártyás elrendezésben. (A kód kizárólag azonos hatóanyag alapján ajánl).
@@ -748,10 +976,26 @@ Ez a szekció azokat a funkciókat tartalmazza, amelyek korábbi tervekben szere
 
 **Minden fiók egységes jelszava:** `vény123`
 
-| # | Fiók neve | Email | Jelszó | Szerepkör | Státusz | Szakterületek | Tesztelési Rendeltetés |
-|---|---|---|---|---|---|---|---|
-| 1 | Adminisztrátor | `admin@example.com` | `vény123` | Admin | Aktív | – | Adminisztrációs felület és felhasználókezelés tesztelése ([https://bvo.uneb.hu/admin/users](https://bvo.uneb.hu/admin/users)). |
-| 2 | Dr. Kovács István (Orvos) | `demo@example.com` | `vény123` | User | Aktív | Háziorvos, Belgyógyász | Szakmai portál teljes körű tesztelése (keresés, kedvencek, értesítések, profilbeállítások). Az admin felület elérése számára korlátozott. |
-| 3 | Dr. Teszt Szabolcs (Inaktív) | `teszt@example.com` | `vény123` | User | Inaktív | Kardiológus | Felfüggesztett/Inaktív fiók bejelentkezési elutasításának és védelmének tesztelése. |
+- **1. Adminisztrátor:**
+  - **Email:** `admin@example.com`
+  - **Jelszó:** `vény123`
+  - **Szerepkör:** Admin
+  - **Státusz:** Aktív
+  - **Szakterületek:** –
+  - **Tesztelési Rendeltetés:** Adminisztrációs felület és felhasználókezelés tesztelése ([https://bvo.uneb.hu/admin/users](https://bvo.uneb.hu/admin/users)).
+- **2. Dr. Kovács István (Orvos):**
+  - **Email:** `demo@example.com`
+  - **Jelszó:** `vény123`
+  - **Szerepkör:** User
+  - **Státusz:** Aktív
+  - **Szakterületek:** Háziorvos, Belgyógyász
+  - **Tesztelési Rendeltetés:** Szakmai portál teljes körű tesztelése (keresés, kedvencek, értesítések, profilbeállítások). Az admin felület elérése számára korlátozott.
+- **3. Dr. Teszt Szabolcs (Inaktív):**
+  - **Email:** `teszt@example.com`
+  - **Jelszó:** `vény123`
+  - **Szerepkör:** User
+  - **Státusz:** Inaktív
+  - **Szakterületek:** Kardiológus
+  - **Tesztelési Rendeltetés:** Felfüggesztett/Inaktív fiók bejelentkezési elutasításának és védelmének tesztelése.
 
 ---
