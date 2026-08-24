@@ -12,10 +12,11 @@ a felhasználói interakciókat, valamint a tesztelési hozzáféréseket.
 
 KAPCSOLÓDÓ USER STORY-K:
 - Egészségügyi szakemberként (orvos/gyógyszerész) szeretnék naprakész és megbízható információt kapni 
-  a gyógyszerek piaci elérhetőségéről, készlethiányáról (a LogiNet Middleware által közvetített BENU hálózati adatok és az OGYÉI hatósági hiánylista összevetésével) és a helyettesíthetőségről.
+  a gyógyszerek piaci elérhetőségéről, készlethiányáról (a LogiNet Middleware által közvetített BENU hálözati adatok és az OGYÉI hatósági hiánylista összevetésével) és a helyettesíthetőségről.
 - Felhasználóként szeretném megtalálni a legközelebbi preferált gyógyszertáramat és 
   ellenőrizni annak aktuális készletét.
 - Felhasználóként szeretnék szakmai és akkreditált képzéseken részt venni.
+- Új szakmai felhasználóként szeretném felvenni a kapcsolatot az adminisztrátorral a bejelentkezési felületről elérhető űrlapon keresztül, hogy szakmai jogosultság-ellenőrzést követően regisztrálják a fiókomat.
 - Adminisztrátorként szeretném kezelni a felhasználókat, jogosultságokat, patikákat és tartalmakat.
 
 KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
@@ -26,7 +27,7 @@ KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
 - BENU Képzési Program: https://bvo.uneb.hu/kepzesek
 - Közösség és Fórum: https://bvo.uneb.hu/kozosseg
 - Képzési Program (Képzések): https://bvo.uneb.hu/kepzesek
-- Hitelesítés & Profilkezelés: https://bvo.uneb.hu/login, https://bvo.uneb.hu/profile
+- Hitelesítés, Regisztrációs Kapcsolatfelvétel & Profilkezelés: https://bvo.uneb.hu/login, https://bvo.uneb.hu/profile
 - Adminisztráció (Felhasználók, Patikák, Moderálás): https://bvo.uneb.hu/admin/users
 ============================================================================
 -->
@@ -35,9 +36,9 @@ KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
 
 ---
 
-> **Verzió:** 1.4  
+> **Verzió:** 1.4.1  
 > **Dátum:** 2026.08.24.  
-> **Státusz:** Véglegesnek szánt
+> **Státusz:** Véglegesnek szánt (Kiegészítés)  
 > **Prototípus URL:** [https://bvo.uneb.hu/](https://bvo.uneb.hu/) (hozzáférések a 6. pontban)
 
 ---
@@ -79,6 +80,7 @@ A rendszer moduláris felépítésű, központjában a biztonságos szakmai azon
 - **[Gyógyszertár Kereső](#43-gyógyszertár-kereső):** Patikák térképes és szinkronizált listás megjelenítése, nyitvatartás és készletellenőrzés.
 - **[Képzési Program](#44-képzési-program):** Szakmai és akkreditált képzések böngészése, ismertetése és átirányítás a BENU LMS rendszerbe.
 - **[Globális Keresés](#45-globális-keresés):** Fejlécből indítható instant keresés a portál tartalmában.
+- **[Hitelesítés és Jogosultságok](#46-hitelesítés-és-jogosultságok):** Bejelentkezési módok (jelszó, passkey, magic code), 2FA azonosítás, elfelejtett jelszó, valamint a manuális regisztrációs kapcsolatfelvételi űrlap.
 - **[Adminisztráció](#47-adminisztráció):** Felhasználók, patika-áttekintő nézet és közösségi tartalmak kezelése.
 - **[Felhasználói Profil](#48-felhasználói-profil):** Szakmai beállítások, preferált patika, hírlevelek és fiókbiztonság.
 
@@ -138,6 +140,10 @@ A rendszer moduláris felépítésű, központjában a biztonságos szakmai azon
 ### 2.13. Piaci Készlethiány Adatforrás
 - **Definíció és Üzleti Jelentés:** A gyógyszerek piaci készlethiányi státuszának meghatározására és ellenőrzésére szolgáló információforrás. A megbízhatóság növelése érdekében a rendszer a BENU.hu és BENUvény.hu által használt, a LogiNet Middleware által közvetített hálózati/kereskedelmi készletinformációkat, valamint az OGYÉI (NNGYK) *"Összes termékhiány"* hivatalos nyilvántartását (`https://ogyei.gov.hu/generalt_listak/shortage_lista.csv`) veti össze.
 - **Üzleti & Felületi Limitációk:** A két adatforrás összevetése és visszaigazolása a háttérben történik az adathitelesség garantálására. Az OGYÉI CSV fájl nyers adatai egyelőre nem kerülnek közvetlenül megjelenítésre a felhasználói felületen, a portál a konszolidált készlethiányi állapotot mutatja.
+
+### 2.14. Manuális Felhasználói Regisztráció / Kapcsolatfelvételi Űrlap
+- **Definíció és Üzleti Jelentés:** Az orvosok és egészségügyi szakemberek regisztrációja a rendszerbe nem automatikus, hanem adminisztrátori jóváhagyással és kézi rögzítéssel történik. Az új szakmai felhasználó a bejelentkezési felületről elérhető űrlap kitöltésével veszi fel a kapcsolatot az adminisztrátorral, megadva az azonosításhoz és jogosultság-ellenőrzéshez szükséges adatait.
+- **Üzleti & Felületi Limitációk:** A portálon jelenleg nincs közvetlen önkiszolgáló regisztrációs felület; a fiókokat a rendszeradminisztrátor hozza létre manuálisan az adminisztrációs felületen az igény beérkezése és elbírálása után. Későbbiekben elképzelhető önkiszolgáló felület kialakítása, de jelenleg nincs ilyen tervezve.
 
 ---
 
@@ -432,6 +438,46 @@ Ez a szakasz a rendszer fő üzleti entitásait mutatja be a beviteli mezők, ad
 - **Készletforrás és Szinkronizációs Keretek:**
   - **Integrációs Csatorna:** A patikai készletadatok lekérdezése és szinkronizációja a BENU.hu és BENUvény.hu alapjait képező LogiNet Middleware-en keresztül történik.
   - **Audit és Implementáció:** A szinkronizáció pontos frekvenciáját, végpontjait és adatstruktúráját a kivitelező határozza meg a meglévő Middleware képességeinek vizsgálata (auditja) és a bekért interfész-dokumentációk alapján.
+
+### 3.6. Regisztrációs Igény / Kapcsolatfelvételi Űrlap Adatmodell
+
+- **Teljes név:**
+  - **Felületi Típus:** Egysoros szövegmező
+  - **Megadható Adatok / Formátum:** Szöveg (Orvos / Gyógyszerész teljes neve)
+  - **Példa Érték:** `"Dr. Szabó Péter"`
+  - **Üzleti & Felületi Limitációk:** Kötelező. Min. 3, max. 100 karakter.
+- **Szakmai e-mail cím:**
+  - **Felületi Típus:** Egysoros email mező
+  - **Megadható Adatok / Formátum:** Érvényes e-mail formátum (`nev@intezmeny.hu`)
+  - **Példa Érték:** `"dr.szabo.peter@korhaz.hu"`
+  - **Üzleti & Felületi Limitációk:** Kötelező. A későbbi felhasználói fiók elsődleges azonosítója és a kapcsolatfelvétel címe.
+- **Telefonszám:**
+  - **Felületi Típus:** Szövegmező
+  - **Megadható Adatok / Formátum:** Telefonszám formátum (`+36...`)
+  - **Példa Érték:** `"+36 30 987 6543"`
+  - **Üzleti & Felületi Limitációk:** Opcionális / Ajánlott. Kapcsolattartásra és a későbbi SMS alapú 2FA azonosításhoz szükséges.
+- **Pecsétszám / Működési nyilvántartási szám:**
+  - **Felületi Típus:** Szövegmező
+  - **Megadható Adatok / Formátum:** 5-6 számjegyű orvosi vagy gyógyszerészi alapnyilvántartási szám
+  - **Példa Érték:** `"12345"`
+  - **Üzleti & Felületi Limitációk:** Kötelező az orvosi / gyógyszerészi jogosultság hatósági és szakmai ellenőrzéséhez.
+- **Szakterület / Munkahely:**
+  - **Felületi Típus:** Szövegmező / Kiválasztó
+  - **Megadható Adatok / Formátum:** Szöveg
+  - **Példa Érték:** `"Háziorvostan, Kardiológia"`
+  - **Üzleti & Felületi Limitációk:** Opcionális. Segíti az adminisztrátort a profil szakterületi besorolásának előkészítésében.
+- **Üzenet / Kérelem szövege:**
+  - **Felületi Típus:** Többsoros szövegmező (Textarea)
+  - **Megadható Adatok / Formátum:** Szabad szöveg
+  - **Példa Érték:** `"Kérem a hozzáférés biztosítását a BENUvény orvosi szakmai rendszerhez."`
+  - **Üzleti & Felületi Limitációk:** Opcionális. Max. 500 karakter.
+- **Adatkezelési nyilatkozat elfogadása:**
+  - **Felületi Típus:** Jelölőnégyzet (Checkbox)
+  - **Megadható Adatok / Formátum:** Bepipálva / Nem bepipálva
+  - **Példa Érték:** `Bepipálva`
+  - **Üzleti & Felületi Limitációk:** Kötelező a kérelem elküldéséhez.
+- **Üzleti & Működési Keretek:**
+  - Az űrlap beküldése nem hoz létre azonnal belépésre jogosult aktív fiókot; az adatokat a rendszer eljuttatja a rendszeradminisztrátornak, aki a manuális szakmai validációt követően kézzel rögzíti a felhasználót az adminisztrációs felületen.
 
 ---
 
@@ -758,6 +804,7 @@ A bejelentkezési felület háromféle belépési módot kínál a fejlécben l�
    - *E-mail cím:* Egysoros email mező. Példa: `demo@example.com`, `admin@example.com`. Kötelező.
    - *Jelszó:* Maszkolt jelszómező. Példa: `vény123`. Kötelező.
    - *"Elfelejtett jelszó?" link:* Átirányítás a `/forgot-password` oldalra.
+   - *"Nincs még fiókja? / Kapcsolatfelvétel az adminisztrátorral" hivatkozás:* Megnyitja a kapcsolatfelvételi / regisztrációs igény űrlapot az új szakmai felhasználók számára.
    - *"Bejelentkezés" gomb:* Beküldéskor ellenőrzi az adatokat.
 
 ##### 4.6.1.2. Passkey biometrikus bejelentkezés (1-kattintásos kényelmi funkció)
@@ -784,7 +831,19 @@ Jelszavas belépés vagy e-mail kód kérése után (ha a 2FA aktív és az eszk
 - *Információs alert:* Tájékoztatja a tesztelőt, hogy a prototípusban a generált kóddal nem lehet továbbhaladni, a fix jelszót kell használni.
 - *Hivatkozások:* `"Vissza a bejelentkezéshez"` és `"Mégis emlékszem a jelszavamra"`.
 
-#### 4.6.4. Jogosultságkezelés és Munkamenet Biztonság
+#### 4.6.4. Manuális Felhasználói Regisztráció és Kapcsolatfelvételi Űrlap
+
+A BENUvény Orvosi Portál zárt szakmai rendszer, amely kizárólag hitelesített orvosok, gyógyszerészek és egészségügyi szakemberek számára érhető el.
+
+- **Manuális regisztrációs folyamat:** A portálon **nincs közvetlen, azonnali önkiszolgáló felhasználói regisztráció**. A felhasználói fiókok létrehozása és aktiválása kizárólag kézzel, az adminisztrátor által történik.
+- **Kapcsolatfelvétel a bejelentkezési oldalról:**
+  - Az új szakmai felhasználó a bejelentkezési felületen (`/login`) elhelyezett kapcsolatfelvételi hivatkozáson / gombon keresztül érheti el a **Regisztrációs Igény / Kapcsolatfelvételi Űrlapot** (modális ablakban vagy dedikált aloldalon).
+  - **Űrlapon megadandó adatok:** Teljes név, Szakmai e-mail cím, Telefonszám, Orvosi/Gyógyszerészi pecsétszám (működési nyilvántartási szám), Szakterület/Munkahely, valamint tetszőleges kiegészítő megjegyzés/üzenet és az adatkezelési nyilatkozat elfogadása.
+  - **Visszajelzés a felhasználónak:** Az űrlap beküldésekor a felület egyértelmű tájékoztatást ad arról, hogy az igény rögzítésre került, és az adminisztrátor a szakmai jogosultság (pecsétszám) ellenőrzése után manuálisan felveszi a kapcsolatot a felhasználóval és létrehozza a fiókot.
+- **Adminisztrátori jóváhagyás és fiókrögzítés:** Az adminisztrátor a beküldött adatok alapján elvégzi a kamarai/hatósági nyilvántartási ellenőrzést, majd az [Adminisztráció -> Felhasználókezelés](#471-felhasználókezelés) felületen manuálisan rögzíti az új felhasználót, beállítja a jogosultságát (`User`), és eljuttatja számára a kezdeti belépési információkat.
+- **Jövőbeli tervek és önkiszolgáló regisztráció:** Későbbiekben elképzelhető, hogy a rendszer kiegészül egy önkiszolgáló, automatizált regisztrációs felülettel (pl. közvetlen szakmai adatbázis-verifikációval), de **jelenleg a rendszerben nem tervezünk ilyennel**, a regisztráció kizárólag a kapcsolatfelvételi űrlapon és kézi adminisztrátori rögzítésen keresztül működik.
+
+#### 4.6.5. Jogosultságkezelés és Munkamenet Biztonság
 - Szerepkörök: `Admin` (teljes hozzáférés az `/admin/*` útvonalakhoz) és `User` (szakmai felhasználó).
 - **Munkamenet biztonság:** Adminisztrátori fiók-felfüggesztés vagy munkamenet-lezárás (Force Logout) esetén a felhasználó a következő műveletnél azonnal kijelentkeztetésre kerül.
 
@@ -946,6 +1005,10 @@ Ez a szekció azokat a funkciókat tartalmazza, amelyek korábbi tervekben szere
 > **Státusz:** Nem aktív a szabad szöveges mezőben.  
 > A keresőmező Név és Hatóanyag alapján keres. Az ATC kód és Gyártó adatok az oszlopszűrőkben és a kijelölhető oszlopokban érhetők el.
 
+### 5.9. Önkiszolgáló Automatikus Felhasználói Regisztrációs Felület
+> **Státusz:** Jelenleg nem tervezett / Későbbi fejlesztési lehetőség.  
+> A rendszerben nem érhető el közvetlen, azonnali önkiszolgáló regisztrációs folyamat. A felhasználók regisztrációja kézzel (manuálisan) történik az adminisztrátor által, miután az érdeklődő orvos/gyógyszerész felvette a kapcsolatot az üzemeltetéssel a bejelentkezési felületről elérhető kapcsolatfelvételi űrlapon keresztül. Későbbiekben elképzelhető egy automatizált önkiszolgáló regisztrációs felület kialakítása, de jelenleg nem tervezünk ilyennel.
+
 ---
 
 ---
@@ -979,3 +1042,15 @@ Ez a szekció azokat a funkciókat tartalmazza, amelyek korábbi tervekben szere
 - **Státusz:** Inaktív
 - **Szakterületek:** Kardiológus
 - **Tesztelési Rendeltetés:** Felfüggesztett/Inaktív fiók bejelentkezési elutasításának és védelmének tesztelése.
+
+---
+
+---
+
+## 7. Változásnapló (Verziótörténet)
+
+Ez a fejezet a funkcionális specifikáció dokumentumban eszközölt módosítások, pontosítások és kiegészítések időrendi követésére és archiválására szolgál.
+
+| Verzió | Dátum | Változás Típusa | Változások Összefoglalása |
+| :--- | :--- | :--- | :--- |
+| **v1.4.1** | 2026.08.24. | Kiegészítés | **Manuális felhasználói regisztráció és kapcsolatfelvételi űrlap rögzítése:**<br>• Tisztázásra került, hogy a rendszerbe a felhasználók regisztrációja kézzel (manuálisan) történik az adminisztrátor által.<br>• Az új szakmai felhasználó a bejelentkezési felületről elérhető űrlapon keresztül veszi fel a kapcsolatot az adminisztrátorral a szakmai adatok (pl. név, pecsétszám, szakterület) megadásával.<br>• Rögzítésre került, hogy későbbiekben elképzelhető önkiszolgáló regisztrációs felület bevezetése, de jelenleg nem tervezünk ilyennel.<br>• Új adatmodell fejezet hozzáadása: 3.6. Regisztrációs Igény / Kapcsolatfelvételi Űrlap Adatmodell.<br>• Új funkcionális alfejezet: 4.6.4. Manuális Felhasználói Regisztráció és Kapcsolatfelvételi Űrlap.<br>• Elvetett/későbbi funkciók közé felvéve: 5.9. Önkiszolgáló Automatikus Felhasználói Regisztrációs Felület.<br>• Új fejezet bevezetése a dokumentum végén: 7. Változásnapló (Verziótörténet). |
