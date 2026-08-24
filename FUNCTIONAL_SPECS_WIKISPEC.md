@@ -33,6 +33,8 @@ KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
 
 # BENUvény orvosi portál funkcionális specifikáció
 
+---
+
 > **Verzió:** 1.4  
 > **Dátum:** 2026.08.24.  
 > **Státusz:** Véglegesnek szánt
@@ -668,7 +670,9 @@ Interaktív térképes és szinkronizált listás kereső a patikák megtalálá
 
 ---
 
-### 4.4. Képzési Program
+### 4.4. Képzési Program (NEM MVP!)
+
+A Képzési program modul egy teljesen különálló rendszer a portálon, külső LMS rendszerrel szükséges kommunikálnia. Jelenleg nem kell foglalkozni a modul fejlesztésével, viszont szükséges felmérni a szükség kapcsolódási információkat.
 
 #### 4.4.1. Képzések Főoldal
 
