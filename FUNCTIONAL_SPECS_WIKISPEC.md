@@ -6,13 +6,13 @@ FUNKCIONÁLIS SPECIFIKÁCIÓ (FSR) - BENUVÉNY ORVOSI PORTÁL FŐDOKUMENTUM
 MIRE HASZNÁLJUK:
 Ez a dokumentum a BENUvény Orvosi Portál 
 központi funkcionális specifikációja. Részletesen leírja a rendszer üzleti célját,
-az entitások adatmodelljét, az egyes modulok és felületek működését, a beviteli 
-mezőkhöz tartozó adatformátumokat, példákat és limitációkat, a felhasználói 
-interakciókat, valamint a tesztelési hozzáféréseket.
+az entitások adatmodelljét, a megvalósítási és integrációs kereteket, az egyes modulok 
+és felületek működését, a beviteli mezőkhöz tartozó adatformátumokat, példákat és limitációkat, 
+a felhasználói interakciókat, valamint a tesztelési hozzáféréseket.
 
 KAPCSOLÓDÓ USER STORY-K:
 - Egészségügyi szakemberként (orvos/gyógyszerész) szeretnék naprakész és megbízható információt kapni 
-  a gyógyszerek piaci elérhetőségéről, készlethiányáról (a BENU hálózati adatok és az OGYÉI hatósági hiánylista összevetésével) és a helyettesíthetőségről.
+  a gyógyszerek piaci elérhetőségéről, készlethiányáról (a LogiNet Middleware által közvetített BENU hálózati adatok és az OGYÉI hatósági hiánylista összevetésével) és a helyettesíthetőségről.
 - Felhasználóként szeretném megtalálni a legközelebbi preferált gyógyszertáramat és 
   ellenőrizni annak aktuális készletét.
 - Felhasználóként szeretnék szakmai és akkreditált képzéseken részt venni.
@@ -33,15 +33,22 @@ KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
 
 # BENUvény orvosi portál funkcionális specifikáció
 
-> **Verzió:** 6.1  
-> **Dátum:** 2026.08.12.  
-> **Státusz:** Aktualizált (Prototípus kódbázisa alapján teljes körűen felülvizsgált és frissített)  
+> **Verzió:** 6.2  
+> **Dátum:** 2026.08.24.  
+> **Státusz:** Aktualizált (Kivitelezői kompetenciákkal, LogiNet Middleware integrációval és dokumentációs követelményekkel kibővítve)  
 > **Prototípus URL:** [https://bvo.uneb.hu/](https://bvo.uneb.hu/)
 
 ---
 
 ## Tartalomjegyzék
 1. [Brief (Áttekintés)](#1-brief)
+   - [1.1. Cél és Rendszer Áttekintés](#11-cél-és-rendszer-áttekintés)
+   - [1.2. Megvalósítási Keretek és Technológiai Szabadság](#12-megvalósítási-keretek-és-technológiai-szabadság)
+   - [1.3. Készletinformációk és LogiNet Middleware Integráció](#13-készletinformációk-és-loginet-middleware-integráció)
+   - [1.4. Kivitelezői Dokumentációs Igények és Specifikációk](#14-kivitelezői-dokumentációs-igények-és-specifikációk)
+   - [1.5. Live Prototípus](#15-live-prototípus)
+   - [1.6. Felhasználói Szerepkörök](#16-felhasználói-szerepkörök)
+   - [1.7. Modulok Áttekintése](#17-modulok-áttekintése)
 2. [Fogalomtár (Glossary)](#2-fogalomtár)
 3. [Adatmodellek Specifikációja](#3-adatmodellek-specifikációja)
    - [3.1. Felhasználó (User) Adatmodell](#31-felhasználó-user-adatmodell)
@@ -86,18 +93,34 @@ KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
 
 ## 1. Brief
 
-### Cél
-Egy orvosi szakmai portál biztosítása, amely támogatja a gyógyszerészeket és orvosokat a napi munkájukban. A rendszer célja, hogy naprakész és megbízható információt nyújtson a gyógyszerkészletekről, a piaci készlethiányról (amely a BENU.hu és BENUvény.hu által használt hálózati adatok, valamint az OGYÉI Gyógyszeradatbázis "Összes termékhiány" hivatalos nyilvántartása — [https://ogyei.gov.hu/generalt_listak/shortage_lista.csv](https://ogyei.gov.hu/generalt_listak/shortage_lista.csv) — összevetésével kerül meghatározásra, növelve az adatok hitelességét; az OGYÉI CSV fájl nyers adatai egyelőre nem kerülnek közvetlenül kijelzésre a felületen), a helyettesíthetőségről, a legközelebbi preferált patika elérhetőségéről, valamint szakmai és akkreditált képzési lehetőségeket mutasson be.
+### 1.1. Cél és Rendszer Áttekintés
+Egy modern, megbízható orvosi szakmai portál biztosítása, amely hatékonyan támogatja a gyógyszerészeket, orvosokat és egészségügyi szakembereket a mindennapi betegellátásban és döntéshozatalban. A rendszer célja, hogy valós idejű, transzparens és hiteles információt nyújtson a gyógyszerkészletekről, a piaci készlethiányról, a hatóanyag-alapú helyettesíthetőségről, a legközelebbi preferált patika elérhetőségéről, valamint folyamatos szakmai és akkreditált képzési lehetőségeket biztosítson a felhasználók számára.
 
-### Live Prototípus
+### 1.2. Megvalósítási Keretek és Technológiai Szabadság
+A funkcionális specifikáció és a hozzá kapcsolódó prototípus kizárólag a rendszer üzleti működését, a felhasználói folyamatokat, az adatstruktúrákat és a felületi viselkedést rögzíti. 
+- **Kivitelezői kompetencia:** A fejlesztési környezet kialakítása, a technológiai stack (architektúra, backend és frontend keretrendszerek, adatbázis-réteg, tárolási és gyorsítótárazási mechanizmusok, konténerizáció, CI/CD pipeline-ok) megválasztása, valamint a szoftveres implementáció konkrét megvalósítása **teljes mértékben a kivitelezőre (fejlesztő partnerre) van bízva**.
+- **Megvalósítási szabadság:** A kivitelező jogosult és felelős a hosszú távon fenntartható, skálázható, magas rendelkezésre állású és biztonságos architektúra megtervezéséért és kivitelezéséért a megadott funkcionális kereteken belül.
+
+### 1.3. Készletinformációk és LogiNet Middleware Integráció
+A portál alapvető értékajánlata a pontos és gyors készlet- és hiányinformációk elérése:
+- **Integrációs alapok:** A gyógyszertári és piaci készletinformációk átadása, lekérdezése és szinkronizációja a jelenlegi **BENU.hu** és **BENUvény.hu** működési alapjainak megfelelően, a **LogiNet által biztosított Middleware** rétegen keresztül valósul meg.
+- **Rendszervizsgálat és Audit szükségessége:** Kiemelten fontos és kötelező lépés a jelenlegi LogiNet Middleware képességeinek, interfészeinek és adatkapacitásának alapos technikai és funkcionális felmérése (auditja). Meg kell vizsgálni, hogy a meglévő rendszer milyen adatstruktúrákat szolgáltat, milyen lekérdezési sebességet és frissítési frekvenciát támogat, milyen korlátokkal rendelkezik, illetve szükséges-e a meglévő Middleware bővítése vagy finomhangolása a tervezett orvosi portál igényeinek maradéktalan kiszolgálásához.
+- **Piaci Készlethiány Adatforrások Konszolidációja:** A piaci készlethiány meghatározása a LogiNet Middleware által szállított hálózati/kereskedelmi készletinformációk, valamint az OGYÉI (NNGYK) Gyógyszeradatbázis *"Összes termékhiány"* hivatalos nyilvántartása (`https://ogyei.gov.hu/generalt_listak/shortage_lista.csv`) háttérbeli összevetésével valósul meg a maximális adathitelesség érdekében (az OGYÉI CSV nyers adatai közvetlenül nem jelennek meg a felületen).
+
+### 1.4. Kivitelezői Dokumentációs Igények és Specifikációk
+A sikeres, kockázatmentes és határidőre történő implementáció előfeltételeként:
+- **Igények definiálása:** A **kivitelező (fejlesztő partner) határozza meg és specifikálja**, hogy a meglévő rendszerekből és külső partnerektől milyen műszaki és funkcionális dokumentációkra, interfész-leírásokra (API specifikációk, végponti dokumentációk, adatmodellek, hitelesítési/biztonsági eljárásrendek, tesztkörnyezeti hozzáférések) van szüksége az integrációhoz.
+- **Dokumentációs elvárások:** A kivitelező felelőssége összeállítani a hiányzó specifikációs elemek listáját, és azokat a megrendelői/üzemeltetői oldallal egyeztetve beépíteni a fejlesztési tervbe.
+
+### 1.5. Live Prototípus
 A működő prototípus felülete elérhető az alábbi hivatkozáson:  
 🔗 [https://bvo.uneb.hu/](https://bvo.uneb.hu/)
 
-### Felhasználói Szerepkörök
+### 1.6. Felhasználói Szerepkörök
 - **Szakmai Felhasználó (User):** Orvos, gyógyszerész vagy egészségügyi szakdolgozó. Hozzáfér a gyógyszer-nyilvántartáshoz, patikakeresőhöz, képzésekhez és a saját profilbeállításaihoz.
 - **Rendszeradminisztrátor (Admin):** A portál működését felügyelő felhasználó, aki felhasználókat kezel, patikaadatokat tekint át és tartalommoderációt végez.
 
-### Modulok Áttekintése
+### 1.7. Modulok Áttekintése
 A rendszer moduláris felépítésű, központjában a biztonságos szakmai azonosítás áll. A fő funkcionális egységek:
 - **[Fejléc és Navigációs Sáv](#40-fejléc-és-navigációs-sáv-modul):** Központi navigáció, mentett gyógyszer gyorslista, közeli patika kijelző és profil menü.
 - **[Irányítópult](#41-irányítópult-dashboard):** Központi összegző felület a piaci és patikai készletváltozásokról.
@@ -112,6 +135,11 @@ A rendszer moduláris felépítésű, központjában a biztonságos szakmai azon
 
 ## 2. Fogalomtár
 
+- **LogiNet Middleware (Készletintegrációs Köztesréteg):**
+  - **Definíció és Üzleti Jelentés:** A BENU.hu és BENUvény.hu ökoszisztéma alapjait képező központi integrációs réteg, amely a gyógyszertári és piaci készletadatok, raktárkészletek és szinkronizációs folyamatok közvetítéséért felel.
+  - **Konkrét Szerep:** Készletinformációk biztosítása a portál számára; képességeinek és interfészeinek előzetes vizsgálata és auditja a megvalósítás alapfeltétele.
+- **Kivitelezői Implementációs Hatáskör:**
+  - **Definíció és Üzleti Jelentés:** A kivitelezőre bízott fejlesztési környezet, technológiai stack és szoftveres architektúra összessége, amely a specifikált funkciók optimális megvalósítását biztosítja.
 - **Közeli Patika (Preferált Patika):**
   - **Definíció és Üzleti Jelentés:** A felhasználó által megjelölt gyógyszertár. A rendszer ezen patika készletadatait és státuszfrissítéseit kiemelten kezeli az egész portálon.
   - **Konkrét Felületi Példa:** *"BENU Gyógyszertár Arany Sas"*
@@ -143,7 +171,7 @@ A rendszer moduláris felépítésű, központjában a biztonságos szakmai azon
   - **Definíció és Üzleti Jelentés:** Adminisztrátori vagy biztonsági művelet, amely azonnal érvényteleníti a felhasználó aktív belépését.
   - **Konkrét Felületi Példa:** Felhasználó azonnali átirányítása a bejelentkezési oldalra.
 - **Piaci Készlethiány Adatforrás:**
-  - **Definíció és Üzleti Jelentés:** A gyógyszerek piaci készlethiányi státuszának meghatározására és ellenőrzésére szolgáló információforrás. A megbízhatóság növelése érdekében a rendszer a BENU.hu és BENUvény.hu által használt hálózati/kereskedelmi készletinformációkat, valamint az OGYÉI (NNGYK) *"Összes termékhiány"* hivatalos nyilvántartását (`https://ogyei.gov.hu/generalt_listak/shortage_lista.csv`) veti össze.
+  - **Definíció és Üzleti Jelentés:** A gyógyszerek piaci készlethiányi státuszának meghatározására és ellenőrzésére szolgáló információforrás. A megbízhatóság növelése érdekében a rendszer a BENU.hu és BENUvény.hu által használt, a LogiNet Middleware által közvetített hálózati/kereskedelmi készletinformációkat, valamint az OGYÉI (NNGYK) *"Összes termékhiány"* hivatalos nyilvántartását (`https://ogyei.gov.hu/generalt_listak/shortage_lista.csv`) veti össze.
   - **Üzleti & Felületi Limitációk:** A két adatforrás összevetése és visszaigazolása a háttérben történik az adathitelesség garantálására. Az OGYÉI CSV fájl nyers adatai egyelőre nem kerülnek közvetlenül megjelenítésre a felhasználói felületen, a portál a konszolidált készlethiányi állapotot mutatja.
 
 ---
@@ -286,7 +314,7 @@ Ez a szakasz a rendszer fő üzleti entitásait mutatja be a beviteli mezők, ad
   - **Felületi Típus:** Címke (Színkódolt)
   - **Megadható Adatok / Formátum:** `Elérhető` / `Készlethiány` / `Megszűnt`
   - **Példa Érték:** `Készlethiány`
-  - **Üzleti & Felületi Limitációk:** Zöld (Elérhető), Sárga (Készlethiány), Piros (Megszűnt). A státusz a BENU hálózati adatok és az OGYÉI "Összes termékhiány" CSV nyilvántartásának összevetésén alapul (az OGYÉI CSV nyers adatai egyelőre nem láthatók közvetlenül a felületen).
+  - **Üzleti & Felületi Limitációk:** Zöld (Elérhető), Sárga (Készlethiány), Piros (Megszűnt). A státusz a LogiNet Middleware által közvetített BENU hálózati adatok és az OGYÉI "Összes termékhiány" CSV nyilvántartásának háttérbeli összevetésén alapul (az OGYÉI CSV nyers adatai egyelőre nem láthatók közvetlenül a felületen).
 - **Utolsó frissítés:**
   - **Felületi Típus:** Megjelenítő / Dátum
   - **Megadható Adatok / Formátum:** Dátum és időbélyeg
@@ -436,6 +464,9 @@ Ez a szakasz a rendszer fő üzleti entitásait mutatja be a beviteli mezők, ad
   - **Megadható Adatok / Formátum:** `ÉÉÉÉ.MM.NN ÓÓ:PP:SS`
   - **Példa Érték:** `2026.08.12 09:00:12`
   - **Üzleti & Felületi Limitációk:** Készletadatok utolsó frissítési ideje.
+- **Készletforrás és Szinkronizációs Keretek:**
+  - **Integrációs Csatorna:** A patikai készletadatok lekérdezése és szinkronizációja a BENU.hu és BENUvény.hu alapjait képező LogiNet Middleware-en keresztül történik.
+  - **Audit és Implementáció:** A szinkronizáció pontos frekvenciáját, végpontjait és adatstruktúráját a kivitelező határozza meg a meglévő Middleware képességeinek vizsgálata (auditja) és a bekért interfész-dokumentációk alapján.
 
 ---
 
@@ -620,7 +651,7 @@ Egy konkrét gyógyszer részletes szakmai adatlapja.
    - *Hiány várható vége:* Dátum (pl. `2026.09.30`, ha nincs megadva: `"Folyamatban"`).
    - *Hiány oka:* Szöveges megnevezés (ha nincs megadva: `"Szakmai ok"`).
    - *Pótlási javaslat:* Szakmai javaslat a pótlásra.
-   - *Adatforrás háttér-ellenőrzés:* A készlethiányi adatok megbízhatóságát a BENU hálózati adatok és az OGYÉI hatósági nyilvántartás (`shortage_lista.csv`) összevetése biztosítja (az OGYÉI CSV nyers adatai egyelőre nem kerülnek közvetlenül megjelenítésre a felületen).
+   - *Adatforrás háttér-ellenőrzés:* A készlethiányi adatok megbízhatóságát a LogiNet Middleware által közvetített BENU hálózati adatok és az OGYÉI hatósági nyilvántartás (`shortage_lista.csv`) összevetése biztosítja (az OGYÉI CSV nyers adatai egyelőre nem kerülnek közvetlenül megjelenítésre a felületen).
 
 6. **Helyettesítő Termékek Ajánlója:**
    - Azonos hatóanyagú (INN) elérhető készítmények listája kártyás elrendezésben. (A kód kizárólag azonos hatóanyag alapján ajánl).
