@@ -33,10 +33,10 @@ KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
 
 # BENUvény orvosi portál funkcionális specifikáció
 
-> **Verzió:** 6.2  
+> **Verzió:** 1.4  
 > **Dátum:** 2026.08.24.  
-> **Státusz:** Aktualizált (Kivitelezői kompetenciákkal, LogiNet Middleware integrációval és dokumentációs követelményekkel kibővítve)  
-> **Prototípus URL:** [https://bvo.uneb.hu/](https://bvo.uneb.hu/)
+> **Státusz:** Véglegesnek szánt
+> **Prototípus URL:** [https://bvo.uneb.hu/](https://bvo.uneb.hu/) (hozzáférések a 6. pontban)
 
 ---
 
@@ -619,8 +619,6 @@ A listaoldalon nincs különálló felső fő keresőmező vagy státusz legörd
     - **Vezérlők:** `«` (Előző oldal), számozott oldalgombok `...` jelekkel a távolabbi oldalaknál, `»` (Következő oldal). (Nincs külön Első/Utolsó gomb).
     - **Mobil nézet:** Mobilon az oldalszámok helyett kompakt `X / Y` kijelzés látható.
 
----
-
 #### 4.2.2. Gyógyszer Adatlap
 
 Egy konkrét gyógyszer részletes szakmai adatlapja.
@@ -711,8 +709,6 @@ Interaktív térképes és szinkronizált listás kereső a patikák megtalálá
      - `"Mutasd térképen"` (bezárja a modalt és ráfókuszál a gyógyszertárra a térképen).
      - `"Bezárás"` (lezárja a modális ablakot).
 
----
-
 #### 4.3.2. Gyógyszertári Készlet Nézet (Modális Nézet)
 
 - **Funkció:** A Gyógyszer adatlapról a `"Megnézem hol"` gombokkal megnyitható teljes képernyős modális ablak.
@@ -742,8 +738,6 @@ A szakmai és akkreditált képzések böngészőfelülete.
    - A kurzuskártyán lévő `"Érdekel"` gombra kattintva megnyílik a **BENU LMS bemutató modális ablak**.
    - **Tartalom:** Tájékoztató leírás a BENU Képzési Programról, a továbbképzési rendszerről és a kreditpont-gyűjtésről.
    - **Gombok:** `"Tovább a BENU LMS-re"` (külső hivatkozás a tanulási felületre) és `"Bezárás"`.
-
----
 
 #### 4.4.2. Képzés Részletes Oldal és BENU LMS Integráció
 
@@ -869,8 +863,6 @@ Kizárólag `Admin` szerepkörrel rendelkező felhasználók számára elérhet�
 - **Munkamenet Azonnali Lezárása (Force Logout):** Növeli a munkamenet verziót, azonnal kijelentkezteti a felhasználót.
 - **Jelszó-visszaállítás kezdeményezése:** Értesítést generál a jelszó-visszaállításról.
 
----
-
 #### 4.7.2. Fórum és Tartalom Moderálás
 
 **Útvonal:** [https://bvo.uneb.hu/admin/forum](https://bvo.uneb.hu/admin/forum)
@@ -882,8 +874,6 @@ Kizárólag `Admin` szerepkörrel rendelkező felhasználók számára elérhet�
   - *Szöveg Szerkesztése:* Téma leírásának vagy hozzászólás szövegének módosítása moderálási céllal.
   - *Szerző Anonimizálása:* Lecseréli a szerző nevét `"Anonim Felhasználó"` feliratra.
   - *Lenyitható komment-lista:* Témánként megtekinthetők és moderálhatók a kapcsolódó hozzászólások.
-
----
 
 #### 4.7.3. Gyógyszertár Karbantartás
 
@@ -1028,5 +1018,3 @@ Ez a szekció azokat a funkciókat tartalmazza, amelyek korábbi tervekben szere
   - **Státusz:** Inaktív
   - **Szakterületek:** Kardiológus
   - **Tesztelési Rendeltetés:** Felfüggesztett/Inaktív fiók bejelentkezési elutasításának és védelmének tesztelése.
-
----
