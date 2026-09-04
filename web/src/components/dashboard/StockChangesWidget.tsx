@@ -1,156 +1,173 @@
+'use client';
+
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ (FSR) - KÉSZLETVÁLTOZÁSOK TÁBLÁZAT WIDGET
  * ============================================================================
  * 
- * USER STORY:
- * Felhasználóként látni szeretném a legfrissebb gyógyszerkészlet-változásokat 
- * és egy napi/tegnapi összesítést, hogy értesüljek a hiánycikkekről vagy 
- * megszűnt termékekről.
+ * MIRE HASZNÁLJUK:
+ * Az Irányítópult (Dashboard) bal oldali fő táblázat komponense, amely a legutóbbi
+ * 20 készletváltozást jeleníti meg a Figma tervek szerinti kártyában (fehér háttér,
+ * 16px lekerekítés, 38px enyhe árnyék, szürke oszlopfejléc, színkódolt státuszjelvények).
  * 
- * FUNKCIÓK:
- * - Statisztikai összesítő: Mai és tegnapi "Készlethiány" vagy "Megszűnt" státuszú változások száma.
- * - TOP 20 lista: A legutóbbi 20 készletváltozás időrendi sorrendben.
- * - Táblázatos megjelenítés:
- *   - Státusz: Első oszlop, színes badge jelöléssel.
- *   - Név: Második oszlop, dinamikusan nyúlik a dátumig.
- *   - Dátum: Harmadik oszlop, jobbra zárt, formázott időbélyeg.
- * - Navigáció: Linkek a gyógyszer részletes adatlapjára és az összes változás oldalra.
+ * KAPCSOLÓDÓ USER STORY-K:
+ * - Felhasználóként időrendben szeretném látni a legfrissebb gyógyszerkészlet-változásokat
+ *   (újra elérhető, készlethiány, megszűnt), és egy kattintással elérni a gyógyszer adatlapját.
+ * - Felhasználóként az "Összes változás" gombra kattintva át szeretnék navigálni a teljes
+ *   gyógyszerlistára a legutóbb frissültek szerint rendezve.
  * 
- * KAPCSOLÓDÓ ELEMEK:
- * - src/app/(dashboard)/gyogyszerek/page.tsx
- * - src/lib/data.ts (mock adatok a statisztikához)
+ * KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
+ * - Irányítópult (/dashboard)
+ * - Gyógyszer adatlap (/gyogyszerek/adatlap?tk=...)
+ * - Gyógyszerek teljes listaoldala (/gyogyszerek?sort=lastUpdate&order=desc)
+ * - Funkcionális specifikáció (FUNCTIONAL_SPECS_WIKISPEC.md: 4.1.3)
+ * ============================================================================
  */
-
-'use client';
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Medicine } from '@/types';
 import { formatDate } from '@/lib/utils';
 
-export interface StockStats {
-    total: number;
-    megszunt: number;
-    hiany: number;
-    elerheto: number;
-}
-
 interface StockChangesWidgetProps {
-    stats: StockStats;
     changes: Medicine[];
-    period?: number;
+    title?: string;
+    subtitle?: string;
+    showViewAllButton?: boolean;
+    viewAllUrl?: string;
 }
 
-export function StockChangesWidget({ stats, changes, period = 1 }: StockChangesWidgetProps) {
-    const now = new Date();
-
-    // Calculate start date based on period for URL params
-    const startDate = new Date(now);
-    startDate.setDate(now.getDate() - period);
-    startDate.setHours(0, 0, 0, 0);
-
-    const periodLabel = period === 1 ? 'Mai nap' : `Elmúlt ${period} nap`;
-
-    // Helper for date link
-    const getDateFilterParams = () => {
-        const fromDateStr = startDate.toISOString().split('T')[0];
-        return `&lastUpdate_from=${fromDateStr}`;
+export function StockChangesWidget({
+    changes,
+    title = 'Legutóbbi 20 készletváltozás',
+    subtitle = 'Élő készletinformációk és beérkező termékek állapota',
+    showViewAllButton = true,
+    viewAllUrl = '/gyogyszerek?sort=lastUpdate&order=desc'
+}: StockChangesWidgetProps) {
+    const renderStatusBadge = (status: string) => {
+        if (status === 'Elérhető') {
+            return (
+                <div className="bg-[#E8F8E2] text-[#317907] border border-[#C4EDB6] rounded-[4px] px-[8px] py-[3px] flex items-center gap-[6px] shrink-0">
+                    <div className="size-[16px] relative shrink-0">
+                        <Image
+                            src="/assets/figma/8d5c6e13ab3c6173ee2bfff8d7a4bf3cc46bca63.svg"
+                            alt="Elérhető"
+                            width={16}
+                            height={16}
+                        />
+                    </div>
+                    <span className="text-[13px] font-medium leading-none">Elérhető</span>
+                </div>
+            );
+        }
+        if (status === 'Készlethiány' || status === 'Hiány') {
+            return (
+                <div className="bg-[#FFF7BA] text-[#7A6C21] border border-[#F5E68C] rounded-[4px] px-[8px] py-[3px] flex items-center gap-[6px] shrink-0">
+                    <div className="size-[16px] relative shrink-0">
+                        <Image
+                            src="/assets/figma/95a59bf06dc352f30740e8e75e9dc3eccfec6dd4.svg"
+                            alt="Hiány"
+                            width={16}
+                            height={16}
+                        />
+                    </div>
+                    <span className="text-[13px] font-medium leading-none">Hiány</span>
+                </div>
+            );
+        }
+        return (
+            <div className="bg-[#FEEAED] text-[#B1174E] border border-[#FBCED6] rounded-[4px] px-[8px] py-[3px] flex items-center gap-[6px] shrink-0">
+                <div className="size-[16px] relative shrink-0">
+                    <Image
+                        src="/assets/figma/c5d9b22ba806bb52c15a398d9d8ee7ff7e067868.svg"
+                        alt="Megszűnt"
+                        width={16}
+                        height={16}
+                    />
+                </div>
+                <span className="text-[13px] font-medium leading-none">Megszűnt</span>
+            </div>
+        );
     };
 
     return (
-        <div className="card bg-base-100 shadow-sm border border-base-200 h-full">
-            <div className="card-body p-4">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="card-title text-lg flex items-center gap-2">
-                        <span className="material-symbols-rounded text-primary">inventory_2</span>
-                        Készletváltozások
-                    </h2>
-                </div>
+        <div className="bg-white border border-[#E7E8EC] rounded-[16px] shadow-[0px_14px_38px_0px_rgba(0,26,72,0.06)] overflow-hidden w-full flex flex-col">
+            {/* Fejléc */}
+            <div className="pt-[24px] pb-[16px] px-[24px] flex flex-col gap-[4px]">
+                <h2 className="text-[20px] md:text-[22px] font-bold text-[#002664] leading-tight">
+                    {title}
+                </h2>
+                <p className="text-[13px] md:text-[14px] text-[#62788f]">
+                    {subtitle}
+                </p>
+            </div>
 
-                {/* Summary Stats */}
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                    <div className="bg-warning/10 border border-warning/20 rounded-xl p-3 flex flex-col items-center justify-center text-center col-span-2">
-                        <span className="text-xs font-semibold text-warning-content/70 uppercase tracking-wider mb-1">
-                            {periodLabel} változásai
-                        </span>
-                        <div className="flex items-baseline gap-1 mb-2">
-                            <span className="text-2xl font-black text-warning-content">{stats.total}</span>
-                            <span className="text-[10px] font-bold text-warning-content/50">db</span>
-                        </div>
-                        <div className="flex flex-col gap-0.5 text-[10px] font-medium text-warning-content/70 w-full">
-                            <div className="flex justify-center gap-4">
-                                <Link href={`/gyogyszerek?status=Megszűnt${getDateFilterParams()}`} className="hover:underline hover:text-primary transition-colors flex items-center gap-1">
-                                    <span className="badge badge-error badge-xs"></span> {stats.megszunt} megszűnt
-                                </Link>
-                                <Link href={`/gyogyszerek?status=Készlethiány${getDateFilterParams()}`} className="hover:underline hover:text-primary transition-colors flex items-center gap-1">
-                                    <span className="badge badge-warning badge-xs"></span> {stats.hiany} hiány
-                                </Link>
-                                <Link href={`/gyogyszerek?status=Elérhető${getDateFilterParams()}`} className="hover:underline hover:text-primary transition-colors flex items-center gap-1">
-                                    <span className="badge badge-success badge-xs"></span> {stats.elerheto} elérhető
+            <div className="h-px bg-[#E7E8EC] w-full" />
+
+            {/* Táblázat Oszlopfejlécek */}
+            <div className="bg-[#F9F9FB] px-[24px] py-[12px] flex items-center gap-[16px] text-[#3A5876] text-[12px] md:text-[13px] font-bold uppercase tracking-wider border-b border-[#E7E8EC]">
+                <span className="w-[104px] shrink-0">Státusz</span>
+                <span className="flex-1 min-w-0">Termék neve</span>
+                <span className="w-[140px] shrink-0 text-right">Dátum</span>
+            </div>
+
+            {/* Sorok listája */}
+            <div className="divide-y divide-[#E7E8EC] flex-1">
+                {changes.length > 0 ? (
+                    changes.slice(0, 20).map((med) => (
+                        <div
+                            key={med.internalId || med.tkSzam}
+                            className="px-[24px] py-[14px] flex items-center gap-[16px] hover:bg-[#F9F9FB] transition-colors group"
+                        >
+                            {/* Státusz oszlop */}
+                            <div className="w-[104px] shrink-0 flex items-center">
+                                {renderStatusBadge(med.status)}
+                            </div>
+
+                            {/* Terméknév oszlop */}
+                            <div className="flex-1 min-w-0 pr-2">
+                                <Link
+                                    href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(med.tkSzam)}`}
+                                    className="text-[15px] md:text-[16px] font-medium text-[#002664] hover:text-[#378509] hover:underline block truncate"
+                                    title={med.nev}
+                                >
+                                    {med.nev}
                                 </Link>
                             </div>
+
+                            {/* Dátum oszlop */}
+                            <div className="w-[140px] shrink-0 text-right text-[13px] md:text-[14px] text-[#62788f] whitespace-nowrap">
+                                {formatDate(med.lastUpdate)}
+                            </div>
                         </div>
+                    ))
+                ) : (
+                    <div className="p-8 text-center text-sm text-[#62788f]">
+                        Nincs megjeleníthető készletváltozás az adott időszakban.
                     </div>
-                </div>
+                )}
+            </div>
 
-                <div className="mb-2">
-                    <h3 className="text-sm font-semibold text-base-content/70">
-                        Legutóbbi {changes.length} készletváltozás
-                    </h3>
-                </div>
-
-                <div className="overflow-x-auto">
-                    <table className="table table-sm w-full">
-                        <thead>
-                            <tr className="bg-base-200/50">
-                                <th>Státusz</th>
-                                <th className="w-full">Név</th>
-                                <th className="text-right">Dátum</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {changes.length > 0 ? (
-                                changes.map((med) => (
-                                    <tr key={med.internalId || med.tkSzam} className="hover:bg-base-200/30">
-                                        <td>
-                                            <div className={`badge ${med.status === 'Elérhető' ? 'badge-success' :
-                                                med.status === 'Készlethiány' ? 'badge-warning' : 'badge-error'
-                                                } badge-xs font-bold whitespace-nowrap`}>
-                                                {med.status}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <Link
-                                                href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(med.tkSzam)}`}
-                                                className="font-medium text-primary hover:underline block"
-                                            >
-                                                {med.nev}
-                                            </Link>
-                                        </td>
-                                        <td className="text-right text-xs text-base-content/60 whitespace-nowrap">
-                                            {formatDate(med.lastUpdate)}
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={3} className="text-center py-8 text-base-content/50">
-                                        Nincs új változás.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className="card-actions justify-start mt-4 pt-4 border-t border-base-200">
-                    <Link href="/gyogyszerek?sort=lastUpdate&order=desc" className="btn btn-ghost btn-sm text-primary gap-1">
-                        Összes változás
-                        <span className="material-symbols-rounded text-sm">arrow_forward</span>
+            {/* Lábléc gomb */}
+            {showViewAllButton && (
+                <div className="pt-[16px] pb-[24px] px-[24px] border-t border-[#E7E8EC] mt-auto">
+                    <Link
+                        href={viewAllUrl}
+                        className="inline-flex items-center gap-[8px] text-[#002664] hover:text-[#378509] text-[14px] font-bold transition-colors"
+                    >
+                        <span>Összes változás</span>
+                        <div className="size-[20px] relative">
+                            <Image
+                                src="/assets/figma/6facf09639ce8f21ae7716fe32dc70d4159927dc.svg"
+                                alt="Nyíl"
+                                width={20}
+                                height={20}
+                            />
+                        </div>
                     </Link>
                 </div>
-            </div>
+            )}
         </div>
     );
 }

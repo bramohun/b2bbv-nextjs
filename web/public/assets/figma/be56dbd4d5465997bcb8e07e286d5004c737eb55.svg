@@ -1,0 +1,14 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="46.25" height="46.25" viewBox="0 0 46.25 46.25" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Drug">
+<path id="Vector" d="M6.625 41.5V32.125V22.75C6.625 21.5144 7.22312 20.419 8.14516 19.7358C8.19147 19.7015 8.19747 19.6349 8.15669 19.5941L6.89078 18.3282C6.28206 18.7523 5.54219 19.0012 4.74372 18.9999C2.665 18.9965 1 20.7327 1 22.8113V32.125V41.5C1 43.571 2.67897 45.25 4.75 45.25H10.375C8.30397 45.25 6.625 43.571 6.625 41.5Z" fill="#D8D9E0"/>
+<path id="Vector_2" d="M23.5 11.5V15.25C23.5 17.321 25.179 19 27.25 19C29.321 19 31 20.679 31 22.75V28.8943" stroke="#002664" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_3" d="M23.6947 45.25H4.75C2.67897 45.25 1 43.571 1 41.5V22.75C1 20.679 2.67897 19 4.75 19C6.82103 19 8.5 17.321 8.5 15.25V11.5" stroke="#002664" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_4" d="M12.25 30.25H19.75" stroke="#002664" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_5" d="M16 26.5V34" stroke="#002664" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_6" d="M23.5 11.5H8.5C6.42897 11.5 4.75 9.82103 4.75 7.75V4.75C4.75 2.67897 6.42897 1 8.5 1H23.5C25.571 1 27.25 2.67897 27.25 4.75V7.75C27.25 9.82103 25.571 11.5 23.5 11.5Z" stroke="#002664" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+<g id="Group">
+<path id="Vector_7" d="M44.1562 36.2013L36.2013 44.1562C34.7429 45.6146 32.3564 45.6146 30.898 44.1562C29.4396 42.6978 29.4396 40.3113 30.898 38.853L38.853 30.898C40.3113 29.4396 42.6978 29.4396 44.1562 30.898C45.6146 32.3564 45.6146 34.7429 44.1562 36.2013Z" stroke="#58A618" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_8" d="M34.8754 34.8754L40.1787 40.1787" stroke="#58A618" stroke-width="2" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+</svg>

@@ -11,19 +11,26 @@ import { useAuth } from '@/context/AuthContext';
  * ============================================================================
  * 
  * MIRE HASZNÁLJUK:
- * A portál bejelentkezési felülete, amely lehetővé teszi a felhasználóknak a belépést
- * hagyományos jelszóval + 2FA-val (Email/SMS OTP), biometrikus Passkey-vel (TouchID/FaceID/Windows Hello),
- * vagy jelszó nélküli egyszeri e-mail kóddal (Magic Code).
+ * A BENU Vény Orvosi Portál hivatalos bejelentkezési felülete a legújabb Figma tervek
+ * (Desktop / Bejelentkezés - 13334:18188) alapján. Lehetővé teszi az orvosok és szakmai
+ * partnerek számára az azonosítást jelszóval, kétfaktoros hitelesítéssel (2FA OTP),
+ * biometrikus Passkey-vel (Touch ID, Face ID, Windows Hello) vagy egyszeri jelszómentes
+ * e-mail kóddal (Magic Code).
  * 
  * KAPCSOLÓDÓ USER STORY-K:
- * - Szakmai felhasználóként szeretnék bejelentkezni a rendszerbe jelszóval, Passkey-vel vagy e-mail kóddal.
- * - Felhasználóként a jelszó megadása után szeretném beírni a 6 jegyű 2FA kódomat az azonosítás befejezéséhez.
- * - Felhasználóként szeretném megjelölni az eszközömet megbízhatóként (30 napig), hogy ne kelljen újra 2FA kódot megadnom.
+ * - Orvosként / szakmai felhasználóként szeretnék bejelentkezni a portálra a hitelesítő
+ *   adataimmal, vagy biometrikus azonosítással / e-mail kóddal.
+ * - Felhasználóként a jelszó megadása után szeretném beírni a 6 jegyű 2FA kódomat a
+ *   biztonságos belépéshez.
+ * - Felhasználóként szeretném megjelölni az eszközömet megbízhatóként (30 napig), hogy ne
+ *   kelljen minden alkalommal 2FA kódot megadnom.
+ * - Felhasználóként szeretnék elfelejtett jelszó esetén jelszó-visszaállítást kezdeményezni.
  * 
  * KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
- * - Elfelejtett jelszó oldal: https://bvorvosi.vercel.app/forgot-password
- * - Irányítópult (Dashboard): https://bvorvosi.vercel.app/dashboard
- * - Profil felület (2FA és Passkey beállítások): https://bvorvosi.vercel.app/profile
+ * - Elfelejtett jelszó oldal: /forgot-password
+ * - Irányítópult (Dashboard): /dashboard
+ * - Profil felület (2FA és Passkey beállítások): /profile
+ * - Hivatalos specifikáció: FUNCTIONAL_SPECS_WIKISPEC.md (1.0 Felhasználó-kezelés és Authentikáció)
  * ============================================================================
  */
 
@@ -121,252 +128,255 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-base-200 px-4 py-8">
-            <div className="card w-full max-w-md bg-base-100 shadow-xl border border-base-300 relative">
-                <div className="card-body p-6">
-                    {/* Header */}
-                    <div className="flex justify-center mb-4">
-                        <img src="/logo-icon.png" alt="BENUvény Logo" className="h-16 w-16 object-contain" />
+        <div className="min-h-screen flex flex-col items-center justify-center bg-white px-4 py-12">
+            {/* Header: BENU Vény logo + Orvosoknak felirat (Figma: 13300:27275) */}
+            <div className="flex flex-col items-center justify-center gap-2 mb-6 text-center">
+                <div className="h-[33px] w-[214px] relative">
+                    <img
+                        src="/assets/figma/benu-veny-logo.png"
+                        alt="BENU VÉNY"
+                        className="w-full h-full object-contain"
+                    />
+                </div>
+                <h2 className="font-bold text-[#002664] text-[22px] leading-[33px]">
+                    Orvosoknak
+                </h2>
+            </div>
+
+            {/* Bejelentkezési Kártya (Figma: 13300:27205 - Desktop / BENU vény steps) */}
+            <div className="bg-[#F9F9FB] w-[479px] max-w-full rounded-[16px] p-6 md:p-[24px] flex flex-col gap-4 border border-[#EBECEF] shadow-xs">
+                {/* Kártya Cím */}
+                <h1 className="font-bold text-[#002664] text-[22px] leading-[33px]">
+                    {pending2FA ? 'Kétfaktoros Azonosítás' : 'Bejelentkezés'}
+                </h1>
+
+                {/* Hiba- és sikeres üzenetek */}
+                {error && (
+                    <div className="bg-[#FEEAED] border border-[#F5C2C7] text-[#842029] text-xs py-2.5 px-3 rounded-lg flex items-center gap-2">
+                        <span className="material-symbols-rounded text-base shrink-0">error</span>
+                        <span>{error}</span>
                     </div>
+                )}
+                {successMsg && (
+                    <div className="bg-[#E8F8E2] border border-[#C4EDB6] text-[#317907] text-xs py-2.5 px-3 rounded-lg flex items-center gap-2">
+                        <span className="material-symbols-rounded text-base shrink-0">check_circle</span>
+                        <span>{successMsg}</span>
+                    </div>
+                )}
 
-                    <h2 className="text-2xl font-bold text-center text-primary mb-1">
-                        Szakmai Bejelentkezés
-                    </h2>
-                    <p className="text-sm text-center text-base-content/70 mb-6 font-medium">
-                        BENUvény Orvosi Portál
-                    </p>
+                {/* Bejelentkezési Módok Fülei (Csak ha nincs aktív 2FA) */}
+                {!pending2FA && (
+                    <div className="flex p-1 bg-[#EBECEF] rounded-lg gap-1">
+                        <button
+                            type="button"
+                            className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${
+                                activeTab === 'password'
+                                    ? 'bg-[#002664] text-white shadow-xs'
+                                    : 'text-[#62788F] hover:text-[#002664]'
+                            }`}
+                            onClick={() => setActiveTab('password')}
+                        >
+                            Jelszó
+                        </button>
+                        <button
+                            type="button"
+                            className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${
+                                activeTab === 'passkey'
+                                    ? 'bg-[#002664] text-white shadow-xs'
+                                    : 'text-[#62788F] hover:text-[#002664]'
+                            }`}
+                            onClick={() => setActiveTab('passkey')}
+                        >
+                            Passkey
+                        </button>
+                        <button
+                            type="button"
+                            className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all ${
+                                activeTab === 'magic'
+                                    ? 'bg-[#002664] text-white shadow-xs'
+                                    : 'text-[#62788F] hover:text-[#002664]'
+                            }`}
+                            onClick={() => setActiveTab('magic')}
+                        >
+                            E-mail Kód
+                        </button>
+                    </div>
+                )}
 
-                    {/* Notification alerts */}
-                    {error && (
-                        <div className="alert alert-error text-sm py-2.5 mb-4 shadow-sm">
-                            <span className="material-symbols-rounded text-xl">error</span>
-                            <span>{error}</span>
+                {/* TAB 1: Jelszavas Bejelentkezés (Figma: 13300:27216, 27217, 27218, 27219) */}
+                {!pending2FA && activeTab === 'password' && (
+                    <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-3">
+                        <div className="flex flex-col gap-2">
+                            <input
+                                type="email"
+                                placeholder="E-mail cím"
+                                className="h-[56px] w-full bg-white border border-[#D8D9E0] rounded-[8px] px-[15px] py-[16px] text-[16px] text-[#002664] placeholder:text-[#62788F] focus:outline-none focus:border-[#002664] transition-colors"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                            <input
+                                type="password"
+                                placeholder="Jelszó"
+                                className="h-[56px] w-full bg-white border border-[#D8D9E0] rounded-[8px] px-[15px] py-[16px] text-[16px] text-[#002664] placeholder:text-[#62788F] focus:outline-none focus:border-[#002664] transition-colors"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
                         </div>
-                    )}
-                    {successMsg && (
-                        <div className="alert alert-success text-sm py-2.5 mb-4 shadow-sm text-success-content">
-                            <span className="material-symbols-rounded text-xl">check_circle</span>
-                            <span>{successMsg}</span>
-                        </div>
-                    )}
 
-                    {/* Main Tabs */}
-                    {!pending2FA && (
-                        <div className="tabs tabs-boxed mb-6 grid grid-cols-3 bg-base-200 p-1">
-                            <button
-                                type="button"
-                                className={`tab text-xs font-semibold ${activeTab === 'password' ? 'tab-active bg-primary text-primary-content shadow' : ''}`}
-                                onClick={() => setActiveTab('password')}
+                        {/* Bejelentkezés gomb jobbra mutató nyíllal */}
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="h-[56px] w-full bg-[#002664] hover:bg-[#001F52] text-white rounded-[8px] font-bold text-[16px] flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50 mt-1"
+                        >
+                            <span>{isLoading ? 'Azonosítás...' : 'Bejelentkezés'}</span>
+                            <img
+                                src="/assets/figma/926ab808af433eb226b2264ddd3c32d57123262d.svg"
+                                alt=""
+                                className="size-[24px]"
+                            />
+                        </button>
+
+                        {/* Elfelejtett jelszó link */}
+                        <div className="flex items-center justify-start pt-1">
+                            <Link
+                                href="/forgot-password"
+                                className="text-[#002664] font-bold text-[14px] leading-[21px] hover:underline"
                             >
-                                Jelszó
-                            </button>
-                            <button
-                                type="button"
-                                className={`tab text-xs font-semibold ${activeTab === 'passkey' ? 'tab-active bg-primary text-primary-content shadow' : ''}`}
-                                onClick={() => setActiveTab('passkey')}
-                            >
-                                Passkey
-                            </button>
-                            <button
-                                type="button"
-                                className={`tab text-xs font-semibold ${activeTab === 'magic' ? 'tab-active bg-primary text-primary-content shadow' : ''}`}
-                                onClick={() => setActiveTab('magic')}
-                            >
-                                E-mail Kód
-                            </button>
+                                Elfelejtett jelszó
+                            </Link>
                         </div>
-                    )}
+                    </form>
+                )}
 
-                    {/* TAB 1: Password Form */}
-                    {!pending2FA && activeTab === 'password' && (
-                        <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                            <div className="form-control">
-                                <label className="label py-1">
-                                    <span className="label-text font-medium text-xs">E-mail cím</span>
-                                </label>
-                                <input
-                                    type="email"
-                                    placeholder="orvos@orvos.hu"
-                                    className="input input-bordered focus:input-primary text-sm"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
-                            </div>
-
-                            <div className="form-control">
-                                <label className="label py-1">
-                                    <span className="label-text font-medium text-xs">Jelszó</span>
-                                </label>
-                                <input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    className="input input-bordered focus:input-primary text-sm"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                                <label className="label py-1">
-                                    <Link
-                                        href="/forgot-password"
-                                        className="label-text-alt link link-primary text-xs"
-                                    >
-                                        Elfelejtett jelszó?
-                                    </Link>
-                                </label>
-                            </div>
-
-                            <div className="form-control mt-4">
-                                <button
-                                    type="submit"
-                                    className={`btn btn-primary w-full ${isLoading ? 'loading' : ''}`}
-                                    disabled={isLoading}
-                                >
-                                    {isLoading ? 'Azonosítás...' : 'Bejelentkezés'}
-                                </button>
-                            </div>
-                        </form>
-                    )}
-
-                    {/* TAB 2: Passkey Form */}
-                    {!pending2FA && activeTab === 'passkey' && (
-                        <div className="space-y-4 text-center py-2">
-                            <div className="p-4 bg-base-200/60 rounded-xl border border-base-300">
-                                <span className="material-symbols-rounded text-5xl text-primary mb-2 block">
-                                    fingerprint
-                                </span>
-                                <h3 className="font-bold text-base text-base-content mb-1">
-                                    Gyors belépés Biometriával
-                                </h3>
-                                <p className="text-xs text-base-content/70 mb-4">
-                                    Belépés Touch ID, Face ID vagy Windows Hello segítségével kódok beírása nélkül.
-                                </p>
-
-                                <div className="form-control mb-4">
-                                    <input
-                                        type="email"
-                                        placeholder="orvos@orvos.hu (opcionális azonosító)"
-                                        className="input input-bordered input-sm focus:input-primary text-xs"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                    />
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={handlePasskeySubmit}
-                                    className={`btn btn-primary btn-block ${isLoading ? 'loading' : ''}`}
-                                    disabled={isLoading}
-                                >
-                                    <span className="material-symbols-rounded text-lg">fingerprint</span>
-                                    {isLoading ? 'Biometria ellenőrzése...' : 'Belépés Passkey-vel'}
-                                </button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* TAB 3: Magic Code / Passwordless */}
-                    {!pending2FA && activeTab === 'magic' && (
-                        <form onSubmit={handleMagicLinkSubmit} className="space-y-4">
-                            <p className="text-xs text-base-content/70">
-                                Adja meg e-mail címét, és küldünk egy 6 jegyű belépési kódot jelszó használata nélkül.
+                {/* TAB 2: Passkey Biometrikus Belépés */}
+                {!pending2FA && activeTab === 'passkey' && (
+                    <div className="flex flex-col gap-4 text-center py-2">
+                        <div className="p-5 bg-white rounded-xl border border-[#D8D9E0] flex flex-col items-center">
+                            <span className="material-symbols-rounded text-5xl text-[#002664] mb-2 block">
+                                fingerprint
+                            </span>
+                            <h3 className="font-bold text-base text-[#002664] mb-1">
+                                Gyors belépés Biometriával
+                            </h3>
+                            <p className="text-xs text-[#62788F] mb-4 max-w-xs">
+                                Belépés Touch ID, Face ID vagy Windows Hello segítségével kódok beírása nélkül.
                             </p>
-                            <div className="form-control">
-                                <label className="label py-1">
-                                    <span className="label-text font-medium text-xs">E-mail cím</span>
-                                </label>
-                                <input
-                                    type="email"
-                                    placeholder="orvos@orvos.hu"
-                                    className="input input-bordered focus:input-primary text-sm"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
-                            </div>
 
+                            <input
+                                type="email"
+                                placeholder="orvos@orvos.hu (opcionális azonosító)"
+                                className="h-[48px] w-full bg-white border border-[#D8D9E0] rounded-[8px] px-3 py-2 text-sm text-[#002664] placeholder:text-[#62788F] focus:outline-none focus:border-[#002664] mb-3"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+
+                            <button
+                                type="button"
+                                onClick={handlePasskeySubmit}
+                                disabled={isLoading}
+                                className="h-[56px] w-full bg-[#002664] hover:bg-[#001F52] text-white rounded-[8px] font-bold text-[16px] flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
+                            >
+                                <span className="material-symbols-rounded text-xl">fingerprint</span>
+                                <span>{isLoading ? 'Biometria ellenőrzése...' : 'Belépés Passkey-vel'}</span>
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* TAB 3: E-mail Kód (Magic Code) */}
+                {!pending2FA && activeTab === 'magic' && (
+                    <form onSubmit={handleMagicLinkSubmit} className="flex flex-col gap-3">
+                        <p className="text-xs text-[#62788F]">
+                            Adja meg e-mail címét, és küldünk egy 6 jegyű belépési kódot jelszó használata nélkül.
+                        </p>
+                        <input
+                            type="email"
+                            placeholder="E-mail cím"
+                            className="h-[56px] w-full bg-white border border-[#D8D9E0] rounded-[8px] px-[15px] py-[16px] text-[16px] text-[#002664] placeholder:text-[#62788F] focus:outline-none focus:border-[#002664] transition-colors"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="h-[56px] w-full bg-[#002664] hover:bg-[#001F52] text-white rounded-[8px] font-bold text-[16px] flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:opacity-50 mt-1"
+                        >
+                            <span className="material-symbols-rounded text-xl">mail</span>
+                            <span>{isLoading ? 'Kód küldése...' : 'Egyszeri belépőkód küldése'}</span>
+                        </button>
+                    </form>
+                )}
+
+                {/* 2FA / OTP Belépési lépés (Ha pending2FA aktív) */}
+                {pending2FA && (
+                    <form onSubmit={handle2FASubmit} className="flex flex-col gap-4">
+                        <div className="p-4 bg-white rounded-xl border border-[#D8D9E0] text-center">
+                            <span className="material-symbols-rounded text-4xl text-[#002664] mb-1 block">
+                                verified_user
+                            </span>
+                            <p className="text-xs text-[#62788F]">
+                                Elküldtük a 6 jegyű kódot a(z) <span className="font-semibold text-[#002664]">{pending2FA.email}</span> címre.
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                            <label className="text-xs font-bold text-[#002664] text-center">
+                                6-jegyű OTP kód
+                            </label>
+                            <input
+                                type="text"
+                                maxLength={6}
+                                placeholder="123456"
+                                className="h-[56px] w-full bg-white border border-[#D8D9E0] rounded-[8px] text-center text-2xl tracking-[0.5em] font-mono font-bold text-[#002664] focus:outline-none focus:border-[#002664]"
+                                value={otpCode}
+                                onChange={(e) => setOtpCode(e.target.value)}
+                                required
+                                autoFocus
+                            />
+                        </div>
+
+                        <label className="cursor-pointer flex items-center gap-2 py-1">
+                            <input
+                                type="checkbox"
+                                className="checkbox checkbox-primary checkbox-sm rounded"
+                                checked={rememberDevice}
+                                onChange={(e) => setRememberDevice(e.target.checked)}
+                            />
+                            <span className="text-xs text-[#62788F]">
+                                Megbízható eszköz megjegyzése (ne kérjen kódot 30 napig)
+                            </span>
+                        </label>
+
+                        <div className="flex gap-2 pt-2">
+                            <button
+                                type="button"
+                                onClick={cancel2FA}
+                                className="h-[48px] flex-1 bg-white border border-[#D8D9E0] hover:bg-slate-50 text-[#002664] font-bold text-sm rounded-[8px] transition-colors"
+                            >
+                                Vissza
+                            </button>
                             <button
                                 type="submit"
-                                className={`btn btn-primary w-full ${isLoading ? 'loading' : ''}`}
-                                disabled={isLoading}
+                                disabled={isLoading || otpCode.length < 6}
+                                className="h-[48px] flex-1 bg-[#002664] hover:bg-[#001F52] text-white font-bold text-sm rounded-[8px] transition-colors disabled:opacity-50"
                             >
-                                <span className="material-symbols-rounded text-lg">mail</span>
-                                {isLoading ? 'Kód küldése...' : 'Egyszeri belépőkód küldése'}
+                                {isLoading ? 'Ellenőrzés...' : 'Kód igazolása'}
                             </button>
-                        </form>
-                    )}
+                        </div>
 
-                    {/* 2FA / OTP STEP (WHEN PENDING 2FA IS ACTIVE) */}
-                    {pending2FA && (
-                        <form onSubmit={handle2FASubmit} className="space-y-4 animate-fade-in">
-                            <div className="p-4 bg-primary/5 rounded-xl border border-primary/20 text-center">
-                                <span className="material-symbols-rounded text-4xl text-primary mb-1 block">
-                                    verified_user
-                                </span>
-                                <h3 className="font-bold text-base text-base-content mb-1">
-                                    Kétfaktoros Azonosítás (2FA)
-                                </h3>
-                                <p className="text-xs text-base-content/70">
-                                    Elküldtük a 6 jegyű kódot a(z) <span className="font-semibold text-primary">{pending2FA.email}</span> címre.
-                                </p>
-                            </div>
-
-                            <div className="form-control text-center">
-                                <label className="label justify-center py-1">
-                                    <span className="label-text font-bold text-xs">6-jegyű OTP kód</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    maxLength={6}
-                                    placeholder="123456"
-                                    className="input input-bordered text-center text-2xl tracking-[0.5em] font-mono focus:input-primary font-bold"
-                                    value={otpCode}
-                                    onChange={(e) => setOtpCode(e.target.value)}
-                                    required
-                                    autoFocus
-                                />
-                            </div>
-
-                            <div className="form-control">
-                                <label className="cursor-pointer label justify-start gap-2 py-1">
-                                    <input
-                                        type="checkbox"
-                                        className="checkbox checkbox-primary checkbox-sm"
-                                        checked={rememberDevice}
-                                        onChange={(e) => setRememberDevice(e.target.checked)}
-                                    />
-                                    <span className="label-text text-xs">
-                                        Megbízható eszköz megjegyzése (ne kérjen kódot 30 napig)
-                                    </span>
-                                </label>
-                            </div>
-
-                            <div className="flex gap-2 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={cancel2FA}
-                                    className="btn btn-ghost btn-sm flex-1 text-xs"
-                                >
-                                    Vissza
-                                </button>
-                                <button
-                                    type="submit"
-                                    className={`btn btn-primary btn-sm flex-1 text-xs ${isLoading ? 'loading' : ''}`}
-                                    disabled={isLoading || otpCode.length < 6}
-                                >
-                                    {isLoading ? 'Ellenőrzés...' : 'Kód igazolása'}
-                                </button>
-                            </div>
-
-                            {/* Demo helper */}
-                            <div className="mt-3 p-2 bg-base-200 rounded text-center">
-                                <span className="text-[11px] text-base-content/60">
-                                    💡 <strong>Tesztelési segédlet:</strong> A demo 2FA kód: <code className="font-bold text-primary">123456</code>
-                                </span>
-                            </div>
-                        </form>
-                    )}
-                </div>
+                        {/* Demo segédlet */}
+                        <div className="p-2.5 bg-[#EFF0F3] rounded-lg text-center">
+                            <span className="text-[11px] text-[#62788F]">
+                                💡 <strong>Tesztelési segédlet:</strong> A demo 2FA kód: <code className="font-bold text-[#002664]">123456</code>
+                            </span>
+                        </div>
+                    </form>
+                )}
             </div>
         </div>
     );

@@ -1,21 +1,37 @@
+/**
+ * ============================================================================
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ (FSR) - ROOT LAYOUT
+ * ============================================================================
+ * 
+ * HASZNÁLAT ÉS CÉL:
+ * A teljes portál gyökér elrendezése. Betölti az arculati tipográfiát (Ubuntu Google Font),
+ * a Material Symbols ikonkészletet, a globális CSS stílusokat, valamint biztosítja
+ * a hitelesítési környezetet (AuthProvider).
+ * 
+ * USER STORYK:
+ * - Felhasználóként szeretném, hogy az oldal arculata, betűtípusa és vizuális
+ *   megjelenése megegyezzen a hivatalos BENU márka és a benuveny.hu stílusával.
+ * 
+ * KAPCSOLÓDÓ ELEMEK:
+ * - src/app/globals.css
+ * - src/context/AuthContext.tsx
+ * ============================================================================
+ */
+
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google"; // Keep Geist as simple import, using variables in CSS
+import { Ubuntu } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const ubuntu = Ubuntu({
+  variable: "--font-ubuntu",
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Orvosi Készletportál",
-  description: "Benuveny B2B Prototípus - Next.js Migration",
+  title: "BENUvény Orvosi Portál",
+  description: "Benuveny Orvosi Készlet és Információs Portál",
 };
 
 export default function RootLayout({
@@ -32,7 +48,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${ubuntu.variable} font-sans antialiased bg-[#F9F9FB] text-[#002664]`}
         suppressHydrationWarning={true}
       >
         <AuthProvider>

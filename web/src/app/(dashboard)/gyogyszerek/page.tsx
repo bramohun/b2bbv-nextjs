@@ -1,43 +1,33 @@
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ (FSR) - GYÓGYSZERLISTA FELÜLET
  * ============================================================================
  * 
- * USER STORY:
- * Felhasználóként szeretném áttekinteni az elérhető gyógyszerek listáját, 
- * keresni közöttük név, hatóanyag vagy TK-szám alapján, és szűrni a státuszuk szerint,
- * hogy gyorsan megtaláljam a számomra releváns készítményeket.
- * Emellett rendezni szeretném az eredményeket különböző szempontok szerint.
+ * MIRE HASZNÁLJUK:
+ * Ez az oldal a BENU Vény Orvosi Portál központi gyógyszerkereső és -böngésző
+ * felülete. Lehetővé teszi a magyarországi forgalomban lévő gyógyszerek (több mint 41 000 tétel)
+ * gyors keresését, oszlopszintű szűrését, rendezését, a készlet- és hiányállapotok
+ * áttekintését, valamint a kedvencek és feliratkozások kezelését.
  * 
- * FUNKCIÓK:
- * - Gyógyszerlista megjelenítése rácsos elrendezésben (MedicineCard).
- * - Keresés (Search): Valós idejű szűrés név, INN vagy TK-szám alapján.
- * - Szűrés (Filter): 
- *   - Szűrés gyógyszerstátusz szerint (Elérhető, Készlethiány, Megszűnt).
- *   - Szűrés közeli patikában elérhető termékekre.
- * - Rendezés (Sorting):
- *   - Táblázatos nézet: az egyes oszlopok fejlécére kattintva növekvő/csökkenő rendezés.
- *     Az aktuális rendezési irány ▲/▼ jelzéssel látható a fejlécen.
- *   - Kártyás nézet: a találatok felett dropdown az alábbi opciókkal:
- *     "ABC sorrendben növekvő", "ABC sorrendben csökkenő", "Frissítés szerint",
- *     "Hatóanyag szerint növekvő", "Hatóanyag szerint csökkenő".
- * - Lapozás (Pagination): Az eredmények tördelése a gyorsabb betöltés és áttekinthetőség érdekében.
- * - Reszponzív nézet: Mobil és asztali felületre optimalizált megjelenés.
- * - Nézet testreszabása (Customization): 
- *   - Oszlopok és kártyaadatok láthatóságának kapcsolása, beállítások mentése localStorage-ba.
- *   - Táblázat oszlopainak átrendezése drag & drop segítségével a fejlécet megragadva.
+ * KAPCSOLÓDÓ USER STORY-K:
+ * - Orvosként szeretnék gyorsan rákeresni egy készítményre név, hatóanyag vagy törzskönyvi szám
+ *   alapján, hogy azonnal lássam annak elérhetőségét és adatait.
+ * - Orvosként szeretném látni a készlethiányos és megszűnt gyógyszereket, hogy időben értesülhessek
+ *   a piaci ellátási problémákról.
+ * - Felhasználóként szeretném egyetlen kattintással szűrni a listát csak a mentett (kedvenc)
+ *   gyógyszereimre vagy a kijelölt közeli gyógyszertáramban elérhető tételekre.
+ * - Felhasználóként szeretném testreszabni a táblázat oszlopait (megjelenítés/elrejtés és drag-and-drop sorrend),
+ *   hogy a napi orvosi munkámhoz legfontosabb adatokat láthassam elsődlegesen.
+ * - Felhasználóként szeretnék közvetlenül a listából kedvencnek jelölni vagy készlethiány-értesítést
+ *   beállítani egy adott gyógyszerre.
  * 
- * MŰKÖDÉSI LOGIKA:
- * - Mentés a listához / eltávolítás és értesítés kérése / lemondása.
- * - ÉRTESÍTÉS LOGIKA: Értesítésre való feliratkozáskor a termék automatikusan a mentett listára kerül.
- * - MENTÉS LOGIKA: Mentett gyógyszer eltávolítása esetén figyelmeztetés jelenik meg, ha értesítés is aktív a termékhez.
- * - KÖZELI PATIKA LOGIKA: Ha közeli patika van beállítva, a "Közeli patika" oszlop automatikusan megjelenik a táblázatban, 
- *   megjelenítve a készletstátuszt és az utolsó frissítés időpontját.
- * - Rendezés a szűrt listán (`filteredMedicines`) történik, mielőtt a lapozás alkalmazásra kerül.
- * 
- * KAPCSOLÓDÓ ELEMEK:
- * - src/components/medicines/MedicineCard.tsx: Egyedi termékkártya
- * - src/lib/data.ts: Adatforrás
+ * KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
+ * - Gyógyszer részletes adatlap: /gyogyszerek/adatlap?tk=...
+ * - Kedvencek kezelése: FavoriteContext & Mentett tételek lista a fejlécben
+ * - Készletértesítések kezelése: NotificationContext & Bell ikon akciók
+ * - Közeli gyógyszertár integráció: NearbyPharmacyContext & készletindikátor
+ * - Fejléc globális kereső: GlobalSearch autocompletion
+ * ============================================================================
  */
 
 'use client';
@@ -125,7 +115,9 @@ function MedicinesPageContent() {
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 24; // Nice grid number (1, 2, 3, 4 col compatible)
+    const [itemsPerPage, setItemsPerPage] = useState(20);
+    const [isPerPageDropdownOpen, setIsPerPageDropdownOpen] = useState(false);
+    const perPageRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         async function fetchMedicines() {
@@ -199,9 +191,12 @@ function MedicinesPageContent() {
             if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
                 setIsSettingsOpen(false);
             }
+            if (perPageRef.current && !perPageRef.current.contains(event.target as Node)) {
+                setIsPerPageDropdownOpen(false);
+            }
         }
 
-        if (isSettingsOpen) {
+        if (isSettingsOpen || isPerPageDropdownOpen) {
             document.addEventListener('mousedown', handleClickOutside);
         } else {
             document.removeEventListener('mousedown', handleClickOutside);
@@ -210,7 +205,7 @@ function MedicinesPageContent() {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [isSettingsOpen]);
+    }, [isSettingsOpen, isPerPageDropdownOpen]);
 
     const toggleTableColumn = (column: MedicineTableColumn) => {
         setViewSettings(prev => ({
@@ -391,6 +386,9 @@ function MedicinesPageContent() {
             case 'elérhető': return 'badge-success';
             case 'készlethiány': return 'badge-warning';
             case 'megszűnt': return 'badge-error';
+            case 'elérhető': return 'badge-status-available';
+            case 'készlethiány': return 'badge-status-shortage';
+            case 'megszűnt': return 'badge-status-discontinued';
             default: return 'badge-ghost';
         }
     };
@@ -485,8 +483,8 @@ function MedicinesPageContent() {
 
         const isSortable = col !== 'actions';
         const labelMap: Record<string, string> = {
-            tkSzam: 'TK-szám',
-            nev: 'Terméknév',
+            tkSzam: 'TK szám',
+            nev: 'Termék neve',
             activeSubstance: 'Hatóanyag',
             kiszereles: 'Kiszerelés',
             gyarto: 'Gyártó',
@@ -495,7 +493,7 @@ function MedicinesPageContent() {
             dispensabilitySub: 'Kiad. Alcsop.',
             safetyFeatures: 'B. Elemek',
             authorizationDate: 'Eng. Dátum',
-            lastUpdate: 'Utolsó friss.',
+            lastUpdate: 'Dátum / idő',
             status: 'Státusz',
             nearbyPharmacyStock: 'Közeli patika',
             nearbyPharmacyLastUpdate: 'Közeli patika frissítve',
@@ -528,15 +526,17 @@ function MedicinesPageContent() {
                 onDragEnd={handleDragEnd}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, col)}
-                className={`sticky top-[64px] lg:top-[80px] z-20 bg-base-100 shadow-sm ${col !== 'actions' ? 'cursor-grab active:cursor-grabbing hover:bg-base-200' : ''} select-none ${draggedColumn === col ? 'bg-base-300' : ''}`}
+                className={`bg-[#f9f9fb] px-[24px] py-[10px] text-[#62788f] text-[12px] font-bold tracking-normal uppercase border-b border-[#e7e8ec] ${col === 'actions' ? 'text-right' : 'text-left'} ${col !== 'actions' ? 'cursor-grab active:cursor-grabbing hover:bg-slate-100' : ''} select-none ${draggedColumn === col ? 'bg-slate-200' : ''}`}
                 onClick={() => isSortable && sortKeyMap[col] && handleTableSort(sortKeyMap[col]!)}
             >
-                <div className="flex items-center gap-1">
+                <div className={`flex items-center gap-1.5 ${col === 'actions' ? 'justify-end' : 'justify-start'}`}>
                     {col !== 'actions' && (
-                        <span className="material-symbols-rounded text-xs opacity-30">drag_indicator</span>
+                        <img src="/assets/figma/deafcd0a1d15ec8a0769a1c0ddd59e713ab49928.svg" alt="" className="size-[20px] shrink-0 opacity-60" />
                     )}
-                    {labelMap[col]}
-                    {sortKey === sortKeyMap[col] && (sortDirection === 'asc' ? ' ▲' : ' ▼')}
+                    <span>{labelMap[col]}</span>
+                    {sortKey === sortKeyMap[col] && (
+                        <span className="text-[#002664] font-bold">{sortDirection === 'asc' ? ' ▲' : ' ▼'}</span>
+                    )}
                 </div>
             </th>
         );
@@ -545,17 +545,17 @@ function MedicinesPageContent() {
     const renderFilterCell = (col: MedicineTableColumn) => {
         if (!viewSettings.tableColumns[col]) return null;
 
-        if (col === 'actions') return <th key={col} className="bg-base-100 p-1"></th>;
+        if (col === 'actions') return <th key={col} className="bg-[#f9f9fb] px-[24px] py-[12px] border-b border-[#e7e8ec]"></th>;
 
         if (col === 'status') {
             return (
-                <th key={col} className="bg-base-100 p-1">
+                <th key={col} className="bg-[#f9f9fb] px-[24px] py-[12px] border-b border-[#e7e8ec]">
                     <select
-                        className="select select-bordered select-xs w-full font-normal"
+                        className="w-full bg-white border border-[#d8d9e0] rounded-[24px] px-[12px] py-[8px] text-[13px] text-[#002664] font-normal cursor-pointer focus:outline-none focus:border-[#002664]"
                         value={columnFilters['status'] || ''}
                         onChange={(e) => handleColumnFilterChange('status', e.target.value)}
                     >
-                        <option value="">Mindegy</option>
+                        <option value="">Státusz</option>
                         <option value="Elérhető">Elérhető</option>
                         <option value="Készlethiány">Készlethiány</option>
                         <option value="Megszűnt">Megszűnt</option>
@@ -566,9 +566,9 @@ function MedicinesPageContent() {
 
         if (col === 'nearbyPharmacyStock') {
             return (
-                <th key={col} className="bg-base-100 p-1">
+                <th key={col} className="bg-[#f9f9fb] px-[24px] py-[12px] border-b border-[#e7e8ec]">
                     <select
-                        className="select select-bordered select-xs w-full font-normal"
+                        className="w-full bg-white border border-[#d8d9e0] rounded-[24px] px-[12px] py-[8px] text-[13px] text-[#002664] font-normal cursor-pointer focus:outline-none focus:border-[#002664]"
                         value={columnFilters['nearbyPharmacyStock'] || ''}
                         onChange={(e) => handleColumnFilterChange('nearbyPharmacyStock', e.target.value)}
                         disabled={!nearbyPharmacy}
@@ -581,59 +581,43 @@ function MedicinesPageContent() {
             );
         }
 
-        if (col === 'nearbyPharmacyLastUpdate') {
+        if (col === 'nearbyPharmacyLastUpdate' || col === 'lastUpdate') {
+            const prefix = col === 'nearbyPharmacyLastUpdate' ? 'nearbyPharmacyLastUpdate' : 'lastUpdate';
             return (
-                <th key={col} className="bg-base-100 p-1">
-                    <div className="flex flex-col gap-1">
-                        <input
-                            type="date"
-                            className="input input-bordered input-xs w-full font-normal"
-                            title="Dátumtól"
-                            value={columnFilters['nearbyPharmacyLastUpdate_from'] || ''}
-                            onChange={(e) => handleColumnFilterChange('nearbyPharmacyLastUpdate_from', e.target.value)}
-                            disabled={!nearbyPharmacy}
-                        />
-                        <input
-                            type="date"
-                            className="input input-bordered input-xs w-full font-normal"
-                            title="Dátumig"
-                            value={columnFilters['nearbyPharmacyLastUpdate_to'] || ''}
-                            onChange={(e) => handleColumnFilterChange('nearbyPharmacyLastUpdate_to', e.target.value)}
-                            disabled={!nearbyPharmacy}
-                        />
-                    </div>
-                </th>
-            );
-        }
-
-        if (col === 'lastUpdate') {
-            return (
-                <th key={col} className="bg-base-100 p-1">
-                    <div className="flex flex-col gap-1">
-                        <input
-                            type="date"
-                            className="input input-bordered input-xs w-full font-normal"
-                            title="Dátumtól"
-                            value={columnFilters['lastUpdate_from'] || ''}
-                            onChange={(e) => handleColumnFilterChange('lastUpdate_from', e.target.value)}
-                        />
-                        <input
-                            type="date"
-                            className="input input-bordered input-xs w-full font-normal"
-                            title="Dátumig"
-                            value={columnFilters['lastUpdate_to'] || ''}
-                            onChange={(e) => handleColumnFilterChange('lastUpdate_to', e.target.value)}
-                        />
+                <th key={col} className="bg-[#f9f9fb] px-[24px] py-[12px] border-b border-[#e7e8ec]">
+                    <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-1 bg-white border border-[#d8d9e0] rounded-[8px] px-2 py-1">
+                            <img src="/assets/figma/0805af40480be0d0f5e523ccec7510bfc0f81007.svg" alt="" className="size-3.5 opacity-60" />
+                            <input
+                                type="date"
+                                className="w-full text-xs text-[#62788f] bg-transparent outline-none font-normal"
+                                title="Dátumtól"
+                                value={columnFilters[`${prefix}_from`] || ''}
+                                onChange={(e) => handleColumnFilterChange(`${prefix}_from`, e.target.value)}
+                                disabled={col === 'nearbyPharmacyLastUpdate' && !nearbyPharmacy}
+                            />
+                        </div>
+                        <div className="flex items-center gap-1 bg-white border border-[#d8d9e0] rounded-[8px] px-2 py-1">
+                            <img src="/assets/figma/0805af40480be0d0f5e523ccec7510bfc0f81007.svg" alt="" className="size-3.5 opacity-60" />
+                            <input
+                                type="date"
+                                className="w-full text-xs text-[#62788f] bg-transparent outline-none font-normal"
+                                title="Dátumig"
+                                value={columnFilters[`${prefix}_to`] || ''}
+                                onChange={(e) => handleColumnFilterChange(`${prefix}_to`, e.target.value)}
+                                disabled={col === 'nearbyPharmacyLastUpdate' && !nearbyPharmacy}
+                            />
+                        </div>
                     </div>
                 </th>
             );
         }
 
         return (
-            <th key={col} className="bg-base-100 p-1">
+            <th key={col} className="bg-[#f9f9fb] px-[24px] py-[12px] border-b border-[#e7e8ec]">
                 <input
                     type="text"
-                    className="input input-bordered input-xs w-full font-normal"
+                    className="w-full bg-white border border-[#d8d9e0] rounded-[8px] px-[12px] py-[8px] text-[13px] text-[#002664] placeholder-[#62788f] font-normal focus:outline-none focus:border-[#002664]"
                     placeholder="Szűrés..."
                     value={columnFilters[col] || ''}
                     onChange={(e) => handleColumnFilterChange(col, e.target.value)}
@@ -647,56 +631,74 @@ function MedicinesPageContent() {
 
         switch (col) {
             case 'tkSzam':
-                return <td key={col} className="text-xs font-mono">{medicine.tkSzam}</td>;
+                return <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] border-b border-[#e7e8ec]">{medicine.tkSzam}</td>;
             case 'nev':
                 return (
-                    <td key={col}>
-                        <div className="font-bold text-primary">
-                            <Link href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(medicine.tkSzam)}`} className="hover:underline">
-                                {medicine.nev}
-                            </Link>
-                        </div>
+                    <td key={col} className="px-[24px] py-[16px] border-b border-[#e7e8ec]">
+                        <Link href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(medicine.tkSzam)}`} className="font-bold text-[#002664] text-[15px] hover:text-[#378509] transition-colors leading-snug block">
+                            {medicine.nev}
+                        </Link>
                     </td>
                 );
             case 'activeSubstance':
-                return <td key={col}>{medicine.activeSubstance || medicine.inn || '-'}</td>;
+                return <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] border-b border-[#e7e8ec]">{medicine.activeSubstance || medicine.inn || '-'}</td>;
             case 'kiszereles':
-                return <td key={col}>{medicine.kiszereles}</td>;
+                return <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] border-b border-[#e7e8ec]">{medicine.kiszereles}</td>;
             case 'gyarto':
                 return (
-                    <td key={col}>
-                        <div className="tooltip" data-tip={medicine.gyarto}>
-                            <span className="truncate max-w-[150px] block">{medicine.gyarto}</span>
-                        </div>
+                    <td key={col} className="px-[24px] py-[16px] border-b border-[#e7e8ec]">
+                        <span className="truncate max-w-[150px] block text-[14px] text-[#62788f]" title={medicine.gyarto}>{medicine.gyarto}</span>
                     </td>
                 );
             case 'packagingDetails':
-                return <td key={col}>{medicine.packagingDetails}</td>;
+                return <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] border-b border-[#e7e8ec]">{medicine.packagingDetails}</td>;
             case 'dispensability':
-                return <td key={col}>{medicine.dispensability}</td>;
+                return <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] border-b border-[#e7e8ec]">{medicine.dispensability}</td>;
             case 'dispensabilitySub':
-                return <td key={col}>{medicine.dispensabilitySub}</td>;
+                return <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] border-b border-[#e7e8ec]">{medicine.dispensabilitySub}</td>;
             case 'safetyFeatures':
-                return <td key={col}>{medicine.safetyFeatures}</td>;
+                return <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] border-b border-[#e7e8ec]">{medicine.safetyFeatures}</td>;
             case 'authorizationDate':
-                return <td key={col}>{medicine.authorizationDate}</td>;
+                return <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] border-b border-[#e7e8ec]">{medicine.authorizationDate}</td>;
             case 'lastUpdate':
-                return <td key={col}>{formatDate(medicine.lastUpdate)}</td>;
+                return <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] whitespace-nowrap border-b border-[#e7e8ec]">{formatDate(medicine.lastUpdate)}</td>;
             case 'status':
                 return (
-                    <td key={col}>
-                        <div className={`badge ${medicine.status === 'Elérhető' ? 'badge-success' : medicine.status === 'Készlethiány' ? 'badge-warning' : 'badge-error'} badge-xs whitespace-nowrap`}>
-                            {medicine.status}
-                        </div>
+                    <td key={col} className="px-[24px] py-[16px] border-b border-[#e7e8ec]">
+                        {medicine.status === 'Elérhető' && (
+                            <span className="inline-flex items-center gap-[6px] bg-[#e8f8e2] text-[#317907] px-[8px] py-[3px] rounded-[4px] font-medium text-[14px] whitespace-nowrap">
+                                <img src="/assets/figma/8d5c6e13ab3c6173ee2bfff8d7a4bf3cc46bca63.svg" alt="" className="size-[16px]" />
+                                Elérhető
+                            </span>
+                        )}
+                        {medicine.status === 'Készlethiány' && (
+                            <span className="inline-flex items-center gap-[6px] bg-[#fff7ba] text-[#7a6c21] px-[8px] py-[3px] rounded-[4px] font-medium text-[14px] whitespace-nowrap">
+                                <img src="/assets/figma/95a59bf06dc352f30740e8e75e9dc3eccfec6dd4.svg" alt="" className="size-[16px]" />
+                                Hiány
+                            </span>
+                        )}
+                        {medicine.status === 'Megszűnt' && (
+                            <span className="inline-flex items-center gap-[6px] bg-[#feeaed] text-[#b1174e] px-[8px] py-[3px] rounded-[4px] font-medium text-[14px] whitespace-nowrap">
+                                <img src="/assets/figma/c5d9b22ba806bb52c15a398d9d8ee7ff7e067868.svg" alt="" className="size-[16px]" />
+                                Megszűnt
+                            </span>
+                        )}
                     </td>
                 );
             case 'nearbyPharmacyStock':
                 return (
-                    <td key={col}>
+                    <td key={col} className="px-[24px] py-[16px] border-b border-[#e7e8ec]">
                         {nearbyPharmacy ? (
-                            <div className={`badge ${isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'badge-success' : 'bg-gray-200 text-gray-500 border-gray-300'} badge-xs whitespace-nowrap`}>
-                                {isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? 'Elérhető' : 'Nem elérhető'}
-                            </div>
+                            isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? (
+                                <span className="inline-flex items-center gap-[6px] bg-[#e8f8e2] text-[#317907] px-[8px] py-[3px] rounded-[4px] font-medium text-[14px] whitespace-nowrap">
+                                    <img src="/assets/figma/8d5c6e13ab3c6173ee2bfff8d7a4bf3cc46bca63.svg" alt="" className="size-[16px]" />
+                                    Elérhető
+                                </span>
+                            ) : (
+                                <span className="inline-flex items-center gap-[6px] bg-gray-100 text-gray-500 px-[8px] py-[3px] rounded-[4px] font-medium text-[14px] whitespace-nowrap">
+                                    Nem elérhető
+                                </span>
+                            )
                         ) : (
                             <span className="text-xs text-gray-400 italic">Nincs beállítva</span>
                         )}
@@ -704,41 +706,50 @@ function MedicinesPageContent() {
                 );
             case 'nearbyPharmacyLastUpdate':
                 return (
-                    <td key={col}>
-                        {nearbyPharmacy ? (
-                            <div className="text-xs text-gray-400 flex items-center gap-0.5">
-                                <span className="material-symbols-rounded text-[14px]">schedule</span>
-                                {getNearbyPharmacyStatusUpdate(medicine.tkSzam, nearbyPharmacy.id, '')}
-                            </div>
-                        ) : (
-                            <span className="text-xs text-gray-400 italic">-</span>
-                        )}
+                    <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] border-b border-[#e7e8ec]">
+                        {nearbyPharmacy ? getNearbyPharmacyStatusUpdate(medicine.tkSzam, nearbyPharmacy.id, '') : '-'}
                     </td>
                 );
             case 'actions':
                 return (
-                    <td key={col} className="bg-base-100 sticky right-0 z-10 shadow-[-5px_0px_5px_-5px_#0000001a]">
-                        <div className="flex items-center gap-1">
+                    <td key={col} className="px-[24px] py-[16px] text-right border-b border-[#e7e8ec]">
+                        <div className="flex items-center justify-end gap-[8px]">
                             <button
-                                className={`btn btn-circle btn-xs ${isFavorite(medicine.tkSzam) ? 'bg-warning text-warning-content border-warning' : 'btn-ghost text-gray-400 hover:text-warning'}`}
+                                className={`size-[36px] rounded-[8px] flex items-center justify-center p-[6px] transition-colors cursor-pointer ${
+                                    isFavorite(medicine.tkSzam)
+                                        ? 'bg-[#002664] border border-[#002664]'
+                                        : 'bg-white border border-[#002664] hover:bg-[#f0f4f9]'
+                                }`}
                                 onClick={() => handleFavorite(medicine)}
                                 title={isFavorite(medicine.tkSzam) ? "Eltávolítás a mentettek közül" : "Mentés a listához"}
                             >
-                                <span className={`material-symbols-rounded text-[18px] ${isFavorite(medicine.tkSzam) ? 'fill-1' : ''}`}>
-                                    {isFavorite(medicine.tkSzam) ? 'bookmark_added' : 'bookmark_add'}
-                                </span>
+                                <img
+                                    src={isFavorite(medicine.tkSzam) ? "/assets/figma/0f46a8820ef14e70f1707a091b6a494ac0448773.svg" : "/assets/figma/944c7c49d7facfffc581f76fcabc2cff7a31b865.svg"}
+                                    alt="Mentés"
+                                    className="size-[24px]"
+                                />
                             </button>
                             <button
-                                className={`btn btn-circle btn-xs ${isSubscribed(medicine.tkSzam) ? 'btn-primary' : 'btn-ghost text-gray-400 hover:text-info'}`}
+                                className={`size-[36px] rounded-[8px] flex items-center justify-center p-[6px] transition-colors cursor-pointer ${
+                                    isSubscribed(medicine.tkSzam)
+                                        ? 'bg-[#002664] border border-[#002664]'
+                                        : 'bg-white border border-[#002664] hover:bg-[#f0f4f9]'
+                                }`}
                                 onClick={() => handleSubscription(medicine)}
                                 title={isSubscribed(medicine.tkSzam) ? "Leiratkozás" : "Értesítés kérése"}
                             >
-                                <span className="material-symbols-rounded text-[18px]">
-                                    {isSubscribed(medicine.tkSzam) ? 'notifications_active' : 'notifications'}
-                                </span>
+                                <img
+                                    src={isSubscribed(medicine.tkSzam) ? "/assets/figma/a490d8a3ba430f0d884765763912ceec677e0181.svg" : "/assets/figma/475a3a63bba1e5d0fe7309be1d8843540bbf7f88.svg"}
+                                    alt="Értesítés"
+                                    className="size-[24px]"
+                                />
                             </button>
-                            <Link href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(medicine.tkSzam)}`} className="btn btn-ghost btn-xs">
-                                Részletek
+                            <Link
+                                href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(medicine.tkSzam)}`}
+                                className="inline-flex items-center gap-[4px] text-[#002664] hover:text-[#378509] font-bold text-[14px] ml-1 transition-colors"
+                            >
+                                <span>Részletek</span>
+                                <img src="/assets/figma/6facf09639ce8f21ae7716fe32dc70d4159927dc.svg" alt="" className="size-[20px]" />
                             </Link>
                         </div>
                     </td>
@@ -757,137 +768,139 @@ function MedicinesPageContent() {
             />
 
             {/* Header & Controls */}
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                <h1 className="text-3xl font-bold">
-                    Gyógyszerek
-                    <span className="ml-2 text-sm font-normal text-gray-500">
-                        ({totalItems} termék)
-                    </span>
-                </h1>
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
+                <div className="flex items-center gap-3">
+                    <div className="size-[42px] flex items-center justify-center shrink-0">
+                        <img src="/assets/figma/38bf5ad3ce1d1b2b21785ece01507074f555c665.svg" alt="" className="size-[36px]" />
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-[22px] font-bold text-[#002664] leading-[33px]">
+                            Gyógyszerek
+                        </h1>
+                        <span className="text-xs font-semibold text-[#62788f] bg-[#f9f9fb] border border-[#d8d9e0] px-2.5 py-0.5 rounded-full">
+                            {totalItems} termék
+                        </span>
+                    </div>
+                </div>
 
-                <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto items-center">
-                    <button
-                        className={`btn btn-md gap-2 ${favoritesOnly ? 'btn-warning' : 'btn-ghost border-base-300'}`}
-                        onClick={() => setFavoritesOnly(!favoritesOnly)}
-                        title={favoritesOnly ? "Minden gyógyszer mutatása" : "Csak mentettek mutatása"}
-                    >
-                        <span className={`material-symbols-rounded ${favoritesOnly ? 'fill-1' : ''}`}>bookmarks</span>
-                        Mentett gyógyszerek
-                    </button>
+                <div className="flex flex-wrap items-center gap-[16px]">
+                    <label className="flex items-center gap-[8px] cursor-pointer select-none">
+                        <input
+                            type="checkbox"
+                            checked={favoritesOnly}
+                            onChange={(e) => setFavoritesOnly(e.target.checked)}
+                            className="size-[20px] rounded-[4px] border border-[#d8d9e0] accent-[#002664] cursor-pointer"
+                        />
+                        <span className="text-[#002664] text-[16px] font-normal">Csak mentett gyógyszerek</span>
+                    </label>
 
-                    {nearbyPharmacy && (
+                    <label className="flex items-center gap-[8px] cursor-pointer select-none">
+                        <input
+                            type="checkbox"
+                            checked={nearbyOnly}
+                            onChange={(e) => setNearbyOnly(e.target.checked)}
+                            className="size-[20px] rounded-[4px] border border-[#d8d9e0] accent-[#002664] cursor-pointer"
+                        />
+                        <span className="text-[#002664] text-[16px] font-normal">Közeli gyógyszertárban elérhető</span>
+                    </label>
+
+                    <div className="relative" ref={settingsRef}>
                         <button
-                            className={`btn btn-md gap-2 ${nearbyOnly ? 'btn-success' : 'btn-ghost border-base-300'}`}
-                            onClick={() => setNearbyOnly(!nearbyOnly)}
-                            title={nearbyOnly ? "Minden gyógyszer mutatása" : "Csak közeli patikában elérhetőek mutatása"}
-                        >
-                            <span className="material-symbols-rounded">local_pharmacy</span>
-                            Közeli patikában elérhető
-                        </button>
-                    )}
-
-
-
-                    <div className="relative z-30">
-                        <button
-                            className="btn btn-md m-1"
+                            className="border border-[#002664] bg-white text-[#002664] rounded-[8px] h-[36px] px-[12px] py-[6px] font-bold text-[14px] flex items-center gap-[8px] hover:bg-[#f0f4f9] transition-colors cursor-pointer"
                             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                            aria-label="Nézet testreszabása"
+                            aria-label="Oszlopok beállítása"
                         >
-                            <span className="material-symbols-rounded">tune</span>
-                            Nézet
+                            <img src="/assets/figma/d8e1edbd1ae5ee135c9de7a0829d05e39cce802e.svg" alt="" className="size-[20px]" />
+                            <span>Oszlopok</span>
                         </button>
                         {isSettingsOpen && (
                             <div
-                                ref={settingsRef}
-                                className="absolute right-0 top-full mt-2 z-[50] w-64 p-2 shadow-xl bg-base-100 rounded-box border border-base-200 overflow-y-auto max-h-[80vh]"
+                                className="absolute right-0 top-full mt-2 z-[50] w-64 p-3 shadow-xl bg-white rounded-2xl border border-[#d8d9e0] overflow-y-auto max-h-[80vh]"
                             >
                                 <ul className="menu menu-sm gap-1">
-                                    <li className="menu-title px-2">Oszlopok megjelenítése</li>
+                                    <li className="menu-title px-2 font-bold text-[#002664]">Oszlopok megjelenítése</li>
                                     <li>
                                         <label className="label cursor-pointer hover:bg-base-200">
-                                            <span className="label-text">TK-szám</span>
-                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.tkSzam} onChange={() => toggleTableColumn('tkSzam')} />
+                                            <span className="label-text text-[#002664]">TK szám</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm accent-[#002664]" checked={!!viewSettings.tableColumns.tkSzam} onChange={() => toggleTableColumn('tkSzam')} />
                                         </label>
                                     </li>
                                     <li>
                                         <label className="label cursor-pointer hover:bg-base-200">
-                                            <span className="label-text">Hatóanyag</span>
-                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.activeSubstance} onChange={() => toggleTableColumn('activeSubstance')} />
+                                            <span className="label-text text-[#002664]">Hatóanyag</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm accent-[#002664]" checked={!!viewSettings.tableColumns.activeSubstance} onChange={() => toggleTableColumn('activeSubstance')} />
                                         </label>
                                     </li>
                                     <li>
                                         <label className="label cursor-pointer hover:bg-base-200">
-                                            <span className="label-text">Kiszerelés</span>
-                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.kiszereles} onChange={() => toggleTableColumn('kiszereles')} />
+                                            <span className="label-text text-[#002664]">Kiszerelés</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm accent-[#002664]" checked={!!viewSettings.tableColumns.kiszereles} onChange={() => toggleTableColumn('kiszereles')} />
                                         </label>
                                     </li>
                                     <li>
                                         <label className="label cursor-pointer hover:bg-base-200">
-                                            <span className="label-text">Gyártó</span>
-                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.gyarto} onChange={() => toggleTableColumn('gyarto')} />
+                                            <span className="label-text text-[#002664]">Gyártó</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm accent-[#002664]" checked={!!viewSettings.tableColumns.gyarto} onChange={() => toggleTableColumn('gyarto')} />
                                         </label>
                                     </li>
                                     <li>
                                         <label className="label cursor-pointer hover:bg-base-200">
-                                            <span className="label-text">Csomagolás</span>
-                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.packagingDetails} onChange={() => toggleTableColumn('packagingDetails')} />
+                                            <span className="label-text text-[#002664]">Csomagolás</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm accent-[#002664]" checked={!!viewSettings.tableColumns.packagingDetails} onChange={() => toggleTableColumn('packagingDetails')} />
                                         </label>
                                     </li>
                                     <li>
                                         <label className="label cursor-pointer hover:bg-base-200">
-                                            <span className="label-text">Státusz</span>
-                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.status} onChange={() => toggleTableColumn('status')} />
+                                            <span className="label-text text-[#002664]">Státusz</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm accent-[#002664]" checked={!!viewSettings.tableColumns.status} onChange={() => toggleTableColumn('status')} />
                                         </label>
                                     </li>
                                     <li>
                                         <label className="label cursor-pointer hover:bg-base-200">
-                                            <span className="label-text">Közeli patika</span>
-                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.nearbyPharmacyStock} onChange={() => toggleTableColumn('nearbyPharmacyStock')} />
+                                            <span className="label-text text-[#002664]">Közeli patika</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm accent-[#002664]" checked={!!viewSettings.tableColumns.nearbyPharmacyStock} onChange={() => toggleTableColumn('nearbyPharmacyStock')} />
                                         </label>
                                     </li>
                                     <li>
                                         <label className="label cursor-pointer hover:bg-base-200">
-                                            <span className="label-text">Közeli patika frissítve</span>
-                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.nearbyPharmacyLastUpdate} onChange={() => toggleTableColumn('nearbyPharmacyLastUpdate')} />
+                                            <span className="label-text text-[#002664]">Közeli patika frissítve</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm accent-[#002664]" checked={!!viewSettings.tableColumns.nearbyPharmacyLastUpdate} onChange={() => toggleTableColumn('nearbyPharmacyLastUpdate')} />
                                         </label>
                                     </li>
                                     <li>
                                         <label className="label cursor-pointer hover:bg-base-200">
-                                            <span className="label-text">Kiadhatóság</span>
-                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.dispensability} onChange={() => toggleTableColumn('dispensability')} />
+                                            <span className="label-text text-[#002664]">Kiadhatóság</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm accent-[#002664]" checked={!!viewSettings.tableColumns.dispensability} onChange={() => toggleTableColumn('dispensability')} />
                                         </label>
                                     </li>
                                     <li>
                                         <label className="label cursor-pointer hover:bg-base-200">
-                                            <span className="label-text">Kiad. Alcsop.</span>
-                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.dispensabilitySub} onChange={() => toggleTableColumn('dispensabilitySub')} />
+                                            <span className="label-text text-[#002664]">Kiad. Alcsop.</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm accent-[#002664]" checked={!!viewSettings.tableColumns.dispensabilitySub} onChange={() => toggleTableColumn('dispensabilitySub')} />
                                         </label>
                                     </li>
                                     <li>
                                         <label className="label cursor-pointer hover:bg-base-200">
-                                            <span className="label-text">Biztonsági Elemek</span>
-                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.safetyFeatures} onChange={() => toggleTableColumn('safetyFeatures')} />
+                                            <span className="label-text text-[#002664]">Biztonsági Elemek</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm accent-[#002664]" checked={!!viewSettings.tableColumns.safetyFeatures} onChange={() => toggleTableColumn('safetyFeatures')} />
                                         </label>
                                     </li>
                                     <li>
                                         <label className="label cursor-pointer hover:bg-base-200">
-                                            <span className="label-text">Engedély Dátuma</span>
-                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.authorizationDate} onChange={() => toggleTableColumn('authorizationDate')} />
+                                            <span className="label-text text-[#002664]">Engedély Dátuma</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm accent-[#002664]" checked={!!viewSettings.tableColumns.authorizationDate} onChange={() => toggleTableColumn('authorizationDate')} />
                                         </label>
                                     </li>
                                     <li>
                                         <label className="label cursor-pointer hover:bg-base-200">
-                                            <span className="label-text">Utolsó frissítés</span>
-                                            <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={!!viewSettings.tableColumns.lastUpdate} onChange={() => toggleTableColumn('lastUpdate')} />
+                                            <span className="label-text text-[#002664]">Utolsó frissítés</span>
+                                            <input type="checkbox" className="checkbox checkbox-sm accent-[#002664]" checked={!!viewSettings.tableColumns.lastUpdate} onChange={() => toggleTableColumn('lastUpdate')} />
                                         </label>
                                     </li>
                                 </ul>
                             </div>
                         )}
                     </div>
-
-
                 </div>
             </div>
 
@@ -898,107 +911,149 @@ function MedicinesPageContent() {
                     </div>
                 ) : (
                     <>
-                        <div className="overflow-x-visible mb-8 bg-base-100 rounded-lg shadow">
-                            <table className="table table-pin-rows">
-                                {/* head */}
-                                <thead>
-                                    <tr>
-                                        {viewSettings.tableColumnOrder.map(renderHeaderCell)}
-                                    </tr>
-                                    <tr>
-                                        {viewSettings.tableColumnOrder.map(renderFilterCell)}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {paginatedItems.length > 0 ? (
-                                        paginatedItems.map((medicine) => (
-                                            <tr key={medicine.internalId} className="hover">
-                                                {viewSettings.tableColumnOrder.map(col => renderDataCell(col, medicine))}
-                                            </tr>
-                                        ))
-                                    ) : (
+                        <div className="bg-white border border-[#e7e8ec] rounded-[16px] shadow-[0px_14px_38px_0px_rgba(0,26,72,0.06)] overflow-hidden mb-8">
+                            <div className="overflow-x-auto">
+                                <table className="w-full border-collapse">
+                                    <thead>
                                         <tr>
-                                            <td colSpan={viewSettings.tableColumnOrder.filter(col => viewSettings.tableColumns[col] || col === 'actions').length} className="text-center py-12 text-gray-500">
-                                                Nem található a keresésnek megfelelő gyógyszer.
-                                            </td>
+                                            {viewSettings.tableColumnOrder.map(renderHeaderCell)}
                                         </tr>
-                                    )}
-                                </tbody>
-                            </table >
-                        </div >
+                                        <tr>
+                                            {viewSettings.tableColumnOrder.map(renderFilterCell)}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {paginatedItems.length > 0 ? (
+                                            paginatedItems.map((medicine) => (
+                                                <tr key={medicine.internalId} className="hover:bg-slate-50 transition-colors">
+                                                    {viewSettings.tableColumnOrder.map(col => renderDataCell(col, medicine))}
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan={viewSettings.tableColumnOrder.filter(col => viewSettings.tableColumns[col] || col === 'actions').length} className="text-center py-12 text-[#62788f] text-[15px]">
+                                                    Nem található a keresésnek megfelelő gyógyszer.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
 
-                        {/* Pagination Controls */}
-                        {
-                            totalPages > 1 && (
-                                <div className="flex justify-center pb-8">
-                                    <div className="join">
+                            {/* Footer Bottom Row (Pagination + Items per page) */}
+                            <div className="flex flex-col sm:flex-row items-center justify-between p-[16px] gap-4 border-t border-[#e7e8ec] bg-white">
+                                {/* Pagination Numbers */}
+                                <div className="flex items-center gap-[8px]">
+                                    <button
+                                        className="size-[44px] rounded-[8px] border border-[#d8d9e0] bg-white text-[#002664] flex items-center justify-center p-[10px] hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                                        disabled={currentPage === 1}
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                        aria-label="Előző oldal"
+                                    >
+                                        <img src="/assets/figma/3b23203475136b257b7c1d04849a07d4c2d3b4cf.svg" alt="" className="size-[20px]" />
+                                    </button>
+
+                                    {/* Page number buttons */}
+                                    <div className="flex items-center gap-[8px]">
                                         <button
-                                            className="join-item btn"
-                                            disabled={currentPage === 1}
-                                            onClick={() => handlePageChange(currentPage - 1)}
+                                            className={`size-[44px] rounded-[8px] text-[16px] text-center transition-colors cursor-pointer ${
+                                                currentPage === 1
+                                                    ? 'bg-[#002664] text-white font-medium'
+                                                    : 'border border-[#d8d9e0] bg-white text-[#002664] hover:bg-slate-50'
+                                            }`}
+                                            onClick={() => handlePageChange(1)}
                                         >
-                                            «
+                                            1
                                         </button>
 
-                                        {/* Mobile: simple page number */}
-                                        <button className="join-item btn pointer-events-none md:hidden">
-                                            {currentPage} / {totalPages}
-                                        </button>
+                                        {currentPage > 3 && (
+                                            <div className="size-[44px] flex items-center justify-center text-[#002664] text-[16px]">
+                                                ...
+                                            </div>
+                                        )}
 
-                                        {/* Desktop: numeric buttons */}
-                                        <div className="hidden md:flex">
-                                            {/* Always show first page */}
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                            .filter(p => p !== 1 && p !== totalPages && Math.abs(currentPage - p) <= 1)
+                                            .map(page => (
+                                                <button
+                                                    key={page}
+                                                    className={`size-[44px] rounded-[8px] text-[16px] text-center transition-colors cursor-pointer ${
+                                                        currentPage === page
+                                                            ? 'bg-[#002664] text-white font-medium'
+                                                            : 'border border-[#d8d9e0] bg-white text-[#002664] hover:bg-slate-50'
+                                                    }`}
+                                                    onClick={() => handlePageChange(page)}
+                                                >
+                                                    {page}
+                                                </button>
+                                            ))
+                                        }
+
+                                        {currentPage < totalPages - 2 && (
+                                            <div className="size-[44px] flex items-center justify-center text-[#002664] text-[16px]">
+                                                ...
+                                            </div>
+                                        )}
+
+                                        {totalPages > 1 && (
                                             <button
-                                                className={`join-item btn ${currentPage === 1 ? 'btn-active' : ''}`}
-                                                onClick={() => handlePageChange(1)}
-                                            >
-                                                1
-                                            </button>
-
-                                            {/* Show dots if far from start */}
-                                            {currentPage > 3 && <button className="join-item btn btn-disabled">...</button>}
-
-                                            {/* Dynamic range around current page */}
-                                            {Array.from({ length: totalPages }, (_, i) => i + 1)
-                                                .filter(p => p !== 1 && p !== totalPages && Math.abs(currentPage - p) <= 1)
-                                                .map(page => (
-                                                    <button
-                                                        key={page}
-                                                        className={`join-item btn ${currentPage === page ? 'btn-active' : ''}`}
-                                                        onClick={() => handlePageChange(page)}
-                                                    >
-                                                        {page}
-                                                    </button>
-                                                ))
-                                            }
-
-                                            {/* Show dots if far from end */}
-                                            {currentPage < totalPages - 2 && <button className="join-item btn btn-disabled">...</button>}
-
-                                            {/* Always show last page */}
-                                            <button
-                                                className={`join-item btn ${currentPage === totalPages ? 'btn-active' : ''}`}
+                                                className={`size-[44px] rounded-[8px] text-[16px] text-center transition-colors cursor-pointer ${
+                                                    currentPage === totalPages
+                                                        ? 'bg-[#002664] text-white font-medium'
+                                                        : 'border border-[#d8d9e0] bg-white text-[#002664] hover:bg-slate-50'
+                                                }`}
                                                 onClick={() => handlePageChange(totalPages)}
                                             >
                                                 {totalPages}
                                             </button>
-                                        </div>
-
-                                        <button
-                                            className="join-item btn"
-                                            disabled={currentPage === totalPages}
-                                            onClick={() => handlePageChange(currentPage + 1)}
-                                        >
-                                            »
-                                        </button>
+                                        )}
                                     </div>
+
+                                    <button
+                                        className="size-[44px] rounded-[8px] border border-[#d8d9e0] bg-white text-[#002664] flex items-center justify-center p-[10px] hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                        aria-label="Következő oldal"
+                                    >
+                                        <img src="/assets/figma/6facf09639ce8f21ae7716fe32dc70d4159927dc.svg" alt="" className="size-[20px]" />
+                                    </button>
                                 </div>
-                            )
-                        }
+
+                                {/* Per Page Selector */}
+                                <div className="relative" ref={perPageRef}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsPerPageDropdownOpen(!isPerPageDropdownOpen)}
+                                        className="bg-white border border-[#d8d9e0] rounded-[24px] px-[20px] py-[10px] flex items-center gap-[8px] text-[#002664] text-[16px] hover:border-[#002664] transition-colors cursor-pointer"
+                                    >
+                                        <span>{itemsPerPage} találat / oldal</span>
+                                        <img src="/assets/figma/bbb8b289e0529c918f53d375fc26f245b777bd09.svg" alt="" className="size-[20px]" />
+                                    </button>
+                                    {isPerPageDropdownOpen && (
+                                        <div className="absolute right-0 bottom-full mb-2 z-50 bg-white border border-[#d8d9e0] rounded-[16px] shadow-lg py-2 min-w-[160px]">
+                                            {[10, 20, 50, 100].map(cnt => (
+                                                <button
+                                                    key={cnt}
+                                                    type="button"
+                                                    className={`w-full text-left px-4 py-2 text-[14px] hover:bg-slate-50 transition-colors cursor-pointer ${itemsPerPage === cnt ? 'font-bold text-[#002664] bg-slate-50' : 'text-[#62788f]'}`}
+                                                    onClick={() => {
+                                                        setItemsPerPage(cnt);
+                                                        setCurrentPage(1);
+                                                        setIsPerPageDropdownOpen(false);
+                                                    }}
+                                                >
+                                                    {cnt} találat / oldal
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </>
                 )
             }
-        </div >
+        </div>
     );
 }
 
