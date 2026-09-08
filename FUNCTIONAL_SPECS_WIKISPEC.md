@@ -36,8 +36,8 @@ KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
 
 ---
 
-> **Verzió:** 1.5.0  
-> **Dátum:** 2026.09.04.  
+> **Verzió:** 1.5.1  
+> **Dátum:** 2026.09.08.  
 > **Státusz:** Véglegesnek szánt (Figma Redesign Szinkronizáció)  
 > **Prototípus URL:** [https://bvo.uneb.hu/](https://bvo.uneb.hu/) (hozzáférések a 6. pontban)
 
@@ -601,6 +601,10 @@ A portál központi kereső-, szűrő- és tájékoztató felülete a gyógyszer
 
 **Útvonal:** [https://bvo.uneb.hu/gyogyszerek](https://bvo.uneb.hu/gyogyszerek)
 
+##### 4.2.1.0. Teljes Szélességű (Fluid) Elrendezés
+- **Rugalmas képernyőkitöltés:** A gyógyszerlista oldal és a benne elhelyezkedő táblázat teljes szélességű (fluid) elrendezést követ. Nem korlátozza mesterséges maximális szélesség (korábban 1440 képpont), így a felhasználó monitorának vagy böngészőablakának teljes szélességét kitölti (megfelelő szélső védőtávolságok megtartásával).
+- **Felhasználói előny:** Nagyobb felbontású kijelzőkön (pl. Full HD, 2K, 4K vagy ultraszéles monitorok) sokkal több oszlop és szöveges adat tekinthető át egyszerre vízszintes görgetés nélkül, a terméknevek, hatóanyagok és gyártók nevei tágasabban és áttekinthetőbben jelennek meg.
+
 ##### 4.2.1.1. Fejléc és Gyorsszűrők
 - **Találati számláló:** A címsor mellett jól látható a szűrt tételek száma (pl. *"Gyógyszerek (142)"*).
 - **Közvetlen Szűrő Jelölőnégyzetek (Checkboxok):**
@@ -1118,4 +1122,5 @@ Ez a fejezet a funkcionális specifikáció dokumentumban eszközölt módosít�
 
 | Verzió | Dátum | Változás Típusa | Változások Összefoglalása |
 | :--- | :--- | :--- | :--- |
+| **v1.5.1** | 2026.09.08. | Módosítás | **Gyógyszerlista táblázat fluid (teljes képernyőszélességű) elrendezése:**<br>• A gyógyszerek oldal és az adatáblázat fix maximális szélességi korlátja (1440px) feloldásra került; a felület dinamikusan és rugalmasan (fluid módon) kitölti a teljes rendelkezésre álló képernyőszélességet.<br>• Nagyobb felbontású monitorokon és széles kijelzőkön jelentősen javul az adatok átláthatósága és olvashatósága, minimalizálva a vízszintes görgetés szükségességét sok oszlop bekapcsolása esetén is.<br>• Frissítésre került a 4.2.1. Gyógyszer Lista Oldal funkcionális leírása (4.2.1.0. pont). |
 | **v1.4.1** | 2026.08.24. | Kiegészítés | **Manuális felhasználói regisztráció és kapcsolatfelvételi űrlap rögzítése:**<br>• Tisztázásra került, hogy a rendszerbe a felhasználók regisztrációja kézzel (manuálisan) történik az adminisztrátor által.<br>• Az új szakmai felhasználó a bejelentkezési felületről elérhető űrlapon keresztül veszi fel a kapcsolatot az adminisztrátorral a szakmai adatok (pl. név, pecsétszám, szakterület) megadásával.<br>• Rögzítésre került, hogy későbbiekben elképzelhető önkiszolgáló regisztrációs felület bevezetése, de jelenleg nem tervezünk ilyennel.<br>• Új adatmodell fejezet hozzáadása: 3.6. Regisztrációs Igény / Kapcsolatfelvételi Űrlap Adatmodell.<br>• Új funkcionális alfejezet: 4.6.4. Manuális Felhasználói Regisztráció és Kapcsolatfelvételi Űrlap.<br>• Elvetett/későbbi funkciók közé felvéve: 5.9. Önkiszolgáló Automatikus Felhasználói Regisztrációs Felület.<br>• Új fejezet bevezetése a dokumentum végén: 7. Változásnapló (Verziótörténet). |

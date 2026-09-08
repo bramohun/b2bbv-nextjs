@@ -18,6 +18,8 @@
  *   gyógyszereimre vagy a kijelölt közeli gyógyszertáramban elérhető tételekre.
  * - Felhasználóként szeretném testreszabni a táblázat oszlopait (megjelenítés/elrejtés és drag-and-drop sorrend),
  *   hogy a napi orvosi munkámhoz legfontosabb adatokat láthassam elsődlegesen.
+ * - Felhasználóként szeretném, hogy a táblázat fluid (teljes képernyőszélességet kitöltő) elrendezésű legyen,
+ *   hogy a rendelkezésre álló képernyőterületet maximálisan kihasználva kényelmesen tekinthessék át a sokoszlopos gyógyszeradatokat.
  * - Felhasználóként szeretnék közvetlenül a listából kedvencnek jelölni vagy készlethiány-értesítést
  *   beállítani egy adott gyógyszerre.
  * - Felhasználóként szeretném, hogy a műveletek oszlop (kedvenc mentés, értesítés, részletek gomb)
@@ -29,6 +31,7 @@
  * - Készletértesítések kezelése: NotificationContext & Bell ikon akciók
  * - Közeli gyógyszertár integráció: NearbyPharmacyContext & készletindikátor
  * - Fejléc globális kereső: GlobalSearch autocompletion
+ * - Funkcionális specifikáció (FUNCTIONAL_SPECS_WIKISPEC.md: 4.2.1)
  * ============================================================================
  */
 
@@ -667,7 +670,7 @@ function MedicinesPageContent() {
             case 'gyarto':
                 return (
                     <td key={col} className="px-[24px] py-[16px] border-b border-[#e7e8ec]">
-                        <span className="truncate max-w-[150px] block text-[14px] text-[#62788f]" title={medicine.gyarto}>{medicine.gyarto}</span>
+                        <span className="truncate max-w-[200px] xl:max-w-[320px] block text-[14px] text-[#62788f]" title={medicine.gyarto}>{medicine.gyarto}</span>
                     </td>
                 );
             case 'packagingDetails':
@@ -780,7 +783,7 @@ function MedicinesPageContent() {
     };
 
     return (
-        <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12">
+        <div className="w-full px-4 md:px-12 pt-8 md:pt-12 pb-12">
             <FavoriteRemovalModal
                 isOpen={isRemovalWarningOpen}
                 onClose={() => setIsRemovalWarningOpen(false)}
