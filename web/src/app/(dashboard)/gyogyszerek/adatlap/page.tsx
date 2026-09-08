@@ -10,19 +10,32 @@
  * azonosítóinak, kiszerelésének, árainak, patikai elérhetőségének és
  * helyettesíthetőségének részletes bemutatását.
  * 
+ * KÉSZLETSTÁTUSZ LOGIKA ÉS JELVÉNYEK (Figma #13376:10063, #13376:4482, #13331:14965):
+ * - Készleten: Gyógyszertárban elérhető és a nagykerben is van.
+ * - Korlátozottan: Termékhiányos készítmény még fellelhető a gyógyszertárban.
+ * - Rendelésre: Nagykerben elérhető készítmény a patikában fizikailag nincs készleten,
+ *   de 1-2 munkanap alatt megrendelhető.
+ * - Nem elérhető: Nagykerben nincs (hiány vagy megszűnt), és a gyógyszertárban
+ *   sincs raktáron.
+ * - Két külön blokk: BENU GYÓGYSZERTÁRAK (hálózati összesítés) és KÖZELI GYÓGYSZERTÁR.
+ * 
  * KAPCSOLÓDÓ USER STORY-K:
  * - Orvosként szeretném megtekinteni a gyógyszer pontos törzskönyvi adatait, gyártóját,
  *   támogatási kategóriáját, publikus fogyasztói árát és becsült térítési díját.
  * - Orvosként készlethiány esetén látni szeretném a hiány kezdetét, tervezett végét és
  *   szakmai okát, valamint a javasolt helyettesítő készítményeket.
  * - Felhasználóként látni szeretném a hálózati (BENU gyógyszertárak) és a kijelölt
- *   kedvenc patika aktuális elérhetőségét.
+ *   közeli gyógyszertár aktuális készletstátuszát (Készleten, Korlátozottan, Rendelésre, Nem elérhető).
+ * - Felhasználóként a közeli patika nevére kattintva szeretném megnyitni a gyógyszertár
+ *   részletes adatait (nyitvatartás, elérhetőségek) felugró modális ablakban.
  * - Felhasználóként egyetlen kattintással szeretném a gyógyszert kedvencnek jelölni vagy
  *   értesítést kérni a státuszváltozásairól.
  * 
  * KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
  * - /gyogyszerek: Gyógyszerkereső lista (visszanavigálás a "Részletek" gombbal)
  * - /gyogyszertarak: Patikakereső
+ * - MedicineStockBadge: Hivatalos 4 állapotú készletstátusz jelvény
+ * - PharmacyDetailModal: Patika részletes adatlap modális ablak
  * - MedicineDetailActions: Kedvenc és értesítéskezelés
  * - MedicineStatusHistory: Státuszváltozási napló
  * - SimilarMedicines: Elérhető helyettesítő készítmények táblázata
@@ -32,17 +45,20 @@
 'use client';
 
 import React, { useEffect, useState, useMemo, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MedicineDetailActions } from '@/components/medicines/MedicineDetailActions';
 import { MedicineStatusHistory } from '@/components/medicines/MedicineStatusHistory';
 import { SimilarMedicines } from '@/components/medicines/SimilarMedicines';
+import { MedicineStockBadge } from '@/components/medicines/MedicineStockBadge';
+import { PharmacyDetailModal } from '@/components/pharmacies/PharmacyDetailModal';
 import { fetchStaticData } from '@/lib/static-fetch';
-import { formatDate, isAvailableInPharmacy } from '@/lib/utils';
+import { formatDate, isAvailableInPharmacy, getMedicinePharmacyStockStatus } from '@/lib/utils';
 import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
 import { Medicine } from '@/types';
 
 function MedicineDetailContent() {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const tkParam = searchParams.get('tk') || '';
     const { nearbyPharmacy } = useNearbyPharmacy();
@@ -50,6 +66,7 @@ function MedicineDetailContent() {
     const [medicine, setMedicine] = useState<Medicine | null | undefined>(undefined);
     const [similarMedicines, setSimilarMedicines] = useState<Medicine[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isPharmacyModalOpen, setIsPharmacyModalOpen] = useState(false);
 
     useEffect(() => {
         let isMounted = true;
@@ -106,28 +123,57 @@ function MedicineDetailContent() {
         };
     }, [tkParam]);
 
-    const getStockInfo = (status: string) => {
-        const totalPharmacies = 247;
-        const s = status?.toLowerCase() || '';
+    const stockInfo = useMemo(() => {
+        if (!medicine) return { inStock: 0, orderable: 0, unavailable: 0, total: 250 };
+        const totalPharmacies = 250;
+        const s = medicine.status?.toLowerCase() || '';
 
-        if (s === 'elérhető') {
-            const inStock = Math.floor(Math.random() * (totalPharmacies * 0.6)) + Math.floor(totalPharmacies * 0.1);
+        // Determinisztikus értékek a törzskönyvi szám alapján
+        let hash = 0;
+        const str = medicine.tkSzam || medicine.nev;
+        for (let i = 0; i < str.length; i++) {
+            hash = (hash * 31 + str.charCodeAt(i)) | 0;
+        }
+        const abs = Math.abs(hash);
+
+        if (s === 'elérhető' || s === 'elerheto') {
+            const inStock = (abs % 41) + 180; // 180-220 közötti érték
+            const orderable = totalPharmacies - inStock;
             return {
                 inStock,
+                orderable,
+                unavailable: 0,
                 total: totalPharmacies
             };
         }
 
-        if (s === 'készlethiány') {
-            const inStock = Math.floor(Math.random() * (totalPharmacies * 0.2)) + 5;
+        if (s === 'készlethiány' || s === 'keszlethiany') {
+            const inStock = (abs % 31) + 30; // 30-60 patikában van még készlet
+            const unavailable = totalPharmacies - inStock;
             return {
                 inStock,
+                orderable: 0,
+                unavailable,
                 total: totalPharmacies
             };
         }
 
-        return { inStock: 0, total: totalPharmacies };
-    };
+        // Megszűnt termék
+        const inStock = abs % 4 === 0 ? (abs % 25) + 10 : 0;
+        const unavailable = totalPharmacies - inStock;
+        return {
+            inStock,
+            orderable: 0,
+            unavailable,
+            total: totalPharmacies
+        };
+    }, [medicine]);
+
+    const nearbyStockStatus = useMemo(() => {
+        if (!medicine || !nearbyPharmacy) return null;
+        const inPharmacy = isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id);
+        return getMedicinePharmacyStockStatus(medicine.status, inPharmacy);
+    }, [medicine, nearbyPharmacy]);
 
     const generateMockHistory = (currentStatus: string, lastUpdateStr: string, tk: string) => {
         const history: { date: string; status: string }[] = [];
@@ -218,9 +264,7 @@ function MedicineDetailContent() {
         );
     }
 
-    const stockInfo = getStockInfo(medicine.status);
     const statusHistory = generateMockHistory(medicine.status, medicine.lastUpdate, medicine.tkSzam);
-    const isNearbyAvailable = nearbyPharmacy ? isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) : false;
 
     return (
         <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12 flex flex-col gap-[24px]">
@@ -300,58 +344,82 @@ function MedicineDetailContent() {
                     </div>
                 )}
 
-                {/* BENU gyógyszertárak availability row */}
+                {/* BENU gyógyszertárak készlet státusz */}
                 <div className="flex flex-col gap-[8px]">
                     <span className="text-[#62788f] text-[12px] font-medium uppercase tracking-wider">BENU GYÓGYSZERTÁRAK</span>
-                    <div className="flex items-center gap-[12px]">
-                        {medicine.status === 'Elérhető' && (
-                            <span className="inline-flex items-center gap-[8px] bg-[#e8f8e2] text-[#317907] px-[10px] py-[4px] rounded-[4px] font-medium text-[14px] leading-none whitespace-nowrap">
-                                <img src="/assets/figma/8d5c6e13ab3c6173ee2bfff8d7a4bf3cc46bca63.svg" alt="" className="size-[16px] shrink-0" />
-                                <span>Elérhető</span>
-                            </span>
+                    <div className="flex flex-col gap-[8px]">
+                        {(medicine.status === 'Elérhető' || (!medicine.status.includes('hiány') && !medicine.status.includes('Megszűnt') && !medicine.status.includes('Hiány'))) ? (
+                            <>
+                                <div className="flex items-center gap-[12px]">
+                                    <MedicineStockBadge status="keszleten" />
+                                    <Link href="/gyogyszertarak" className="text-[#002664] text-[16px] underline hover:text-[#378509] transition-colors">
+                                        {stockInfo.inStock} db BENU Gyógyszertárban
+                                    </Link>
+                                </div>
+                                <div className="flex items-center gap-[12px]">
+                                    <MedicineStockBadge status="rendelesre" />
+                                    <p className="text-[#002664] text-[16px]">
+                                        <Link href="/gyogyszertarak" className="text-[#002664] underline hover:text-[#378509] transition-colors">
+                                            {stockInfo.orderable} db BENU Gyógyszertárban
+                                        </Link>
+                                        <span> (1-2 munkanap)</span>
+                                    </p>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                {stockInfo.inStock > 0 && (
+                                    <div className="flex items-center gap-[12px]">
+                                        <MedicineStockBadge status="korlatozottan" />
+                                        <Link href="/gyogyszertarak" className="text-[#002664] text-[16px] underline hover:text-[#378509] transition-colors">
+                                            {stockInfo.inStock} db BENU Gyógyszertárban
+                                        </Link>
+                                    </div>
+                                )}
+                                <div className="flex items-center gap-[12px]">
+                                    <MedicineStockBadge status="nem-elerheto" />
+                                    <span className="text-[#002664] text-[16px]">
+                                        {stockInfo.unavailable} gyógyszertárban
+                                    </span>
+                                </div>
+                            </>
                         )}
-                        {medicine.status === 'Készlethiány' && (
-                            <span className="inline-flex items-center gap-[8px] bg-[#fff7ba] text-[#7a6c21] px-[10px] py-[4px] rounded-[4px] font-medium text-[14px] leading-none whitespace-nowrap">
-                                <img src="/assets/figma/95a59bf06dc352f30740e8e75e9dc3eccfec6dd4.svg" alt="" className="size-[16px] shrink-0" />
-                                <span>Hiány</span>
-                            </span>
-                        )}
-                        {medicine.status === 'Megszűnt' && (
-                            <span className="inline-flex items-center gap-[8px] bg-[#feeaed] text-[#b1174e] px-[10px] py-[4px] rounded-[4px] font-medium text-[14px] leading-none whitespace-nowrap">
-                                <img src="/assets/figma/c5d9b22ba806bb52c15a398d9d8ee7ff7e067868.svg" alt="" className="size-[16px] shrink-0" />
-                                <span>Megszűnt</span>
-                            </span>
-                        )}
-                        <Link href="/gyogyszertarak" className="text-[#002664] text-[16px] underline hover:text-[#378509] transition-colors">
-                            {stockInfo.inStock > 0 ? `${stockInfo.inStock} gyógyszertárban` : 'Készlet lekérdezése'}
-                        </Link>
                     </div>
                 </div>
 
-                {/* Kedvenc patika availability row */}
+                {/* Közeli gyógyszertár készlet státusz */}
                 <div className="flex flex-col gap-[8px]">
-                    <span className="text-[#62788f] text-[12px] font-medium uppercase tracking-wider">KEDVENC PATIKA</span>
-                    <div className="flex items-center gap-[12px]">
-                        {nearbyPharmacy ? (
-                            <>
-                                {isNearbyAvailable ? (
-                                    <span className="inline-flex items-center gap-[8px] bg-[#e8f8e2] text-[#317907] px-[10px] py-[4px] rounded-[4px] font-medium text-[14px] leading-none whitespace-nowrap">
-                                        <img src="/assets/figma/8d5c6e13ab3c6173ee2bfff8d7a4bf3cc46bca63.svg" alt="" className="size-[16px] shrink-0" />
-                                        <span>Elérhető</span>
-                                    </span>
-                                ) : (
-                                    <span className="inline-flex items-center gap-[8px] bg-gray-100 text-gray-500 px-[10px] py-[4px] rounded-[4px] font-medium text-[14px] leading-none whitespace-nowrap">
-                                        <span>Nem elérhető</span>
-                                    </span>
-                                )}
-                                <Link href="/gyogyszertarak" className="text-[#002664] text-[16px] underline hover:text-[#378509] transition-colors">
+                    <span className="text-[#62788f] text-[12px] font-medium uppercase tracking-wider">KÖZELI GYÓGYSZERTÁR</span>
+                    {nearbyPharmacy && nearbyStockStatus ? (
+                        <div className="flex items-center gap-[12px]">
+                            <MedicineStockBadge status={nearbyStockStatus} />
+                            <p className="text-[#002664] text-[16px]">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsPharmacyModalOpen(true)}
+                                    className="text-[#002664] underline hover:text-[#378509] transition-colors cursor-pointer text-left font-normal"
+                                    title="Patika részleteinek megtekintése"
+                                >
                                     {nearbyPharmacy.nev}
-                                </Link>
-                            </>
-                        ) : (
-                            <span className="text-sm text-gray-400 italic">Nincs beállítva kedvenc gyógyszertár</span>
-                        )}
-                    </div>
+                                </button>
+                                {nearbyStockStatus === 'rendelesre' && (
+                                    <span> (1-2 munkanap)</span>
+                                )}
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-[12px]">
+                            <span className="text-sm text-[#62788f] italic">
+                                Nincs beállítva közeli gyógyszertár.
+                            </span>
+                            <Link
+                                href="/gyogyszertarak"
+                                className="text-sm text-[#002664] underline hover:text-[#378509] font-medium transition-colors"
+                            >
+                                Gyógyszertár kiválasztása
+                            </Link>
+                        </div>
+                    )}
                 </div>
 
                 {/* Divider */}
@@ -410,6 +478,19 @@ function MedicineDetailContent() {
 
             {/* Status History Card */}
             <MedicineStatusHistory history={statusHistory} />
+
+            {/* Közeli Patika Részletek Modális Ablak */}
+            {nearbyPharmacy && (
+                <PharmacyDetailModal
+                    pharmacy={nearbyPharmacy}
+                    isOpen={isPharmacyModalOpen}
+                    onClose={() => setIsPharmacyModalOpen(false)}
+                    onSelectOnMap={(id) => {
+                        setIsPharmacyModalOpen(false);
+                        router.push(`/gyogyszertarak?id=${id}`);
+                    }}
+                />
+            )}
         </div>
     );
 }

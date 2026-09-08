@@ -69,3 +69,36 @@ export function getNearbyPharmacyStatusUpdate(medicineId: string, pharmacyId: st
 
     return formatDate(updateDate.toISOString());
 }
+
+/**
+ * ============================================================================
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ (FSR) - GYÓGYSZERTÁRI KÉSZLETSTÁTUSZ SZÁMÍTÁS
+ * ============================================================================
+ * 
+ * ÜZLETI SZABÁLYOK ÉS MŰKÖDÉS:
+ * A gyógyszertári készletstátusz a nagykereskedelmi elérhetőség (medicineStatus)
+ * és az adott gyógyszertárban lévő fizikai raktárkészlet (inPharmacy) együtteséből áll elő:
+ * 
+ * 1. Készleten ('keszleten'):
+ *    - Feltétel: Nagykerben van ('Elérhető') ÉS a gyógyszertárban is elérhető (inPharmacy: true).
+ * 2. Rendelésre ('rendelesre'):
+ *    - Feltétel: Nagykerben van ('Elérhető'), DE a gyógyszertárban nincs fizikai készleten (inPharmacy: false).
+ *      A patika 1-2 munkanap alatt megrendeli a nagykerből.
+ * 3. Korlátozottan ('korlatozottan'):
+ *    - Feltétel: Nagykerben hiánycikk ('Készlethiány') vagy megszűnt ('Megszűnt'),
+ *      DE a gyógyszertárban még található elfekvő/maradék raktárkészlet (inPharmacy: true).
+ * 4. Nem elérhető ('nem-elerheto'):
+ *    - Feltétel: Nagykerben nincs ('Készlethiány' / 'Megszűnt') ÉS a gyógyszertárban sincs készleten (inPharmacy: false).
+ *      Mivel a nagykerből nem rendelhető, így a beteg számára nem elérhető.
+ */
+export type PharmacyStockStatus = 'keszleten' | 'korlatozottan' | 'rendelesre' | 'nem-elerheto';
+
+export function getMedicinePharmacyStockStatus(medicineStatus: string, inPharmacy: boolean): PharmacyStockStatus {
+    const s = (medicineStatus || '').toLowerCase().trim();
+    if (s === 'elérhető' || s === 'elerheto') {
+        return inPharmacy ? 'keszleten' : 'rendelesre';
+    }
+    // Készlethiány vagy Megszűnt
+    return inPharmacy ? 'korlatozottan' : 'nem-elerheto';
+}
+

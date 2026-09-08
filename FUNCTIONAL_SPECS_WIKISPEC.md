@@ -675,14 +675,51 @@ Egy kiválasztott gyógyszer részletes szakmai információs adatlapja.
   - Cím: *"A gyógyszer forgalomból kivonva / Megszűnt"*.
   - Részletek: A forgalomból való kivonás hatósági dátuma és szakmai tájékoztatás.
 
-##### 4.2.2.3. Hálózati és Helyi Elérhetőségi Sorok
-- **BENU Gyógyszertárak készletinformáció:**
-  - Zöld állapotjelző pont.
-  - Szöveges összesítés az országos hálózatról: *"Elérhető X gyógyszertárban"*.
-  - **"Hol érhető el? >" gomb:** Kattintásra felugró térképes ablak jelenik meg, amely megjeleníti a készlettel rendelkező gyógyszertárakat.
-- **Kedvenc Patika állapota:**
-  - Megjeleníti a kiválasztott preferált gyógyszertár nevét (pl. *"BENU Gyógyszertár Arany Sas"*).
-  - Készletstátusz: Zöld pipa ikon és *"Raktáron"* felirat, vagy sárga figyelmeztetés *"Nincs készleten"* felirattal.
+##### 4.2.2.3. Hálózati és Helyi Készletstátuszok (BENU Gyógyszertárak és Közeli Gyógyszertár)
+
+A gyógyszer adatlapján a készletelérhetőség két jól elkülönülő szakaszban jelenik meg: a teljes országos hálózati elérhetőség (**"BENU GYÓGYSZERTÁRAK"**) és a felhasználó által kiválasztott preferált patika állapota (**"KÖZELI GYÓGYSZERTÁR"**).
+
+###### A) A Négy Készletstátusz és Vizuális Jelvényeik
+A portál négyféle készletstátuszt különböztet meg a nagykereskedelmi és a helyi patikai raktárkészlet együttes vizsgálata alapján:
+
+1. **Készleten:**
+   - **Üzleti Jelentés:** A készítmény a gyógyszertárban fizikai raktárkészleten van, és a nagykereskedelmi raktárból is folyamatosan elérhető/utánpótolható.
+   - **Vizuális Megjelenés:** Világoszöld háttér (`#E8F8E2`), sötétzöld szöveg (`#317907`), teli körben fehér pipa ikon.
+   - **Felhasználói Előny:** A termék azonnal átvehető a gyógyszertárban.
+
+2. **Korlátozottan:**
+   - **Üzleti Jelentés:** A készítmény országos termékhiányos vagy megszűnt termék (a nagykereskedelemből már nem rendelhető), de a gyógyszertárban még fellelhető maradék raktárkészlet.
+   - **Vizuális Megjelenés:** Melegsárga háttér (`#FFF5B8`), sötét olíva/arany szöveg (`#7A6C21`), teli körben fehér pipa ikon.
+   - **Felhasználói Előny:** Figyelmezteti az orvost és a beteget, hogy a készlet véges, a recept felírása előtt érdemes a patikával egyeztetni, mert utánpótlás nem garantált.
+
+3. **Rendelésre:**
+   - **Üzleti Jelentés:** A termék a nagykereskedelemben elérhető, azonban a vizsgált gyógyszertárban pillanatnyilag nincs fizikai polckészleten, de rendelésre 1-2 munkanapon belül beszerezhető.
+   - **Vizuális Megjelenés:** Halványsárga háttér (`#FFF7C7`), aranybarna szöveg (`#7A6C21`), homokóra ikon.
+   - **Szöveges Kiegészítés:** A patika vagy darabszám után közvetlenül megjelenik a *" (1-2 munkanap)"* tájékoztató megjegyzés.
+   - **Felhasználói Előny:** Az orvos és a beteg pontosan tudja, hogy a gyógyszer nem azonnal, hanem 1-2 munkanap múlva vehető át.
+
+4. **Nem elérhető:**
+   - **Üzleti Jelentés:** A termék a nagykereskedelemben nincs raktáron (pl. megszűnt vagy országos hiánycikk), és a gyógyszertárban sincs belőle készlet, így jelenleg egyáltalán nem szerezhető be.
+   - **Vizuális Megjelenés:** Világosszürke háttér (`#F2F4F7`), palaszürke szöveg (`#62788F`), teli körben fehér mínusz ikon.
+   - **Felhasználói Előny:** Egyértelművé teszi, hogy az adott készítmény nem elérhető, és szükség van helyettesítő készítmény választására (amely a kártya alatti helyettesítő táblázatban közvetlenül megtekinthető).
+
+###### B) Hálózati Összesítés (BENU GYÓGYSZERTÁRAK)
+A hálózati blokk a termék alapvető nagykereskedelmi státusza szerint sorolja fel a gyógyszertárak megoszlását:
+- **Normál forgalomban lévő (elérhető) gyógyszer esetén:**
+  - `[Készleten]` **X db BENU Gyógyszertárban** (kattintható hivatkozás, amely a gyógyszertár-keresőbe vezet).
+  - `[Rendelésre]` **Y db BENU Gyógyszertárban (1-2 munkanap)** (kattintható hivatkozás).
+- **Készlethiányos vagy megszűnt gyógyszer esetén:**
+  - Ha van még patika elfekvő készlettel: `[Korlátozottan]` **X db BENU Gyógyszertárban** (kattintható hivatkozás).
+  - A készlettel nem rendelkező patikákra: `[Nem elérhető]` **Z gyógyszertárban** (figyelmeztető tájékoztató sor).
+
+###### C) Helyi Elérhetőség (KÖZELI GYÓGYSZERTÁR)
+- **Beállított közeli patika esetén:**
+  - Megjelenik a releváns státuszjelvény (`Készleten`, `Korlátozottan`, `Rendelésre` vagy `Nem elérhető`).
+  - A patika teljes neve kattintható hivatkozásként jelenik meg.
+  - **Közvetlen részletmegtekintés:** A patika nevére kattintva a felületen azonnal felugrik a **Gyógyszertár Részletek Modális Ablak**, amely bemutatja a heti nyitvatartást, címet, telefonszámot és e-mail címet anélkül, hogy el kellene hagyni a gyógyszer adatlapját.
+  - *"Rendelésre"* státusz esetén a patika neve mellett megjelenik a *" (1-2 munkanap)"* szöveges jelzés.
+- **Ha nincs beállítva közeli gyógyszertár:**
+  - Megjelenik a *"Nincs beállítva közeli gyógyszertár"* tájékoztatás egy *"Gyógyszertár kiválasztása"* hivatkozással, amellyel a felhasználó gyorsan kijelölheti az orvosi rendelőjéhez legközelebbi preferált patikát.
 
 ##### 4.2.2.4. Részletes Tulajdonságok és Árinformációk Kártya
 Három oszlopos, világosszürke hátterű kártya a készítmény összes fontos szakmai és gazdasági paraméterével:
