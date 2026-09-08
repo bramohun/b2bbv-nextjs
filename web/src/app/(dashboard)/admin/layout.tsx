@@ -33,10 +33,17 @@ export default function AdminLayout({
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col gap-1">
-                <h1 className="text-3xl font-bold text-base-content">Adminisztrációs felület</h1>
-                <p className="text-base-content/60">Rendszerfelhasználók, gyógyszertárak és a közösségi fórum kezelése</p>
+        <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12 space-y-6">
+            <div className="flex flex-col gap-2 mb-2">
+                <div className="flex items-center gap-3">
+                    <div className="size-[36px] rounded-lg bg-[#002664] text-white flex items-center justify-center shrink-0">
+                        <span className="material-symbols-rounded text-2xl">admin_panel_settings</span>
+                    </div>
+                    <h1 className="text-[22px] md:text-[24px] font-bold text-[#002664] leading-[33px]">
+                        Adminisztrációs felület
+                    </h1>
+                </div>
+                <p className="text-[#62788f] text-[15px]">Rendszerfelhasználók, gyógyszertárak és a közösségi fórum kezelése</p>
             </div>
 
             <div role="tablist" className="tabs tabs-lifted">

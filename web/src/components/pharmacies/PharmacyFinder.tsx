@@ -195,7 +195,10 @@ export const PharmacyFinder: React.FC<PharmacyFinderProps> = ({
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <div className="flex items-center gap-3">
-                            <h1 className="text-2xl font-bold">{title}</h1>
+                            <div className="size-[36px] rounded-lg bg-[#002664] text-white flex items-center justify-center shrink-0">
+                                <span className="material-symbols-rounded text-2xl">local_pharmacy</span>
+                            </div>
+                            <h1 className="text-[22px] md:text-[24px] font-bold text-[#002664] leading-[33px]">{title}</h1>
                         </div>
                         {description && <p className="text-sm text-gray-500 mt-1">{description}</p>}
                     </div>

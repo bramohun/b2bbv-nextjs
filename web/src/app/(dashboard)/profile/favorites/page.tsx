@@ -60,13 +60,20 @@ export default function FavoritesPage() {
     };
 
     return (
-        <div className="container mx-auto py-8">
+        <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12">
             <FavoriteRemovalModal
                 isOpen={pendingRemovalTkSzam !== null}
                 onClose={() => setPendingRemovalTkSzam(null)}
                 onConfirm={confirmRemoval}
             />
-            <h1 className="text-3xl font-bold mb-6">Mentett gyógyszerek</h1>
+            <div className="flex items-center gap-3 mb-6">
+                <div className="size-[36px] rounded-lg bg-[#002664] text-white flex items-center justify-center shrink-0">
+                    <span className="material-symbols-rounded text-2xl">bookmarks</span>
+                </div>
+                <h1 className="text-[22px] md:text-[24px] font-bold text-[#002664] leading-[33px]">
+                    Mentett gyógyszerek
+                </h1>
+            </div>
 
             {/* Explanation Section */}
             <div className="card bg-primary/5 border border-primary/10 mb-8 overflow-hidden">

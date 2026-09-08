@@ -223,7 +223,7 @@ function MedicineDetailContent() {
     const isNearbyAvailable = nearbyPharmacy ? isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) : false;
 
     return (
-        <div className="container mx-auto py-8 px-4 flex flex-col gap-[24px]">
+        <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12 flex flex-col gap-[24px]">
             {/* Back Link Row */}
             <div>
                 <Link

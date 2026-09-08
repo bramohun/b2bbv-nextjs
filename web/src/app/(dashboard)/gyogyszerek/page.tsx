@@ -518,6 +518,24 @@ function MedicinesPageContent() {
             actions: undefined
         };
 
+        const colWidthClass: Record<string, string> = {
+            lastUpdate: 'min-w-[150px] whitespace-nowrap',
+            status: 'min-w-[120px] whitespace-nowrap',
+            nev: 'min-w-[260px]',
+            activeSubstance: 'min-w-[160px]',
+            kiszereles: 'min-w-[160px]',
+            gyarto: 'min-w-[160px]',
+            nearbyPharmacyStock: 'min-w-[140px] whitespace-nowrap',
+            nearbyPharmacyLastUpdate: 'min-w-[170px] whitespace-nowrap',
+            tkSzam: 'min-w-[150px] whitespace-nowrap',
+            packagingDetails: 'min-w-[160px]',
+            dispensability: 'min-w-[140px]',
+            dispensabilitySub: 'min-w-[140px]',
+            safetyFeatures: 'min-w-[140px]',
+            authorizationDate: 'min-w-[140px] whitespace-nowrap',
+            actions: 'w-[180px] min-w-[180px] whitespace-nowrap text-right'
+        };
+
         return (
             <th
                 key={col}
@@ -526,7 +544,7 @@ function MedicinesPageContent() {
                 onDragEnd={handleDragEnd}
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, col)}
-                className={`bg-[#f9f9fb] px-[24px] py-[10px] text-[#62788f] text-[12px] font-bold tracking-normal uppercase border-b border-[#e7e8ec] ${col === 'actions' ? 'text-right' : 'text-left'} ${col !== 'actions' ? 'cursor-grab active:cursor-grabbing hover:bg-slate-100' : ''} select-none ${draggedColumn === col ? 'bg-slate-200' : ''}`}
+                className={`bg-[#f9f9fb] px-[24px] py-[10px] text-[#62788f] text-[12px] font-bold tracking-normal uppercase border-b border-[#e7e8ec] ${colWidthClass[col] || ''} ${col === 'actions' ? 'text-right' : 'text-left'} ${col !== 'actions' ? 'cursor-grab active:cursor-grabbing hover:bg-slate-100' : ''} select-none ${draggedColumn === col ? 'bg-slate-200' : ''}`}
                 onClick={() => isSortable && sortKeyMap[col] && handleTableSort(sortKeyMap[col]!)}
             >
                 <div className={`flex items-center gap-1.5 ${col === 'actions' ? 'justify-end' : 'justify-start'}`}>
@@ -545,7 +563,7 @@ function MedicinesPageContent() {
     const renderFilterCell = (col: MedicineTableColumn) => {
         if (!viewSettings.tableColumns[col]) return null;
 
-        if (col === 'actions') return <th key={col} className="bg-[#f9f9fb] px-[24px] py-[12px] border-b border-[#e7e8ec]"></th>;
+        if (col === 'actions') return <th key={col} className="bg-[#f9f9fb] px-[24px] py-[12px] border-b border-[#e7e8ec] w-[180px] min-w-[180px]"></th>;
 
         if (col === 'status') {
             return (
@@ -631,7 +649,7 @@ function MedicinesPageContent() {
 
         switch (col) {
             case 'tkSzam':
-                return <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] border-b border-[#e7e8ec]">{medicine.tkSzam}</td>;
+                return <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] whitespace-nowrap border-b border-[#e7e8ec]">{medicine.tkSzam}</td>;
             case 'nev':
                 return (
                     <td key={col} className="px-[24px] py-[16px] border-b border-[#e7e8ec]">
@@ -659,12 +677,12 @@ function MedicinesPageContent() {
             case 'safetyFeatures':
                 return <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] border-b border-[#e7e8ec]">{medicine.safetyFeatures}</td>;
             case 'authorizationDate':
-                return <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] border-b border-[#e7e8ec]">{medicine.authorizationDate}</td>;
+                return <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] whitespace-nowrap border-b border-[#e7e8ec]">{medicine.authorizationDate}</td>;
             case 'lastUpdate':
                 return <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] whitespace-nowrap border-b border-[#e7e8ec]">{formatDate(medicine.lastUpdate)}</td>;
             case 'status':
                 return (
-                    <td key={col} className="px-[24px] py-[16px] border-b border-[#e7e8ec]">
+                    <td key={col} className="px-[24px] py-[16px] whitespace-nowrap border-b border-[#e7e8ec]">
                         {medicine.status === 'Elérhető' && (
                             <span className="inline-flex items-center gap-[6px] bg-[#e8f8e2] text-[#317907] px-[8px] py-[3px] rounded-[4px] font-medium text-[14px] whitespace-nowrap">
                                 <img src="/assets/figma/8d5c6e13ab3c6173ee2bfff8d7a4bf3cc46bca63.svg" alt="" className="size-[16px]" />
@@ -687,7 +705,7 @@ function MedicinesPageContent() {
                 );
             case 'nearbyPharmacyStock':
                 return (
-                    <td key={col} className="px-[24px] py-[16px] border-b border-[#e7e8ec]">
+                    <td key={col} className="px-[24px] py-[16px] whitespace-nowrap border-b border-[#e7e8ec]">
                         {nearbyPharmacy ? (
                             isAvailableInPharmacy(medicine.tkSzam, nearbyPharmacy.id) ? (
                                 <span className="inline-flex items-center gap-[6px] bg-[#e8f8e2] text-[#317907] px-[8px] py-[3px] rounded-[4px] font-medium text-[14px] whitespace-nowrap">
@@ -706,16 +724,16 @@ function MedicinesPageContent() {
                 );
             case 'nearbyPharmacyLastUpdate':
                 return (
-                    <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] border-b border-[#e7e8ec]">
+                    <td key={col} className="px-[24px] py-[16px] text-[14px] text-[#62788f] whitespace-nowrap border-b border-[#e7e8ec]">
                         {nearbyPharmacy ? getNearbyPharmacyStatusUpdate(medicine.tkSzam, nearbyPharmacy.id, '') : '-'}
                     </td>
                 );
             case 'actions':
                 return (
-                    <td key={col} className="px-[24px] py-[16px] text-right border-b border-[#e7e8ec]">
-                        <div className="flex items-center justify-end gap-[8px]">
+                    <td key={col} className="px-[24px] py-[16px] text-right border-b border-[#e7e8ec] w-[180px] min-w-[180px] whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-[8px] shrink-0">
                             <button
-                                className={`size-[36px] rounded-[8px] flex items-center justify-center p-[6px] transition-colors cursor-pointer ${
+                                className={`w-[36px] h-[36px] min-w-[36px] min-h-[36px] shrink-0 aspect-square rounded-[8px] flex items-center justify-center p-[6px] transition-colors cursor-pointer ${
                                     isFavorite(medicine.tkSzam)
                                         ? 'bg-[#002664] border border-[#002664]'
                                         : 'bg-white border border-[#002664] hover:bg-[#f0f4f9]'
@@ -726,11 +744,11 @@ function MedicinesPageContent() {
                                 <img
                                     src={isFavorite(medicine.tkSzam) ? "/assets/figma/0f46a8820ef14e70f1707a091b6a494ac0448773.svg" : "/assets/figma/944c7c49d7facfffc581f76fcabc2cff7a31b865.svg"}
                                     alt="Mentés"
-                                    className="size-[24px]"
+                                    className="size-[24px] min-w-[24px] min-h-[24px] shrink-0 object-contain aspect-square"
                                 />
                             </button>
                             <button
-                                className={`size-[36px] rounded-[8px] flex items-center justify-center p-[6px] transition-colors cursor-pointer ${
+                                className={`w-[36px] h-[36px] min-w-[36px] min-h-[36px] shrink-0 aspect-square rounded-[8px] flex items-center justify-center p-[6px] transition-colors cursor-pointer ${
                                     isSubscribed(medicine.tkSzam)
                                         ? 'bg-[#002664] border border-[#002664]'
                                         : 'bg-white border border-[#002664] hover:bg-[#f0f4f9]'
@@ -741,15 +759,15 @@ function MedicinesPageContent() {
                                 <img
                                     src={isSubscribed(medicine.tkSzam) ? "/assets/figma/a490d8a3ba430f0d884765763912ceec677e0181.svg" : "/assets/figma/475a3a63bba1e5d0fe7309be1d8843540bbf7f88.svg"}
                                     alt="Értesítés"
-                                    className="size-[24px]"
+                                    className="size-[24px] min-w-[24px] min-h-[24px] shrink-0 object-contain aspect-square"
                                 />
                             </button>
                             <Link
                                 href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(medicine.tkSzam)}`}
-                                className="inline-flex items-center gap-[4px] text-[#002664] hover:text-[#378509] font-bold text-[14px] ml-1 transition-colors"
+                                className="inline-flex items-center gap-[4px] text-[#002664] hover:text-[#378509] font-bold text-[14px] ml-1 transition-colors shrink-0 whitespace-nowrap"
                             >
                                 <span>Részletek</span>
-                                <img src="/assets/figma/6facf09639ce8f21ae7716fe32dc70d4159927dc.svg" alt="" className="size-[20px]" />
+                                <img src="/assets/figma/6facf09639ce8f21ae7716fe32dc70d4159927dc.svg" alt="" className="size-[20px] shrink-0" />
                             </Link>
                         </div>
                     </td>
@@ -760,7 +778,7 @@ function MedicinesPageContent() {
     };
 
     return (
-        <div className="container mx-auto">
+        <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12">
             <FavoriteRemovalModal
                 isOpen={isRemovalWarningOpen}
                 onClose={() => setIsRemovalWarningOpen(false)}
@@ -774,7 +792,7 @@ function MedicinesPageContent() {
                         <img src="/assets/figma/38bf5ad3ce1d1b2b21785ece01507074f555c665.svg" alt="" className="size-[36px]" />
                     </div>
                     <div className="flex items-center gap-3">
-                        <h1 className="text-[22px] font-bold text-[#002664] leading-[33px]">
+                        <h1 className="text-[22px] md:text-[24px] font-bold text-[#002664] leading-[33px]">
                             Gyógyszerek
                         </h1>
                         <span className="text-xs font-semibold text-[#62788f] bg-[#f9f9fb] border border-[#d8d9e0] px-2.5 py-0.5 rounded-full">

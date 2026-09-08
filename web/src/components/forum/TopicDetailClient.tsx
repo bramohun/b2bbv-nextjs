@@ -137,7 +137,7 @@ export default function TopicDetailClient() {
 
     if (notFound || !topic) {
         return (
-            <div className="max-w-4xl mx-auto">
+            <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12">
                 <div className="card bg-base-100 shadow">
                     <div className="card-body items-center text-center py-12">
                         <span className="material-symbols-rounded text-6xl text-error">
@@ -158,7 +158,7 @@ export default function TopicDetailClient() {
     }
 
     return (
-        <div className="max-w-4xl mx-auto">
+        <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12">
             <Link
                 href="/kozosseg"
                 className="btn btn-ghost btn-sm gap-2 mb-4"

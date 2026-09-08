@@ -115,15 +115,19 @@ export default function ForumPage() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto">
+        <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold flex items-center gap-2">
-                        <span className="material-symbols-rounded text-primary">forum</span>
-                        Közösség
-                    </h1>
-                    <p className="text-base-content/70 mt-1">
+                    <div className="flex items-center gap-3">
+                        <div className="size-[36px] rounded-lg bg-[#002664] text-white flex items-center justify-center shrink-0">
+                            <span className="material-symbols-rounded text-2xl">forum</span>
+                        </div>
+                        <h1 className="text-[22px] md:text-[24px] font-bold text-[#002664] leading-[33px]">
+                            Közösség
+                        </h1>
+                    </div>
+                    <p className="text-[#62788f] text-[15px] mt-1">
                         Szakmai beszélgetések és tapasztalatcsere orvosok között
                     </p>
                 </div>

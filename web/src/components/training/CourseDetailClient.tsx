@@ -44,7 +44,7 @@ export default function CourseDetailClient() {
     }
 
     return (
-        <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12">
             {/* Navigation Back */}
             <Link 
                 href="/kepzesek" 

@@ -75,10 +75,10 @@ function DashboardContent() {
     }, [period]);
 
     return (
-        <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 py-6">
+        <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12">
             {/* Fejléc Sáv: Cím + Időszak Választó */}
             <div className="flex flex-row justify-between items-center mb-6 gap-4">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                     <div className="size-[36px] relative shrink-0">
                         <Image
                             src="/assets/figma/fbac0194bef5cfd022a9163982735ef9952d202c.svg"
@@ -87,7 +87,7 @@ function DashboardContent() {
                             height={36}
                         />
                     </div>
-                    <h1 className="text-[22px] md:text-[24px] font-bold text-[#002664]">
+                    <h1 className="text-[22px] md:text-[24px] font-bold text-[#002664] leading-[33px]">
                         Irányítópult
                     </h1>
                 </div>

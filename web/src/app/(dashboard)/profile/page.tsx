@@ -334,13 +334,17 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto py-8 px-4">
+        <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12">
             <header className="mb-8">
-                <h1 className="text-3xl font-bold text-primary flex items-center gap-3">
-                    <span className="material-symbols-rounded text-4xl text-primary">account_circle</span>
-                    Felhasználói profil
-                </h1>
-                <p className="text-base-content/60 mt-2">Kezelje személyes adatait és szakmai beállításait.</p>
+                <div className="flex items-center gap-3">
+                    <div className="size-[36px] rounded-lg bg-[#002664] text-white flex items-center justify-center shrink-0">
+                        <span className="material-symbols-rounded text-2xl">account_circle</span>
+                    </div>
+                    <h1 className="text-[22px] md:text-[24px] font-bold text-[#002664] leading-[33px]">
+                        Felhasználói profil
+                    </h1>
+                </div>
+                <p className="text-[#62788f] text-[15px] mt-2">Kezelje személyes adatait és szakmai beállításait.</p>
             </header>
 
             {securitySuccess && (

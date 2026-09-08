@@ -34,17 +34,19 @@ export default function TrainingListPage() {
     }, [selectedCategory]);
 
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12">
             {/* Header Area */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-primary flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
-                            <span className="material-symbols-rounded text-3xl">school</span>
+                    <div className="flex items-center gap-3">
+                        <div className="size-[36px] rounded-lg bg-[#002664] text-white flex items-center justify-center shrink-0">
+                            <span className="material-symbols-rounded text-2xl">school</span>
                         </div>
-                        BENU KÉPZÉSI PROGRAM
-                    </h1>
-                    <p className="text-base-content/60 mt-2 max-w-2xl font-medium">
+                        <h1 className="text-[22px] md:text-[24px] font-bold text-[#002664] leading-[33px]">
+                            Képzési program
+                        </h1>
+                    </div>
+                    <p className="text-[#62788f] text-[15px] mt-2 max-w-2xl font-normal">
                         Szakmai fejlődés, naprakész tudás és akkreditált pontgyűjtés egy helyen. 
                         Böngésszen orvosoknak és gyógyszerészeknek szánt anyagaink között.
                     </p>

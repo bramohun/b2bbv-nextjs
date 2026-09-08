@@ -17,8 +17,15 @@ export default function NotificationsPage() {
     };
 
     return (
-        <div className="container mx-auto py-8">
-            <h1 className="text-3xl font-bold mb-6">Értesítés kezelés</h1>
+        <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12">
+            <div className="flex items-center gap-3 mb-6">
+                <div className="size-[36px] rounded-lg bg-[#002664] text-white flex items-center justify-center shrink-0">
+                    <span className="material-symbols-rounded text-2xl">notifications</span>
+                </div>
+                <h1 className="text-[22px] md:text-[24px] font-bold text-[#002664] leading-[33px]">
+                    Értesítés kezelés
+                </h1>
+            </div>
 
             <div className="bg-base-100 rounded-lg shadow border border-base-200">
                 {subscriptions.length === 0 ? (
