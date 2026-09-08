@@ -87,18 +87,63 @@ function MedicinesPageContent() {
     const [medicines, setMedicines] = useState<Medicine[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
-    const [filterStatus, setFilterStatus] = useState(searchParams.get('status') || 'all');
+    const [filterStatus, setFilterStatus] = useState(
+        searchParams.get('status') === 'saved' ? 'all' : (searchParams.get('status') || 'all')
+    );
     const [viewMode] = useState<'grid' | 'table'>('table');
     const [viewSettings, setViewSettings] = useState<ViewSettings>(DEFAULT_VIEW_SETTINGS);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const settingsRef = useRef<HTMLDivElement>(null);
     const { isSubscribed, subscribe, unsubscribe } = useNotification();
     const { isFavorite, addFavorite, removeFavorite } = useFavorite();
-    const [favoritesOnly, setFavoritesOnly] = useState(false);
+    const [favoritesOnly, setFavoritesOnly] = useState(
+        searchParams.get('onlyFavorites') === 'true' ||
+        searchParams.get('favoritesOnly') === 'true' ||
+        searchParams.get('status') === 'saved'
+    );
     const [nearbyOnly, setNearbyOnly] = useState(searchParams.get('nearbyOnly') === 'true');
     const { nearbyPharmacy } = useNearbyPharmacy();
     const [isRemovalWarningOpen, setIsRemovalWarningOpen] = useState(false);
     const [selectedMedicineForRemoval, setSelectedMedicineForRemoval] = useState<Medicine | null>(null);
+
+    // URL paraméterek és külső események szinkronizálása (pl. fejléc Mentett -> Összes navigáció)
+    useEffect(() => {
+        const isOnlyFav =
+            searchParams.get('onlyFavorites') === 'true' ||
+            searchParams.get('favoritesOnly') === 'true' ||
+            searchParams.get('status') === 'saved';
+        if (isOnlyFav) {
+            setFavoritesOnly(true);
+        } else if (searchParams.has('onlyFavorites') || searchParams.has('favoritesOnly')) {
+            setFavoritesOnly(false);
+        }
+
+        if (searchParams.has('nearbyOnly')) {
+            setNearbyOnly(searchParams.get('nearbyOnly') === 'true');
+        }
+
+        const search = searchParams.get('search');
+        if (search !== null) {
+            setSearchTerm(search);
+        }
+
+        const status = searchParams.get('status');
+        if (status && status !== 'saved') {
+            setFilterStatus(status);
+        } else if (status === 'saved') {
+            setFilterStatus('all');
+        }
+    }, [searchParams]);
+
+    // Egyedi esemény figyelése, ha a felhasználó már az oldalon tartózkodik és a fejlécből szűr
+    useEffect(() => {
+        const handleFilterFavorites = () => {
+            setFavoritesOnly(true);
+            setCurrentPage(1);
+        };
+        window.addEventListener('filter-favorites', handleFilterFavorites);
+        return () => window.removeEventListener('filter-favorites', handleFilterFavorites);
+    }, []);
 
     // Sorting State
     const [sortKey, setSortKey] = useState<SortKey | null>((searchParams.get('sort') as SortKey) || 'lastUpdate');
@@ -811,7 +856,21 @@ function MedicinesPageContent() {
                         <input
                             type="checkbox"
                             checked={favoritesOnly}
-                            onChange={(e) => setFavoritesOnly(e.target.checked)}
+                            onChange={(e) => {
+                                const checked = e.target.checked;
+                                setFavoritesOnly(checked);
+                                if (!checked && typeof window !== 'undefined') {
+                                    const url = new URL(window.location.href);
+                                    if (url.searchParams.has('onlyFavorites') || url.searchParams.has('favoritesOnly') || url.searchParams.get('status') === 'saved') {
+                                        url.searchParams.delete('onlyFavorites');
+                                        url.searchParams.delete('favoritesOnly');
+                                        if (url.searchParams.get('status') === 'saved') {
+                                            url.searchParams.delete('status');
+                                        }
+                                        window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
+                                    }
+                                }
+                            }}
                             className="size-[20px] rounded-[4px] border border-[#d8d9e0] accent-[#002664] cursor-pointer"
                         />
                         <span className="text-[#002664] text-[16px] font-normal">Csak mentett gyógyszerek</span>

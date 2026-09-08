@@ -15,6 +15,8 @@
  * - Felhasználóként egy modern, átlátható fejlécből szeretném elérni a portál
  *   összes fő funkcióját, látni a mentett gyógyszereim számát, és gyorsan
  *   patikát választani.
+ * - Felhasználóként a mentett gyógyszerek gyorslistájából az "Összes" gombra kattintva
+ *   azonnal a gyógyszerlista oldalra szeretnék navigálni, a listát kizárólag a mentett kedvenceimre szűrve.
  * 
  * KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
  * - Globális keresés (GlobalSearch)
@@ -228,8 +230,13 @@ export const Navbar: React.FC = () => {
                                         </span>
                                         <Link
                                             href="/gyogyszerek?onlyFavorites=true"
-                                            onClick={() => setIsFavoritesOpen(false)}
-                                            className="text-[12px] text-[#378509] font-bold hover:underline"
+                                            onClick={() => {
+                                                setIsFavoritesOpen(false);
+                                                if (typeof window !== 'undefined') {
+                                                    window.dispatchEvent(new CustomEvent('filter-favorites'));
+                                                }
+                                            }}
+                                            className="text-[12px] text-[#378509] font-bold hover:underline cursor-pointer"
                                         >
                                             Összes
                                         </Link>

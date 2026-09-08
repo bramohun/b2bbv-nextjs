@@ -514,11 +514,14 @@ A portál tetején rögzített (sticky) központi navigációs sáv, amely minde
 
 ##### 4.0.1.5. Mentett Gyógyszerek Lenyíló Gyorslista (Dropdown)
    - A fejléc *"Mentett"* gombjára kattintva egy lenyíló ablak jelenik meg az alábbi tartalommal:
-     - **Fejléc:** *"Mentett gyógyszerek"* cím és a mentett tételek összdarabszáma.
-     - **Tétellista:** Gyógyszer neve, kiszerelése, valamint színes készletjelvénye (`Elérhető` - zöld, `Készlethiány` - sárga, `Megszűnt` - piros).
-     - **Gyorsnavigáció:** Bármely mentett gyógyszerre kattintva a rendszer azonnal az adott gyógyszer adatlapjára visz.
-     - **Üres állapot:** Amennyiben a felhasználó még nem jelölt meg kedvencet: *"Nincs mentett gyógyszere."*
-     - **"Összes mentett gyógyszer megtekintése" gomb:** Átirányít a szűrt gyógyszerlistára (`/gyogyszerek?status=saved`).
+     - **Fejléc:** *"Mentett gyógyszerek"* cím és a mentett tételek összdarabszáma (pl. *"2 mentett gyógyszer"*).
+     - **"Összes" gomb / hivatkozás:**
+       - **Megjelenés:** A fejléc jobb oldalán elhelyezett zöld színű, aláhúzott szöveges link.
+       - **Működés és felületi viselkedés:** Rákattintva bezárja a lenyíló ablakot, a felhasználót közvetlenül a gyógyszerlista felületre (`/gyogyszerek`) navigálja, és a listát automatikusan leszűri kizárólag a korábban elmentett kedvenc készítményekre (a felületen lévő *"Csak mentett gyógyszerek"* szűrőkapcsoló automatikusan bekapcsolt állapotba kerül). Amennyiben a felhasználó már eleve a gyógyszerek oldalon tartózkodik, a kattintás azonnal aktiválja a mentett szűrést és az első oldalra állítja a találati listát.
+       - **Limitáció:** Ha a felhasználónak még nincs egyetlen mentett gyógyszere sem, a gombra kattintva a gyógyszerlista oldal üres találati listát ("0 termék") jelenít meg.
+     - **Tétellista:** Gyógyszer neve, törzskönyvi száma, valamint színes készletjelvénye (`Elérhető` - zöld, `Készlethiány` - sárga, `Megszűnt` - piros).
+     - **Gyorsnavigáció tételekre:** Bármely mentett gyógyszer sorára kattintva a rendszer azonnal az adott gyógyszer részletes adatlapjára viszi a felhasználót.
+     - **Üres állapot:** Amennyiben a felhasználó még nem jelölt meg kedvencet: *"Nincs még mentett gyógyszered."* tájékoztató szöveg jelenik meg.
 
 ##### 4.0.1.6. Felhasználói Profil Menü
    - A profil gombra kattintva lenyíló menü jelenik meg:
@@ -606,9 +609,13 @@ A portál központi kereső-, szűrő- és tájékoztató felülete a gyógyszer
 - **Felhasználói előny:** Nagyobb felbontású kijelzőkön (pl. Full HD, 2K, 4K vagy ultraszéles monitorok) sokkal több oszlop és szöveges adat tekinthető át egyszerre vízszintes görgetés nélkül, a terméknevek, hatóanyagok és gyártók nevei tágasabban és áttekinthetőbben jelennek meg.
 
 ##### 4.2.1.1. Fejléc és Gyorsszűrők
-- **Találati számláló:** A címsor mellett jól látható a szűrt tételek száma (pl. *"Gyógyszerek (142)"*).
+- **Találati számláló:** A címsor mellett jól látható a szűrt tételek száma (pl. *"Gyógyszerek (142)"* vagy mentett szűrésnél *"Gyógyszerek (2)"*).
 - **Közvetlen Szűrő Jelölőnégyzetek (Checkboxok):**
-  - **"Csak mentett gyógyszerek":** Bekapcsolásakor a táblázat kizárólag a felhasználó által csillaggal megjelölt kedvenc készítményeket mutatja.
+  - **"Csak mentett gyógyszerek":**
+    - **Típus:** Négyzet alakú jelölőnégyzet szöveges felirattal.
+    - **Működés:** Bekapcsolásakor a táblázat kizárólag a felhasználó által korábban könyvjelzővel elmentett készítményeket jeleníti meg.
+    - **Kapcsolódás a fejléchez:** Amennyiben a felhasználó a felső navigációs sáv *"Mentett"* gyorslistájában az *"Összes"* gombra kattint, a rendszer a gyógyszerlistára lépve automatikusan bepipálja ezt a jelölőnégyzetet és azonnal aktiválja a szűrést.
+    - **Kikapcsolás:** A jelölőnégyzetből a pipát kivéve a szűrés azonnal megszűnik, és a rendszer ismét a teljes (vagy az egyéb feltételeknek megfelelő) gyógyszerkínálatot listázza.
   - **"Közeli gyógyszertárban elérhető":** Bekapcsolásakor kizárólag azok a gyógyszerek jelennek meg, amelyek a beállított preferált patikában fizikai raktárkészleten vannak. (Ha nincs beállítva patika, a funkció figyelmeztet a választásra).
 - **"Oszlopok" Testreszabási Gomb (Dropdown):**
   - Másodlagos, szürke keretes funkciógomb lefelé mutató nyíllal.
