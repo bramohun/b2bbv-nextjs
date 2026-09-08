@@ -613,7 +613,7 @@ A portál központi kereső-, szűrő- és tájékoztató felülete a gyógyszer
   - A beállításokat a böngésző automatikusan megjegyzi a későbbi látogatásokhoz.
 
 ##### 4.2.1.2. Táblázat Oszlopfejlécek és Sorrendezés
-- **Oszlopok átrendezése (Drag & Drop):** Minden oszlopfejléc előtt egy hatpontos fogantyú ikon (`drag_indicator`) található, amellyel a felhasználó az oszlopokat tetszőleges sorrendbe húzhatja át.
+- **Oszlopok átrendezése (Drag & Drop):** Minden adatoszlop fejléce előtt egy hatpontos fogantyú ikon (`drag_indicator`) található, amellyel a felhasználó az oszlopokat tetszőleges sorrendbe húzhatja át. A jobb szélső *"Műveletek"* oszlop nem mozgatható, fixen a táblázat jobb szélén marad.
 - **Rendezés:** Az oszlop nevére kattintva a sorrend növekvő (A-Z, 0-9), csökkenő (Z-A, 9-0) vagy alapértelmezett irányba rendeződik, amit nyilak jeleznek.
 
 ##### 4.2.1.3. Oszloponkénti Szűrősor
@@ -628,6 +628,11 @@ A fejlécek alatt közvetlenül egy szűrősor helyezkedik el:
   - `Elérhető` – világoszöld háttér (`#E8F8E2`), sötétzöld szöveg
   - `Hiány` – világossárga háttér (`#FFF7BA`), sötétsárga szöveg
   - `Megszűnt` – világospiros háttér (`#FEEAED`), bordó szöveg
+- **Rögzített "Műveletek" Oszlop (Fix jobb oldali oszlop):**
+  - A táblázat jobb szélén elhelyezkedő *"Műveletek"* oszlop (a fejlécével, üres szűrőcellájával és az összes sorbeli funkciógombjával) rögzített (fix pozíciójú).
+  - Vízszintes görgetés során – ami sok bekapcsolt adatoszlop esetén vagy kisebb képernyőkön, táblagépeken automatikusan elérhetővé válik – ez az oszlop folyamatosan látható marad a jobb szélen, így a felhasználónak sosem kell jobbra-balra görgetnie a legfontosabb műveletek eléréséhez.
+  - A vízszintesen elgörgetett adatsorok lágyan a rögzített oszlop mögé csúsznak be, amit egy finom elválasztó függőleges vonal és árnyék tesz egyértelművé.
+  - Egérmutatóval egy sor fölé állva a sor kiemelése (világosszürke háttérszín) a rögzített műveleti cellára is kiterjed, biztosítva az egységes vizuális visszajelzést.
 - **Műveleti gombok (36px x 36px négyzet alakú gombok):**
   - **Kedvenc gomb (Csillag ikon):** Egykattintásos mentés a kedvencek közé. Sárga csillag jelzi az aktív állapotot. Ha a felhasználó egy olyan tételt távolít el a kedvencekből, amelyhez értesítés van rendelve, megerősítő párbeszédablak jelenik meg.
   - **Értesítés gomb (Harang ikon):** Egykattintásos feliratkozás a gyógyszer piaci státuszváltozásaira. Kék harang jelzi az aktív feliratkozást.

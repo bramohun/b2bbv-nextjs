@@ -20,6 +20,8 @@
  *   hogy a napi orvosi munkámhoz legfontosabb adatokat láthassam elsődlegesen.
  * - Felhasználóként szeretnék közvetlenül a listából kedvencnek jelölni vagy készlethiány-értesítést
  *   beállítani egy adott gyógyszerre.
+ * - Felhasználóként szeretném, hogy a műveletek oszlop (kedvenc mentés, értesítés, részletek gomb)
+ *   a táblázat vízszintes görgetése során is folyamatosan rögzítve (fix/sticky) maradjon a jobb szélen.
  * 
  * KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
  * - Gyógyszer részletes adatlap: /gyogyszerek/adatlap?tk=...
@@ -533,7 +535,7 @@ function MedicinesPageContent() {
             dispensabilitySub: 'min-w-[140px]',
             safetyFeatures: 'min-w-[140px]',
             authorizationDate: 'min-w-[140px] whitespace-nowrap',
-            actions: 'w-[180px] min-w-[180px] whitespace-nowrap text-right'
+            actions: 'w-[230px] min-w-[230px] whitespace-nowrap text-right sticky right-0 z-20 bg-[#f9f9fb] shadow-[-4px_0_8px_-2px_rgba(0,26,72,0.06)] border-l border-[#e7e8ec]'
         };
 
         return (
@@ -563,7 +565,7 @@ function MedicinesPageContent() {
     const renderFilterCell = (col: MedicineTableColumn) => {
         if (!viewSettings.tableColumns[col]) return null;
 
-        if (col === 'actions') return <th key={col} className="bg-[#f9f9fb] px-[24px] py-[12px] border-b border-[#e7e8ec] w-[180px] min-w-[180px]"></th>;
+        if (col === 'actions') return <th key={col} className="bg-[#f9f9fb] px-[24px] py-[12px] border-b border-l border-[#e7e8ec] w-[230px] min-w-[230px] sticky right-0 z-20 shadow-[-4px_0_8px_-2px_rgba(0,26,72,0.06)]"></th>;
 
         if (col === 'status') {
             return (
@@ -730,7 +732,7 @@ function MedicinesPageContent() {
                 );
             case 'actions':
                 return (
-                    <td key={col} className="px-[24px] py-[16px] text-right border-b border-[#e7e8ec] w-[180px] min-w-[180px] whitespace-nowrap">
+                    <td key={col} className="px-[24px] py-[16px] text-right border-b border-l border-[#e7e8ec] w-[230px] min-w-[230px] whitespace-nowrap sticky right-0 z-10 bg-white group-hover:bg-slate-50 transition-colors shadow-[-4px_0_8px_-2px_rgba(0,26,72,0.06)]">
                         <div className="flex items-center justify-end gap-[8px] shrink-0">
                             <button
                                 className={`w-[36px] h-[36px] min-w-[36px] min-h-[36px] shrink-0 aspect-square rounded-[8px] flex items-center justify-center p-[6px] transition-colors cursor-pointer ${
@@ -931,7 +933,7 @@ function MedicinesPageContent() {
                     <>
                         <div className="bg-white border border-[#e7e8ec] rounded-[16px] shadow-[0px_14px_38px_0px_rgba(0,26,72,0.06)] overflow-hidden mb-8">
                             <div className="overflow-x-auto">
-                                <table className="w-full border-collapse">
+                                <table className="w-full border-separate border-spacing-0">
                                     <thead>
                                         <tr>
                                             {viewSettings.tableColumnOrder.map(renderHeaderCell)}
@@ -943,7 +945,7 @@ function MedicinesPageContent() {
                                     <tbody>
                                         {paginatedItems.length > 0 ? (
                                             paginatedItems.map((medicine) => (
-                                                <tr key={medicine.internalId} className="hover:bg-slate-50 transition-colors">
+                                                <tr key={medicine.internalId} className="hover:bg-slate-50 transition-colors group">
                                                     {viewSettings.tableColumnOrder.map(col => renderDataCell(col, medicine))}
                                                 </tr>
                                             ))
