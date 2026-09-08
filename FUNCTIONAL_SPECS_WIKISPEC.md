@@ -749,53 +749,80 @@ Három oszlopos, világosszürke hátterű kártya a készítmény összes fonto
 
 #### 4.3.1. Gyógyszertárak Oldal
 
-Interaktív térképes és szinkronizált listás kereső a patikák megtalálására.
+Interaktív térképes és szinkronizált listás kereső felület a legközelebbi BENU gyógyszertárak megtalálására, nyitvatartási idejük ellenőrzésére és a preferált közeli patika kijelölésére.
 
 **Útvonal:** [https://bvo.uneb.hu/gyogyszertarak](https://bvo.uneb.hu/gyogyszertarak)
 
-##### 4.3.1.1. Kereső mező
-   - **Típus:** Egysoros szövegmező.
-   - **Megadható adatok:** Patika neve, Utca/Házszám cím, Város neve vagy BF azonosító kód.
-   - **Példák:** `"BENU"`, `"1052 Budapest"`, `"Károly körút"`, `"BF001"`.
+##### 4.3.1.1. Fejléc Alatti Kereső- és Szűrősáv (SubHeader)
+- **Bal oldali fejléc:** Hivatalos zöld BENU kereszt embléma és *"Gyógyszertárak"* megnevezés.
+- **Keresőmező:**
+  - **Típus:** Egysoros keresőmező jobb oldali nagyító ikonnal.
+  - **Megadható adatok:** Patika neve, utca/házszám, város vagy település neve.
+  - **Példák:** `"BENU"`, `"1052 Budapest"`, `"Görgey Artúr utca"`, `"Szeged"`.
+  - **Működés:** Gépelés közben valós időben szűri a listát és a térképen látható markereket.
+- **Nyitvatartási Szűrőgombok (Filter Pills):**
+  - **Gombok:** `"Most nyitva"` (óra ikonnal), `"Hétvégén nyitva"` (naptár ikonnal), `"0-24 órában nyitva"` (épület ikonnal).
+  - **Megjelenés:** Lekerekített kapszula formájú gombok, amelyek aktív állapotban sötétkék kiemelést kapnak.
+  - **Működés:** Azonnal kizárják a feltételeknek meg nem felelő patikákat a listából és a térképről.
+- **"Szűrés törlése" Funkció:**
+  - Kék aláhúzott szöveges hivatkozás, amely akkor válik láthatóvá, ha a felhasználó keresőszöveget írt be vagy szűrőgombot aktivált.
+  - Kattintásra egy lépésben törli a szabadszöveges keresést és kikapcsolja az összes aktív szűrőt.
+- **Mobil nézetváltó:**
+  - Kis képernyőméret esetén egy kapcsoló jelenik meg (`Lista` / `Térkép`), amellyel a felhasználó válthat a függőleges kártyalista és a térkép között.
 
-##### 4.3.1.2. Nyitvatartási Szűrőgombok
-   - **Opciók:** `"Most nyitva"`, `"Hétvégén nyitva"`, `"0-24 órában nyitva"`.
-   - **Működés:** Szűri a térképes jelölőket és a kapcsolódó listát.
+##### 4.3.1.2. Helyzet- és Preferenciameghatározó Értesítő Panelek (Oldalsáv Teteje)
+A bal oldali listaoszlop tetején két figyelemfelkeltő információs panel segíti a gyors eligazodást:
+1. **"Az Ön tartózkodási helye" Panel:**
+   - **Megjelenés:** Világoskék hátterű kártya célkereszt ikonnal.
+   - **Tartalom:** Kiírja a felhasználó aktuálisan beállított vagy észlelt tartózkodási címét (alapértelmezett referencia: *"Budapest, Soroksári út 32., 1095"*).
+   - **"Aktuális hely frissítése" gomb:** Kattintásra a rendszer engedélyt kér a böngésző GPS/helymeghatározó szolgáltatásától, rögzíti a valós koordinátákat, a térképet az új pozícióra fókuszálja, és újraszámolja a patikák távolságát.
+2. **"Válasszon közeli gyógyszertárat" / "Az Ön közeli gyógyszertára:" Panel:**
+   - **Megjelenés:** Világoszöld hátterű kártya szív/patika szimbólummal.
+   - **Működés:**
+     - *Ha nincs kiválasztva közeli patika:* A panel címe *"Válasszon közeli gyógyszertárat"*, és alatta a *"Válasszon a listából közeli gyógyszertárat, hogy láthassa a készletét!"* tájékoztató szöveg látható.
+     - *Ha ki van választva közeli gyógyszertár:* A panel címe automatikusan átvált az *"Az Ön közeli gyógyszertára:"* feliratra, és alatta zöld színnel, aláhúzva megjelenik a kiválasztott gyógyszertár neve. A patikanévre kattintva a térkép közvetlenül az adott gyógyszertárra fókuszál és ráközelít (zoom).
 
-##### 4.3.1.3. "Mutasd az összeset" Gomb
-   - Alaphelyzetbe állítja a térkép nézetét (középpont és zoom), de az aktív nyitvatartási és szöveges szűrőket **NEM törli**.
+##### 4.3.1.3. Patikalista és Találati Összesítő
+- **Találati számláló:** Kiírja a szűrésnek megfelelő patikák pontos számát (pl. *"10 BENU gyógyszertárat találtunk"*).
+- **Térképi szinkronizáció:**
+  - Amennyiben a felhasználó belenagyít a térképbe, a számláló jelzi a térképi kivágatban látható patikák számát is, valamint megjelenik a `[Mutasd az összest]` opció a térkép nézetének alaphelyzetbe állításához.
+- **Gyógyszertár Kártya Felépítése (Pharmacy Details Master):**
+  - **Patika Neve:** Kék, aláhúzott kiemelt szöveg. Rákattintva megnyílik a részletes heti adatlap modal.
+  - **Cím és Település:** Vastag betűs pontos utca, házszám, irányítószám és városnév.
+  - **Becsült Távolság:** Az észlelt vagy megadott tartózkodási helytől számított légvonalbeli távolság tizedes pontossággal (pl. `"~2.4 km"` vagy `"~95.9 km"`).
+  - **Napi Nyitvatartás és Státusz:** Az adott nap megnevezése (pl. *"Kedd:"*), a napi idősáv (pl. *"08:00 - 18:00"*), óra ikon és színes szöveges státuszjelzés:
+    - Zöld: *"Nyitva"*
+    - Sárga: *"Hamarosan zár"* vagy *"Hamarosan nyit"*
+    - Piros: *"Zárva"*
+  - **"Többit mutasd" Hivatkozás:** Közvetlen gomb a heti nyitvatartási rend megnyitásához.
+  - **Elválasztó vonal.**
+  - **"Közelinek jelölöm" / "Közeli gyógyszertár" Akciógomb:**
+    - *Ha nincs kijelölve:* Világoszöld ovális gomb plusz jellel és *"Közelinek jelölöm"* felirattal.
+    - *Ha ki van jelölve:* Teli zöld ovális gomb fehér pipa jellel és *"Közeli gyógyszertár"* felirattal.
+    - Kattintásra azonnal beállítja vagy feloldja a preferált patikát a portál teljes felületén.
+  - **Kiválasztott kártya kiemelése:** Amikor a felhasználó rákattint egy kártyára, az határozott zöld keretet (`border-2`) kap, jelezve az aktív kiválasztást.
 
-##### 4.3.1.4. Mobil Lista / Térkép Nézetváltó
-   - Kisebb kijelzőméretnél egy kapcsológomb jellegű opcióválasztó jelenik meg a fejlécben (`Lista` / `Térkép`), amely lehetővé teszi a két nézet közötti váltást mobilon.
+##### 4.3.1.4. Interaktív Térkép és Egyedi BENU Jelölők (Pins)
+- **Térkép:** Teljes képernyős OpenStreetMap réteg, zoom- és mozgatási lehetőséggel.
+- **Egyedi BENU Jelölők:**
+  - Csepp alakú, fehér kör közepén BENU zöld kereszttel ellátott jelölő.
+  - A kiválasztott patika kiemelt színű aktív jelölőként jelenik meg.
+- **Térképi Lebegő Felugró Ablak (Master Popup):**
+  - Bármely jelölőre kattintva a térképen egy elegáns, lekerekített sarkú lebegő információs ablak jelenik meg, lefelé mutató nyíllal.
+  - Az ablak tartalmazza a patika nevét, címét, távolságát, nyitvatartását, a *"Többit mutasd"* hivatkozást, valamint a *"Közelinek jelölöm"* akciógombot.
 
-##### 4.3.1.5. Térkép - Lista Szinkronizáció és Találatszám
-   - A lista panelén kizárólag azon gyógyszertárak kártyái jelennek meg, amelyek az aktuális térképes kivágatban láthatók (maximum 50 kártya).
-   - **Találatszám kijelzés:** `"Összesen N gyógyszertár / a térképen X gyógyszertár."`
-   - **[Mutasd az összest] hivatkozás:** Visszaállítja a térkép zoom szintjét az összes patika megjelenítéséhez.
-
-##### 4.3.1.6. Nyitvatartási Státusz Kijelzés (Patikakártya)
-   - Háromállapotú jelvény: **Nyitva** (zöld), **Hamarosan zár** (sárga), **Zárva** (piros) + a napi nyitvatartási időpontok kijelzése (pl. `08:00 - 19:00`).
-
-##### 4.3.1.7. Preferált Patika Kijelölése
-   - Gomb a patikakártyán és a térképes felugró ablakban: Ház / helyszín hozzáadása ikon (`"Közeli patikának jelölöm"`).
-   - Visszajelzés: A kiválasztott patikán egyértelmű `"Közeli gyógyszertár"` kitűző jelenik meg, és beállítása érvényesül az egész portálon.
-
-##### 4.3.1.8. Gyógyszertár Részletek Modal és Mélylinkelés
-   - **Megnyitás:** A patikakártyán és a térképes marker felugró ablakában lévő `"Részletek"` gombra kattintva megnyílik a gyógyszertár részletes adatlapja egy reszponzív felugró modális ablakban.
-   - **Mélylinkelés (Deep Linking):** Ha a felhasználó a Globális keresőből vagy más felületről hivatkozással érkezik (pl. `/gyogyszertarak?id=BF133`), a rendszer a térképen automatikusan az adott patikára fókuszál (zoom 15) és megnyitja a részletes modális ablakot.
-   - **A Modal Tartalma:**
-     - *Fejléc:* Gyógyszertár neve, belső azonosító kódja (pl. `BF133`), esetleges `"Közeli gyógyszertár"` jelvény és bezáró `X` gomb.
-     - *Aktuális státusz & Elérhetőségek:* Háromállapotú jelvény (`Nyitva`, `Hamarosan zár`, `Zárva`), pontos cím, kattintható telefonszám (`tel:` hivatkozással azonnali hívásindításhoz) és kattintható e-mail cím (`mailto:` hivatkozással levelezéshez).
-     - *Heti nyitvatartási rend:* Hétfőtől Vasárnapig napokra lebontott nyitvatartási idők. Az aktuális nap kiemelésre kerül (kiemelt háttér és `"Ma"` badge). A zárva tartó napoknál `"ZÁRVA"` felirat jelenik meg.
-   - **Reszponzivitás:** Mobilon és asztali kijelzőn egyaránt görgethető, érintésbarát felületet nyújt (`max-h-[90vh]`).
-   - **Akciógombok:**
-     - `"Közeli patikának jelölöm"` / `"Közeli jelölés eltávolítása"` (szinkronizálja a preferált patika állapotot).
-     - `"Mutasd térképen"` (bezárja a modalt és ráfókuszál a gyógyszertárra a térképen).
-     - `"Bezárás"` (lezárja a modális ablakot).
+##### 4.3.1.5. Gyógyszertár Részletek Modal és Mélylinkelés
+- **Megnyitás:** A kártyán lévő patikanévre, a *"Többit mutasd"* gombra vagy a térképi felugró ablakra kattintva érhető el.
+- **Mélylinkelés:** Közvetlen URL hivatkozással (pl. `/gyogyszertarak?id=BF133`) érkezve a rendszer a térképen azonnal az adott patikára navigál és automatikusan megnyitja a részletes modált.
+- **Tartalom:**
+  - Patika hivatalos neve, kódja és aktuális nyitvatartási státusza.
+  - Kattintható telefonszám (hívásindítás) és e-mail cím (levelezőprogram megnyitása).
+  - Hétfőtől Vasárnapig tartó részletes heti nyitvatartási táblázat, az aktuális nap kiemelésével.
+  - Akciógombok a közeli jelöléshez és a térképi megjelenítéshez.
 
 #### 4.3.2. Gyógyszertári Készlet Nézet (Modális Nézet)
 
-- **Funkció:** A Gyógyszer adatlapról a `"Megnézem hol"` gombokkal megnyitható teljes képernyős modális ablak.
+- **Funkció:** A Gyógyszer adatlapról a *"Megnézem hol"* gombokkal megnyitható teljes képernyős modális ablak.
 - **Működés:** Kizárólag azokat a gyógyszertárakat jeleníti meg a térképen és a kísérő listában, ahol a kiválasztott gyógyszer raktáron van vagy rendelhető.
 
 ---
