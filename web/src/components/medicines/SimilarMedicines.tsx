@@ -133,21 +133,21 @@ export function SimilarMedicines({ substance, medicines }: SimilarMedicinesProps
                                         {med.gyarto}
                                     </td>
                                     <td className="px-[16px] py-[14px]">
-                                        <span className="inline-flex items-center gap-[6px] bg-[#e8f8e2] text-[#317907] px-[8px] py-[3px] rounded-[4px] font-medium text-[14px] whitespace-nowrap">
-                                            <img src="/assets/figma/8d5c6e13ab3c6173ee2bfff8d7a4bf3cc46bca63.svg" alt="" className="size-[16px]" />
-                                            Elérhető
+                                        <span className="inline-flex items-center gap-[8px] bg-[#e8f8e2] text-[#317907] px-[10px] py-[4px] rounded-[4px] font-medium text-[14px] leading-none whitespace-nowrap">
+                                            <img src="/assets/figma/8d5c6e13ab3c6173ee2bfff8d7a4bf3cc46bca63.svg" alt="" className="size-[16px] shrink-0" />
+                                            <span>Elérhető</span>
                                         </span>
                                     </td>
                                     <td className="px-[16px] py-[14px]">
                                         {nearbyPharmacy ? (
                                             availableInPharmacy ? (
-                                                <span className="inline-flex items-center gap-[6px] bg-[#e8f8e2] text-[#317907] px-[8px] py-[3px] rounded-[4px] font-medium text-[14px] whitespace-nowrap">
-                                                    <img src="/assets/figma/8d5c6e13ab3c6173ee2bfff8d7a4bf3cc46bca63.svg" alt="" className="size-[16px]" />
-                                                    Elérhető
+                                                <span className="inline-flex items-center gap-[8px] bg-[#e8f8e2] text-[#317907] px-[10px] py-[4px] rounded-[4px] font-medium text-[14px] leading-none whitespace-nowrap">
+                                                    <img src="/assets/figma/8d5c6e13ab3c6173ee2bfff8d7a4bf3cc46bca63.svg" alt="" className="size-[16px] shrink-0" />
+                                                    <span>Elérhető</span>
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center gap-[6px] bg-gray-100 text-gray-500 px-[8px] py-[3px] rounded-[4px] font-medium text-[14px] whitespace-nowrap">
-                                                    Nem elérhető
+                                                <span className="inline-flex items-center gap-[8px] bg-gray-100 text-gray-500 px-[10px] py-[4px] rounded-[4px] font-medium text-[14px] leading-none whitespace-nowrap">
+                                                    <span>Nem elérhető</span>
                                                 </span>
                                             )
                                         ) : (

@@ -53,21 +53,21 @@ export function MedicineStatusHistory({ history }: MedicineStatusHistoryProps) {
                         >
                             <div className="w-[120px]">
                                 {item.status === 'Elérhető' && (
-                                    <span className="inline-flex items-center gap-[8px] bg-[#e8f8e2] text-[#317907] px-[8px] py-[3px] rounded-[4px] font-medium text-[14px]">
-                                        <img src="/assets/figma/8d5c6e13ab3c6173ee2bfff8d7a4bf3cc46bca63.svg" alt="" className="size-[16px]" />
-                                        Elérhető
+                                    <span className="inline-flex items-center gap-[8px] bg-[#e8f8e2] text-[#317907] px-[10px] py-[4px] rounded-[4px] font-medium text-[14px] leading-none whitespace-nowrap">
+                                        <img src="/assets/figma/8d5c6e13ab3c6173ee2bfff8d7a4bf3cc46bca63.svg" alt="" className="size-[16px] shrink-0" />
+                                        <span>Elérhető</span>
                                     </span>
                                 )}
                                 {item.status === 'Készlethiány' && (
-                                    <span className="inline-flex items-center gap-[8px] bg-[#fff7ba] text-[#7a6c21] px-[8px] py-[3px] rounded-[4px] font-medium text-[14px]">
-                                        <img src="/assets/figma/95a59bf06dc352f30740e8e75e9dc3eccfec6dd4.svg" alt="" className="size-[16px]" />
-                                        Hiány
+                                    <span className="inline-flex items-center gap-[8px] bg-[#fff7ba] text-[#7a6c21] px-[10px] py-[4px] rounded-[4px] font-medium text-[14px] leading-none whitespace-nowrap">
+                                        <img src="/assets/figma/95a59bf06dc352f30740e8e75e9dc3eccfec6dd4.svg" alt="" className="size-[16px] shrink-0" />
+                                        <span>Hiány</span>
                                     </span>
                                 )}
                                 {item.status === 'Megszűnt' && (
-                                    <span className="inline-flex items-center gap-[8px] bg-[#feeaed] text-[#b1174e] px-[8px] py-[3px] rounded-[4px] font-medium text-[14px]">
-                                        <img src="/assets/figma/c5d9b22ba806bb52c15a398d9d8ee7ff7e067868.svg" alt="" className="size-[16px]" />
-                                        Megszűnt
+                                    <span className="inline-flex items-center gap-[8px] bg-[#feeaed] text-[#b1174e] px-[10px] py-[4px] rounded-[4px] font-medium text-[14px] leading-none whitespace-nowrap">
+                                        <img src="/assets/figma/c5d9b22ba806bb52c15a398d9d8ee7ff7e067868.svg" alt="" className="size-[16px] shrink-0" />
+                                        <span>Megszűnt</span>
                                     </span>
                                 )}
                                 {!['Elérhető', 'Készlethiány', 'Megszűnt'].includes(item.status) && (
