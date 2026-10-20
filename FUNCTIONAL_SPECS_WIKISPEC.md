@@ -22,9 +22,9 @@ kerülnek strukturálásra.
 ---
 
 > **Dokumentum azonosító:** FRS-BVO-20261020  
-> **Verzió:** 1.8.0  
+> **Verzió:** 1.8.1  
 > **Dátum:** 2026.10.20.  
-> **Státusz:** Aktív / Hatályos (Mobil nézet és helyszíni orvosi vizit támogatása, Accordion szűrőpanel, gyógyszerkártyák, patika Split View és Desktop vs. Mobil funkcionális összehasonlítások)  
+> **Státusz:** Aktív / Hatályos (Dashboard kétszintes kompakt készletváltozási lista, Mobil nézet és helyszíni orvosi vizit támogatása, Accordion szűrőpanel, gyógyszerkártyák, patika Split View)  
 > **Élő prototípus elérhetőség:** [https://bvo.uneb.hu/](https://bvo.uneb.hu/) (tesztfiókok a 6. fejezetben)  
 
 ---
@@ -422,14 +422,17 @@ Kétoszlopos modern reszponzív elrendezés (Figma elrendezési minták alapján
 1. **Bal oldali oszlop (Globális készletváltozások):**
    - **Időszak-választó Kapszula:** `Elmúlt 3 nap` (alapértelmezett), `Elmúlt 1 nap`, `Elmúlt 7 nap`, `Elmúlt 30 nap`.
    - **Globális Figyelmeztető Kártya:** Sárga keretes összesítő, amely mutatja az adott időszakban bekövetkezett változásokat: összes változás, megszűnt, készlethiány és újra elérhető tételek száma. A készlethiány számlálóra kattintva azonnali gyorsszűrt átnavigálás történik a gyógyszerlistára.
-   - **Legutóbbi Készletváltozások Táblázat:** A legfrissebb 20 piaci készletmozgás listája: gyógyszernév, hatóanyag, kiszerelés, gyártó, országos státusz pill, és közvetlen adatlap link.
+   - **Legutóbbi Készletváltozások Listája:** A legfrissebb 20 piaci készletmozgás áttekinthető, kétszintes kompakt kártyasorokban:
+     - *Felső szint (1. sor):* A terméknév a teljes rendelkezésre álló szélességet megkapja, maximum 2 soros intelligens szövegtördeléssel (`line-clamp-2`), sötétkék félkövér kiemeléssel és közvetlen hivatkozással a gyógyszer adatlapjára (`/gyogyszerek/adatlap?tk=...`). A teljes hivatalos terméknév lebegő szövegként (title attribútum) is olvasható.
+     - *Alsó szint (2. sor):* Szuper kompakt metainfó sáv: bal oldalon a színkódolt országos státuszjelvény (`Elérhető`, `Hiány`, `Megszűnt`), jobb oldalon a készletváltozás pontos időbélyege (ÉÉÉÉ-HH-NN ÓÓ:PP).
+     - *Oszlopfejléc mentesség:* A merev 3 oszlopos táblázatfejlécek helyett a lista közvetlenül a kártyafejléc alatt kezdődik, minimális sormagasságot és maximális adatsűrűséget biztosítva.
 2. **Jobb oldali oszlop (Közeli Gyógyszertár állapota):**
    - **Ha nincs preferált patika:** Kiemelt figyelmeztető doboz nagy térkép-illusztrációval és *"Patika keresése"* gombbal, amely megnyitja a keresőt.
-   - **Ha van kijelölt preferált patika:** A gyógyszertár neve, címe, heti nyitvatartási összefoglalója, valamint a patika saját, helyi készletmozgásainak összesítője és táblázata.
+   - **Ha van kijelölt preferált patika:** A gyógyszertár neve, címe, heti nyitvatartási összefoglalója, valamint a patika saját, helyi készletmozgásainak összesítője és azonos kétszintes kompakt készletváltozási listája.
 
 #### 4.1.2. Bemenetek és Kimenetek
-- **Bemenet:** Időszakválasztó gombokra kattintás (1, 3, 7, 30 nap), összesítő számlálóra kattintás, táblázati sorra kattintás.
-- **Kimenet:** A statisztikák és a táblázat adatainak azonnali frissülése, átnavigálás a gyógyszerlistára előszűrt státusszal.
+- **Bemenet:** Időszakválasztó gombokra kattintás (1, 3, 7, 30 nap), összesítő számlálóra kattintás, terméknév linkre kattintás.
+- **Kimenet:** A statisztikák és a táblázat adatainak azonnali frissülése, átnavigálás a gyógyszerlistára előszűrt státusszal vagy az adott gyógyszer adatlapjára.
 
 #### 4.1.3. Hibakezelés a Dashboardon
 - **Nincs készletváltozás az adott időszakban:** A táblázat helyén diszkrét, tiszta információs sáv jelenik meg: *"A kiválasztott időszakban nem történt készletváltozás."*
@@ -440,6 +443,7 @@ Kétoszlopos modern reszponzív elrendezés (Figma elrendezési minták alapján
 - **AC-4.1.2:** Az összesítő kártyán a hiánycikkek számára kattintva a gyógyszerlista nyílik meg, automatikusan `Készlethiány` szűrővel.
 - **AC-4.1.3:** Kijelölt preferált patika esetén a jobb oldali panel kizárólag az adott patika valós helyi készletmozgásait jeleníti meg.
 - **AC-4.1.4:** Az Irányítópulton megjelenő adatok kizárólag az OTC és vényköteles humán gyógyszerek készletmozgásait tartalmazzák; egyéb termékek nem jelenhetnek meg.
+- **AC-4.1.5:** A legutóbbi készletváltozások listájában a hosszú terméknevek a rendelkezésre álló teljes szélességben, levágás nélkül legfeljebb 2 sorba tördelődnek, közvetlenül az adatlapra navigálnak, alattuk pedig egységesen látható a státuszjelvény és az időbélyeg.
 
 ---
 
@@ -800,6 +804,7 @@ Ez a fejezet a funkcionális specifikációban eszközölt módosítások és ki
 
 | Verzió | Dátum | Változás Típusa | Változások Részletes Összefoglalása |
 | :--- | :--- | :--- | :--- |
+| **v1.8.1** | 2026.10.20. | Ergonómiai Optimalizálás | **Dashboard készletváltozási lista kétszintes kompakt optimalizálása:**<br>• A korábbi merev 3 oszlopos táblázat (amelyben a hosszú terméknevek lebegve csonkán, 20-30 karakter után levágódtak) felváltása modern kétszintes kártyasorokkal a `StockChangesWidget` komponensben.<br>• **Felső szint (1. sor):** A terméknév a teljes rendelkezésre álló kártyaszélességet (több mint 500px) megkapja, intelligens legfeljebb 2 soros szövegtördeléssel (`line-clamp-2`), közvetlen kattintható linkkel az adatlapra és lebegő címmel (`title`).<br>• **Alsó szint (2. sor):** Letisztult, szuper kompakt metainfó sáv bal oldalon az országos státuszjelvénnyel (`Elérhető`, `Hiány`, `Megszűnt`), jobb oldalon a pontos időbélyeggel.<br>• A merev táblázatfejléc elhagyásával ~42px függőleges hely takarítható meg, a sorok pedig diszkrét hover kiemelést kaptak a könnyebb pásztázásért.<br>• Új elfogadási kritérium (AC-4.1.5). |
 | **v1.8.0** | 2026.10.20. | Mobil Nézet és Helyszíni Vizit Támogatás | **Teljes körű reszponzív és mobil ergonómiai optimalizálás:**<br>• Új koncepció bevezetése (1.9. fejezet): Asztali/laptop fókuszú rendelői környezet mellett a helyszíni orvosi betegvizit (ambuláns használat) teljes körű támogatása.<br>• **Gyógyszerkereső mobil nézet (<1024px):** Automatikus átváltás ergonomikus gyógyszerkártyákra (`MedicineCard`), kétállású kézi Nézetváltó gomb (`Kártyák` / `Táblázat`), lenyitható egyérintéses **Accordion szűrőpanel** beépített rendezési opciókkal, aktív szűrőszámláló jelvénnyel és egykattintásos szűrőtörléssel.<br>• **Gyógyszertár Kereső Címsori Nézetválasztó, Összecsukható Kereső és Bottom Sheet:** Mobilon (<1024px) a 3-állású nézetválasztó (`[Térkép | Osztott | Lista]`) közvetlenül a címsorral egy sorban helyezkedik el. A „Lista” elemre kattintva a lista felülete kitakarja a címsor alatti teljes részt (100% képernyőkitöltés a térkép és szűrősáv felett, beépített in-sheet gyorskeresővel és gyorsszűrőkkel), míg az „Osztott” (50/50) és „Térkép” (92px peek) állapotok megőrzik a térkép interaktív elérését. A címsorban helyet kapott az **összecsukható kereső és szűrőpanel (Accordion)** gombja, amely aktív szűrés esetén számláló jelvénnyel (badge) jelzi a feltételek darabszámát nyitott és csukott állapotban is. A patikalistában a számláló dinamikusan a térképen látható patikákat jelzi (`"{X} BENU gyógyszertár a térképen"`), mellette tiszta szöveges linkkel (`Összes ({n} db)`). A tartózkodási hely és a közeli patika kártyák a lap görgethető listájának elejére kerültek (nem sticky), így lefelé görgetve elúsznak és a teljes sheet-magasság a patikakártyáké marad.<br>• **Mobil Navigáció és Keresés:** Hamburger menübe integrált „Mentett gyógyszerek” számlálóval, azonnali közeli patika adatkijelzés és módosítási akciógomb, valamint teljes képernyős keresőfelület (Mobil Kereső Overlay).<br>• **Helyettesítő gyógyszerek:** Az adatlapon mobil nézetben a helyettesítő készítmények táblázata automatikusan kártyás listává alakul át.<br>• Részletes **Desktop vs. Mobil összehasonlító táblázatok** elhelyezése minden érintett felületi modulban (4.0.5, 4.2.1.4, 4.2.2.6, 4.3.8) és új elfogadási kritériumok (AC-4.2.6, AC-4.2.7, AC-4.3.4, AC-4.3.5, AC-4.3.6). |
 | **v1.7.0** | 2026.10.20. | Hatókör Tisztítás (Scope Alignment) | **Közösségi funkciók és Képzési program teljes kivezetése a funkcionális specifikációból:**<br>• A dokumentáció teljes mértékben szinkronba került a prototípus aktív fejlesztési scope-jával; a felületen csak koncepciótervként létező funkciók (Közösségi fórum, képzések listája és LMS integráció, admin moderáció) kivezetésre kerültek a specifikációból.<br>• Az adatmodellek (3. fejezet) és a funkcionális modulok (4. fejezet) újraszámozása (4.4 Globális Keresés, 4.5 Hitelesítés, 4.6 Adminisztráció, 4.7 Profil).<br>• Az Elfogadási Kritériumok (AC) frissítése és beépített újraszámozása a funkcionális modulokban.<br>• Profil és admin felületi hírlevél/értesítési beállítások szűkítése a valós készletértesítési funkcionalitásra. |
 | **v1.6.1** | 2026.10.20. | Funkcionális Hatókör & Irányelvek Pontosítása | **Gyógyszer státuszkövetés, WCAG és böngésző title követelmények rögzítése:**<br>• Rögzítésre került, hogy a portál gyógyszerkészlet- és hiánystátuszkövetési funkciói kizárólag a humán gyógyszerek két csoportjára korlátozódnak: **OTC (vény nélkül kapható)** és **vényköteles (Rx)** készítmények; egyéb nem gyógyszer cikkek (étrend-kiegészítők, kozmetikumok, tápszerek, gyógyászati segédeszközök) státuszai kívül esnek a hatókörön.<br>• **WCAG 2.2 irányelvek:** Törekedni kell az alapvető sztenderdek betartására, de zárt szakmai rendszer lévén és a nem akadályoztatott orvosi célcsoport miatt nem követelmény a maximális szintű megfelelőség.<br>• **Technikai SEO és lapfül title formátum:** Zárt rendszer lévén klasszikus SEO elvárások nincsenek, de a böngészést segítő lapfülcím kötelezően a `"{lap neve} \| BENUvény Orvosi Portál"` formátumban kell megjelenjen (új 1.8 fejezet és AC-4.0.5). |

@@ -9,18 +9,18 @@
  * A portál bejelentkezést követő központi áttekintő felülete a legújabb Figma
  * tervek szerinti 2 oszlopos reszponzív elrendezéssel.
  * - Bal oszlop: Globális készletváltozás összesítő kártya és a legutóbbi 20
- *   készletváltozás részletes táblázata.
+ *   készletváltozás kétszintes kompakt listája.
  * - Jobb oszlop: Közeli gyógyszertár kiválasztása nagy térképes modul, vagy
- *   amennyiben van kijelölt patika, annak helyi készletmozgási összesítője és táblázata.
+ *   amennyiben van kijelölt patika, annak helyi készletmozgási összesítője és listája.
  * 
  * KAPCSOLÓDÓ USER STORY-K:
  * - Felhasználóként egy modern, fókuszált felületen szeretném azonnal látni a piaci
- *   hiányokat, megszűnéseket és a patikám készletének alakulását.
+ *   hiányokat, megszűnéseket és a patikám készletének alakulását jól olvasható formában.
  * 
  * KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
  * - Időszakválasztó kapszula gomb (PeriodSelector)
  * - Globális készletösszesítő kártya (StockNotificationCard)
- * - Legutóbbi készletváltozások táblázat (StockChangesWidget)
+ * - Legutóbbi készletváltozások lista (StockChangesWidget)
  * - Közeli patika térkép és készlet modul (PharmacyStockWidget)
  * - Gyógyszertár kereső (/gyogyszertarak)
  * - Gyógyszer nyilvántartás (/gyogyszerek)

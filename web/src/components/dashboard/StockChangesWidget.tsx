@@ -2,13 +2,14 @@
 
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ (FSR) - KÉSZLETVÁLTOZÁSOK TÁBLÁZAT WIDGET
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ (FSR) - KÉSZLETVÁLTOZÁSOK LISTA WIDGET
  * ============================================================================
  * 
  * MIRE HASZNÁLJUK:
- * Az Irányítópult (Dashboard) bal oldali fő táblázat komponense, amely a legutóbbi
- * 20 készletváltozást jeleníti meg a Figma tervek szerinti kártyában (fehér háttér,
- * 16px lekerekítés, 38px enyhe árnyék, szürke oszlopfejléc, színkódolt státuszjelvények).
+ * Az Irányítópult (Dashboard) készletváltozási lista komponense, amely a legutóbbi
+ * 20 piaci készletmozgást jeleníti meg áttekinthető, kétszintes kompakt kártyasorokban
+ * (felső szinten teljes szélességű terméknév max. 2 soros intelligens tördeléssel,
+ * alsó szinten színkódolt státuszjelvény és dátum a maximális olvashatóságért).
  * 
  * KAPCSOLÓDÓ USER STORY-K:
  * - Felhasználóként időrendben szeretném látni a legfrissebb gyógyszerkészlet-változásokat
@@ -20,7 +21,7 @@
  * - Irányítópult (/dashboard)
  * - Gyógyszer adatlap (/gyogyszerek/adatlap?tk=...)
  * - Gyógyszerek teljes listaoldala (/gyogyszerek?sort=lastUpdate&order=desc)
- * - Funkcionális specifikáció (FUNCTIONAL_SPECS_WIKISPEC.md: 4.1.3)
+ * - Funkcionális specifikáció (FUNCTIONAL_SPECS_WIKISPEC.md: 4.1.1, AC-4.1.5)
  * ============================================================================
  */
 
@@ -105,40 +106,33 @@ export function StockChangesWidget({
 
             <div className="h-px bg-[#E7E8EC] w-full" />
 
-            {/* Táblázat Oszlopfejlécek */}
-            <div className="bg-[#F9F9FB] px-[24px] py-[12px] flex items-center gap-[16px] text-[#3A5876] text-[12px] md:text-[13px] font-bold uppercase tracking-wider border-b border-[#E7E8EC]">
-                <span className="w-[104px] shrink-0">Státusz</span>
-                <span className="flex-1 min-w-0">Termék neve</span>
-                <span className="w-[140px] shrink-0 text-right">Dátum</span>
-            </div>
-
-            {/* Sorok listája */}
+            {/* Sorok listája - Kétszintes kompakt kártyasor elrendezés a maximális terméknév-olvashatóságért */}
             <div className="divide-y divide-[#E7E8EC] flex-1">
                 {changes.length > 0 ? (
                     changes.slice(0, 20).map((med) => (
                         <div
                             key={med.internalId || med.tkSzam}
-                            className="px-[24px] py-[14px] flex items-center gap-[16px] hover:bg-[#F9F9FB] transition-colors group"
+                            className="px-[20px] md:px-[24px] py-[12px] flex flex-col gap-[6px] hover:bg-[#F9F9FB] transition-colors"
                         >
-                            {/* Státusz oszlop */}
-                            <div className="w-[104px] shrink-0 flex items-center">
-                                {renderStatusBadge(med.status)}
-                            </div>
-
-                            {/* Terméknév oszlop */}
-                            <div className="flex-1 min-w-0 pr-2">
+                            {/* Felső szint: Teljes szélességű terméknév link 2 soros intelligens tördeléssel */}
+                            <div className="w-full">
                                 <Link
                                     href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(med.tkSzam)}`}
-                                    className="text-[15px] md:text-[16px] font-medium text-[#002664] hover:text-[#378509] hover:underline block truncate"
+                                    className="text-[14px] md:text-[15px] font-semibold text-[#002664] hover:text-[#378509] hover:underline line-clamp-2 leading-snug"
                                     title={med.nev}
                                 >
                                     {med.nev}
                                 </Link>
                             </div>
 
-                            {/* Dátum oszlop */}
-                            <div className="w-[140px] shrink-0 text-right text-[13px] md:text-[14px] text-[#62788f] whitespace-nowrap">
-                                {formatDate(med.lastUpdate)}
+                            {/* Alsó szint: Státuszjelvény a bal oldalon, Dátum a jobb szélen */}
+                            <div className="flex items-center justify-between gap-[12px] pt-[2px]">
+                                <div className="flex items-center">
+                                    {renderStatusBadge(med.status)}
+                                </div>
+                                <div className="text-[12px] md:text-[13px] text-[#62788f] whitespace-nowrap">
+                                    {formatDate(med.lastUpdate)}
+                                </div>
                             </div>
                         </div>
                     ))
