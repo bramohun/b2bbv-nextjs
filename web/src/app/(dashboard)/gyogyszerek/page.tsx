@@ -24,14 +24,19 @@
  *   beállítani egy adott gyógyszerre.
  * - Felhasználóként szeretném, hogy a műveletek oszlop (kedvenc mentés, értesítés, részletek gomb)
  *   a táblázat vízszintes görgetése során is folyamatosan rögzítve (fix/sticky) maradjon a jobb szélen.
+ * - Orvosként helyszíni vizit során (<1024px) szeretném, ha a sokoszlopos táblázat helyett áttekinthető
+ *   gyógyszerkártyák jelennének meg, lenyitható egyérintéses Accordion szűrőpanellel és rendezési lehetőségekkel.
+ * - Felhasználóként szeretnék bármikor kézzel váltani a kártyás és a táblázatos megjelenítés között
+ *   a fejlécben elhelyezett kétállású Nézetváltó gombbal.
  * 
  * KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
  * - Gyógyszer részletes adatlap: /gyogyszerek/adatlap?tk=...
+ * - Gyógyszer mobil kártya: MedicineCard
  * - Kedvencek kezelése: FavoriteContext & Mentett tételek lista a fejlécben
  * - Készletértesítések kezelése: NotificationContext & Bell ikon akciók
  * - Közeli gyógyszertár integráció: NearbyPharmacyContext & készletindikátor
  * - Fejléc globális kereső: GlobalSearch autocompletion
- * - Funkcionális specifikáció (FUNCTIONAL_SPECS_WIKISPEC.md: 4.2.1)
+ * - Funkcionális specifikáció (FUNCTIONAL_SPECS_WIKISPEC.md: 4.2.1, 4.2.1.4)
  * ============================================================================
  */
 
@@ -45,6 +50,7 @@ import { formatDate } from '@/lib/utils';
 import { useNotification } from '@/context/NotificationContext';
 import { useFavorite } from '@/context/FavoriteContext';
 import { FavoriteRemovalModal } from '@/components/medicines/FavoriteRemovalModal';
+import { MedicineCard } from '@/components/medicines/MedicineCard';
 import { useNearbyPharmacy } from '@/context/NearbyPharmacyContext';
 import { isAvailableInPharmacy, getNearbyPharmacyStatusUpdate } from '@/lib/utils';
 import { fetchStaticData } from '@/lib/static-fetch';
@@ -90,8 +96,16 @@ function MedicinesPageContent() {
     const [filterStatus, setFilterStatus] = useState(
         searchParams.get('status') === 'saved' ? 'all' : (searchParams.get('status') || 'all')
     );
-    const [viewMode] = useState<'grid' | 'table'>('table');
+    const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+    const [isFilterAccordionOpen, setIsFilterAccordionOpen] = useState(false);
     const [viewSettings, setViewSettings] = useState<ViewSettings>(DEFAULT_VIEW_SETTINGS);
+
+    // Automatikus kártyás nézet mobilon és kis képernyőkön (< 1024px)
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+            setViewMode('grid');
+        }
+    }, []);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const settingsRef = useRef<HTMLDivElement>(null);
     const { isSubscribed, subscribe, unsubscribe } = useNotification();
@@ -360,6 +374,29 @@ function MedicinesPageContent() {
 
         return matchesSearch && matchesStatus && matchesColumnFilters && matchesFavorites && matchesNearby && matchesNearbyColumnFilter && matchesNearbyUpdateFilter;
     });
+
+    const activeFilterCount = useMemo(() => {
+        let count = 0;
+        if (searchTerm.trim()) count++;
+        if (filterStatus !== 'all') count++;
+        if (favoritesOnly) count++;
+        if (nearbyOnly) count++;
+        if (columnFilters['lastUpdate_from'] || columnFilters['lastUpdate_to']) count++;
+        if (columnFilters['nearbyPharmacyStock']) count++;
+        if (columnFilters['status']) count++;
+        return count;
+    }, [searchTerm, filterStatus, favoritesOnly, nearbyOnly, columnFilters]);
+
+    const handleResetAllFilters = () => {
+        setSearchTerm('');
+        setFilterStatus('all');
+        setFavoritesOnly(false);
+        setNearbyOnly(false);
+        setColumnFilters({});
+        setSortKey('lastUpdate');
+        setSortDirection('desc');
+        setCurrentPage(1);
+    };
 
     useEffect(() => {
         setCurrentPage(1);
@@ -851,41 +888,75 @@ function MedicinesPageContent() {
                     </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-[16px]">
-                    <label className="flex items-center gap-[8px] cursor-pointer select-none">
-                        <input
-                            type="checkbox"
-                            checked={favoritesOnly}
-                            onChange={(e) => {
-                                const checked = e.target.checked;
-                                setFavoritesOnly(checked);
-                                if (!checked && typeof window !== 'undefined') {
-                                    const url = new URL(window.location.href);
-                                    if (url.searchParams.has('onlyFavorites') || url.searchParams.has('favoritesOnly') || url.searchParams.get('status') === 'saved') {
-                                        url.searchParams.delete('onlyFavorites');
-                                        url.searchParams.delete('favoritesOnly');
-                                        if (url.searchParams.get('status') === 'saved') {
-                                            url.searchParams.delete('status');
+                <div className="flex flex-wrap items-center gap-[12px]">
+                    {/* Nézetváltó gomb (Kártya / Táblázat) */}
+                    <div className="flex items-center bg-[#f0f4f9] rounded-lg p-1 border border-[#d8d9e0]">
+                        <button
+                            type="button"
+                            onClick={() => setViewMode('grid')}
+                            className={`flex items-center gap-1.5 px-3 py-1 text-[13px] font-bold rounded transition-colors cursor-pointer ${
+                                viewMode === 'grid'
+                                    ? 'bg-[#002664] text-white shadow-sm'
+                                    : 'text-[#002664] hover:bg-white/60'
+                            }`}
+                            title="Kártyás nézet"
+                        >
+                            <span className="material-symbols-rounded text-[18px]">grid_view</span>
+                            <span className="hidden sm:inline">Kártyák</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setViewMode('table')}
+                            className={`flex items-center gap-1.5 px-3 py-1 text-[13px] font-bold rounded transition-colors cursor-pointer ${
+                                viewMode === 'table'
+                                    ? 'bg-[#002664] text-white shadow-sm'
+                                    : 'text-[#002664] hover:bg-white/60'
+                            }`}
+                            title="Táblázatos nézet"
+                        >
+                            <span className="material-symbols-rounded text-[18px]">table_rows</span>
+                            <span className="hidden sm:inline">Táblázat</span>
+                        </button>
+                    </div>
+
+                    {/* Desktop kapcsolók */}
+                    <div className="hidden lg:flex items-center gap-[16px]">
+                        <label className="flex items-center gap-[8px] cursor-pointer select-none">
+                            <input
+                                type="checkbox"
+                                checked={favoritesOnly}
+                                onChange={(e) => {
+                                    const checked = e.target.checked;
+                                    setFavoritesOnly(checked);
+                                    if (!checked && typeof window !== 'undefined') {
+                                        const url = new URL(window.location.href);
+                                        if (url.searchParams.has('onlyFavorites') || url.searchParams.has('favoritesOnly') || url.searchParams.get('status') === 'saved') {
+                                            url.searchParams.delete('onlyFavorites');
+                                            url.searchParams.delete('favoritesOnly');
+                                            if (url.searchParams.get('status') === 'saved') {
+                                                url.searchParams.delete('status');
+                                            }
+                                            window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
                                         }
-                                        window.history.replaceState({}, '', url.pathname + (url.search ? url.search : ''));
                                     }
-                                }
-                            }}
-                            className="size-[20px] rounded-[4px] border border-[#d8d9e0] accent-[#002664] cursor-pointer"
-                        />
-                        <span className="text-[#002664] text-[16px] font-normal">Csak mentett gyógyszerek</span>
-                    </label>
+                                }}
+                                className="size-[20px] rounded-[4px] border border-[#d8d9e0] accent-[#002664] cursor-pointer"
+                            />
+                            <span className="text-[#002664] text-[15px] font-normal">Csak mentett</span>
+                        </label>
 
-                    <label className="flex items-center gap-[8px] cursor-pointer select-none">
-                        <input
-                            type="checkbox"
-                            checked={nearbyOnly}
-                            onChange={(e) => setNearbyOnly(e.target.checked)}
-                            className="size-[20px] rounded-[4px] border border-[#d8d9e0] accent-[#002664] cursor-pointer"
-                        />
-                        <span className="text-[#002664] text-[16px] font-normal">Közeli gyógyszertárban elérhető</span>
-                    </label>
+                        <label className="flex items-center gap-[8px] cursor-pointer select-none">
+                            <input
+                                type="checkbox"
+                                checked={nearbyOnly}
+                                onChange={(e) => setNearbyOnly(e.target.checked)}
+                                className="size-[20px] rounded-[4px] border border-[#d8d9e0] accent-[#002664] cursor-pointer"
+                            />
+                            <span className="text-[#002664] text-[15px] font-normal">Közeli patikában elérhető</span>
+                        </label>
+                    </div>
 
+                    {/* Oszlopbeállító (Táblázat nézetben) */}
                     <div className="relative" ref={settingsRef}>
                         <button
                             className="border border-[#002664] bg-white text-[#002664] rounded-[8px] h-[36px] px-[12px] py-[6px] font-bold text-[14px] flex items-center gap-[8px] hover:bg-[#f0f4f9] transition-colors cursor-pointer"
@@ -986,6 +1057,138 @@ function MedicinesPageContent() {
                 </div>
             </div>
 
+            {/* Accordion Szűrő és Rendezés Panel */}
+            <div className="mb-6 bg-white border border-[#e7e8ec] rounded-[16px] overflow-hidden shadow-[0px_4px_16px_0px_rgba(0,26,72,0.04)]">
+                {/* Fejléc: Nyitás/Zárás & Állapot jelvények */}
+                <div className="p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 bg-[#f9f9fb] border-b border-[#e7e8ec]">
+                    <button
+                        type="button"
+                        onClick={() => setIsFilterAccordionOpen(!isFilterAccordionOpen)}
+                        className="flex items-center gap-2 text-[#002664] font-bold text-[14px] hover:text-[#378509] transition-colors cursor-pointer"
+                    >
+                        <span className="material-symbols-rounded text-[20px] text-[#002664]">tune</span>
+                        <span>Szűrés és rendezés</span>
+                        {activeFilterCount > 0 && (
+                            <span className="bg-[#002664] text-white text-[11px] font-bold px-2 py-0.5 rounded-full">
+                                {activeFilterCount} aktív szűrő
+                            </span>
+                        )}
+                        <span className="material-symbols-rounded text-[18px]">
+                            {isFilterAccordionOpen ? 'expand_less' : 'expand_more'}
+                        </span>
+                    </button>
+
+                    {activeFilterCount > 0 && (
+                        <button
+                            type="button"
+                            onClick={handleResetAllFilters}
+                            className="text-[13px] font-semibold text-[#002664] underline hover:text-[#378509] transition-colors cursor-pointer"
+                        >
+                            Szűrők törlése
+                        </button>
+                    )}
+                </div>
+
+                {/* Accordion törzs */}
+                {isFilterAccordionOpen && (
+                    <div className="p-4 bg-white grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fade-in border-t border-[#e7e8ec]">
+                        {/* 1. Rendezés */}
+                        <div>
+                            <label className="block text-[12px] font-bold text-[#62788f] uppercase mb-1.5">
+                                Rendezés
+                            </label>
+                            <select
+                                className="w-full bg-[#f9f9fb] border border-[#d8d9e0] rounded-[8px] px-3 py-2 text-[13px] text-[#002664] font-medium focus:outline-none focus:border-[#002664]"
+                                value={`${sortKey}_${sortDirection}`}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === 'lastUpdate_desc') { setSortKey('lastUpdate'); setSortDirection('desc'); }
+                                    else if (val === 'lastUpdate_asc') { setSortKey('lastUpdate'); setSortDirection('asc'); }
+                                    else if (val === 'nev_asc') { setSortKey('nev'); setSortDirection('asc'); }
+                                    else if (val === 'nev_desc') { setSortKey('nev'); setSortDirection('desc'); }
+                                    else if (val === 'nearbyPharmacyStock_desc') { setSortKey('nearbyPharmacyStock'); setSortDirection('desc'); }
+                                    setCurrentPage(1);
+                                }}
+                            >
+                                <option value="lastUpdate_desc">Legutóbb frissült elöl</option>
+                                <option value="lastUpdate_asc">Legrégebben frissült elöl</option>
+                                <option value="nev_asc">Gyógyszer neve (A → Z)</option>
+                                <option value="nev_desc">Gyógyszer neve (Z → A)</option>
+                                <option value="nearbyPharmacyStock_desc">Közeli patikában elérhető elöl</option>
+                            </select>
+                        </div>
+
+                        {/* 2. Gyógyszer státusz */}
+                        <div>
+                            <label className="block text-[12px] font-bold text-[#62788f] uppercase mb-1.5">
+                                Országos státusz
+                            </label>
+                            <select
+                                className="w-full bg-[#f9f9fb] border border-[#d8d9e0] rounded-[8px] px-3 py-2 text-[13px] text-[#002664] font-medium focus:outline-none focus:border-[#002664]"
+                                value={columnFilters['status'] || ''}
+                                onChange={(e) => handleColumnFilterChange('status', e.target.value)}
+                            >
+                                <option value="">Mindegyik státusz</option>
+                                <option value="Elérhető">Elérhető</option>
+                                <option value="Készlethiány">Készlethiány</option>
+                                <option value="Megszűnt">Megszűnt</option>
+                            </select>
+                        </div>
+
+                        {/* 3. Gyorskapcsolók */}
+                        <div>
+                            <label className="block text-[12px] font-bold text-[#62788f] uppercase mb-1.5">
+                                Gyorsszűrők
+                            </label>
+                            <div className="flex flex-col gap-2 pt-0.5">
+                                <label className="flex items-center gap-2 cursor-pointer select-none">
+                                    <input
+                                        type="checkbox"
+                                        checked={favoritesOnly}
+                                        onChange={(e) => setFavoritesOnly(e.target.checked)}
+                                        className="size-[18px] rounded border border-[#d8d9e0] accent-[#002664]"
+                                    />
+                                    <span className="text-[13px] text-[#002664] font-medium">Csak mentett</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer select-none">
+                                    <input
+                                        type="checkbox"
+                                        checked={nearbyOnly}
+                                        onChange={(e) => setNearbyOnly(e.target.checked)}
+                                        className="size-[18px] rounded border border-[#d8d9e0] accent-[#002664]"
+                                    />
+                                    <span className="text-[13px] text-[#002664] font-medium">Közeli patikában elérhető</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        {/* 4. Utolsó frissítés dátum tartomány */}
+                        <div>
+                            <label className="block text-[12px] font-bold text-[#62788f] uppercase mb-1.5">
+                                Frissítés dátuma
+                            </label>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="date"
+                                    className="w-full bg-[#f9f9fb] border border-[#d8d9e0] rounded-[8px] px-2 py-1.5 text-[12px] text-[#002664] focus:outline-none focus:border-[#002664]"
+                                    placeholder="Kezdő dátum"
+                                    value={columnFilters['lastUpdate_from'] || ''}
+                                    onChange={(e) => handleColumnFilterChange('lastUpdate_from', e.target.value)}
+                                />
+                                <span className="text-gray-400">-</span>
+                                <input
+                                    type="date"
+                                    className="w-full bg-[#f9f9fb] border border-[#d8d9e0] rounded-[8px] px-2 py-1.5 text-[12px] text-[#002664] focus:outline-none focus:border-[#002664]"
+                                    placeholder="Záró dátum"
+                                    value={columnFilters['lastUpdate_to'] || ''}
+                                    onChange={(e) => handleColumnFilterChange('lastUpdate_to', e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
             {
                 loading ? (
                     <div className="flex justify-center p-12" >
@@ -993,143 +1196,175 @@ function MedicinesPageContent() {
                     </div>
                 ) : (
                     <>
-                        <div className="bg-white border border-[#e7e8ec] rounded-[16px] shadow-[0px_14px_38px_0px_rgba(0,26,72,0.06)] overflow-hidden mb-8">
-                            <div className="overflow-x-auto">
-                                <table className="w-full border-separate border-spacing-0">
-                                    <thead>
-                                        <tr>
-                                            {viewSettings.tableColumnOrder.map(renderHeaderCell)}
-                                        </tr>
-                                        <tr>
-                                            {viewSettings.tableColumnOrder.map(renderFilterCell)}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {paginatedItems.length > 0 ? (
-                                            paginatedItems.map((medicine) => (
-                                                <tr key={medicine.internalId} className="hover:bg-slate-50 transition-colors group">
-                                                    {viewSettings.tableColumnOrder.map(col => renderDataCell(col, medicine))}
-                                                </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan={viewSettings.tableColumnOrder.filter(col => viewSettings.tableColumns[col] || col === 'actions').length} className="text-center py-12 text-[#62788f] text-[15px]">
-                                                    Nem található a keresésnek megfelelő gyógyszer.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
+                        {/* Kártyás megjelenítés (Grid) */}
+                        {viewMode === 'grid' && (
+                            paginatedItems.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
+                                    {paginatedItems.map((medicine) => (
+                                        <MedicineCard
+                                            key={medicine.internalId || medicine.tkSzam}
+                                            medicine={medicine}
+                                            visibleFields={viewSettings.tableColumns}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="bg-white border border-[#e7e8ec] rounded-[16px] p-12 text-center text-[#62788f] mb-6 shadow-[0px_4px_16px_0px_rgba(0,26,72,0.04)]">
+                                    <p className="text-[16px] font-bold text-[#002664] mb-2">Nem található a keresésnek megfelelő gyógyszer.</p>
+                                    <p className="text-[14px] text-[#62788f] mb-4">Próbálja meg módosítani a keresőszót vagy a beállított szűrőket.</p>
+                                    {activeFilterCount > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={handleResetAllFilters}
+                                            className="px-4 py-2 bg-[#002664] text-white rounded-lg text-sm font-bold hover:bg-[#001b47] transition-colors cursor-pointer"
+                                        >
+                                            Szűrők törlése
+                                        </button>
+                                    )}
+                                </div>
+                            )
+                        )}
 
-                            {/* Footer Bottom Row (Pagination + Items per page) */}
-                            <div className="flex flex-col sm:flex-row items-center justify-between p-[16px] gap-4 border-t border-[#e7e8ec] bg-white">
-                                {/* Pagination Numbers */}
+                        {/* Táblázatos megjelenítés (Table) */}
+                        {viewMode === 'table' && (
+                            <div className="bg-white border border-[#e7e8ec] rounded-[16px] shadow-[0px_14px_38px_0px_rgba(0,26,72,0.06)] overflow-hidden mb-6">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full border-separate border-spacing-0">
+                                        <thead>
+                                            <tr>
+                                                {viewSettings.tableColumnOrder.map(renderHeaderCell)}
+                                            </tr>
+                                            <tr>
+                                                {viewSettings.tableColumnOrder.map(renderFilterCell)}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {paginatedItems.length > 0 ? (
+                                                paginatedItems.map((medicine) => (
+                                                    <tr key={medicine.internalId} className="hover:bg-slate-50 transition-colors group">
+                                                        {viewSettings.tableColumnOrder.map(col => renderDataCell(col, medicine))}
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan={viewSettings.tableColumnOrder.filter(col => viewSettings.tableColumns[col] || col === 'actions').length} className="text-center py-12 text-[#62788f] text-[15px]">
+                                                        Nem található a keresésnek megfelelő gyógyszer.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Megosztott alsó lapozó és találatszám sáv */}
+                        <div className="bg-white border border-[#e7e8ec] rounded-[16px] shadow-[0px_4px_16px_0px_rgba(0,26,72,0.04)] p-[16px] flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+                            {/* Pagination Numbers */}
+                            <div className="flex items-center gap-[8px]">
+                                <button
+                                    className="size-[44px] rounded-[8px] border border-[#d8d9e0] bg-white text-[#002664] flex items-center justify-center p-[10px] hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                                    disabled={currentPage === 1}
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    aria-label="Előző oldal"
+                                >
+                                    <img src="/assets/figma/3b23203475136b257b7c1d04849a07d4c2d3b4cf.svg" alt="" className="size-[20px]" />
+                                </button>
+
+                                {/* Page number buttons */}
                                 <div className="flex items-center gap-[8px]">
                                     <button
-                                        className="size-[44px] rounded-[8px] border border-[#d8d9e0] bg-white text-[#002664] flex items-center justify-center p-[10px] hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                                        disabled={currentPage === 1}
-                                        onClick={() => handlePageChange(currentPage - 1)}
-                                        aria-label="Előző oldal"
+                                        className={`size-[44px] rounded-[8px] text-[16px] text-center transition-colors cursor-pointer ${
+                                            currentPage === 1
+                                                ? 'bg-[#002664] text-white font-medium'
+                                                : 'border border-[#d8d9e0] bg-white text-[#002664] hover:bg-slate-50'
+                                        }`}
+                                        onClick={() => handlePageChange(1)}
                                     >
-                                        <img src="/assets/figma/3b23203475136b257b7c1d04849a07d4c2d3b4cf.svg" alt="" className="size-[20px]" />
+                                        1
                                     </button>
 
-                                    {/* Page number buttons */}
-                                    <div className="flex items-center gap-[8px]">
-                                        <button
-                                            className={`size-[44px] rounded-[8px] text-[16px] text-center transition-colors cursor-pointer ${
-                                                currentPage === 1
-                                                    ? 'bg-[#002664] text-white font-medium'
-                                                    : 'border border-[#d8d9e0] bg-white text-[#002664] hover:bg-slate-50'
-                                            }`}
-                                            onClick={() => handlePageChange(1)}
-                                        >
-                                            1
-                                        </button>
+                                    {currentPage > 3 && (
+                                        <div className="size-[44px] flex items-center justify-center text-[#002664] text-[16px]">
+                                            ...
+                                        </div>
+                                    )}
 
-                                        {currentPage > 3 && (
-                                            <div className="size-[44px] flex items-center justify-center text-[#002664] text-[16px]">
-                                                ...
-                                            </div>
-                                        )}
-
-                                        {Array.from({ length: totalPages }, (_, i) => i + 1)
-                                            .filter(p => p !== 1 && p !== totalPages && Math.abs(currentPage - p) <= 1)
-                                            .map(page => (
-                                                <button
-                                                    key={page}
-                                                    className={`size-[44px] rounded-[8px] text-[16px] text-center transition-colors cursor-pointer ${
-                                                        currentPage === page
-                                                            ? 'bg-[#002664] text-white font-medium'
-                                                            : 'border border-[#d8d9e0] bg-white text-[#002664] hover:bg-slate-50'
-                                                    }`}
-                                                    onClick={() => handlePageChange(page)}
-                                                >
-                                                    {page}
-                                                </button>
-                                            ))
-                                        }
-
-                                        {currentPage < totalPages - 2 && (
-                                            <div className="size-[44px] flex items-center justify-center text-[#002664] text-[16px]">
-                                                ...
-                                            </div>
-                                        )}
-
-                                        {totalPages > 1 && (
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                        .filter(p => p !== 1 && p !== totalPages && Math.abs(currentPage - p) <= 1)
+                                        .map(page => (
                                             <button
+                                                key={page}
                                                 className={`size-[44px] rounded-[8px] text-[16px] text-center transition-colors cursor-pointer ${
-                                                    currentPage === totalPages
+                                                    currentPage === page
                                                         ? 'bg-[#002664] text-white font-medium'
                                                         : 'border border-[#d8d9e0] bg-white text-[#002664] hover:bg-slate-50'
                                                 }`}
-                                                onClick={() => handlePageChange(totalPages)}
+                                                onClick={() => handlePageChange(page)}
                                             >
-                                                {totalPages}
+                                                {page}
                                             </button>
-                                        )}
-                                    </div>
+                                        ))
+                                    }
 
-                                    <button
-                                        className="size-[44px] rounded-[8px] border border-[#d8d9e0] bg-white text-[#002664] flex items-center justify-center p-[10px] hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                                        disabled={currentPage === totalPages}
-                                        onClick={() => handlePageChange(currentPage + 1)}
-                                        aria-label="Következő oldal"
-                                    >
-                                        <img src="/assets/figma/6facf09639ce8f21ae7716fe32dc70d4159927dc.svg" alt="" className="size-[20px]" />
-                                    </button>
-                                </div>
-
-                                {/* Per Page Selector */}
-                                <div className="relative" ref={perPageRef}>
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsPerPageDropdownOpen(!isPerPageDropdownOpen)}
-                                        className="bg-white border border-[#d8d9e0] rounded-[24px] px-[20px] py-[10px] flex items-center gap-[8px] text-[#002664] text-[16px] hover:border-[#002664] transition-colors cursor-pointer"
-                                    >
-                                        <span>{itemsPerPage} találat / oldal</span>
-                                        <img src="/assets/figma/bbb8b289e0529c918f53d375fc26f245b777bd09.svg" alt="" className="size-[20px]" />
-                                    </button>
-                                    {isPerPageDropdownOpen && (
-                                        <div className="absolute right-0 bottom-full mb-2 z-50 bg-white border border-[#d8d9e0] rounded-[16px] shadow-lg py-2 min-w-[160px]">
-                                            {[10, 20, 50, 100].map(cnt => (
-                                                <button
-                                                    key={cnt}
-                                                    type="button"
-                                                    className={`w-full text-left px-4 py-2 text-[14px] hover:bg-slate-50 transition-colors cursor-pointer ${itemsPerPage === cnt ? 'font-bold text-[#002664] bg-slate-50' : 'text-[#62788f]'}`}
-                                                    onClick={() => {
-                                                        setItemsPerPage(cnt);
-                                                        setCurrentPage(1);
-                                                        setIsPerPageDropdownOpen(false);
-                                                    }}
-                                                >
-                                                    {cnt} találat / oldal
-                                                </button>
-                                            ))}
+                                    {currentPage < totalPages - 2 && (
+                                        <div className="size-[44px] flex items-center justify-center text-[#002664] text-[16px]">
+                                            ...
                                         </div>
                                     )}
+
+                                    {totalPages > 1 && (
+                                        <button
+                                            className={`size-[44px] rounded-[8px] text-[16px] text-center transition-colors cursor-pointer ${
+                                                currentPage === totalPages
+                                                    ? 'bg-[#002664] text-white font-medium'
+                                                    : 'border border-[#d8d9e0] bg-white text-[#002664] hover:bg-slate-50'
+                                            }`}
+                                            onClick={() => handlePageChange(totalPages)}
+                                        >
+                                            {totalPages}
+                                        </button>
+                                    )}
                                 </div>
+
+                                <button
+                                    className="size-[44px] rounded-[8px] border border-[#d8d9e0] bg-white text-[#002664] flex items-center justify-center p-[10px] hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                                    disabled={currentPage === totalPages}
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    aria-label="Következő oldal"
+                                >
+                                    <img src="/assets/figma/6facf09639ce8f21ae7716fe32dc70d4159927dc.svg" alt="" className="size-[20px]" />
+                                </button>
+                            </div>
+
+                            {/* Per Page Selector */}
+                            <div className="relative" ref={perPageRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsPerPageDropdownOpen(!isPerPageDropdownOpen)}
+                                    className="bg-white border border-[#d8d9e0] rounded-[24px] px-[20px] py-[10px] flex items-center gap-[8px] text-[#002664] text-[16px] hover:border-[#002664] transition-colors cursor-pointer"
+                                >
+                                    <span>{itemsPerPage} találat / oldal</span>
+                                    <img src="/assets/figma/bbb8b289e0529c918f53d375fc26f245b777bd09.svg" alt="" className="size-[20px]" />
+                                </button>
+                                {isPerPageDropdownOpen && (
+                                    <div className="absolute right-0 bottom-full mb-2 z-50 bg-white border border-[#d8d9e0] rounded-[16px] shadow-lg py-2 min-w-[160px]">
+                                        {[10, 20, 50, 100].map(cnt => (
+                                            <button
+                                                key={cnt}
+                                                type="button"
+                                                className={`w-full text-left px-4 py-2 text-[14px] hover:bg-slate-50 transition-colors cursor-pointer ${itemsPerPage === cnt ? 'font-bold text-[#002664] bg-slate-50' : 'text-[#62788f]'}`}
+                                                onClick={() => {
+                                                    setItemsPerPage(cnt);
+                                                    setCurrentPage(1);
+                                                    setIsPerPageDropdownOpen(false);
+                                                }}
+                                            >
+                                                {cnt} találat / oldal
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </>

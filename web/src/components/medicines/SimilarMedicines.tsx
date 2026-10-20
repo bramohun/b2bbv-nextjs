@@ -17,10 +17,13 @@
  *   patikámban is, hogy a páciens garantáltan kiválthassa a felírt receptet.
  * - Felhasználóként szeretném közvetlenül menteni vagy részleteit megnyitni a javasolt
  *   helyettesítő készítménynek.
+ * - Orvosként mobil nézetben (<768px) szeretném, ha a helyettesítő készítmények
+ *   horizontálisan görgetendő táblázat helyett érintésbarát mobil kártyákon jelennének meg.
  * 
  * KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
  * - src/app/(dashboard)/gyogyszerek/adatlap/page.tsx: Gyógyszer adatlap felület
  * - NearbyPharmacyContext: Közeli patika elérhetőség lekérése
+ * - Funkcionális specifikáció: FUNCTIONAL_SPECS_WIKISPEC.md (4.2.2, 4.2.2.6)
  * ============================================================================
  */
 
@@ -99,7 +102,71 @@ export function SimilarMedicines({ substance, medicines }: SimilarMedicinesProps
                 onConfirm={confirmRemoval}
             />
 
-            <div className="overflow-x-auto">
+            {/* Mobil kártyás nézet (< 768px) */}
+            <div className="md:hidden space-y-3">
+                {medicines.map((med) => {
+                    const availableInPharmacy = nearbyPharmacy ? isAvailableInPharmacy(med.tkSzam, nearbyPharmacy.id) : false;
+                    const isFav = isFavorite(med.tkSzam);
+                    const isSub = isSubscribed(med.tkSzam);
+
+                    return (
+                        <div key={med.tkSzam} className="p-3 bg-[#f9f9fb] rounded-xl border border-[#e7e8ec] flex flex-col gap-2">
+                            <div className="flex items-center justify-between gap-2">
+                                <span className="inline-flex items-center gap-[6px] bg-[#e8f8e2] text-[#317907] px-[8px] py-[2px] rounded-[4px] font-medium text-[12px]">
+                                    <img src="/assets/figma/8d5c6e13ab3c6173ee2bfff8d7a4bf3cc46bca63.svg" alt="" className="size-[14px]" />
+                                    <span>Elérhető</span>
+                                </span>
+                                {nearbyPharmacy && (
+                                    <MedicineStockBadge status={getMedicinePharmacyStockStatus(med.status, availableInPharmacy)} />
+                                )}
+                            </div>
+                            <Link
+                                href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(med.tkSzam)}`}
+                                className="font-bold text-[#002664] hover:text-[#378509] transition-colors text-[15px]"
+                            >
+                                {med.nev}
+                            </Link>
+                            <div className="text-[13px] text-[#62788f]">
+                                <span>{med.kiszereles}</span> • <span>{med.gyarto}</span>
+                            </div>
+                            <div className="flex items-center justify-between pt-2 border-t border-[#e7e8ec]">
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        className={`size-[32px] rounded-[6px] flex items-center justify-center p-[4px] transition-colors cursor-pointer ${
+                                            isFav ? 'bg-[#002664] border border-[#002664]' : 'bg-white border border-[#002664]'
+                                        }`}
+                                        onClick={() => handleFavoriteToggle(med)}
+                                        title={isFav ? "Eltávolítás" : "Mentés"}
+                                        aria-label="Mentés kedvencnek"
+                                    >
+                                        <img src={isFav ? "/assets/figma/0f46a8820ef14e70f1707a091b6a494ac0448773.svg" : "/assets/figma/944c7c49d7facfffc581f76fcabc2cff7a31b865.svg"} alt="" className="size-[18px]" />
+                                    </button>
+                                    <button
+                                        className={`size-[32px] rounded-[6px] flex items-center justify-center p-[4px] transition-colors cursor-pointer ${
+                                            isSub ? 'bg-[#002664] border border-[#002664]' : 'bg-white border border-[#002664]'
+                                        }`}
+                                        onClick={() => handleSubscriptionToggle(med)}
+                                        title={isSub ? "Leiratkozás" : "Értesítés"}
+                                        aria-label="Értesítés kérése"
+                                    >
+                                        <img src={isSub ? "/assets/figma/a490d8a3ba430f0d884765763912ceec677e0181.svg" : "/assets/figma/475a3a63bba1e5d0fe7309be1d8843540bbf7f88.svg"} alt="" className="size-[18px]" />
+                                    </button>
+                                </div>
+                                <Link
+                                    href={`/gyogyszerek/adatlap?tk=${encodeURIComponent(med.tkSzam)}`}
+                                    className="inline-flex items-center gap-1 text-[#002664] font-bold text-xs bg-white px-2.5 py-1.5 rounded border border-[#d8d9e0]"
+                                >
+                                    <span>Részletek</span>
+                                    <img src="/assets/figma/6facf09639ce8f21ae7716fe32dc70d4159927dc.svg" alt="" className="size-[14px]" />
+                                </Link>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* Asztali táblázat (>= 768px) */}
+            <div className="hidden md:block overflow-x-auto">
                 <table className="w-full border-collapse">
                     <thead>
                         <tr className="bg-[#f9f9fb] border-y border-[#e7e8ec] text-[#002664] font-bold text-[14px]">

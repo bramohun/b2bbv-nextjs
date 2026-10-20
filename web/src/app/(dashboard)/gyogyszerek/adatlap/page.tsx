@@ -280,14 +280,14 @@ function MedicineDetailContent() {
             </div>
 
             {/* Product Profile Card */}
-            <div className="bg-white border border-[#e7e8ec] rounded-[16px] p-[32px] shadow-[0px_14px_38px_0px_rgba(0,26,72,0.06)] flex flex-col gap-[24px]">
+            <div className="bg-white border border-[#e7e8ec] rounded-[16px] p-4 sm:p-6 lg:p-[32px] shadow-[0px_14px_38px_0px_rgba(0,26,72,0.06)] flex flex-col gap-[24px]">
                 {/* Primary Header */}
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
                     <div className="flex flex-col gap-[8px]">
-                        <h1 className="font-bold text-[#002664] text-[28px] leading-tight">
+                        <h1 className="font-bold text-[#002664] text-[22px] sm:text-[28px] leading-tight">
                             {medicine.nev}
                         </h1>
-                        <p className="text-[#62788f] text-[16px]">
+                        <p className="text-[#62788f] text-[15px] sm:text-[16px]">
                             Hatóanyag: {medicine.inn || medicine.activeSubstance || 'Nincs adat'} | ATC Kód: {medicine.atcKod || 'Nincs adat'}
                         </p>
                     </div>

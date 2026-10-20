@@ -17,13 +17,15 @@
  *   patikát választani.
  * - Felhasználóként a mentett gyógyszerek gyorslistájából az "Összes" gombra kattintva
  *   azonnal a gyógyszerlista oldalra szeretnék navigálni, a listát kizárólag a mentett kedvenceimre szűrve.
+ * - Orvosként mobil eszközön a bal oldali hamburger menüből szeretném elérni a navigációs útvonalakat,
+ *   a mentett gyógyszereimet dinamikus darabszámmal, valamint a közeli gyógyszertáram adatait és közvetlen módosítását.
  * 
  * KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
  * - Globális keresés (GlobalSearch)
  * - Patikaválasztó modális ablak (PharmacyFinder)
  * - Mentett kedvencek gyorslista és kezelés (FavoriteContext)
  * - Felhasználói munkamenet és profil (AuthContext)
- * - Funkcionális specifikáció (FUNCTIONAL_SPECS_WIKISPEC.md: 4.0.1)
+ * - Funkcionális specifikáció (FUNCTIONAL_SPECS_WIKISPEC.md: 4.0.1, 4.0.5)
  * ============================================================================
  */
 
@@ -352,12 +354,15 @@ export const Navbar: React.FC = () => {
                             setIsMobileMenuOpen(false);
                             setIsPharmacyModalOpen(true);
                         }}
-                        className="p-3 bg-[#F9F9FB] rounded-lg border border-[#d8d9e0] mb-3 cursor-pointer"
+                        className="p-3 bg-[#F9F9FB] rounded-lg border border-[#d8d9e0] mb-3 cursor-pointer flex items-center justify-between hover:bg-[#f0f4f9] transition-colors"
                     >
-                        <span className="text-xs text-[#62788f] font-medium block">Közeli gyógyszertár:</span>
-                        <span className="text-sm font-bold text-[#378509] block truncate">
-                            {nearbyPharmacy ? nearbyPharmacy.nev : 'Válasszon gyógyszertárat!'}
-                        </span>
+                        <div className="truncate">
+                            <span className="text-xs text-[#62788f] font-medium block">Közeli gyógyszertár:</span>
+                            <span className="text-sm font-bold text-[#378509] block truncate">
+                                {nearbyPharmacy ? nearbyPharmacy.nev : 'Válasszon gyógyszertárat!'}
+                            </span>
+                        </div>
+                        <span className="text-xs font-bold text-[#002664] underline shrink-0 ml-2">Módosítás</span>
                     </div>
 
                     <Link
@@ -375,6 +380,26 @@ export const Navbar: React.FC = () => {
                     >
                         <span className="material-symbols-rounded">medication</span>
                         Gyógyszerek
+                    </Link>
+                    <Link
+                        href="/gyogyszerek?status=saved"
+                        onClick={() => {
+                            setIsMobileMenuOpen(false);
+                            if (pathname === '/gyogyszerek') {
+                                window.dispatchEvent(new CustomEvent('filter-favorites'));
+                            }
+                        }}
+                        className="flex items-center justify-between p-2 text-sm font-bold text-[#002664] hover:bg-slate-50 rounded-lg"
+                    >
+                        <div className="flex items-center gap-3">
+                            <span className="material-symbols-rounded">bookmark</span>
+                            <span>Mentett gyógyszerek</span>
+                        </div>
+                        {favorites.length > 0 && (
+                            <span className="bg-[#002664] text-white text-[12px] font-bold px-2 py-0.5 rounded-full">
+                                {favorites.length}
+                            </span>
+                        )}
                     </Link>
                     <Link
                         href="/gyogyszertarak"
