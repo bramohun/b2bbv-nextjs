@@ -1,34 +1,19 @@
 <!-- 
 ============================================================================
-FUNKCIONÁLIS SPECIFIKÁCIÓ (FSR) - BENUVÉNY ORVOSI PORTÁL FŐDOKUMENTUM
+FUNKCIONÁLIS SPECIFIKÁCIÓ (FRS) - BENUVÉNY ORVOSI PORTÁL FŐDOKUMENTUM
 ============================================================================
 
 MIRE HASZNÁLJUK:
-Ez a dokumentum a BENUvény Orvosi Portál 
-központi funkcionális specifikációja. Részletesen leírja a rendszer üzleti célját,
-az entitások adatmodelljét, a megvalósítási és integrációs kereteket, az egyes modulok 
-és felületek működését, a beviteli mezőkhöz tartozó adatformátumokat, példákat és limitációkat, 
-a felhasználói interakciókat, valamint a tesztelési hozzáféréseket.
+Ez a dokumentum a BENUvény Orvosi Portál központi funkcionális követelményspecifikációja (Functional Requirements Specification - FRS).
+Részletesen rögzíti a rendszer üzleti célját, a felhasználói szerepköröket, az entitások adatmodelljét, 
+a beviteli mezőkhöz tartozó adatformátumokat, példákat és korlátokat, az üzleti munkafolyamatokat, 
+a bemeneteket, kimeneteket, a felhasználói szintű hibakezelést és az elfogadási kritériumokat.
 
-KAPCSOLÓDÓ USER STORY-K:
-- Egészségügyi szakemberként (orvos/gyógyszerész) szeretnék naprakész és megbízható információt kapni 
-  a gyógyszerek piaci elérhetőségéről, készlethiányáról (a LogiNet Middleware által közvetített BENU hálözati adatok és az OGYÉI hatósági hiánylista összevetésével) és a helyettesíthetőségről.
-- Felhasználóként szeretném megtalálni a legközelebbi preferált gyógyszertáramat és 
-  ellenőrizni annak aktuális készletét.
-- Felhasználóként szeretnék szakmai és akkreditált képzéseken részt venni.
-- Új szakmai felhasználóként szeretném felvenni a kapcsolatot az adminisztrátorral a bejelentkezési felületről elérhető űrlapon keresztül, hogy szakmai jogosultság-ellenőrzést követően regisztrálják a fiókomat.
-- Adminisztrátorként szeretném kezelni a felhasználókat, jogosultságokat, patikákat és tartalmakat.
-
-KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
-- Fejléc / Navigációs sáv (Globális kereső, Közeli patika, Kedvencek, Profil)
-- Irányítópult (Dashboard): https://bvo.uneb.hu/dashboard
-- Gyógyszer Nyilvántartás (Lista + Adatlap): https://bvo.uneb.hu/gyogyszerek
-- Gyógyszertár Kereső (Térkép + Készlet): https://bvo.uneb.hu/gyogyszertarak
-- BENU Képzési Program: https://bvo.uneb.hu/kepzesek
-- Közösség és Fórum: https://bvo.uneb.hu/kozosseg
-- Képzési Program (Képzések): https://bvo.uneb.hu/kepzesek
-- Hitelesítés, Regisztrációs Kapcsolatfelvétel & Profilkezelés: https://bvo.uneb.hu/login, https://bvo.uneb.hu/profile
-- Adminisztráció (Felhasználók, Patikák, Moderálás): https://bvo.uneb.hu/admin/users
+A DOKUMENTUM JELLEGE:
+A leírás szigorúan a funkcionális működésre (mit csináljon a rendszer a felhasználó szemszögéből) 
+fókuszál, teljesen mellőzve a belső technológiai implementációs részleteket (keretrendszer, forráskódfájlok, 
+belső változónevek). A funkcionális területek a felhasználói útvonalak (webes URL-ek) és felületek mentén 
+kerülnek strukturálásra.
 ============================================================================
 -->
 
@@ -36,53 +21,102 @@ KAPCSOLÓDÓ FUNKCIÓK ÉS FELÜLETEK:
 
 ---
 
-> **Verzió:** 1.5.1  
-> **Dátum:** 2026.09.08.  
-> **Státusz:** Véglegesnek szánt (Figma Redesign Szinkronizáció)  
-> **Prototípus URL:** [https://bvo.uneb.hu/](https://bvo.uneb.hu/) (hozzáférések a 6. pontban)
+> **Dokumentum azonosító:** FRS-BVO-20261020  
+> **Verzió:** 1.6.0  
+> **Dátum:** 2026.10.20.  
+> **Státusz:** Aktív / Hatályos (Prototípus működés szerinti átfogó szinkronizáció)  
+> **Élő prototípus elérhetőség:** [https://bvo.uneb.hu/](https://bvo.uneb.hu/) (tesztfiókok a 6. fejezetben)  
+
+---
+
+## Tartalomjegyzék
+
+1. [Brief és Rendszer Áttekintés](#1-brief)
+   - 1.1. Cél és Rendszer Áttekintés
+   - 1.2. Megvalósítási Keretek és Szabadság
+   - 1.3. Készletinformációk és LogiNet Middleware Integráció
+   - 1.4. Kivitelezői Dokumentációs Igények
+   - 1.5. Live Prototípus
+   - 1.6. Felhasználói Szerepkörök
+   - 1.7. Modulok és Felületek Áttekintése
+2. [Fogalomtár](#2-fogalomtár)
+3. [Adatmodellek Specifikációja](#3-adatmodellek-specifikációja)
+   - 3.1. Felhasználó (User) Adatmodell
+   - 3.2. Gyógyszer (Medicine) Adatmodell
+   - 3.3. Gyógyszertár (Pharmacy) Adatmodell
+   - 3.4. Képzés / Kurzus (Course) Adatmodell *(Nem aktív felület)*
+   - 3.5. Patikai Készletrekord Adatmodell
+   - 3.6. Regisztrációs Igény / Kapcsolatfelvételi Űrlap Adatmodell
+   - 3.7. Közösségi Téma és Hozzászólás Adatmodell
+4. [Modulok és Funkciók Részletes Leírása](#4-modulok-és-funkciók-részletes-leírása)
+   - 4.0. Fejléc és Navigációs Sáv Modul
+   - 4.1. Irányítópult (Dashboard)
+   - 4.2. Gyógyszer Nyilvántartás (Lista és Adatlap)
+   - 4.3. Gyógyszertár Kereső és Térkép
+   - 4.4. Képzési Program *(Nem aktív felület)*
+   - 4.5. Globális Keresés (Asztali és Mobil Overlay)
+   - 4.6. Hitelesítés, Jogosultságok és Kapcsolatfelvétel
+   - 4.7. Adminisztráció (Felhasználók, Patikák, Moderálás)
+   - 4.8. Felhasználói Profil és Értesítéskezelés
+   - 4.9. Közösség és Szakmai Fórum
+5. [Korábban tervezett, de elvetett / külső rendszerbe átsorolt funkciók](#5-korábban-tervezett-de-elvetett--külső-rendszerbe-átsorolt-funkciók)
+6. [Tesztfiókok és Hozzáférések](#6-tesztfiókok-és-hozzáférések)
+7. [Változásnapló (Verziótörténet)](#7-változásnapló-verziótörténet)
+
+---
 
 ---
 
 ## 1. Brief
 
 ### 1.1. Cél és Rendszer Áttekintés
-Egy modern, megbízható orvosi szakmai portál biztosítása, amely hatékonyan támogatja a gyógyszerészeket, orvosokat és egészségügyi szakembereket a mindennapi betegellátásban és döntéshozatalban. A rendszer célja, hogy valós idejű, transzparens és hiteles információt nyújtson a gyógyszerkészletekről, a piaci készlethiányról, a hatóanyag-alapú helyettesíthetőségről, a legközelebbi preferált patika elérhetőségéről, valamint folyamatos szakmai és akkreditált képzési lehetőségeket biztosítson a felhasználók számára.
+A **BENUvény Orvosi Portál** egy modern, zárt orvosi szakmai információs és döntéstámogató rendszer, amely hiteles segítséget nyújt a gyógyszerészek, orvosok és egészségügyi szakemberek mindennapi betegellátási munkájában.
 
-### 1.2. Megvalósítási Keretek és Technológiai Szabadság
-A funkcionális specifikáció és a hozzá kapcsolódó prototípus kizárólag a rendszer üzleti működését, a felhasználói folyamatokat, az adatstruktúrákat és a felületi viselkedést rögzíti. 
-- **Kivitelezői kompetencia:** A fejlesztési környezet kialakítása, a technológiai stack (architektúra, backend és frontend keretrendszerek, adatbázis-réteg, tárolási és gyorsítótárazási mechanizmusok, konténerizáció, CI/CD pipeline-ok) megválasztása, valamint a szoftveres implementáció konkrét megvalósítása **teljes mértékben a kivitelezőre (fejlesztő partnerre) van bízva**.
-- **Megvalósítási szabadság:** A kivitelező jogosult és felelős a hosszú távon fenntartható, skálázható, magas rendelkezésre állású és biztonságos architektúra megtervezéséért és kivitelezéséért a megadott funkcionális kereteken belül.
+A portál elsődleges üzleti küldetése, hogy valós idejű, átlátható és megbízható tájékoztatást adjon:
+1. **Gyógyszerkészletekről és piaci hiányokról:** Az országos szintű hiánycikkekről, a gyártási fennakadásokról, valamint a készletpótlás várható idejéről.
+2. **Készítmények helyettesíthetőségéről:** Azonnali terápiás és hatóanyag-alapú (INN) alternatívák felkínálásával, elkerülve a betegek kezelésének megszakadását.
+3. **Gyógyszertári elérhetőségről:** A legközelebbi vagy kijelölt preferált gyógyszertár naprakész polckészletéről, nyitvatartásáról és elérhetőségéről.
+4. **Szakmai továbbképzési lehetőségekről:** Akkreditált kreditpontos és gyártói képzési anyagok specifikált keretrendszeréről *(a felület jelenleg nem aktív a prototípusban, részletek a 4.4. és 5.1. pontokban)*.
+
+### 1.2. Megvalósítási Keretek és Szabadság
+A specifikáció és a kapcsolódó prototípus kizárólag a rendszer üzleti és funkcionális működését, a felhasználói folyamatokat, az adatstruktúrákat és a felületi viselkedési szabályokat határozza meg.
+- **Kivitelezői kompetencia:** A fejlesztési környezet, a technológiai keretrendszerek, az adatbázis-architektúra, a tárolási és gyorsítótárazási mechanizmusok megválasztása a kivitelező fejlesztő partner hatásköre.
+- **Megvalósítási szabadság:** A kivitelező felelős a hosszú távon skálázható, magas rendelkezésre állású, robusztus és biztonságos architektúra szállításáért.
 
 ### 1.3. Készletinformációk és LogiNet Middleware Integráció
 A portál alapvető értékajánlata a pontos és gyors készlet- és hiányinformációk elérése:
-- **Integrációs alapok:** A gyógyszertári és piaci készletinformációk átadása, lekérdezése és szinkronizációja a jelenlegi **BENU.hu** és **BENUvény.hu** működési alapjainak megfelelően, a **LogiNet által biztosított Middleware** rétegen keresztül valósul meg.
-- **Rendszervizsgálat és Audit szükségessége:** Kiemelten fontos és kötelező lépés a jelenlegi LogiNet Middleware képességeinek, interfészeinek és adatkapacitásának alapos technikai és funkcionális felmérése (auditja). Meg kell vizsgálni, hogy a meglévő rendszer milyen adatstruktúrákat szolgáltat, milyen lekérdezési sebességet és frissítési frekvenciát támogat, milyen korlátokkal rendelkezik, illetve szükséges-e a meglévő Middleware bővítése vagy finomhangolása a tervezett orvosi portál igényeinek maradéktalan kiszolgálásához.
-- **Piaci Készlethiány Adatforrások Konszolidációja:** A piaci készlethiány meghatározása a LogiNet Middleware által szállított hálózati/kereskedelmi készletinformációk, valamint az OGYÉI (NNGYK) Gyógyszeradatbázis *"Összes termékhiány"* hivatalos nyilvántartása (`https://ogyei.gov.hu/generalt_listak/shortage_lista.csv`) háttérbeli összevetésével valósul meg a maximális adathitelesség érdekében (az OGYÉI CSV nyers adatai közvetlenül nem jelennek meg a felületen).
+- **Integrációs alapok:** A gyógyszertári és piaci készletinformációk átadása, lekérdezése és szinkronizációja a BENU ökoszisztéma alapjainak megfelelően, a **LogiNet Middleware** rétegen keresztül valósul meg.
+- **Rendszervizsgálat és Audit szükségessége:** Kiemelten fontos és kötelező lépés a meglévő LogiNet Middleware interfészeinek, adatmodelljeinek, válaszidejének és kapacitásának alapos funkcionális felmérése és auditja a végleges élesítés előtt.
+- **Piaci Készlethiány Adatforrások Konszolidációja:** A piaci készlethiány meghatározása a LogiNet Middleware hálózati készletadatai, valamint a Nemzeti Népegészségügyi és Gyógyszerészeti Központ (NNGYK / korábbi OGYÉI) hivatalos termékhiány-nyilvántartásának háttérbeli konszolidációjával történik a maximális adathitelesség érdekében (az OGYÉI CSV nyers adatai közvetlenül nem jelennek meg a felületen).
 
-### 1.4. Kivitelezői Dokumentációs Igények és Specifikációk
-A sikeres, kockázatmentes és határidőre történő implementáció előfeltételeként:
-- **Igények definiálása:** A **kivitelező (fejlesztő partner) határozza meg és specifikálja**, hogy a meglévő rendszerekből és külső partnerektől milyen műszaki és funkcionális dokumentációkra, interfész-leírásokra (API specifikációk, végponti dokumentációk, adatmodellek, hitelesítési/biztonsági eljárásrendek, tesztkörnyezeti hozzáférések) van szüksége az integrációhoz.
-- **Dokumentációs elvárások:** A kivitelező felelőssége összeállítani a hiányzó specifikációs elemek listáját, és azokat a megrendelői/üzemeltetői oldallal egyeztetve beépíteni a fejlesztési tervbe.
+### 1.4. Kivitelezői Dokumentációs Igények
+A kockázatmentes implementáció érdekében a kivitelező partnerek feladata meghatározni, hogy a meglévő rendszerekből milyen műszaki és funkcionális interfész-leírásokra (API specifikációk, végponti dokumentációk, hitelesítési eljárások, tesztkörnyezeti adatok) van szükség az integrációhoz.
 
 ### 1.5. Live Prototípus
-A működő prototípus felülete elérhető az alábbi hivatkozáson:  
-🔗 [https://bvo.uneb.hu/](https://bvo.uneb.hu/)
+A működő, tesztelhető prototípus felülete nyilvánosan elérhető az alábbi címen:  
+🔗 [https://bvo.uneb.hu/](https://bvo.uneb.hu/)  
+*(Tesztfiókok és bejelentkezési adatok a [6. fejezetben](#6-tesztfiókok-és-hozzáférések) találhatók).*
 
 ### 1.6. Felhasználói Szerepkörök
-- **Szakmai Felhasználó (User):** Orvos, gyógyszerész vagy egészségügyi szakdolgozó. Hozzáfér a gyógyszer-nyilvántartáshoz, patikakeresőhöz, képzésekhez és a saját profilbeállításaihoz.
-- **Rendszeradminisztrátor (Admin):** A portál működését felügyelő felhasználó, aki felhasználókat kezel, patikaadatokat tekint át és tartalommoderációt végez.
+A rendszerben két alapvető szerepkör létezik:
+1. **Szakmai Felhasználó (User):** Orvos, gyógyszerész vagy regisztrált egészségügyi szakdolgozó. Teljes körűen hozzáfér a gyógyszer-nyilvántartáshoz, patikakeresőhöz, kedvencekhez, értesítésekhez és a saját profiljához. Nem éri el az adminisztrációs felületeket.
+2. **Rendszeradminisztrátor (Admin):** Az üzemeltetésért felelős belső felhasználó. A szakmai felületeken felül hozzáfér a védett `/admin/*` útvonalakhoz: kezeli a felhasználói fiókokat, felügyeli a patikai adatok szinkronizációját és moderálja a szakmai fórumot.
 
-### 1.7. Modulok Áttekintése
-A rendszer moduláris felépítésű, központjában a biztonságos szakmai azonosítás áll. A fő funkcionális egységek:
-- **[Fejléc és Navigációs Sáv](#40-fejléc-és-navigációs-sáv-modul):** Központi navigáció, mentett gyógyszer gyorslista, közeli patika kijelző és profil menü.
-- **[Irányítópult](#41-irányítópult-dashboard):** Központi összegző felület a piaci és patikai készletváltozásokról.
-- **[Gyógyszer Nyilvántartás](#42-gyógyszer-nyilvántartás):** Gyógyszerek keresése, fejlett táblázatos szűrése, rendezése és részletes adatlapja.
-- **[Gyógyszertár Kereső](#43-gyógyszertár-kereső):** Patikák térképes és szinkronizált listás megjelenítése, nyitvatartás és készletellenőrzés.
-- **[Képzési Program](#44-képzési-program):** Szakmai és akkreditált képzések böngészése, ismertetése és átirányítás a BENU LMS rendszerbe.
-- **[Globális Keresés](#45-globális-keresés):** Fejlécből indítható instant keresés a portál tartalmában.
-- **[Hitelesítés és Jogosultságok](#46-hitelesítés-és-jogosultságok):** Bejelentkezési módok (jelszó, passkey, magic code), 2FA azonosítás, elfelejtett jelszó, valamint a manuális regisztrációs kapcsolatfelvételi űrlap.
-- **[Adminisztráció](#47-adminisztráció):** Felhasználók, patika-áttekintő nézet és közösségi tartalmak kezelése.
-- **[Felhasználói Profil](#48-felhasználói-profil):** Szakmai beállítások, preferált patika, hírlevelek és fiókbiztonság.
+### 1.7. Modulok és Felületek Áttekintése
+
+| Modul Megnevezése | Elsődleges Felületi Útvonal (URL) | Fő Funkcionális Felelősség | Felületi Státusz |
+| :--- | :--- | :--- | :--- |
+| **Fejléc & Navigációs Sáv** | Globális komponens | Kereső, gyorslista, közeli patika kijelző, modulváltás, profil menü. | **Aktív** |
+| **Irányítópult (Dashboard)** | `https://bvo.uneb.hu/dashboard` | Időszakos készletváltozások, preferált patika widget, gyors navigáció. | **Aktív** |
+| **Gyógyszer Nyilvántartás** | `https://bvo.uneb.hu/gyogyszerek` | Teljes képernyős fluid táblázat, oszloprendezés, szűrés, kedvencek. | **Aktív** |
+| **Gyógyszer Adatlap** | `https://bvo.uneb.hu/gyogyszerek/adatlap` | 4 szintű készletstátusz, árak, hiánybannerek, helyettesítők, történet. | **Aktív** |
+| **Gyógyszertár Kereső** | `https://bvo.uneb.hu/gyogyszertarak` | Térkép, szinkronizált kártyalista, GPS helymeghatározás, heti rend modal. | **Aktív** |
+| **Képzési Program** | `https://bvo.uneb.hu/kepzesek` | Kurzusok listázása, kategóriák, akkreditáció, LMS átirányítás. | ⚠️ **Nem aktív felület** |
+| **Globális Keresés** | Globális / Mobil Overlay | Instant keresés gyógyszerek, hatóanyagok és patikák között. | **Aktív** |
+| **Hitelesítés & Jogosultság** | `https://bvo.uneb.hu/login` | Jelszavas, Passkey és Magic Code belépés, 2FA, kapcsolatfelvételi űrlap. | **Aktív** |
+| **Felhasználói Profil** | `https://bvo.uneb.hu/profile` | Szakterületek, preferált patika, hírlevelek, biztonság, 2FA, passkey. | **Aktív** |
+| **Adminisztráció** | `https://bvo.uneb.hu/admin/*` | Felhasználók kezelése, patikák felügyelete, tartalommoderáció. | **Aktív** |
+| **Közösség és Fórum** | `https://bvo.uneb.hu/kozosseg` | Szakmai eszmecsere, témák, hozzászólások (közvetlen URL elérés). | **Közvetlen URL** |
 
 ---
 
@@ -90,394 +124,226 @@ A rendszer moduláris felépítésű, központjában a biztonságos szakmai azon
 
 ## 2. Fogalomtár
 
-### 2.1. LogiNet Middleware (Készletintegrációs Köztesréteg)
-- **Definíció és Üzleti Jelentés:** A BENU.hu és BENUvény.hu ökoszisztéma alapjait képező központi integrációs réteg, amely a gyógyszertári és piaci készletadatok, raktárkészletek és szinkronizációs folyamatok közvetítéséért felel.
-- **Konkrét Szerep:** Készletinformációk biztosítása a portál számára; képességeinek és interfészeinek előzetes vizsgálata és auditja a megvalósítás alapfeltétele.
+### 2.1. LogiNet Middleware
+A BENU ökoszisztéma alapját képező központi integrációs réteg, amely a gyógyszertári készletadatok, raktárkészletek és szinkronizációs folyamatok valós idejű közvetítéséért felel a portál felé.
 
-### 2.2. Kivitelezői Implementációs Hatáskör
-- **Definíció és Üzleti Jelentés:** A kivitelezőre bízott fejlesztési környezet, technológiai stack és szoftveres architektúra összessége, amely a specifikált funkciók optimális megvalósítását biztosítja.
+### 2.2. Közeli Patika (Preferált Patika)
+A felhasználó által kiválasztott gyógyszertár (pl. *"BENU Gyógyszertár Arany Sas"*). A portál teljes felületén kiemelten kezeli ezen patika készletét és státuszait (Irányítópult widget, Fejléc kijelző, Gyógyszer adatlap sor).
 
-### 2.3. Közeli Patika (Preferált Patika)
-- **Definíció és Üzleti Jelentés:** A felhasználó által megjelölt gyógyszertár. A rendszer ezen patika készletadatait és státuszfrissítéseit kiemelten kezeli az egész portálon.
-- **Konkrét Felületi Példa:** *"BENU Gyógyszertár Arany Sas"*
+### 2.3. Kedvenc Gyógyszer (Mentett Gyógyszer)
+A felhasználó által könyvjelzővel (csillag ikonnal) megjelölt gyógyszerkészítmény. Megjelenik a fejléc gyorslistájában és a Profil mentett tételei között a gyors eléréshez.
 
-### 2.4. Kedvenc Gyógyszer (Mentett Gyógyszer)
-- **Definíció és Üzleti Jelentés:** A felhasználó által könyvjelzővel megjelölt gyógyszer, amely bekerül a mentett listába a gyors elérés érdekében.
-- **Konkrét Felületi Példa:** *"Algopyrin 500 mg filmtabletta"*
+### 2.4. Készletértesítés
+Feliratkozás egy adott gyógyszer országos vagy helyi státuszváltozására (harang ikon). Készlethiány megszűnésekor vagy újra elérhető állapotba kerüléskor a rendszer automatikus e-mail értesítőt / hírlevelet küld. Az értesítés bekapcsolása automatikusan a kedvencek közé is menti a gyógyszert.
 
-### 2.5. Készletértesítés
-- **Definíció és Üzleti Jelentés:** Feliratkozás egy adott gyógyszer piaci vagy patikai státuszváltozására (pl. készlethiány vagy újra elérhető állapot). Feliratkozáskor a termék automatikusan mentetté is válik.
-- **Konkrét Felületi Példa:** Értesítés küldése hírlevélben vagy felületi visszajelzésben.
+### 2.5. A Négy Készletstátusz (Készletelérhetőségi Szintek)
+A rendszer a készítmények elérhetőségét négy üzleti állapotba sorolja:
+1. **Készleten:** A termék a patikában fizikai polckészleten van, és a nagykereskedelemből is folyamatosan utánpótolható.
+2. **Korlátozottan:** A termék országosan hiánycikk vagy megszűnt, a nagykereskedelemből nem rendelhető, de a patikában még maradt elfekvő készlet.
+3. **Rendelésre (1-2 munkanap):** A termék a nagykereskedelemben van, de a patika polcán épp nincs, rendelésre 1-2 munkanap alatt megérkezik.
+4. **Nem elérhető:** A készítmény sem a patikában, sem a nagykereskedelemben nem érhető el (pl. tartós hiánycikk).
 
-### 2.6. TK-szám
-- **Definíció és Üzleti Jelentés:** Törzskönyvi szám - a gyógyszerek hatósági egyedi azonosítója.
-- **Konkrét Felületi Példa:** `"OGYI-T-8898/01"`
+### 2.6. TK-szám (Törzskönyvi Szám)
+A gyógyszerkészítmények hivatalos hatósági azonosítója (pl. `"OGYI-T-8898/01"`).
 
 ### 2.7. INN (Nemzetközi Szabadnév / Hatóanyag)
-- **Definíció és Üzleti Jelentés:** Nemzetközi Szabadnév (International Nonproprietary Name) - a gyógyszer hatóanyaga.
-- **Konkrét Felületi Példa:** `"metamizol-nátrium"`
+A gyógyszer aktív hatóanyagának hivatalos nemzetközi elnevezése (pl. `"metamizol-nátrium"`). A portál ezen az alapon határozza meg a helyettesíthetőséget.
 
 ### 2.8. ATC-kód
-- **Definíció és Üzleti Jelentés:** Anatómiai, Terápiás és Kémiai osztályozási rendszer kódja.
-- **Konkrét Felületi Példa:** `"N02BB02"`
+Az Egészségügyi Világszervezet (WHO) Anatómiai, Terápiás és Kémiai osztályozási kódja (pl. `"N02BB02"`).
 
-### 2.9. Hírlevél Hatókör (Scope)
-- **Definíció és Üzleti Jelentés:** A készletértesítő hírlevelek szűrési köre (pl. teljes adatbázis, csak a felhasználó szakterülete, vagy csak a mentett kedvenc gyógyszerei).
-- **Konkrét Felületi Példa:** `"Szakterület + mentett gyógyszerek"`
+### 2.9. BENU LMS (Külső Rendszer / Nem aktív modulhoz kapcsolódó fogalom)
+A BENU külső online e-learning és akkreditált továbbképzési portálja. A tananyagok tényleges feldolgozása, a vizsgatesztek kitöltése és a kreditpontok jóváírása ezen a külső felületen történik. *(A prototípusban jelenleg nem aktív felület, részletek: 4.4. és 5.1. pont).*
 
-### 2.10. BENU LMS Rendszer
-- **Definíció és Üzleti Jelentés:** A BENU külső e-learning és továbbképzési rendszere, ahol a tananyagok tényleges feldolgozása, a tesztkitöltés és a kreditpont-jóváírás történik.
-- **Konkrét Felületi Példa:** *"BENU LMS felület"*
+### 2.10. Passkey (Biometrikus Azonosító)
+FIDO2 szabványon alapuló eszközalapú azonosítás (Face ID, Touch ID, Windows Hello), amely jelszó megadása nélkül, 1-kattintásos biztonságos belépést nyújt.
 
-### 2.11. Passkey (Biometrikus azonosító)
-- **Definíció és Üzleti Jelentés:** Eszközalapú biometrikus kulcs (Touch ID, Face ID, Windows Hello), amely jelszó nélküli 1-kattintásos belépést tesz lehetővé.
-- **Konkrét Felületi Példa:** *"Work Mac TouchID"*
+### 2.11. Kényszerített Munkamenet Lezárás (Force Logout)
+Adminisztrátori biztonsági művelet, amely érvényteleníti a felhasználó aktív bejelentkezési munkamenetét, azonnal kijelentkeztetve a fiókot a rendszerből.
 
-### 2.12. Kényszerített Munkamenet Lezárás
-- **Definíció és Üzleti Jelentés:** Adminisztrátori vagy biztonsági művelet, amely azonnal érvényteleníti a felhasználó aktív belépését.
-- **Konkrét Felületi Példa:** Felhasználó azonnali átirányítása a bejelentkezési oldalra.
+### 2.12. Manuális Regisztrációs Igény / Kapcsolatfelvétel
+A portál zárt jellege miatt nincs automatikus azonnali önkiszolgáló fióknyitás. Az új szakmai érdeklődők a bejelentkezési oldalról elérhető űrlap beküldésével veszik fel a kapcsolatot az üzemeltetéssel, akik hatósági pecsétszám-ellenőrzés után kézzel aktiválják a fiókot.
 
-### 2.13. Piaci Készlethiány Adatforrás
-- **Definíció és Üzleti Jelentés:** A gyógyszerek piaci készlethiányi státuszának meghatározására és ellenőrzésére szolgáló információforrás. A megbízhatóság növelése érdekében a rendszer a BENU.hu és BENUvény.hu által használt, a LogiNet Middleware által közvetített hálózati/kereskedelmi készletinformációkat, valamint az OGYÉI (NNGYK) *"Összes termékhiány"* hivatalos nyilvántartását (`https://ogyei.gov.hu/generalt_listak/shortage_lista.csv`) veti össze.
-- **Üzleti & Felületi Limitációk:** A két adatforrás összevetése és visszaigazolása a háttérben történik az adathitelesség garantálására. Az OGYÉI CSV fájl nyers adatai egyelőre nem kerülnek közvetlenül megjelenítésre a felhasználói felületen, a portál a konszolidált készlethiányi állapotot mutatja.
-
-### 2.14. Manuális Felhasználói Regisztráció / Kapcsolatfelvételi Űrlap
-- **Definíció és Üzleti Jelentés:** Az orvosok és egészségügyi szakemberek regisztrációja a rendszerbe nem automatikus, hanem adminisztrátori jóváhagyással és kézi rögzítéssel történik. Az új szakmai felhasználó a bejelentkezési felületről elérhető űrlap kitöltésével veszi fel a kapcsolatot az adminisztrátorral, megadva az azonosításhoz és jogosultság-ellenőrzéshez szükséges adatait.
-- **Üzleti & Felületi Limitációk:** A portálon jelenleg nincs közvetlen önkiszolgáló regisztrációs felület; a fiókokat a rendszeradminisztrátor hozza létre manuálisan az adminisztrációs felületen az igény beérkezése és elbírálása után. Későbbiekben elképzelhető önkiszolgáló felület kialakítása, de jelenleg nincs ilyen tervezve.
+---
 
 ---
 
 ## 3. Adatmodellek Specifikációja
 
-Ez a szakasz a rendszer fő üzleti entitásait mutatja be a beviteli mezők, adattípusok, megadható értékek, példák és limitációk szempontjából.
+Ez a szakasz a rendszer üzleti entitásainak felületi paramétereit részletezi: beviteli típusok, formátumok, példaértékek és megkötések.
 
 ### 3.1. Felhasználó (User) Adatmodell
 
 - **Teljes név:**
   - **Felületi Típus:** Egysoros szövegmező
-  - **Megadható Adatok / Formátum:** Szöveg (vezetéknév + keresztnév)
+  - **Megadható Formátum:** Titulus + Vezetéknév + Keresztnév
   - **Példa Érték:** `"Dr. Kovács István"`
-  - **Üzleti & Felületi Limitációk:** Kötelező. Min. 3, max. 100 karakter. A profilban csak olvasható.
-- **Elsődleges e-mail:**
+  - **Limitációk:** Kötelező. 3–100 karakter. A felhasználói profilban csak olvasható, kizárólag admin módosíthatja.
+- **Elsődleges e-mail cím:**
   - **Felületi Típus:** Egysoros email mező
-  - **Megadható Adatok / Formátum:** Érvényes e-mail formátum (`user@domain.hu`)
+  - **Megadható Formátum:** Érvényes e-mail szintaxis (`felhasznalo@domain.hu`)
   - **Példa Érték:** `"demo@example.com"`
-  - **Üzleti & Felületi Limitációk:** Kötelező. Egyedi belépési azonosító. A profilban nem módosítható.
-- **Másodlagos e-mail:**
+  - **Limitációk:** Kötelező. Rendszerszinten egyedi belépési azonosító. A profilban nem módosítható.
+- **Másodlagos e-mail cím:**
   - **Felületi Típus:** Egysoros email mező
-  - **Megadható Adatok / Formátum:** Érvényes e-mail formátum
-  - **Példa Érték:** `"kovacs.private@email.hu"`
-  - **Üzleti & Felületi Limitációk:** Opcionális. Értesítések és hírlevelek másodlagos címe.
+  - **Megadható Formátum:** Érvényes e-mail szintaxis
+  - **Példa Érték:** `"kovacs.magan@orvos.hu"`
+  - **Limitációk:** Opcionális. Külön hírlevél és értesítési szabályok köthetők hozzá.
 - **Telefonszám:**
   - **Felületi Típus:** Szövegmező
-  - **Megadható Adatok / Formátum:** Telefonszám formátum (`+36...`)
+  - **Megadható Formátum:** Nemzetközi telefonszám formátum
   - **Példa Érték:** `"+36 30 123 4567"`
-  - **Üzleti & Felületi Limitációk:** Opcionális. Az SMS alapú 2FA azonosítás csatornája.
+  - **Limitációk:** Opcionális. SMS alapú 2FA azonosítás használatához szükséges.
 - **Szerepkör:**
   - **Felületi Típus:** Legördülő menü
-  - **Megadható Adatok / Formátum:** `User` (Szakmai) / `Admin` (Rendszeradmin)
+  - **Megadható Értékek:** `User` (Szakmai felhasználó) / `Admin` (Rendszeradminisztrátor)
   - **Példa Érték:** `User`
-  - **Üzleti & Felületi Limitációk:** Kötelező. Kizárólag az adminisztrátor módosíthatja.
+  - **Limitációk:** Kötelező. Csak az adminisztrációban állítható.
 - **Fiók Státusz:**
   - **Felületi Típus:** Legördülő menü
-  - **Megadható Adatok / Formátum:** `Active` (Aktív) / `Inactive` (Inaktív)
+  - **Megadható Értékek:** `Active` (Aktív) / `Inactive` (Inaktív)
   - **Példa Érték:** `Active`
-  - **Üzleti & Felületi Limitációk:** Inaktív fiókkal a bejelentkezés elutasításra kerül.
+  - **Limitációk:** Inaktív státusz esetén a rendszer megtagadja a belépést.
 - **Szakterületek:**
-  - **Felületi Típus:** Kereshető multi-select
-  - **Megadható Adatok / Formátum:** Orvosi kódlista elemei
-  - **Példa Érték:** `["Háziorvos", "Belgyógyász"]`
-  - **Üzleti & Felületi Limitációk:** Több opció is kiválasztható a megadott kódlistából.
-- **2FA Állapot & Csatorna:**
-  - **Felületi Típus:** Kapcsoló + Rádiógombok
-  - **Megadható Adatok / Formátum:** `Be` / `Ki`; Csatornák: `E-mail`, `SMS`, `TOTP`
+  - **Felületi Típus:** Kereshető többválasztós lista (Multi-select)
+  - **Megadható Értékek:** Szabványos orvosi szakvizsgák listája
+  - **Példa Érték:** `["Háziorvostan", "Belgyógyászat", "Kardiológia"]`
+  - **Limitációk:** Minimum 1 szakterület kiválasztása ajánlott.
+- **2FA Beállítások:**
+  - **Felületi Típus:** Kétállású kapcsoló + Választógombok (Radio buttons)
+  - **Megadható Értékek:** Státusz: `Be` / `Ki`; Csatornák: `E-mail OTP`, `SMS OTP`, `Hitelesítő App (TOTP)`
   - **Példa Érték:** `Be (E-mail OTP)`
-  - **Üzleti & Felületi Limitációk:** Önkiszolgáló módon állítható a Profilban.
+  - **Limitációk:** A profiloldalon önkiszolgáló módon konfigurálható.
 - **Passkey Kulcsok:**
-  - **Felületi Típus:** Lista + Modal
-  - **Megadható Adatok / Formátum:** Eszköznév + Regisztrációs dátum
-  - **Példa Érték:** `[{ name: "MacBook", createdAt: "2026-01-15" }]`
-  - **Üzleti & Felületi Limitációk:** Egy fiókhoz több biometrikus eszköz is rendelhető.
+  - **Felületi Típus:** Lista + Modális ablak
+  - **Megadható Formátum:** Eszköz elnevezése (tetszőleges szöveg) + Regisztráció időpontja
+  - **Példa Érték:** `"Rendelői MacBook Pro (Touch ID)"`
+  - **Limitációk:** Egy fiókhoz tetszőleges számú biometrikus kulcs rögzíthető.
 - **Megbízható Eszközök:**
-  - **Felületi Típus:** Számláló / Gomb
-  - **Megadható Adatok / Formátum:** Megjegyzett 30 napos munkamenetek azonosítói
-  - **Példa Érték:** `3 aktív eszköz`
-  - **Üzleti & Felületi Limitációk:** Egy kattintással az összes eszköz elfelejthető.
-- **Hírlevél (Képzés):**
-  - **Felületi Típus:** Kapcsoló + Checkboxok
-  - **Megadható Adatok / Formátum:** Be/Ki; Kategóriák: `Akkreditált`, `Gyártói`, `Eladásösztönző`
-  - **Példa Érték:** `Feliratkozva: Akkreditált`
-  - **Üzleti & Felületi Limitációk:** Külön konfigurálható az elsődleges és másodlagos e-mail címre.
-- **Hírlevél (Készlet):**
-  - **Felületi Típus:** Kapcsoló + Select/Radio
-  - **Megadható Adatok / Formátum:** Frekvencia (`Napi`/`Heti`/`Havi`), Időpont (0-23h), Téma multiselect, Hatókör
-  - **Példa Érték:** `Heti, 09:00, Készlethiány, Szakterület + mentett`
-  - **Üzleti & Felületi Limitációk:** Külön konfigurálható az elsődleges és másodlagos e-mail címre.
+  - **Felületi Típus:** Számláló kártya + Műveleti gomb
+  - **Megadható Formátum:** Megjegyzett böngésző-munkamenetek darabszáma
+  - **Példa Érték:** `2 aktív megbízható eszköz`
+  - **Limitációk:** Egyetlen gombnyomással az összes megjegyzett munkamenet elfelejthető.
+- **Készletinfó Hírlevél Beállítás:**
+  - **Felületi Típus:** Kapcsoló + Menük
+  - **Megadható Értékek:** Gyakoriság: `Napi`/`Heti`/`Havi`; Kiküldési óra: `0–23`; Témák: `Újra elérhető`, `Készlethiány`, `Megszűnt`; Hatókör: `Minden`, `Szakterület + mentett`, `Csak szakterület`, `Csak mentett`
+  - **Példa Érték:** `Heti, 08:00, [Újra elérhető, Készlethiány], Szakterület + mentett`
+  - **Limitációk:** Külön konfigurálható az elsődleges és a másodlagos e-mail címre.
 - **Preferált Patika:**
-  - **Felületi Típus:** Kiválasztó komponens
-  - **Megadható Adatok / Formátum:** Egy kijelölt gyógyszertár azonosítója
-  - **Példa Érték:** `"BENU Gyógyszertár Arany Sas"`
-  - **Üzleti & Felületi Limitációk:** Opcionális. Bármikor módosítható vagy törölhető.
+  - **Felületi Típus:** Kiválasztó kártya + Törlés gomb
+  - **Megadható Érték:** Egy gyógyszertár megnevezése és azonosítója
+  - **Példa Érték:** `"BENU Gyógyszertár Arany Sas (BF001)"`
+  - **Limitációk:** Legfeljebb 1 preferált patika jelölhető ki egyszerre.
 
 ### 3.2. Gyógyszer (Medicine) Adatmodell
 
 - **Kereskedelmi Név:**
-  - **Felületi Típus:** Megjelenítő / Szöveg
-  - **Megadható Adatok / Formátum:** Szöveg
+  - **Felületi Típus:** Szöveges megjelenítés
   - **Példa Érték:** `"Algopyrin 500 mg filmtabletta"`
-  - **Üzleti & Felületi Limitációk:** Kötelező azonosító elnevezés.
-- **TK-szám:**
-  - **Felületi Típus:** Megjelenítő / Szöveg
-  - **Megadható Adatok / Formátum:** Hatósági azonosító formátum
+  - **Limitációk:** Kötelező alapadat.
+- **TK-szám (Törzskönyvi szám):**
+  - **Felületi Típus:** Szöveges megjelenítés / Rendszerazonosító
   - **Példa Érték:** `"OGYI-T-8898/01"`
-  - **Üzleti & Felületi Limitációk:** Egyedi törzskönyvi szám. Rendszerazonosító.
+  - **Limitációk:** Egyedi hatósági azonosító kód.
 - **INN (Hatóanyag):**
-  - **Felületi Típus:** Megjelenítő / Link
-  - **Megadható Adatok / Formátum:** Szöveg (Hatóanyag neve)
+  - **Felületi Típus:** Kattintható hivatkozás
   - **Példa Érték:** `"metamizol-nátrium"`
-  - **Üzleti & Felületi Limitációk:** Kattintható hivatkozás: szűr a listában.
+  - **Limitációk:** Rákattintva azonos hatóanyagú készítményekre szűr a listában.
 - **Márkanév:**
-  - **Felületi Típus:** Megjelenítő / Szöveg
-  - **Megadható Adatok / Formátum:** Kereskedelmi márkaneve
+  - **Felületi Típus:** Szöveges megjelenítés
   - **Példa Érték:** `"Algopyrin"`
-  - **Üzleti & Felületi Limitációk:** A termékcsalád márkaneve.
 - **ATC-kód:**
-  - **Felületi Típus:** Megjelenítő / Címke
-  - **Megadható Adatok / Formátum:** 7 karakteres kód
+  - **Felületi Típus:** Címke jelvény
   - **Példa Érték:** `"N02BB02"`
-  - **Üzleti & Felületi Limitációk:** Szabványos anatómiai-terápiás osztályozás.
-- **Gyártó:**
-  - **Felületi Típus:** Megjelenítő / Szöveg
-  - **Megadható Adatok / Formátum:** Cégnév
+- **Gyártó / Engedélyes:**
+  - **Felületi Típus:** Szöveges megjelenítés
   - **Példa Érték:** `"Sanofi-Aventis Zrt."`
-  - **Üzleti & Felületi Limitációk:** A forgalomba hozatali engedélyes / gyártó.
-- **Kiszerelés:**
-  - **Felületi Típus:** Megjelenítő / Szöveg
-  - **Megadható Adatok / Formátum:** Mennyiség és csomagolási forma
-  - **Példa Érték:** `"20x filmtabletta"`
-  - **Üzleti & Felületi Limitációk:** A dobozban található kiszerelés.
-- **Csomagolási részletek:**
-  - **Felületi Típus:** Megjelenítő / Szöveg
-  - **Megadható Adatok / Formátum:** Részletes csomagolás leírása
-  - **Példa Érték:** `"bliszterben és dobozban"`
-  - **Üzleti & Felületi Limitációk:** Opcionális oszlop a nyilvántartásban.
+- **Kiszerelés és Csomagolás:**
+  - **Felületi Típus:** Szöveges leírás
+  - **Példa Érték:** `"20x filmtabletta buborékcsomagolásban és dobozban"`
 - **Kiadhatóság:**
-  - **Felületi Típus:** Megjelenítő / Szöveg
-  - **Megadható Adatok / Formátum:** `Vényköteles` / `Vény nélkül kapható`
+  - **Felületi Típus:** Szöveges kategória
+  - **Megadható Értékek:** `Vényköteles` / `Vény nélkül kapható (VN)`
   - **Példa Érték:** `Vényköteles`
-  - **Üzleti & Felületi Limitációk:** Fő kiadhatósági besorolás.
-- **Kiadhatósági alcsoport:**
-  - **Felületi Típus:** Megjelenítő / Szöveg
-  - **Megadható Adatok / Formátum:** Részletes kiadhatósági kód/szöveg
-  - **Példa Érték:** `"VN"`
-  - **Üzleti & Felületi Limitációk:** Opcionális oszlop a nyilvántartásban.
-- **Biztonsági elemek:**
-  - **Felületi Típus:** Megjelenítő / Szöveg
-  - **Megadható Adatok / Formátum:** `Van` / `Nincs`
-  - **Példa Érték:** `Van`
-  - **Üzleti & Felületi Limitációk:** Egyedi azonosító és dézsmálásgátló megléte.
-- **Engedélyezés dátuma:**
-  - **Felületi Típus:** Megjelenítő / Dátum
-  - **Megadható Adatok / Formátum:** Dátum formátum (`ÉÉÉÉ.MM.NN`)
-  - **Példa Érték:** `2010.05.12`
-  - **Üzleti & Felületi Limitációk:** Hatósági engedélyezés időpontja.
-- **Státusz:**
-  - **Felületi Típus:** Címke (Színkódolt)
-  - **Megadható Adatok / Formátum:** `Elérhető` / `Készlethiány` / `Megszűnt`
+- **Biztonsági Elemek:**
+  - **Felületi Típus:** Állapotjelző
+  - **Megadható Értékek:** `Van` / `Nincs`
+  - **Példa Érték:** `Van (Egyedi azonosító és dézsmálásgátló)`
+- **Általános Piaci Státusz:**
+  - **Felületi Típus:** Színkódolt címke
+  - **Megadható Értékek:** `Elérhető` (zöld), `Készlethiány` (sárga), `Megszűnt` (piros)
   - **Példa Érték:** `Készlethiány`
-  - **Üzleti & Felületi Limitációk:** Zöld (Elérhető), Sárga (Készlethiány), Piros (Megszűnt). A státusz a LogiNet Middleware által közvetített BENU hálózati adatok és az OGYÉI "Összes termékhiány" CSV nyilvántartásának háttérbeli összevetésén alapul (az OGYÉI CSV nyers adatai egyelőre nem láthatók közvetlenül a felületen).
-- **Utolsó frissítés:**
-  - **Felületi Típus:** Megjelenítő / Dátum
-  - **Megadható Adatok / Formátum:** Dátum és időbélyeg
-  - **Példa Érték:** `2026.08.10 14:32`
-  - **Üzleti & Felületi Limitációk:** A piaci státusz utolsó módosításának ideje.
-- **Hiány kezdete:**
-  - **Felületi Típus:** Dátum kijelző
-  - **Megadható Adatok / Formátum:** Dátum formátum (`ÉÉÉÉ.MM.NN`)
-  - **Példa Érték:** `2026.07.15`
-  - **Üzleti & Felületi Limitációk:** Kizárólag készlethiány esetén jelenik meg.
-- **Hiány várható vége:**
-  - **Felületi Típus:** Dátum kijelző
-  - **Megadható Adatok / Formátum:** Dátum formátum (`ÉÉÉÉ.MM.NN`)
-  - **Példa Érték:** `2026.09.30`
-  - **Üzleti & Felületi Limitációk:** Becsült lejárati dátum (ha hiányzik: "Folyamatban").
-- **Hiány oka:**
-  - **Felületi Típus:** Szövegblokk
-  - **Megadható Adatok / Formátum:** Szöveges leírás
-  - **Példa Érték:** `"Gyártási kapacitáshiány"`
-  - **Üzleti & Felületi Limitációk:** Részletes tájékoztatás (ha hiányzik: "Szakmai ok").
-- **Pótlási javaslat:**
-  - **Felületi Típus:** Szövegblokk
-  - **Megadható Adatok / Formátum:** Szöveges leírás
-  - **Példa Érték:** `"Helyettesíthető azonos INN készítménnyel."`
-  - **Üzleti & Felületi Limitációk:** Szakmai javaslat a betegellátáshoz.
+- **Hiány Részletei (ha státusza Készlethiány):**
+  - **Hiány kezdete:** Dátum (`2026.07.15`)
+  - **Várható befejezés:** Dátum (`2026.11.30`) vagy `"Folyamatban"`
+  - **Hiány hivatalos oka:** Szöveges leírás (pl. `"Gyártási kapacitáshiány"`)
+  - **Szakmai pótlási javaslat:** Szöveg (pl. `"Helyettesíthető azonos INN készítménnyel"`)
+- **Fogyasztói Ár és Térítési Díj:**
+  - **Bruttó fogyasztói ár:** Pénznem összeg (pl. `"2 490 Ft"`, bordó színnel kiemelve)
+  - **Becsült térítési díj:** Pénznem összeg (pl. `"1 245 Ft"`, sötétkékkel kiemelve)
 
 ### 3.3. Gyógyszertár (Pharmacy) Adatmodell
 
 - **BF azonosító kód:**
-  - **Felületi Típus:** Megjelenítő / Szöveg
-  - **Megadható Adatok / Formátum:** Egyedi hatósági/rendszer kód
+  - **Felületi Típus:** Szöveges kód
   - **Példa Érték:** `"BF001"`
-  - **Üzleti & Felületi Limitációk:** A patika egyedi azonosítója.
-- **Patika neve:**
-  - **Felületi Típus:** Szövegmező
-  - **Megadható Adatok / Formátum:** Szöveg
+  - **Limitációk:** Egyedi belső patikaazonosító.
+- **Gyógyszertár Neve:**
+  - **Felületi Típus:** Szövegmező / Kattintható cím
   - **Példa Érték:** `"BENU Gyógyszertár Arany Sas"`
-  - **Üzleti & Felületi Limitációk:** Kötelező megnevezés.
-- **Irányítószám:**
-  - **Felületi Típus:** Szövegmező
-  - **Megadható Adatok / Formátum:** 4 számjegy
-  - **Példa Érték:** `"1052"`
-  - **Üzleti & Felületi Limitációk:** Magyarországi irányítószám.
-- **Város:**
-  - **Felületi Típus:** Szövegmező
-  - **Megadható Adatok / Formátum:** Szöveg
-  - **Példa Érték:** `"Budapest"`
-  - **Üzleti & Felületi Limitációk:** Kötelező településnév.
-- **Utca, házszám:**
-  - **Felületi Típus:** Szövegmező
-  - **Megadható Adatok / Formátum:** Szöveg
-  - **Példa Érték:** `"Károly körút 1."`
-  - **Üzleti & Felületi Limitációk:** Pontos közterület megnevezés.
-- **Vármegye:**
-  - **Felületi Típus:** Legördülő menü
-  - **Megadható Adatok / Formátum:** Vármegyék listája
-  - **Példa Érték:** `"Pest / Budapest"`
-  - **Üzleti & Felületi Limitációk:** Területi besorolás.
-- **Szélesség (Lat):**
-  - **Felületi Típus:** Számos mező
-  - **Megadható Adatok / Formátum:** Tizedes tört (`-90` és `+90` között)
-  - **Példa Érték:** `47.4979`
-  - **Üzleti & Felületi Limitációk:** Földrajzi koordináta térképhez.
-- **Hosszúság (Lng):**
-  - **Felületi Típus:** Számos mező
-  - **Megadható Adatok / Formátum:** Tizedes tört (`-180` és `+180` között)
-  - **Példa Érték:** `19.0543`
-  - **Üzleti & Felületi Limitációk:** Földrajzi koordináta térképhez.
-- **Nyitvatartás:**
-  - **Felületi Típus:** Napi Időpontok
-  - **Megadható Adatok / Formátum:** Nyitás-Zárás naptári naponként (H-Va)
-  - **Példa Érték:** `"08:00 - 19:00"`
-  - **Üzleti & Felületi Limitációk:** Naponta állítható nyitási/zárási időpont vagy "Zárva".
-- **Telefonszám:**
-  - **Felületi Típus:** Szövegmező
-  - **Megadható Adatok / Formátum:** Telefonszám formátum
-  - **Példa Érték:** `"+36 1 234 5678"`
-  - **Üzleti & Felületi Limitációk:** Kapcsolattartási telefonszám.
-- **E-mail cím:**
-  - **Felületi Típus:** Email mező
-  - **Megadható Adatok / Formátum:** Érvényes e-mail formátum
-  - **Példa Érték:** `"aranysas@benu.hu"`
-  - **Üzleti & Felületi Limitációk:** Elektronikus elérhetőség.
+- **Cím Adatok:**
+  - **Irányítószám:** 4 számjegy (pl. `"1052"`)
+  - **Település / Város:** Szöveg (pl. `"Budapest"`)
+  - **Közterület, házszám:** Szöveg (pl. `"Károly körút 1."`)
+  - **Vármegye:** Szöveg (pl. `"Budapest"`)
+- **Földrajzi Koordináták:**
+  - **Szélesség (Lat):** Számérték (pl. `47.4979`)
+  - **Hosszúság (Lng):** Számérték (pl. `19.0543`)
+  - **Limitációk:** Térképi pozicionáláshoz és távolságszámításhoz szükséges.
+- **Heti Nyitvatartás:**
+  - **Megadható Formátum:** Hétfőtől vasárnapig naponta nyitási-zárási idő (pl. `"08:00 - 19:00"`) vagy `"Zárva"`
+  - **Példa Érték:** H-P: 08:00-19:00, Szo: 08:00-14:00, V: Zárva
+- **Elérhetőségek:**
+  - **Telefonszám:** Hívható formátum (pl. `"+36 1 234 5678"`)
+  - **E-mail cím:** Kattintható levélcím (pl. `"aranysas@benu.hu"`)
 
-### 3.4. Képzés / Kurzus (Course) Adatmodell
+### 3.4. Képzés / Kurzus (Course) Adatmodell *(Nem aktív felület)*
 
-- **Kurzus azonosító:**
-  - **Felületi Típus:** Szöveg azonosító
-  - **Megadható Adatok / Formátum:** Karakterlánc
-  - **Példa Érték:** `"c1"`
-  - **Üzleti & Felületi Limitációk:** Egyedi kurzusazonosító.
-- **Cím:**
-  - **Felületi Típus:** Szöveg
-  - **Megadható Adatok / Formátum:** Karakterlánc
-  - **Példa Érték:** `"A hipertónia legújabb terápiás irányelvei"`
-  - **Üzleti & Felületi Limitációk:** A képzés megnevezése.
-- **Kategória:**
-  - **Felületi Típus:** Címke
-  - **Megadható Adatok / Formátum:** `Akkreditált` / `Gyártói` / `Eladásösztönző`
-  - **Példa Érték:** `Akkreditált`
-  - **Üzleti & Felületi Limitációk:** A képzés szakmai kategóriája.
-- **Becsült időtartam:**
-  - **Felületi Típus:** Szám / Kijelző
-  - **Megadható Adatok / Formátum:** Percek száma
-  - **Példa Érték:** `45 perc`
-  - **Üzleti & Felületi Limitációk:** A tananyag feldolgozásához szükséges becsült idő.
-- **Tartalomtípus:**
-  - **Felületi Típus:** Ikon / Szöveg
-  - **Megadható Adatok / Formátum:** `Videó` / `PDF`
-  - **Példa Érték:** `Videó`
-  - **Üzleti & Felületi Limitációk:** A tananyag fő formátuma.
-- **Rövid leírás:**
-  - **Felületi Típus:** Szövegblokk
-  - **Megadható Adatok / Formátum:** Részlet
-  - **Példa Érték:** `"Összefoglaló a legújabb kardiológiai irányelvekről..."`
-  - **Üzleti & Felületi Limitációk:** Kártyás nézeten megjelenő összefoglaló.
-- **Részletes leírás:**
-  - **Felületi Típus:** Szövegblokk
-  - **Megadható Adatok / Formátum:** Formázott szöveg
-  - **Példa Érték:** `"A kurzus részletesen bemutatja..."`
-  - **Üzleti & Felületi Limitációk:** A kurzus adatlapján megjelenő teljes leírás.
-- **Akkreditált pontok:**
-  - **Felületi Típus:** Kártya / Kijelző
-  - **Megadható Adatok / Formátum:** Egész szám
-  - **Példa Érték:** `2 kreditpont`
-  - **Üzleti & Felületi Limitációk:** Akkreditált képzéseknél megszerezhető pontszám.
+> [!NOTE]
+> Ez az adatmodell a prototípusban korábban definiált képzési struktúrát rögzíti, a hozzá kapcsolódó felület a jelenlegi éles prototípusban nem aktív.
+
+- **Kurzus azonosító:** Karakterlánc (pl. `"c1"`)
+- **Cím:** Szöveg (pl. `"A hipertónia legújabb terápiás irányelvei"`)
+- **Kategória:** `Akkreditált` / `Gyártói` / `Eladásösztönző`
+- **Becsült időtartam:** Perc érték (pl. `"45 perc"`)
+- **Tartalom formátuma:** `Videó` / `PDF Dokumentum`
+- **Rövid és Részletes Leírás:** Szöveges összefoglalók
+- **Akkreditált Kreditpont:** Egész szám (pl. `2 kreditpont`) — *a részletes adatlapon megjelenő érték*
 
 ### 3.5. Patikai Készletrekord Adatmodell
 
-- **TK-szám:**
-  - **Felületi Típus:** Szövegmező
-  - **Megadható Adatok / Formátum:** Törzskönyvi szám
-  - **Példa Érték:** `"OGYI-T-8898/01"`
-  - **Üzleti & Felületi Limitációk:** Hivatkozott gyógyszer azonosítója.
-- **Raktári darabszám:**
-  - **Felületi Típus:** Számmező
-  - **Megadható Adatok / Formátum:** Pozitív egész szám
-  - **Példa Érték:** `42`
-  - **Üzleti & Felületi Limitációk:** A kiválasztott patikában lévő fizikai darabszám.
-- **Utolsó adatszinkron:**
-  - **Felületi Típus:** Dátum és idő
-  - **Megadható Adatok / Formátum:** `ÉÉÉÉ.MM.NN ÓÓ:PP:SS`
-  - **Példa Érték:** `2026.08.12 08:15:30`
-  - **Üzleti & Felületi Limitációk:** Patikai alapadatok utolsó frissítési ideje.
-- **Utolsó készletszinkron:**
-  - **Felületi Típus:** Dátum és idő
-  - **Megadható Adatok / Formátum:** `ÉÉÉÉ.MM.NN ÓÓ:PP:SS`
-  - **Példa Érték:** `2026.08.12 09:00:12`
-  - **Üzleti & Felületi Limitációk:** Készletadatok utolsó frissítési ideje.
-- **Készletforrás és Szinkronizációs Keretek:**
-  - **Integrációs Csatorna:** A patikai készletadatok lekérdezése és szinkronizációja a BENU.hu és BENUvény.hu alapjait képező LogiNet Middleware-en keresztül történik.
-  - **Audit és Implementáció:** A szinkronizáció pontos frekvenciáját, végpontjait és adatstruktúráját a kivitelező határozza meg a meglévő Middleware képességeinek vizsgálata (auditja) és a bekért interfész-dokumentációk alapján.
+- **TK-szám:** Hivatkozott gyógyszerkészítmény kódja
+- **Raktári darabszám:** Pozitív egész szám (pl. `14 db`)
+- **Patikai státuszbesorolás:** `Készleten` / `Korlátozottan` / `Rendelésre` / `Nem elérhető`
+- **Utolsó készletszinkron:** Időbélyeg (pl. `2026.10.20 08:30:15`)
 
 ### 3.6. Regisztrációs Igény / Kapcsolatfelvételi Űrlap Adatmodell
 
-- **Teljes név:**
-  - **Felületi Típus:** Egysoros szövegmező
-  - **Megadható Adatok / Formátum:** Szöveg (Orvos / Gyógyszerész teljes neve)
-  - **Példa Érték:** `"Dr. Szabó Péter"`
-  - **Üzleti & Felületi Limitációk:** Kötelező. Min. 3, max. 100 karakter.
-- **Szakmai e-mail cím:**
-  - **Felületi Típus:** Egysoros email mező
-  - **Megadható Adatok / Formátum:** Érvényes e-mail formátum (`nev@intezmeny.hu`)
-  - **Példa Érték:** `"dr.szabo.peter@korhaz.hu"`
-  - **Üzleti & Felületi Limitációk:** Kötelező. A későbbi felhasználói fiók elsődleges azonosítója és a kapcsolatfelvétel címe.
-- **Telefonszám:**
-  - **Felületi Típus:** Szövegmező
-  - **Megadható Adatok / Formátum:** Telefonszám formátum (`+36...`)
-  - **Példa Érték:** `"+36 30 987 6543"`
-  - **Üzleti & Felületi Limitációk:** Opcionális / Ajánlott. Kapcsolattartásra és a későbbi SMS alapú 2FA azonosításhoz szükséges.
-- **Pecsétszám / Működési nyilvántartási szám:**
-  - **Felületi Típus:** Szövegmező
-  - **Megadható Adatok / Formátum:** 5-6 számjegyű orvosi vagy gyógyszerészi alapnyilvántartási szám
-  - **Példa Érték:** `"12345"`
-  - **Üzleti & Felületi Limitációk:** Kötelező az orvosi / gyógyszerészi jogosultság hatósági és szakmai ellenőrzéséhez.
-- **Szakterület / Munkahely:**
-  - **Felületi Típus:** Szövegmező / Kiválasztó
-  - **Megadható Adatok / Formátum:** Szöveg
-  - **Példa Érték:** `"Háziorvostan, Kardiológia"`
-  - **Üzleti & Felületi Limitációk:** Opcionális. Segíti az adminisztrátort a profil szakterületi besorolásának előkészítésében.
-- **Üzenet / Kérelem szövege:**
-  - **Felületi Típus:** Többsoros szövegmező (Textarea)
-  - **Megadható Adatok / Formátum:** Szabad szöveg
-  - **Példa Érték:** `"Kérem a hozzáférés biztosítását a BENUvény orvosi szakmai rendszerhez."`
-  - **Üzleti & Felületi Limitációk:** Opcionális. Max. 500 karakter.
-- **Adatkezelési nyilatkozat elfogadása:**
-  - **Felületi Típus:** Jelölőnégyzet (Checkbox)
-  - **Megadható Adatok / Formátum:** Bepipálva / Nem bepipálva
-  - **Példa Érték:** `Bepipálva`
-  - **Üzleti & Felületi Limitációk:** Kötelező a kérelem elküldéséhez.
-- **Üzleti & Működési Keretek:**
-  - Az űrlap beküldése nem hoz létre azonnal belépésre jogosult aktív fiókot; az adatokat a rendszer eljuttatja a rendszeradminisztrátornak, aki a manuális szakmai validációt követően kézzel rögzíti a felhasználót az adminisztrációs felületen.
+- **Teljes név:** Szöveg (pl. `"Dr. Szabó Péter"`) — Kötelező
+- **Szakmai e-mail cím:** E-mail (pl. `"szabo.peter@haziorvos.hu"`) — Kötelező
+- **Telefonszám:** Nemzetközi telefonszám (pl. `"+36 20 987 6543"`) — Kötelező
+- **Pecsétszám (Működési nyilvántartási szám):** 5–6 számjegy (pl. `"76543"`) — Kötelező orvosi azonosító
+- **Szakterület / Munkahely:** Szöveg (pl. `"Háziorvosi Rendelő, Szeged"`) — Kötelező
+- **Megjegyzés / Üzenet:** Többsoros szövegmező — Opcionális
+- **Adatkezelési nyilatkozat:** Jelölőnégyzet — Kötelezően elfogadandó
+
+### 3.7. Közösségi Téma és Hozzászólás Adatmodell
+
+- **Téma címe:** Szöveg (min. 5, max. 150 karakter)
+- **Téma kategóriája / Szakterülete:** Kódlista elem (pl. `"Kardiológia"`, `"Háziorvostan"`)
+- **Szerző megnevezése:** Felhasználó neve vagy `"Anonim Felhasználó"`
+- **Tartalom:** Formázott szöveges bejegyzés
+- **Moderációs Státusz:** `Aktív` / `Lezárt` / `Elrejtett`
 
 ---
 
@@ -487,623 +353,445 @@ Ez a szakasz a rendszer fő üzleti entitásait mutatja be a beviteli mezők, ad
 
 ### 4.0. Fejléc és Navigációs Sáv Modul
 
-#### 4.0.1. Fejléc Navigáció és Főfunkciók
+A portál minden oldalának tetején rögzített (sticky), központi navigációs vezérlősávja.
 
-A portál tetején rögzített (sticky) központi navigációs sáv, amely minden oldalon elérhető. A felület a hivatalos 2025-ös BENU VÉNY arculatot követi. Biztosítja az oldalak közötti gyors váltást, a mentett kedvenc gyógyszerek gyors elérését, a kijelölt közeli gyógyszertár megjelenítését és módosítását, a rendszerszintű keresést, valamint a felhasználói fiókműveleteket.
+#### 4.0.1. Működés és Felületi Elemek
+1. **Arculat és Főoldali Navigáció:**
+   - A hivatalos sötétkék/zöld **BENU VÉNY** embléma bal oldalt található.
+   - Rákattintva az Irányítópultra (`https://bvo.uneb.hu/dashboard`) visz.
+2. **Központi Globális Keresősáv:**
+   - Asztali nézetben közvetlen beviteli mező élő lenyíló találati ablakkal (Gyógyszerek és Patikák között).
+   - Mobilon érinthető nagyító gomb, amely teljes képernyős keresőfelületet (overlay-t) nyit meg.
+3. **Közeli Patika Kijelző és Gyorsválasztó:**
+   - Kiemelt mező a fejléc jobb oldalán: zöld aláhúzott patikanév (pl. *"BENU Gyógyszertár Arany Sas"*).
+   - Ha még nincs kijelölt patika: *"Válasszon gyógyszertárat"* szöveg jelenik meg.
+   - Rákattintva azonnal felugrik a teljes képernyős interaktív **Patikaválasztó Modális Ablak** (`PharmacyFinder`), ahol új preferált patika jelölhető ki.
+4. **Ikonos Navigációs Menüpontok:**
+   - **Irányítópult:** Navigáció a `/dashboard` felületre.
+   - **Gyógyszer:** Navigáció a `/gyogyszerek` felületre.
+   - **Gyógyszertár:** Navigáció a `/gyogyszertarak` felületre.
+   - **Mentett (Gyorslista):** Csillag ikon számláló jelvénnyel, amely a mentett készítmények számát mutatja.
+   - **Profil:** Felhasználói fiók menü.
+5. **Mentett Gyógyszerek Lenyíló Gyorslista (Dropdown):**
+   - A *"Mentett"* gombra kattintva lenyílik a mentett termékek előnézete.
+   - **"Összes" gomb:** A lenyíló ablak fejlécében elhelyezett zöld link. Rákattintva a rendszer azonnal a gyógyszerlista oldalra (`https://bvo.uneb.hu/gyogyszerek`) navigál, és automatikusan aktiválja a *"Csak mentett gyógyszerek"* szűrőt (`onlyFavorites=true`).
+   - **Készítmény sorok:** Terméknév, TK-szám, és színes készletjelvény (`Elérhető`, `Készlethiány`, `Megszűnt`). Sorra kattintva közvetlenül a gyógyszer adatlapjára visz.
+   - **Üres állapot:** *"Nincs még mentett gyógyszered."* felirat látható, ha a lista üres.
+6. **Felhasználói Profil Dropdown:**
+   - Megjeleníti az orvos nevét és e-mail címét.
+   - Opciók: *"Profilom és Beállítások"* (`/profile`) és *"Kijelentkezés"*.
+7. **Globális Lábléc (Footer):**
+   - Minden oldal alján megjelenő sötétkék sáv a "Color & Code" fejlesztői jelzéssel, hivatalos jogi hivatkozásokkal és a szoftver aktuális verziószámával (`v1.6.0`).
 
-##### 4.0.1.1. Arculat és Logó
-   - **BENU Vény Logó:** A fejléc bal oldalán elhelyezett hivatalos arculati elem, amely a kezdőoldalra (Irányítópult) vezet.
-   - **Kompakt mobil elrendezés:** Kisebb kijelzőkön a logó mellett azonnal elérhető a navigációs menü és a kereső.
+#### 4.0.2. Bemenetek és Kimenetek
+- **Bemenet:** Egérkattintás a menüpontokra, keresési kulcsszavak gépelése, patika kiválasztása a modálban.
+- **Kimenet:** Oldalnavigáció, modális ablak megjelenése, lenyíló menük aktiválása.
 
-##### 4.0.1.2. Központi Intelligens Kereső (Globális Keresés)
-   - A fejléc közepén elhelyezkedő keresőmező, amely azonnali élő keresést biztosít a gyógyszerek, gyógyszertárak és képzések között.
-   - **Keresési kategória választók:** A keresőfelületen a felhasználó szűrhet `Minden`, `Gyógyszerek`, `Gyógyszertárak` vagy `Képzések` kategóriák szerint.
+#### 4.0.3. Hibakezelés
+- **Üres mentett lista:** Ha a felhasználó úgy kattint az "Összes" gombra, hogy nincs egyetlen mentett gyógyszere sem, a gyógyszeroldalon az "Összesen 0 találat" állapot és segítő tájékoztató szöveg jelenik meg.
+- **Hálózati késés:** Lassú adatletöltés esetén a lenyíló ablak finom pulzáló helykitöltőt jelenít meg az adatok beérkezéséig.
 
-##### 4.0.1.3. Közeli Patika Kijelző (Preferált Gyógyszertár)
-   - **Megjelenés:** A fejléc jobb oldalán kiemelten látható a *"Közeli gyógyszertár"* felirat és alatta a kiválasztott patika neve zöld színnel, aláhúzva (pl. *"BENU Gyógyszertár Arany Sas"*).
-   - **Ha nincs kiválasztva patika:** A felirat *"Válasszon gyógyszertárat"* szövegre vált.
-   - **Interakció:** A blokkra kattintva közvetlenül felugrik a teljes képernyős **Patikaválasztó Modális Ablak** (`PharmacyFinder`), ahol térképes és listás nézetben új preferált patika választható.
-
-##### 4.0.1.4. Ikonos Vertikális Navigációs Menüpontok
-   - Az asztali felületen a fő funkciók jól elkülönülő ikonos, feliratos gombokként jelennek meg:
-     - **Irányítópult:** Közvetlen hivatkozás az összefoglaló főoldalra (`/dashboard`).
-     - **Gyógyszer:** Közvetlen hivatkozás a gyógyszer-nyilvántartás táblázatához (`/gyogyszerek`).
-     - **Gyógyszertár:** Közvetlen hivatkozás a térképes és listás patikakeresőhöz (`/gyogyszertarak`).
-     - **Mentett (Gyorslista):** Csillag ikonnal ellátott gomb, amely felett számláló jelvény mutatja az elmentett gyógyszerek darabszámát.
-     - **Profil:** Felhasználói fiók és beállítások elérése.
-
-##### 4.0.1.5. Mentett Gyógyszerek Lenyíló Gyorslista (Dropdown)
-   - A fejléc *"Mentett"* gombjára kattintva egy lenyíló ablak jelenik meg az alábbi tartalommal:
-     - **Fejléc:** *"Mentett gyógyszerek"* cím és a mentett tételek összdarabszáma (pl. *"2 mentett gyógyszer"*).
-     - **"Összes" gomb / hivatkozás:**
-       - **Megjelenés:** A fejléc jobb oldalán elhelyezett zöld színű, aláhúzott szöveges link.
-       - **Működés és felületi viselkedés:** Rákattintva bezárja a lenyíló ablakot, a felhasználót közvetlenül a gyógyszerlista felületre (`/gyogyszerek`) navigálja, és a listát automatikusan leszűri kizárólag a korábban elmentett kedvenc készítményekre (a felületen lévő *"Csak mentett gyógyszerek"* szűrőkapcsoló automatikusan bekapcsolt állapotba kerül). Amennyiben a felhasználó már eleve a gyógyszerek oldalon tartózkodik, a kattintás azonnal aktiválja a mentett szűrést és az első oldalra állítja a találati listát.
-       - **Limitáció:** Ha a felhasználónak még nincs egyetlen mentett gyógyszere sem, a gombra kattintva a gyógyszerlista oldal üres találati listát ("0 termék") jelenít meg.
-     - **Tétellista:** Gyógyszer neve, törzskönyvi száma, valamint színes készletjelvénye (`Elérhető` - zöld, `Készlethiány` - sárga, `Megszűnt` - piros).
-     - **Gyorsnavigáció tételekre:** Bármely mentett gyógyszer sorára kattintva a rendszer azonnal az adott gyógyszer részletes adatlapjára viszi a felhasználót.
-     - **Üres állapot:** Amennyiben a felhasználó még nem jelölt meg kedvencet: *"Nincs még mentett gyógyszered."* tájékoztató szöveg jelenik meg.
-
-##### 4.0.1.6. Felhasználói Profil Menü
-   - A profil gombra kattintva lenyíló menü jelenik meg:
-     - A bejelentkezett orvos / gyógyszerész teljes neve és e-mail címe.
-     - *"Profilom és Beállítások"* opció (`/profile`).
-     - *"Kijelentkezés"* opció, amely megszakítja a munkamenetet és a bejelentkező felületre navigál.
-
-##### 4.0.1.7. Mobil Hamburger Menü
-   - Mobil és táblagép méret esetén a menüpontok egy könnyen kezelhető felugró oldalsávba (drawer) rendeződnek.
-
-#### 4.0.2. Globális Lábléc (Footer) Modul
-
-A portál alján elhelyezkedő prémium, sötétkék hátterű lábléc.
-- **Megjelenés:** BENU Vény Orvosi Portál megnevezés, hivatalos "Color & Code" fejlesztői és márkaembléma, valamint a jogi és szerzői jogi nyilatkozatok.
-- **Verzió kijelzés:** A lábléc jobb oldalán folyamatosan látható az éles szoftververzió száma (pl. `v1.5.0`).
-- **Gyorslinkek:** Gyors navigációs hivatkozások a fő modulokra és jogi tudnivalókra.
+#### 4.0.4. Elfogadási Kritériumok (Acceptance Criteria)
+- **AC-4.0.1:** A fejléc logójára kattintva a felület minden esetben az Irányítópultra (`/dashboard`) navigál.
+- **AC-4.0.2:** A Közeli patika blokkra kattintva a Patikaválasztó modál megnyílik, és új patika kiválasztásakor a fejléc azonnal frissül a választott patika nevével.
+- **AC-4.0.3:** A Mentett lenyíló ablakban lévő "Összes" hivatkozásra kattintva a gyógyszerlista megnyílik, és a táblázatban kizárólag a mentett gyógyszerek jelennek meg.
+- **AC-4.0.4:** Kijelentkezéskor a rendszer érvényteleníti a munkamenetet és a bejelentkezési oldalra (`/login`) irányít át.
 
 ---
 
 ### 4.1. Irányítópult (Dashboard)
 
-A bejelentkezést követő nyitóoldal. Modern, kétoszlopos elrendezésben azonnali vizuális összefoglalást nyújt a piaci gyógyszer-státuszváltozásokról és a kijelölt preferált gyógyszertár aktuális állapotáról.
+A bejelentkezést követő központi áttekintő felület, amely összefoglalja a legfontosabb piaci és helyi készletmozgásokat a legújabb 2 oszlopos Figma elrendezés szerint.
 
 **Útvonal:** [https://bvo.uneb.hu/dashboard](https://bvo.uneb.hu/dashboard)
 
-#### 4.1.1. Fejléc és Időszak Választó (Time Period Selector)
-- **Cím és Köszöntés:** *"Irányítópult"* főcím és az orvos / felhasználó személyes üdvözlése.
-- **Időszak választó gomb (Pill Dropdown):**
-  - Lekerekített kapszula alakú gomb naptár ikonnal és lefelé mutató nyíllal.
-  - **Kiválasztható időintervallumok:**
-    - `Elmúlt 3 nap` (alapértelmezett beállítás)
-    - `Elmúlt 1 nap (Mai nap)`
-    - `Elmúlt 7 nap`
-    - `Elmúlt 30 nap`
-  - A kiválasztott intervallum azonnal érvényesül az egész irányítópulton: újraszámolja az összesítő kártya adatait és frissíti a legutóbbi változások táblázatát.
+#### 4.1.1. Működés és Felületi Elemek
+1. **Fejléc és Időszak Választó (Time Period Selector):**
+   - Lekerekített kapszula alakú gomb naptár ikonnal.
+   - **Választható időintervallumok:** `Elmúlt 3 nap` (alapértelmezett), `Elmúlt 1 nap (Mai nap)`, `Elmúlt 7 nap`, `Elmúlt 30 nap`.
+   - A választás azonnal újraszámolja a statisztikai kártyákat és frissíti a legfrissebb változások listáját.
+2. **"Globális Készletváltozás" Összesítő Kártya (Bal hasáb):**
+   - Kiemelt, világossárga kártya (`#FFFCE9`) felkiáltójel ikonnal a bal hasáb tetején.
+   - Részletes összefoglalót ad: hány gyógyszer került újonnan készlethiányba, mennyi vált újra elérhetővé, és hány terméket vontak ki a forgalomból (megszűnt).
+   - Amennyiben van beállított közeli patika, külön mondat emeli ki a preferált patikában történt változásokat.
+   - A szöveges számértékek közvetlenül kattintható hivatkozások, amelyek a gyógyszerlistát az adott státuszra előszűrve nyitják meg.
+3. **Legutóbbi 20 Készletváltozás Táblázata (Bal hasáb):**
+   - Időrendi lista a legfrissebb 20 készlet- és piaci státuszváltozásról.
+   - Oszlopok: Színes státuszjelvény (`Elérhető`, `Hiány`, `Megszűnt`), Gyógyszer kereskedelmi neve (adatlapra vezető link), Változás rögzítésének dátuma.
+   - A táblázat alatt az *"Összes változás megtekintése"* gomb a teljes gyógyszerlistára navigál dátum szerinti csökkenő rendezéssel.
+4. **Gyógyszertári Készlet és Térkép Widget (Jobb hasáb):**
+   - *Ha nincs beállítva patika:* Tájékoztató grafika *"Válasszon közeli gyógyszertárat"* címmel és egy *"Gyógyszertár keresése"* gombbal, amely megnyitja a kereső modált.
+   - *Ha van beállítva patika:* Megjeleníti a patika nevét, címét, nyitvatartását, a *"Készleten"* és *"Elfogyott / hiány"* tételek darabszámát, valamint a legutóbbi helyi készletmozgások listáját.
 
-#### 4.1.2. "Fontos Készletváltozások" Figyelmeztető Kártya
-- Kiemelt, világossárga hátterű (`#FFFCE9`), sárga figyelmeztető kerettel ellátott információs kártya a bal hasáb tetején.
-- **Tartalom:**
-  - Figyelmeztető felkiáltójel ikon.
-  - Cím: *"Fontos készletváltozások"* a kiválasztott időszakra vonatkozóan.
-  - Részletes szöveges összefoglaló a piaci készlethiányba került, újra elérhetővé vált, illetve forgalomból kivont (megszűnt) gyógyszerek pontos darabszámával.
-  - Preferált gyógyszertár beállítása esetén kiemeli az adott patikában történt legfontosabb változásokat is (pl. *"A preferált gyógyszertárában 3 gyógyszer készlete változott."*).
-  - Közvetlen kattintható hivatkozások, amelyek a gyógyszerlistát a megfelelő státusz szerint előszűrve nyitják meg.
+#### 4.1.2. Bemenetek és Kimenetek
+- **Bemenet:** Időszak kiválasztása a legördülő kapszulából, kattintás a statisztikai linkekre vagy a patikakereső gombra.
+- **Kimenet:** Dinamikusan újraszámolt statisztikák, frissített táblázatsorok, átnavigálás a szűrt gyógyszerlistára vagy a patikaválasztó modál megnyitása.
 
-#### 4.1.3. Országos Készletváltozások Táblázata (Bal hasáb)
-- **Tételkapacitás:** A legutóbbi 20 releváns gyógyszer-státuszváltozás időrendben.
-- **Oszlopok:**
-  - **Státusz:** Színkódolt, lekerekített jelvények a hivatalos arculat szerint:
-    - `Elérhető` – világoszöld háttér (`#E8F8E2`), sötétzöld szöveg
-    - `Hiány` (Készlethiány) – világossárga háttér (`#FFF7BA`), sötétsárga szöveg
-    - `Megszűnt` – világospiros háttér (`#FEEAED`), bordó szöveg
-  - **Gyógyszer neve:** A készítmény teljes kereskedelmi neve (pl. *"Algopyrin 500 mg filmtabletta"*). Kattintható hivatkozás, amely a gyógyszer részletes adatlapjára visz.
-  - **Dátum:** A státuszváltozás rögzítésének pontos dátuma (pl. `2026.09.02`).
-- **"Összes változás megtekintése" gomb:** A táblázat alatt elhelyezett hivatkozás, amely átnavigál a Gyógyszerek oldalra frissítési dátum szerint rendezve.
+#### 4.1.3. Hibakezelés
+- **Nincs adat az adott időszakra:** Ha egy szűkebb időszakra (pl. Elmúlt 1 nap) nincs regisztrált készletmozgás, a táblázat *"Nem történt készletváltozás a kiválasztott időszakban"* barátságos állapotüzenetet ad.
 
-#### 4.1.4. Gyógyszertári Widget (Jobb hasáb)
-Kétféle állapotban jelenik meg a felhasználó beállításaitól függően:
-
-##### A) Ha NINCS beállítva preferált patika:
-- Kiemelt tájékoztató kártya térképes grafikával.
-- Cím: *"Válasszon közeli gyógyszertárat"*.
-- Szöveges leírás az előnyökről: *"Állítsa be kedvenc gyógyszertárát, hogy a főoldalon azonnal nyomon követhesse a helyi készletmozgásokat és hiánycikkeket."*
-- **"Gyógyszertár keresése" gomb:** Kattintásra megnyitja a Patikaválasztó térképes modális ablakot.
-
-##### B) Ha VAN beállítva preferált patika:
-- **Fejléc:** A kiválasztott patika neve, címe és nyitvatartási állapota.
-- **Készletstatisztikai összefoglaló:**
-  - *"Újra készleten:"* X darab (kattintható zöld számérték).
-  - *"Elfogyott / hiány:"* Y darab (kattintható piros számérték).
-- **Helyi Készletváltozások Táblázata:** A megjelölt patika legfrissebb készletmozgásainak listája terméknévvel, darabszámmal és státusszal.
+#### 4.1.4. Elfogadási Kritériumok (Acceptance Criteria)
+- **AC-4.1.1:** Az időszak-választóban történő módosítás (pl. 7 napról 30 napra) azonnal és oldalújratöltés nélkül újraszámolja a készletváltozások darabszámait.
+- **AC-4.1.2:** A figyelmeztető kártyán a "készlethiány" számára kattintva a rendszer a gyógyszerlistára navigál, ahol a státuszszűrő automatikusan `Készlethiány` értékre van állítva.
+- **AC-4.1.3:** Beállított preferált patika esetén a widgetben a helyi készletváltozások az adott patika BF kódjára szűrt valós adatokat mutatják.
 
 ---
 
-### 4.2. Gyógyszer Nyilvántartás
+### 4.2. Gyógyszer Nyilvántartás (Lista és Adatlap)
 
-A portál központi kereső-, szűrő- és tájékoztató felülete a gyógyszerkészítmények országos és helyi adatainak böngészésére.
+A portál központi felülete a hazai piacon elérhető gyógyszerek adatainak böngészésére, szűrésére és mélyreható elemzésére.
 
 #### 4.2.1. Gyógyszer Lista Oldal
-
 **Útvonal:** [https://bvo.uneb.hu/gyogyszerek](https://bvo.uneb.hu/gyogyszerek)
 
-##### 4.2.1.0. Teljes Szélességű (Fluid) Elrendezés
-- **Rugalmas képernyőkitöltés:** A gyógyszerlista oldal és a benne elhelyezkedő táblázat teljes szélességű (fluid) elrendezést követ. Nem korlátozza mesterséges maximális szélesség (korábban 1440 képpont), így a felhasználó monitorának vagy böngészőablakának teljes szélességét kitölti (megfelelő szélső védőtávolságok megtartásával).
-- **Felhasználói előny:** Nagyobb felbontású kijelzőkön (pl. Full HD, 2K, 4K vagy ultraszéles monitorok) sokkal több oszlop és szöveges adat tekinthető át egyszerre vízszintes görgetés nélkül, a terméknevek, hatóanyagok és gyártók nevei tágasabban és áttekinthetőbben jelennek meg.
+##### 4.2.1.1. Teljes Szélességű (Fluid) Elrendezés
+- A táblázat rugalmasan (fluid módon) kitölti a felhasználó teljes böngészőablakát, feloldva minden mesterséges szélességi korlátot.
+- Széles képernyőn (Full HD, 2K, 4K) rendkívül nagy mennyiségű adatoszlop áttekinthető egyidejűleg vízszintes görgetés nélkül.
 
-##### 4.2.1.1. Fejléc és Gyorsszűrők
-- **Találati számláló:** A címsor mellett jól látható a szűrt tételek száma (pl. *"Gyógyszerek (142)"* vagy mentett szűrésnél *"Gyógyszerek (2)"*).
-- **Közvetlen Szűrő Jelölőnégyzetek (Checkboxok):**
-  - **"Csak mentett gyógyszerek":**
-    - **Típus:** Négyzet alakú jelölőnégyzet szöveges felirattal.
-    - **Működés:** Bekapcsolásakor a táblázat kizárólag a felhasználó által korábban könyvjelzővel elmentett készítményeket jeleníti meg.
-    - **Kapcsolódás a fejléchez:** Amennyiben a felhasználó a felső navigációs sáv *"Mentett"* gyorslistájában az *"Összes"* gombra kattint, a rendszer a gyógyszerlistára lépve automatikusan bepipálja ezt a jelölőnégyzetet és azonnal aktiválja a szűrést.
-    - **Kikapcsolás:** A jelölőnégyzetből a pipát kivéve a szűrés azonnal megszűnik, és a rendszer ismét a teljes (vagy az egyéb feltételeknek megfelelő) gyógyszerkínálatot listázza.
-  - **"Közeli gyógyszertárban elérhető":** Bekapcsolásakor kizárólag azok a gyógyszerek jelennek meg, amelyek a beállított preferált patikában fizikai raktárkészleten vannak. (Ha nincs beállítva patika, a funkció figyelmeztet a választásra).
-- **"Oszlopok" Testreszabási Gomb (Dropdown):**
-  - Másodlagos, szürke keretes funkciógomb lefelé mutató nyíllal.
-  - Kattintásra lenyíló panel jelenik meg az összes lehetséges oszlop listájával és jelölőnégyzeteivel.
-  - A felhasználó tetszőlegesen be- és kikapcsolhatja az oszlopok láthatóságát (pl. TK-szám, Terméknév, Hatóanyag, Kiszerelés, Gyártó, Státusz, Közeli patika készlet, Közeli patika frissítve, Utolsó frissítés, Csomagolás, Kiadhatóság, Biztonsági jellemzők, Támogatás, Bruttó ár, Ekvivalencia).
-  - A beállításokat a böngésző automatikusan megjegyzi a későbbi látogatásokhoz.
+##### 4.2.1.2. Gyorsszűrők és Testreszabás
+- **"Csak mentett gyógyszerek" szűrő:** Jelölőnégyzet. Bekapcsolásakor azonnal kizárja a nem kedvencnek jelölt készítményeket. A fejléc Mentett -> Összes linkje automatikusan bekapcsolja ezt a funkciót.
+- **"Közeli gyógyszertárban elérhető" szűrő:** Bekapcsolásakor csak azok a készítmények maradnak a listában, amelyek a preferált patikában fizikai polckészleten vannak.
+- **"Oszlopok" Testreszabó Panel:**
+  - Lenyíló ablak jelölőnégyzetekkel.
+  - Szabadon be- és kikapcsolható oszlopok: TK-szám, Kereskedelmi név, Hatóanyag, Kiszerelés, Gyártó, Státusz, Közeli patika készlet, Közeli patika frissítve, Utolsó frissítés, Csomagolás, Kiadhatóság, Biztonsági jellemzők, Támogatás, Bruttó fogyasztói ár, Ekvivalencia.
+  - A kiválasztott oszlopbeállításokat a böngésző lokálisan megjegyzi a következő munkamenetre is.
 
-##### 4.2.1.2. Táblázat Oszlopfejlécek és Sorrendezés
-- **Oszlopok átrendezése (Drag & Drop):** Minden adatoszlop fejléce előtt egy hatpontos fogantyú ikon (`drag_indicator`) található, amellyel a felhasználó az oszlopokat tetszőleges sorrendbe húzhatja át. A jobb szélső *"Műveletek"* oszlop nem mozgatható, fixen a táblázat jobb szélén marad.
-- **Rendezés:** Az oszlop nevére kattintva a sorrend növekvő (A-Z, 0-9), csökkenő (Z-A, 9-0) vagy alapértelmezett irányba rendeződik, amit nyilak jeleznek.
+##### 4.2.1.3. Oszlopok Rendezése és Drag & Drop Átrendezés
+- **Oszlopfejlécek fogantyúja (`drag_indicator`):** Az adatoszlopok fejléce előtt elhelyezett ikonnal az oszlopok sorrendje egérrel szabadon áthúzható (a jobb szélső "Műveletek" oszlop fixen rögzített).
+- **Rendezés:** Az oszlop nevére kattintva a lista növekvő vagy csökkenő sorrendbe rendeződik.
 
-##### 4.2.1.3. Oszloponkénti Szűrősor
-A fejlécek alatt közvetlenül egy szűrősor helyezkedik el:
-- **Szöveges beviteli mezők:** Egysoros *"Szűrés..."* mező a szöveges oszlopokhoz (pl. Név, Hatóanyag, TK-szám, Gyártó). Gépelés közben valós időben szűri a listát.
-- **Státusz legördülő választó:** Opciók: `Mindegy`, `Elérhető`, `Készlethiány`, `Megszűnt`.
-- **Közeli patika készlet legördülő választó:** Opciók: `Mindegy`, `Készleten`, `Nincs készleten`.
-- **Dátum szűrők:** Dátumválasztó naptár mezők az utolsó frissítés időpontjának szűrésére.
+##### 4.2.1.4. Oszloponkénti Élő Szűrősáv
+A fejlécek alatt közvetlenül minden adatoszlophoz dedikált szűrőmező tartozik:
+- Szöveges szűrőmezők (Név, Hatóanyag, TK-szám, Gyártó) gépelés közbeni azonnali szűréssel.
+- Legördülő státuszszűrő (`Mindegy`, `Elérhető`, `Készlethiány`, `Megszűnt`).
+- Közeli patika készletválasztó (`Mindegy`, `Készleten`, `Nincs készleten`).
+- Dátumválasztó mezők a frissítési idő szűrésére.
 
-##### 4.2.1.4. Táblázatsorok Megjelenése és Akciógombok
-- **Státusz jelvények:** A sor elején színes, lekerekített kártyák mutatják az elérhetőséget:
-  - `Elérhető` – világoszöld háttér (`#E8F8E2`), sötétzöld szöveg
-  - `Hiány` – világossárga háttér (`#FFF7BA`), sötétsárga szöveg
-  - `Megszűnt` – világospiros háttér (`#FEEAED`), bordó szöveg
-- **Rögzített "Műveletek" Oszlop (Fix jobb oldali oszlop):**
-  - A táblázat jobb szélén elhelyezkedő *"Műveletek"* oszlop (a fejlécével, üres szűrőcellájával és az összes sorbeli funkciógombjával) rögzített (fix pozíciójú).
-  - Vízszintes görgetés során – ami sok bekapcsolt adatoszlop esetén vagy kisebb képernyőkön, táblagépeken automatikusan elérhetővé válik – ez az oszlop folyamatosan látható marad a jobb szélen, így a felhasználónak sosem kell jobbra-balra görgetnie a legfontosabb műveletek eléréséhez.
-  - A vízszintesen elgörgetett adatsorok lágyan a rögzített oszlop mögé csúsznak be, amit egy finom elválasztó függőleges vonal és árnyék tesz egyértelművé.
-  - Egérmutatóval egy sor fölé állva a sor kiemelése (világosszürke háttérszín) a rögzített műveleti cellára is kiterjed, biztosítva az egységes vizuális visszajelzést.
-- **Műveleti gombok (36px x 36px négyzet alakú gombok):**
-  - **Kedvenc gomb (Csillag ikon):** Egykattintásos mentés a kedvencek közé. Sárga csillag jelzi az aktív állapotot. Ha a felhasználó egy olyan tételt távolít el a kedvencekből, amelyhez értesítés van rendelve, megerősítő párbeszédablak jelenik meg.
-  - **Értesítés gomb (Harang ikon):** Egykattintásos feliratkozás a gyógyszer piaci státuszváltozásaira. Kék harang jelzi az aktív feliratkozást.
-- **"Részletek >" Link:** Jobbra mutató nyíllal ellátott szöveges hivatkozás, amely a gyógyszer részletes adatlapjára viszi a felhasználót.
+##### 4.2.1.5. Rögzített (Sticky) Műveleti Oszlop és Akciógombok
+- A táblázat jobb szélén lévő **"Műveletek" oszlop fix pozíciójú**: vízszintes görgetés esetén is folyamatosan látható marad a képernyő jobb szélén, finom elválasztó árnyékkal.
+- **Műveleti gombok (36px x 36px négyzetek):**
+  - **Kedvenc gomb (Csillag):** Egykattintásos mentés a mentett listába. Sárga csillag jelzi az aktív állapotot. Ha olyan gyógyszert távolítanak el, amihez értesítés volt beállítva, megerősítő kérdés jelenik meg.
+  - **Értesítés gomb (Harang):** Feliratkozás státuszváltozási hírlevélre. Kék harang jelzi az aktív feliratkozást.
+  - **"Részletek >" Link:** Jobbra mutató nyíl hivatkozás az adott gyógyszer részletes adatlapjára.
 
-##### 4.2.1.5. Lapozó és Oldalméret Vezérlés (Pagination)
-- **Számozott lapozó:** A táblázat bal alsó sarkában elhelyezkedő lapszámozás előző és következő gombokkal. Az aktív oldal sötétkék háttérrel (`#002664`) és fehér számmal van kiemelve.
-- **Oldalméret választó:** A jobb alsó sarokban található legördülő menü, amellyel a felhasználó kiválaszthatja, hány tétel jelenjen meg egy oldalon:
-  - `10 elem / oldal`
-  - `20 elem / oldal` (alapértelmezett)
-  - `50 elem / oldal`
-  - `100 elem / oldal`
+##### 4.2.1.6. Lapozó és Oldalméret
+- Lapozás számozott gombokkal és Előző/Következő vezérlőkkel a bal alsó sarokban.
+- Oldalméret választó a jobb alsó sarokban: `10`, `20` (alapértelmezett), `50`, `100` elem/oldal.
 
 ---
 
 #### 4.2.2. Gyógyszer Adatlap
-
-Egy kiválasztott gyógyszer részletes szakmai információs adatlapja.
-
 **Útvonal:** `https://bvo.uneb.hu/gyogyszerek/adatlap?tk=[tkSzam]`
 
-##### 4.2.2.1. Navigáció és Fejléc
-- **Visszalépés link:** Bal felül látható a `"< Részletek"` vissza gomb, amely visszanavigál a gyógyszerlistához az előzőleg beállított szűrők megőrzésével.
-- **Gyógyszer Főcíme és ATC-kód:** Nagy méretű terméknév sötétkék színben (pl. *"Algopyrin 500 mg filmtabletta"*), alatta a hatósági ATC-kód kiegészítéssel (pl. *"N02BB02"*).
-- **Prémium Akciógombok (48px magasság):**
-  - **"Kedvencekhez adás" gomb:** Sötétkék hátterű, fehér csillag ikonos gomb.
-  - **"Értesítést kérek" gomb:** Fehér hátterű, sötétkék keretes, harang ikonos gomb.
+##### 4.2.2.1. Fejléc és Visszanavigálás
+- `"< Vissza a gyógyszerekhez"` link, amely visszaállítja a gyógyszerlistát az előzőleg beállított szűrők és lapozási pozíció megtartásával.
+- Terméknév sötétkékkel kiemelve, alatta az ATC-kód és a hatóanyag megnevezése.
+- Felső akciógombok: *"Kedvencekhez adás"* és *"Értesítést kérek"* (48px méretű kiemelt gombok).
 
-##### 4.2.2.2. Állapotjelző Figyelmeztető Bannerek
-- **Készlethiányos termék esetén:**
-  - Világossárga hátterű (`#FFFCE9`), sárga keretes információs kártya figyelmeztető háromszög ikonnal.
-  - Cím: *"Készlethiány információk"*.
-  - Részletek: Hiány kezdetének dátuma, a hiány várható megszűnésének becsült ideje, a hiány hivatalos oka (pl. *"Gyártási kapacitáshiány"*), valamint szakmai pótlási javaslat (pl. *"Helyettesíthető azonos hatóanyagú készítménnyel"*).
-- **Megszűnt készítmény esetén:**
-  - Világospiros hátterű (`#FEEAED`), piros keretes figyelmeztető doboz.
-  - Cím: *"A gyógyszer forgalomból kivonva / Megszűnt"*.
-  - Részletek: A forgalomból való kivonás hatósági dátuma és szakmai tájékoztatás.
+##### 4.2.2.2. Státusz Figyelmeztető Bannerek
+- **Készlethiány esetén:** Sárga keretes doboz felkiáltójellel. Bemutatja a hiány kezdetét, becsült végét, a hivatalos okot és a szakmai pótlási javaslatot.
+- **Megszűnt készítmény esetén:** Piros keretes figyelmeztető doboz a forgalomból való kivonás dátumával és hatósági tájékoztatással.
 
-##### 4.2.2.3. Hálózati és Helyi Készletstátuszok (BENU Gyógyszertárak és Közeli Gyógyszertár)
+##### 4.2.2.3. Hálózati és Helyi Készletstátuszok (A 4 Készletszint)
+A készletinformációk két külön blokkban jelennek meg:
 
-A gyógyszer adatlapján a készletelérhetőség két jól elkülönülő szakaszban jelenik meg: a teljes országos hálózati elérhetőség (**"BENU GYÓGYSZERTÁRAK"**) és a felhasználó által kiválasztott preferált patika állapota (**"KÖZELI GYÓGYSZERTÁR"**).
-
-###### A) A Négy Készletstátusz és Vizuális Jelvényeik
-A portál négyféle készletstátuszt különböztet meg a nagykereskedelmi és a helyi patikai raktárkészlet együttes vizsgálata alapján:
-
-1. **Készleten:**
-   - **Üzleti Jelentés:** A készítmény a gyógyszertárban fizikai raktárkészleten van, és a nagykereskedelmi raktárból is folyamatosan elérhető/utánpótolható.
-   - **Vizuális Megjelenés:** Világoszöld háttér (`#E8F8E2`), sötétzöld szöveg (`#317907`), teli körben fehér pipa ikon.
-   - **Felhasználói Előny:** A termék azonnal átvehető a gyógyszertárban.
-
-2. **Korlátozottan:**
-   - **Üzleti Jelentés:** A készítmény országos termékhiányos vagy megszűnt termék (a nagykereskedelemből már nem rendelhető), de a gyógyszertárban még fellelhető maradék raktárkészlet.
-   - **Vizuális Megjelenés:** Melegsárga háttér (`#FFF5B8`), sötét olíva/arany szöveg (`#7A6C21`), teli körben fehér pipa ikon.
-   - **Felhasználói Előny:** Figyelmezteti az orvost és a beteget, hogy a készlet véges, a recept felírása előtt érdemes a patikával egyeztetni, mert utánpótlás nem garantált.
-
-3. **Rendelésre:**
-   - **Üzleti Jelentés:** A termék a nagykereskedelemben elérhető, azonban a vizsgált gyógyszertárban pillanatnyilag nincs fizikai polckészleten, de rendelésre 1-2 munkanapon belül beszerezhető.
-   - **Vizuális Megjelenés:** Halványsárga háttér (`#FFF7C7`), aranybarna szöveg (`#7A6C21`), homokóra ikon.
-   - **Szöveges Kiegészítés:** A patika vagy darabszám után közvetlenül megjelenik a *" (1-2 munkanap)"* tájékoztató megjegyzés.
-   - **Felhasználói Előny:** Az orvos és a beteg pontosan tudja, hogy a gyógyszer nem azonnal, hanem 1-2 munkanap múlva vehető át.
-
-4. **Nem elérhető:**
-   - **Üzleti Jelentés:** A termék a nagykereskedelemben nincs raktáron (pl. megszűnt vagy országos hiánycikk), és a gyógyszertárban sincs belőle készlet, így jelenleg egyáltalán nem szerezhető be.
-   - **Vizuális Megjelenés:** Világosszürke háttér (`#F2F4F7`), palaszürke szöveg (`#62788F`), teli körben fehér mínusz ikon.
-   - **Felhasználói Előny:** Egyértelművé teszi, hogy az adott készítmény nem elérhető, és szükség van helyettesítő készítmény választására (amely a kártya alatti helyettesítő táblázatban közvetlenül megtekinthető).
-
-###### B) Hálózati Összesítés (BENU GYÓGYSZERTÁRAK)
-A hálózati blokk a termék alapvető nagykereskedelmi státusza szerint sorolja fel a gyógyszertárak megoszlását:
-- **Normál forgalomban lévő (elérhető) gyógyszer esetén:**
-  - `[Készleten]` **X db BENU Gyógyszertárban** (kattintható hivatkozás, amely a gyógyszertár-keresőbe vezet).
-  - `[Rendelésre]` **Y db BENU Gyógyszertárban (1-2 munkanap)** (kattintható hivatkozás).
-- **Készlethiányos vagy megszűnt gyógyszer esetén:**
-  - Ha van még patika elfekvő készlettel: `[Korlátozottan]` **X db BENU Gyógyszertárban** (kattintható hivatkozás).
-  - A készlettel nem rendelkező patikákra: `[Nem elérhető]` **Z gyógyszertárban** (figyelmeztető tájékoztató sor).
-
-###### C) Helyi Elérhetőség (KÖZELI GYÓGYSZERTÁR)
-- **Beállított közeli patika esetén:**
-  - Megjelenik a releváns státuszjelvény (`Készleten`, `Korlátozottan`, `Rendelésre` vagy `Nem elérhető`).
-  - A patika teljes neve kattintható hivatkozásként jelenik meg.
-  - **Közvetlen részletmegtekintés:** A patika nevére kattintva a felületen azonnal felugrik a **Gyógyszertár Részletek Modális Ablak**, amely bemutatja a heti nyitvatartást, címet, telefonszámot és e-mail címet anélkül, hogy el kellene hagyni a gyógyszer adatlapját.
-  - *"Rendelésre"* státusz esetén a patika neve mellett megjelenik a *" (1-2 munkanap)"* szöveges jelzés.
-- **Ha nincs beállítva közeli gyógyszertár:**
-  - Megjelenik a *"Nincs beállítva közeli gyógyszertár"* tájékoztatás egy *"Gyógyszertár kiválasztása"* hivatkozással, amellyel a felhasználó gyorsan kijelölheti az orvosi rendelőjéhez legközelebbi preferált patikát.
+1. **Országos Hálózati Készlet (BENU GYÓGYSZERTÁRAK):**
+   - Normál gyógyszer esetén:
+     - `[Készleten]` **X db BENU Gyógyszertárban** (kattintható link a patikakeresőbe).
+     - `[Rendelésre]` **Y db BENU Gyógyszertárban (1-2 munkanap)** (kattintható link).
+   - Hiánycikk esetén:
+     - Ha van még elfekvő készlet: `[Korlátozottan]` **X db BENU Gyógyszertárban**.
+     - Egyéb patikákra: `[Nem elérhető]` **Z gyógyszertárban**.
+2. **Helyi Készlet (KÖZELI GYÓGYSZERTÁR):**
+   - Ha van beállított közeli patika:
+     - Megjeleníti a megfelelő színkódolt jelvényt (`Készleten`, `Korlátozottan`, `Rendelésre (1-2 munkanap)`, `Nem elérhető`).
+     - A patika neve kék aláhúzott hivatkozásként jelenik meg.
+     - **Azonnali részletmegtekintés:** A patika nevére kattintva helyben felugrik a **Gyógyszertár Részletek Modális Ablak** a nyitvatartással és elérhetőségekkel anélkül, hogy el kellene hagyni a gyógyszer adatlapját!
+   - Ha nincs beállítva patika:
+     - *"Nincs beállítva közeli gyógyszertár"* felirat és *"Gyógyszertár kiválasztása"* gyorslink.
 
 ##### 4.2.2.4. Részletes Tulajdonságok és Árinformációk Kártya
-Három oszlopos, világosszürke hátterű kártya a készítmény összes fontos szakmai és gazdasági paraméterével:
-- **Törzsadatok:**
-  - **Gyártó:** A forgalomba hozatali engedély jogosultja (pl. *"Sanofi-Aventis Zrt."*).
-  - **Kiszerelés:** A gyógyszer pontos csomagolása és egysége (pl. *"20x filmtabletta buborékcsomagolásban"*).
-  - **Támogatási kategória:** Normatív, kiemelt vagy támogatás nélküli besorolás.
-  - **Ekvivalencia:** Helyettesíthetőségi besorolás (pl. *"Azonos INN ekvivalens"*).
-  - **Törzskönyvi szám (TK):** Hivatalos hatósági azonosító (pl. `"OGYI-T-8898/01"`).
-  - **Hatóanyag (INN):** A készítmény nemzetközi szabadneve (pl. `"metamizol-nátrium"`). Kattintásra a gyógyszerlistára navigál az azonos hatóanyagú termékekhez.
-- **Kiemelt Árblokkok:**
-  - **Publikus Bruttó Fogyasztói Ár:** Feltűnő, bordó színnel (`#B1174E`) kiemelt összeg (pl. `2 490 Ft`).
-  - **Becsült Térítési Díj:** Sötétkék színnel (`#002664`) kiemelt betegtérítési díj támogatott készítményeknél.
+Három oszlopos áttekintő kártya:
+- Törzsadatok: Gyártó, Kiszerelés, Támogatási kategória, Ekvivalencia, TK-szám, Hatóanyag (kattintható INN).
+- Árak: Bordó színnel kiemelt **Bruttó fogyasztói ár** (pl. `2 490 Ft`) és sötétkékkel kiemelt **Becsült térítési díj** támogatott termékeknél.
 
-##### 4.2.2.5. Státusz Történet (Előzmények Kártya)
-- Időrendi táblázat, amely bemutatja a gyógyszer korábbi készlet- és piaci státuszváltozásait.
-- Tartalma: Változás dátuma, korábbi státusz → új státusz.
-- A kártya alján látható az utolsó adatbázis-szinkronizáció pontos időbélyege.
+##### 4.2.2.5. Helyettesítő Készítmények (Substitutes Kártya)
+- Azonos hatóanyagú (INN) vagy terápiásan ekvivalens gyógyszerek táblázata.
+- Megjeleníti a helyettesítő termék nevét, kiszerelését, árát, elérhetőségét a közeli patikában, közvetlen kedvenc/értesítés gombokat és átnavigálási lehetőséget az adott helyettesítő adatlapjára.
 
-##### 4.2.2.6. Helyettesítő Készítmények (Substitutes Kártya)
-- Azonos hatóanyagú (INN) vagy terápiásan ekvivalens készítmények táblázata.
-- **Megjelenített adatok soronként:** Terméknév, Gyártó, Kiszerelés, Elérhetőség a közeli patikában (zöld badge vagy hiányjelzés), valamint közvetlen kedvenc/értesítés akciógombok és hivatkozás az adott helyettesítő termék adatlapjára.
+##### 4.2.2.6. Státusz Történet (Előzmények Kártya)
+- Időrendi lista a gyógyszer korábbi készlet- és piaci státuszváltozásairól (dátum, régi státusz -> új státusz).
+- A blokk alján látható az utolsó adatbázis-szinkronizáció pontos időbélyege.
+
+#### 4.2.3. Hibakezelés a Gyógyszer Modulban
+- **Nincs találat a szűrésre:** Ha a felhasználó által megadott keresési és szűrési feltételeknek egyetlen gyógyszer sem felel meg, a táblázatban megjelenik az *"A megadott szűrési feltételekkel nem található gyógyszer"* üzenet, valamint egy *"Szűrők törlése"* gomb, amely alaphelyzetbe állítja a beviteli mezőket.
+- **Nem létező TK-szám az adatlapon:** Ha az URL-ben megadott törzskönyvi szám nem található a nyilvántartásban, a felület figyelmeztető hibaüzenetet jelenít meg (*"A keresett gyógyszer nem található"*), és felkínálja a visszatérést a gyógyszerlistára.
+
+#### 4.2.4. Elfogadási Kritériumok (Acceptance Criteria)
+- **AC-4.2.1:** A táblázat oszlopfejlécei az egérrel áthúzhatók (Drag & Drop), és az új sorrend a táblázat újratöltésekor vagy lapozáskor sem esik szét.
+- **AC-4.2.2:** A jobb szélső "Műveletek" oszlop vízszintes görgetéskor mindvégig látható marad a monitor jobb szélén rögzített módon.
+- **AC-4.2.3:** A gyógyszer adatlapon a "Közeli gyógyszertár" nevére kattintva azonnal felugrik a Gyógyszertár Részletek modális ablak anélkül, hogy a böngésző elnavigálna a gyógyszer oldaláról.
+- **AC-4.2.4:** Készlethiányos gyógyszer esetén a hiány oka, kezdete és a helyettesítő javaslat jól láthatóan megjelenik a sárga figyelmeztető bannerben.
 
 ---
 
-### 4.3. Gyógyszertár Kereső
+### 4.3. Gyógyszertár Kereső és Térkép
 
-#### 4.3.1. Gyógyszertárak Oldal
-
-Interaktív térképes és szinkronizált listás kereső felület a legközelebbi BENU gyógyszertárak megtalálására, nyitvatartási idejük ellenőrzésére és a preferált közeli patika kijelölésére.
+A rendszer interaktív térképes és szinkronizált listás felülete a BENU gyógyszertárak készletének, nyitvatartásának és elhelyezkedésének áttekintésére.
 
 **Útvonal:** [https://bvo.uneb.hu/gyogyszertarak](https://bvo.uneb.hu/gyogyszertarak)
 
-##### 4.3.1.1. Fejléc Alatti Kereső- és Szűrősáv (SubHeader)
-- **Bal oldali fejléc:** Hivatalos zöld BENU kereszt embléma és *"Gyógyszertárak"* megnevezés.
-- **Keresőmező:**
-  - **Típus:** Egysoros keresőmező jobb oldali nagyító ikonnal.
-  - **Megadható adatok:** Patika neve, utca/házszám, város vagy település neve.
-  - **Példák:** `"BENU"`, `"1052 Budapest"`, `"Görgey Artúr utca"`, `"Szeged"`.
-  - **Működés:** Gépelés közben valós időben szűri a listát és a térképen látható markereket.
-- **Nyitvatartási Szűrőgombok (Filter Pills):**
-  - **Gombok:** `"Most nyitva"` (óra ikonnal), `"Hétvégén nyitva"` (naptár ikonnal), `"0-24 órában nyitva"` (épület ikonnal).
-  - **Megjelenés:** Lekerekített kapszula formájú gombok, amelyek aktív állapotban sötétkék kiemelést kapnak.
-  - **Működés:** Azonnal kizárják a feltételeknek meg nem felelő patikákat a listából és a térképről.
-- **"Szűrés törlése" Funkció:**
-  - Kék aláhúzott szöveges hivatkozás, amely akkor válik láthatóvá, ha a felhasználó keresőszöveget írt be vagy szűrőgombot aktivált.
-  - Kattintásra egy lépésben törli a szabadszöveges keresést és kikapcsolja az összes aktív szűrőt.
-- **Mobil nézetváltó:**
-  - Kis képernyőméret esetén egy kapcsoló jelenik meg (`Lista` / `Térkép`), amellyel a felhasználó válthat a függőleges kártyalista és a térkép között.
+#### 4.3.1. Fejléc Alatti Kereső- és Szűrősáv (SubHeader)
+1. **Keresőmező:**
+   - Egysoros keresőmező jobb oldali nagyító ikonnal.
+   - Gépelhető: Patika neve, település, utca, irányítószám (pl. `"1052"`, `"Szeged"`, `"Görgey"`).
+   - Valós időben szűri a kártyalistát és a térképen látható markereket.
+2. **Nyitvatartási Szűrőgombok (Filter Pills):**
+   - Kapszula gombok: `"Most nyitva"` (óra ikon), `"Hétvégén nyitva"` (naptár ikon), `"0-24 órában nyitva"` (épület ikon).
+   - Bekapcsoláskor azonnal kizárják a feltételnek meg nem felelő patikákat.
+3. **"Szűrés törlése" Link:**
+   - Kék aláhúzott szöveg, amely csak akkor jelenik meg, ha aktív szűrő vagy beírt keresőszöveg van érvényben. Egy kattintással töröl minden szűrőt.
+4. **Mobil Nézetváltó:**
+   - Mobilon megjelenő kapcsoló gomb (`Lista` / `Térkép`), amellyel a felhasználó válthat a térkép és a függőleges kártyalista között.
 
-##### 4.3.1.2. Helyzet- és Preferenciameghatározó Értesítő Panelek (Oldalsáv Teteje)
-A bal oldali listaoszlop tetején két figyelemfelkeltő információs panel segíti a gyors eligazodást:
-1. **"Az Ön tartózkodási helye" Panel:**
-   - **Megjelenés:** Világoskék hátterű kártya célkereszt ikonnal.
-   - **Tartalom:** Kiírja a felhasználó aktuálisan beállított vagy észlelt tartózkodási címét (alapértelmezett referencia: *"Budapest, Soroksári út 32., 1095"*).
-   - **"Aktuális hely frissítése" gomb:** Kattintásra a rendszer engedélyt kér a böngésző GPS/helymeghatározó szolgáltatásától, rögzíti a valós koordinátákat, a térképet az új pozícióra fókuszálja, és újraszámolja a patikák távolságát.
-2. **"Válasszon közeli gyógyszertárat" / "Az Ön közeli gyógyszertára:" Panel:**
-   - **Megjelenés:** Világoszöld hátterű kártya szív/patika szimbólummal.
-   - **Működés:**
-     - *Ha nincs kiválasztva közeli patika:* A panel címe *"Válasszon közeli gyógyszertárat"*, és alatta a *"Válasszon a listából közeli gyógyszertárat, hogy láthassa a készletét!"* tájékoztató szöveg látható.
-     - *Ha ki van választva közeli gyógyszertár:* A panel címe automatikusan átvált az *"Az Ön közeli gyógyszertára:"* feliratra, és alatta zöld színnel, aláhúzva megjelenik a kiválasztott gyógyszertár neve. A patikanévre kattintva a térkép közvetlenül az adott gyógyszertárra fókuszál és ráközelít (zoom).
+#### 4.3.2. Helyzet- és Preferenciameghatározó Panelek
+A lista tetején két kiemelt információs kártya segíti a tájékozódást:
+1. **"Az Ön tartózkodási helye" Panel (Világoskék kártya):**
+   - Kiírja a felhasználó észlelt vagy beállított címét (alapértelmezett: *"Budapest, Soroksári út 32., 1095"*).
+   - **"Aktuális hely frissítése" gomb:** Kattintásra a rendszer engedélyt kér a böngésző GPS helymeghatározásától, újraszámolja a patikák távolságát légvonalban, és a térképet a felhasználó aktuális pozíciójára állítja.
+2. **"Válasszon közeli gyógyszertárat" / "Az Ön közeli gyógyszertára:" Panel (Világoszöld kártya):**
+   - *Ha nincs kijelölt patika:* *"Válasszon a listából közeli gyógyszertárat, hogy láthassa a készletét!"* tájékoztató szöveg.
+   - *Ha van kijelölt patika:* Kiírja a választott patika nevét zöld aláhúzott szövegként. Rákattintva a térkép azonnal ráfókuszál a gyógyszertárra és ráközelít (zoom).
 
-##### 4.3.1.3. Patikalista és Találati Összesítő
-- **Találati számláló:** Kiírja a szűrésnek megfelelő patikák pontos számát (pl. *"10 BENU gyógyszertárat találtunk"*).
-- **Térképi szinkronizáció:**
-  - Amennyiben a felhasználó belenagyít a térképbe, a számláló jelzi a térképi kivágatban látható patikák számát is, valamint megjelenik a `[Mutasd az összest]` opció a térkép nézetének alaphelyzetbe állításához.
-- **Gyógyszertár Kártya Felépítése (Pharmacy Details Master):**
-  - **Patika Neve:** Kék, aláhúzott kiemelt szöveg. Rákattintva megnyílik a részletes heti adatlap modal.
-  - **Cím és Település:** Vastag betűs pontos utca, házszám, irányítószám és városnév.
-  - **Becsült Távolság:** Az észlelt vagy megadott tartózkodási helytől számított légvonalbeli távolság tizedes pontossággal (pl. `"~2.4 km"` vagy `"~95.9 km"`).
-  - **Napi Nyitvatartás és Státusz:** Az adott nap megnevezése (pl. *"Kedd:"*), a napi idősáv (pl. *"08:00 - 18:00"*), óra ikon és színes szöveges státuszjelzés:
+#### 4.3.3. Patikalista és Részletes Kártyák (Pharmacy Cards)
+- **Találati számláló:** Kiírja a találatok pontos számát (pl. *"10 BENU gyógyszertárat találtunk"*). Térképi nagyítás esetén jelzi a látható kivágat patikáit és felkínálja a `[Mutasd az összest]` visszaállítást.
+- **Patika Kártya Felépítése:**
+  - **Patika neve:** Kék aláhúzott link, amely megnyitja a részletes heti adatlap modált.
+  - **Pontos cím:** Irányítószám, város, utca, házszám.
+  - **Becsült távolság:** Tizedes pontosságú légvonalbeli távolság az észlelt pozíciótól (pl. `"~2.4 km"`).
+  - **Napi nyitvatartás és státuszjelvény:**
     - Zöld: *"Nyitva"*
     - Sárga: *"Hamarosan zár"* vagy *"Hamarosan nyit"*
     - Piros: *"Zárva"*
-  - **"Többit mutasd" Hivatkozás:** Közvetlen gomb a heti nyitvatartási rend megnyitásához.
-  - **Elválasztó vonal.**
+  - **"Többit mutasd" Link:** Közvetlen gomb a heti nyitvatartás megnyitásához.
   - **"Közelinek jelölöm" / "Közeli gyógyszertár" Akciógomb:**
-    - *Ha nincs kijelölve:* Világoszöld ovális gomb plusz jellel és *"Közelinek jelölöm"* felirattal.
-    - *Ha ki van jelölve:* Teli zöld ovális gomb fehér pipa jellel és *"Közeli gyógyszertár"* felirattal.
-    - Kattintásra azonnal beállítja vagy feloldja a preferált patikát a portál teljes felületén.
-  - **Kiválasztott kártya kiemelése:** Amikor a felhasználó rákattint egy kártyára, az határozott zöld keretet (`border-2`) kap, jelezve az aktív kiválasztást.
+    - Ha nincs kiválasztva: Világoszöld gomb plusz jellel.
+    - Ha ki van választva: Teli zöld gomb fehér pipával.
+    - Kattintásra azonnal beállítja vagy feloldja a preferált patika állapotot az egész portálon.
+  - **Kártya kiválasztása:** Kattintásra határozott zöld keretet kap, és a térképen is aktívvá válik az adott marker.
 
-##### 4.3.1.4. Interaktív Térkép és Egyedi BENU Jelölők (Pins)
-- **Térkép:** Teljes képernyős OpenStreetMap réteg, zoom- és mozgatási lehetőséggel.
-- **Egyedi BENU Jelölők:**
-  - Csepp alakú, fehér kör közepén BENU zöld kereszttel ellátott jelölő.
-  - A kiválasztott patika kiemelt színű aktív jelölőként jelenik meg.
-- **Térképi Lebegő Felugró Ablak (Master Popup):**
-  - Bármely jelölőre kattintva a térképen egy elegáns, lekerekített sarkú lebegő információs ablak jelenik meg, lefelé mutató nyíllal.
-  - Az ablak tartalmazza a patika nevét, címét, távolságát, nyitvatartását, a *"Többit mutasd"* hivatkozást, valamint a *"Közelinek jelölöm"* akciógombot.
+#### 4.3.4. Interaktív Térkép és Lebegő Információs Ablak (Master Popup)
+- Teljes felületű OpenStreetMap térkép nagyítási és mozgatási lehetőséggel.
+- **Egyedi BENU Jelölők (Pins):** Csepp alakú ikon fehér kör közepén hivatalos BENU zöld kereszttel. A kijelölt patika kiemelt színű aktív jelölőként látható.
+- **Lebegő felugró ablak:** A jelölőre kattintva elegáns kártya nyílik lefelé mutató nyíllal: patikanév, cím, távolság, nyitvatartás, "Közelinek jelölöm" akciógomb és adatlap link.
 
-##### 4.3.1.5. Gyógyszertár Részletek Modal és Mélylinkelés
-- **Megnyitás:** A kártyán lévő patikanévre, a *"Többit mutasd"* gombra vagy a térképi felugró ablakra kattintva érhető el.
-- **Mélylinkelés:** Közvetlen URL hivatkozással (pl. `/gyogyszertarak?id=BF133`) érkezve a rendszer a térképen azonnal az adott patikára navigál és automatikusan megnyitja a részletes modált.
-- **Tartalom:**
-  - Patika hivatalos neve, kódja és aktuális nyitvatartási státusza.
-  - Kattintható telefonszám (hívásindítás) és e-mail cím (levelezőprogram megnyitása).
-  - Hétfőtől Vasárnapig tartó részletes heti nyitvatartási táblázat, az aktuális nap kiemelésével.
-  - Akciógombok a közeli jelöléshez és a térképi megjelenítéshez.
+#### 4.3.5. Gyógyszertár Részletek Modal és Mélylinkelés
+- **Mélylinkelés URL támogatása:** Közvetlen címmel (pl. `https://bvo.uneb.hu/gyogyszertarak?id=BF133`) megnyitva a felület azonnal az adott gyógyszertárra navigálja a térképet, és automatikusan megnyitja a heti részletes adatlap modált.
+- **Modal tartalma:** Patika hivatalos neve, kódja, státusza, kattintható telefonszám (`tel:` hívásindításhoz), kattintható e-mail cím (`mailto:` levélíráshoz), Hétfőtől Vasárnapig tartó heti nyitvatartási táblázat az aktuális nap kiemelésével.
 
-#### 4.3.2. Gyógyszertári Készlet Nézet (Modális Nézet)
+#### 4.3.6. Gyógyszertári Készlet Nézet (Adatlap Modál)
+- A gyógyszer adatlapról a *"Megnézem hol"* gombokkal előhívható speciális modális nézet, amely kizárólag azokat a patikákat tünteti fel a térképen és a listában, ahol a vizsgált gyógyszer elérhető vagy rendelhető.
 
-- **Funkció:** A Gyógyszer adatlapról a *"Megnézem hol"* gombokkal megnyitható teljes képernyős modális ablak.
-- **Működés:** Kizárólag azokat a gyógyszertárakat jeleníti meg a térképen és a kísérő listában, ahol a kiválasztott gyógyszer raktáron van vagy rendelhető.
+#### 4.3.7. Hibakezelés a Gyógyszertár Modulban
+- **GPS helymeghatározás megtagadása:** Ha a felhasználó böngészőjében letiltja a helymeghatározást, a rendszer nem dob hibát, hanem diszkrét értesítést ad, és megtartja az alapértelmezett budapesti referencia-helyzetet.
+- **Nincs patika a megadott szűrésre:** A lista helyén megjelenik az *"A megadott feltételekkel nem található gyógyszertár"* üzenet és a szűrők egykattintásos törlésének gombja.
+
+#### 4.3.8. Elfogadási Kritériumok (Acceptance Criteria)
+- **AC-4.3.1:** A keresőmezőbe beírt településnévre (pl. "Szeged") a kártyalista és a térkép jelölői késlekedés nélkül kizárólag a szegedi patikákat jelenítik meg.
+- **AC-4.3.2:** A "Közelinek jelölöm" gombra kattintva a választott patika azonnal megjelenik a fejlécben és az Irányítópulton is újratöltés nélkül.
+- **AC-4.3.3:** Mélylinkkel érkezve (`/gyogyszertarak?id=BF133`) a térkép automatikusan a megadott patikára fókuszál, és a heti nyitvatartási modal felugrik.
 
 ---
 
-### 4.4. Képzési Program (NEM MVP!)
+### 4.4. Képzési Program *(Nem aktív felület)*
 
-A Képzési program modul egy teljesen különálló rendszer a portálon, külső LMS rendszerrel szükséges kommunikálnia. Jelenleg nem kell foglalkozni a modul fejlesztésével, viszont szükséges felmérni a szükség kapcsolódási információkat.
+> [!WARNING]
+> **Felületi Státusz: Nem aktív felület**  
+> Ez a modul és felület a jelenlegi éles prototípusban nem aktív (a navigációs fejlécből, a főoldali irányítópultról és a globális keresőből kivezetésre került, közvetlen menühivatkozás nem vezet rá).  
+> Az alábbi fejezet a korábbi prototípus-specifikáció szerinti működést, a kurzusadatokat és az LMS kapcsolódási logikát dokumentálja nyilvántartási és későbbi reaktiválhatósági céllal.
 
-#### 4.4.1. Képzések Főoldal
+**Útvonal:** `https://bvo.uneb.hu/kepzesek` *(Közvetlen eléréssel érhető el)*
 
-A szakmai és akkreditált képzések böngészőfelülete.
+#### 4.4.1. Működés és Képzés Lista Oldal
+1. **Kategória Szűrősáv:**
+   - Kapszula szűrők: `Összes` (alapértelmezett), `Akkreditált` (zöld címke), `Gyártói` (kék címke), `Eladásösztönző` (sárga címke).
+2. **Kurzuskártyák Tartalma:**
+   - Képzés címe, kategória címkéje, rövid szakmai összefoglaló, becsült időtartam (pl. `"45 perc"`), tartalomtípus ikon (Videó / PDF).
+   - Gombok a kártyán: *"Részletek"* (navigáció az adatlapra) és *"Érdekel"* (BENU LMS tájékoztató modál megnyitása).
+3. **BENU LMS Tájékoztató Modal:**
+   - Az *"Érdekel"* gombra kattintva felugró ablak bemutatja a képzési rendszert és átirányítási linket nyújt a külső BENU LMS tanulási felületre.
 
-**Útvonal:** [https://bvo.uneb.hu/kepzesek](https://bvo.uneb.hu/kepzesek)
+#### 4.4.2. Képzés Részletes Oldal
+**Útvonal:** `https://bvo.uneb.hu/kepzesek/[courseId]` (Példa: `/kepzesek/c1`)
+- **Bevezető Videó Placeholder:** Képzés fejléce lejátszás szimbólummal.
+- **Részletes Ismertető:** A képzés szakmai céljai és leírása.
+- **Modullista:**
+  - 1. modul: Bevezető előadás (videó ikon).
+  - 2. modul: Klinikai adatok (PDF segédanyag).
+  - 3. modul (Zárolt): Záróteszt és akkreditáció — felirat: *"A tartalom eléréséhez lépjen be a BENU LMS rendszerbe"*.
+- **Akkreditált Pontok Kártya:** Megszerezhető kreditpontok kiemelve (pl. `2 kreditpont`) és *"Pontszerzés"* gomb, amely az LMS-re irányít át.
 
-##### 4.4.1.1. Kategória Szűrő Fülek
-   - **Típus:** Horizontális fül-választó (Tabs).
-   - **Választható opciók:** `Összes`, `Akkreditált`, `Gyártói`, `Eladásösztönző`.
-   - **Alapértelmezett:** `Összes`.
-
-##### 4.4.1.2. Kurzuskártyák adatai
-   - Képzés címe, Kategória jelvény (`Akkreditált` - zöld, `Gyártói` - kék, `Eladásösztönző` - sárga), Rövid leírás, Tananyag becsült időtartama (pl. `"45 perc"`), Tartalomtípus ikon (Videó / PDF Dokumentum), `"Részletek"` gomb és `"Érdekel"` gomb. *(Kreditpont a kártyán NEM jelenik meg)*.
-
-##### 4.4.1.3. "Érdekel" Gomb és BENU LMS Tájékoztató Modal
-   - A kurzuskártyán lévő `"Érdekel"` gombra kattintva megnyílik a **BENU LMS bemutató modális ablak**.
-   - **Tartalom:** Tájékoztató leírás a BENU Képzési Programról, a továbbképzési rendszerről és a kreditpont-gyűjtésről.
-   - **Gombok:** `"Tovább a BENU LMS-re"` (külső hivatkozás a tanulási felületre) és `"Bezárás"`.
-
-#### 4.4.2. Képzés Részletes Oldal és BENU LMS Integráció
-
-**Útvonal:** `https://bvo.uneb.hu/kepzesek/[courseId]`  
-*(Példa: [https://bvo.uneb.hu/kepzesek/c1](https://bvo.uneb.hu/kepzesek/c1))*
-
-##### 4.4.2.1. Bevezető Videó Placeholder
-- Képzés fejléce lejátszás gombbal és kategória jelvénnyel.
-##### 4.4.2.2. Tanfolyam Részletei
-- Részletes szöveges ismertető a képzésről.
-##### 4.4.2.3. Tartalmi Elemek (Modullista)
-   - *Modul 1:* Bevezető előadás (Videó ikon, időtartam).
-   - *Modul 2:* Klinikai adatok és segédanyagok (PDF ikon, diaszám).
-   - *Modul 3 (Zárolt):* Záróteszt és Akkreditáció — Felirat: `"A tartalom eléréséhez lépjen be a BENU LMS rendszerbe"`.
-##### 4.4.2.4. Akkreditált Pontok Kártya
-- Megszerezhető kreditpontok kijelzése (pl. `2 kreditpont`) + `"Pontszerzés"` gomb (megnyitja az LMS Tájékoztató Modalt).
-##### 4.4.2.5. Hibaállapot és Érvénytelen Kurzuskezelés
-- Nem létező kurzusazonosító esetén `"Tanfolyam nem található"` üzenet és gomb a listára való visszalépéshez.
-##### 4.4.2.6. Üzleti Integráció a BENU LMS Rendszerrel
-- A tananyagok tényleges feldolgozása, a tesztkitöltés és a kreditpontok elismerése a külső BENU LMS rendszerben történik.
+#### 4.4.3. Bemenetek, Kimenetek és Hibakezelés
+- **Bemenet:** Kategória szűrő gombok kattintása, *"Érdekel"* vagy *"Részletek"* gomb választása.
+- **Kimenet:** Szűrt kurzuslista, modális tájékoztató ablak megnyitása, navigáció a kurzus adatlapjára.
+- **Nem létező kurzusazonosító:** Ha az URL-ben érvénytelen azonosító szerepel, a felület *"A képzés nem található"* hibaüzenetet ad és visszairányítást kínál a listára.
+- **Elfogadási kritérium (ha a felület aktívvá válik):**
+  - **AC-4.4.1:** A kurzuskártyák kategória szerinti szűrése pontosan és azonnal kiszűri a nem releváns képzéseket.
+  - **AC-4.4.2:** A zárolt akkreditációs modulra kattintva a felület tájékoztatást ad az LMS belépési kötelezettségről.
 
 ---
 
-### 4.5. Globális Keresés
+### 4.5. Globális Keresés (Asztali és Mobil Overlay)
 
-A navigációs fejlécbe épített rendszerszintű instant kereső, amely reszponzív elrendezéssel támogatja az asztali és a mobil felületeket egyaránt.
+A fejlécbe integrált, rendszerszintű intelligens keresőmotor a gyógyszerek és gyógyszertárak gyors eléréséhez.
 
-#### 4.5.1. Reszponzív Keresősáv és Mobil Overlay Felület
-- **Asztali nézet (≥768px / md):** Egysoros keresőmező kereső ikonnal a fejlécben, amely alatt gépeléskor élő legördülő találati kártya (`w-[400px]`) jelenik meg.
-- **Mobil nézet (<768px / md):** A fejlécben egy jól érinthető **kereső ikon gomb** (nagyító ikon) jelenik meg. A gombra koppintva egy **teljes képernyős Mobil Kereső Overlay (Modális felület)** nyílik meg kiterjesztett rétegen (`fixed inset-0 z-[100]`), letiltva a háttér oldal görgetését.
-- **Mobil Kereső Overlay felületi elemei:**
-  - **Vissza gomb (`arrow_back`):** Az overlay azonnali bezárása és visszatérés az eredeti oldalra.
-  - **Kereső beviteli mező:** Lekerekített keresősáv automatikus fókusszal (`autoFocus`), hogy a felnyíló virtuális billentyűzetről azonnal lehessen gépelni.
-  - **Törlés gomb (X):** Kifejezés beírása esetén megjelenő gyors törlés ikon a mező kiürítésére.
-  - **Kategória fülek:** Vízszintesen kényelmesen választható szűrő gombok (`Minden`, `Gyógyszerek`, `Patikák`, `Képzések`).
+#### 4.5.1. Keresési Felületek
+- **Asztali nézet (≥768px):** A fejléc közepén lévő beviteli mező alatt gépeléskor azonnal legördül a 400px széles lebegő találati kártya.
+- **Mobil nézet (<768px):** A nagyító ikonra kattintva **teljes képernyős Mobil Kereső Overlay** nyílik meg (`fixed inset-0 z-[100]`), letiltva a háttér görgetését. Tartalma: visszalépés gomb, automatikusan fókuszált keresőmező törlés (X) gombbal, és vízszintesen görgethető kategória fülek (`Minden`, `Gyógyszerek`, `Patikák`).
 
-#### 4.5.2. Keresési Tartomány és Kategóriák
-- *Gyógyszerek:* Gyógyszer kereskedelmi neve és Hatóanyaga (INN). *(TK-szám alapján a globális kereső nem keres).*
-- *Gyógyszertárak:* Patika neve, Település és Cím.
-- *Képzések:* BENU Képzési Program tanfolyamainak címe, rövid leírása és kategóriája (`Gyártói`, `Eladásösztönző`, `Akkreditált`).
-
-#### 4.5.3. Működés, Élő Találati Panel és Mélylinkelés
-- Már **1 karakter** beírása után megnyílik az élő találati panel.
-- **Kategória fülek:** `Minden`, `Gyógyszerek`, `Patikák`, `Képzések`.
-- **Találati korlátok:** Kategóriánként max. 5 találat jelenik meg, a `Minden` fülön összesen max. 10 találat.
+#### 4.5.2. Keresési Logika és Találatok
+- Már **1 beírt karakter** után azonnal megnyílik a találati felület.
+- **Keresési területek:**
+  - *Gyógyszerek:* Kereskedelmi név és Hatóanyag (INN).
+  - *Gyógyszertárak:* Név, Település, Utca és Cím.
+- **Kategória fülek:** `Minden`, `Gyógyszerek`, `Patikák`.
+- **Megjelenítési korlátok:** Kategóriánként legfeljebb 5 tétel jelenik meg, a Minden fülön összesen legfeljebb 10 tétel.
 - **Navigáció találatra kattintva:**
-  - Gyógyszer találat → gyógyszer adatlapjára navigál (`/gyogyszerek/adatlap?tk=[tkSzam]`).
-  - Gyógyszertár találat → a gyógyszertár keresőre navigál a kiválasztott patika mélylinkjével, fókuszált térképpel és megnyitott adatlapjával (`/gyogyszertarak?id=[pharmacyId]`).
-  - Képzés találat → a BENU Képzési Program adott tanfolyamának adatlapjára navigál (`/kepzesek/[courseId]`).
-  - Találatra kattintáskor a mobil overlay automatikusan bezárul és helyreáll a háttér görgetése.
-- **Lábléc:** `"Összes találat megtekintése"` gomb.
+  - Gyógyszerre kattintva -> az adott gyógyszer adatlapjára visz (`/gyogyszerek/adatlap?tk=...`).
+  - Patikára kattintva -> a patikakeresőbe visz a térkép fókuszálásával és az adatlap megnyitásával (`/gyogyszertarak?id=...`).
+  - Kattintáskor a mobil overlay automatikusan bezárul és a háttér görgetése helyreáll.
+
+#### 4.5.3. Elfogadási Kritériumok
+- **AC-4.5.1:** Gyógyszernév és hatóanyag alapján a releváns készítmények azonnal megjelennek a találati panelen.
+- **AC-4.5.2:** Mobilon a kereső megnyitásakor a billentyűzet automatikusan felugrik és a háttér nem görgethető el.
 
 ---
 
-### 4.6. Hitelesítés és Jogosultságok
+### 4.6. Hitelesítés, Jogosultságok és Kapcsolatfelvétel
 
-#### 4.6.1. Bejelentkezés Oldal
-
-A portál hivatalos, orvosi szakmai bejelentkezési felülete, amely a modern, letisztult BENU Vény arculatot követi.
+A portál hivatalos, orvosi szakmai azonosítási és beléptetési rendszere.
 
 **Útvonal:** [https://bvo.uneb.hu/login](https://bvo.uneb.hu/login)
 
-##### 4.6.1.1. Fejléc és Arculati Elemek
-- **BENU Vény Logó:** A képernyő felső részén elhelyezett hivatalos arculati embléma.
-- **"Orvosoknak" Alcím:** A logó alatt kiemelten látható, 22px-es sötétkék felirat, amely egyértelműen jelzi a felület zárt szakmai jellegét.
+#### 4.6.1. Bejelentkezési Módok (3 Fül)
+A képernyő közepén lévő 479px széles, letisztult kártyán három belépési mód választható:
+1. **Jelszavas Bejelentkezés (Alapértelmezett):**
+   - 56px magas e-mail cím mező (`demo@example.com`).
+   - 56px magas maszkolt jelszómező (`vény123`).
+   - 56px magas sötétkék *"Bejelentkezés"* akciógomb jobbra mutató nyíllal.
+   - *"Elfelejtett jelszó"* hivatkozás, amely a `/forgot-password` oldalra vezet.
+2. **Passkey Biometrikus Belépés:**
+   - 1-kattintásos belépés Touch ID, Face ID vagy Windows Hello azonosítással jelszó gépelése nélkül.
+3. **Egyszeri E-mail Kódos Belépés (Magic Code):**
+   - Jelszó nélküli belépési kérelem: az e-mail cím megadása után a rendszer 6-jegyű ellenőrző kódot generál és a 2FA felületre navigál.
 
-##### 4.6.1.2. Bejelentkezési Kártya Felépítése
-A képernyő közepén elhelyezkedő 479px széles, világosszürke hátterű (`#F9F9FB`), lekerekített sarkú kártya:
-- **Kártya Címe:** *"Bejelentkezés"* (22px méretű sötétkék betűkkel).
-- **Bejelentkezési Módok Fülei (Tabs):**
-  - Három választható fül: `Jelszó` (alapértelmezett), `Passkey` (biometrikus belépés), `E-mail Kód` (egyszeri kód jelszó nélkül).
-  - Az aktív fül sötétkék háttérrel és fehér szöveggel van kiemelve.
-
-##### 4.6.1.3. Jelszavas Bejelentkezés (Alapértelmezett Mód)
-- **E-mail cím beviteli mező:**
-  - 56px magasságú, fehér hátterű, finom szürke kerettel (`#D8D9E0`) ellátott egysoros mező.
-  - Helykitöltő szöveg: *"E-mail cím"*.
-  - Megadható adat: az orvos regisztrált szakmai e-mail címe (pl. `demo@example.com`).
-- **Jelszó beviteli mező:**
-  - 56px magasságú, fehér hátterű, szürke keretes maszkolt jelszómező.
-  - Helykitöltő szöveg: *"Jelszó"*.
-- **"Bejelentkezés" Gomb:**
-  - 56px magasságú, sötétkék (`#002664`) háttérszínű, fehér félkövér feliratú gomb jobbra mutató nyíl ikonnal.
-  - Beküldéskor ellenőrzi az adatokat; helyes jelszó esetén (ha az eszköz megbízható) közvetlenül az Irányítópultra navigál, vagy kétfaktoros ellenőrzést kér.
-- **"Elfelejtett jelszó" Hivatkozás:**
-  - A gomb alatt elhelyezkedő sötétkék link, amely a jelszó-visszaállító oldalra (`/forgot-password`) navigál.
-
-##### 4.6.1.4. Passkey Biometrikus Belépés (1-kattintásos kényelmi funkció)
-- Lehetővé teszi az orvosok számára a belépést Touch ID, Face ID vagy Windows Hello segítségével.
-- Ujjlenyomat ikonnal és opcionális e-mail azonosítóval ellátott felület, 56px magas sötétkék *"Belépés Passkey-vel"* akciógombbal.
-
-##### 4.6.1.5. Egyszeri E-mail Kódos Belépés (Magic Code)
-- Jelszó nélküli belépési lehetőség: az orvos megadja az e-mail címét, a rendszer kiküld egy 6-jegyű egyszeri érvényesítő kódot, és átirányítja a felhasználót a hitelesítési képernyőre.
-
-#### 4.6.2. Kétfaktoros Azonosítás (2FA) Igazolási Felület
-
-Jelszavas belépés vagy e-mail kód kérése után (amennyiben a 2FA be van kapcsolva és az eszköz még nem megbízható) a bejelentkezési kártya átvált a kétfaktoros ellenőrzési állapotba:
-
-- **Biztonsági Információs Blokk:** Zöld/kék biztonsági pajzs ikon és tájékoztató szöveg a kód kiküldéséről a felhasználó e-mail címére.
-- **6-jegyű OTP kód mező:** 56px magas, nagyméretű, középre zárt, ritkított karaktertávolságú számszerű beviteli mező (pl. `123456`).
-- **"Megbízható eszköz megjegyzése (ne kérjen kódot 30 napig)" jelölőnégyzet:** Alapértelmezetten bepipálva. Megjelölése esetén a rendszer 30 napig nem kér újabb 2FA kódot az adott böngészőből való belépéskor.
-- **Akciógombok:**
-  - *"Vissza"* gomb: a belépési űrlaphoz való visszatéréshez.
-  - *"Kód igazolása"* gomb: 48px magas sötétkék akciógomb, amely sikeres ellenőrzés után az Irányítópultra lépteti be a felhasználót.
-- **Tesztelési Segédlet:** A prototípusban látható egy tesztelői emlékeztető a működő demó kódról (`123456`).
+#### 4.6.2. Kétfaktoros Azonosítás (2FA) Igazolási Képernyő
+Amennyiben a felhasználó fiókjában aktív a 2FA és az eszköz még nem megbízható:
+- Tájékoztató pajzs ikon és az ellenőrző kód kiküldésének visszaigazolása.
+- 56px magas, nagyméretű, középre zárt 6-jegyű OTP kód beviteli mező.
+- **"Megbízható eszköz megjegyzése (ne kérjen kódot 30 napig)" jelölőnégyzet:** Alapértelmezetten bepipálva. Megjelölése esetén a böngésző 30 napig mentesül az újabb kódkérés alól.
+- *"Kód igazolása"* sötétkék akciógomb, amely sikeres azonosítás után beléptet a Dashboardra.
+- *(A prototípus felületén tesztelői segédlet mutatja a működő demó kódot: `123456`).*
 
 #### 4.6.3. Elfelejtett Jelszó Oldal
-
 **Útvonal:** [https://bvo.uneb.hu/forgot-password](https://bvo.uneb.hu/forgot-password)
+- E-mail cím megadása után belépési kód igényelhető. A prototípus felületén tájékoztató doboz emlékeztet a működő demó jelszóra.
 
-- *E-mail cím mező:* Szabványos email mező.
-- *"Belépési kód küldése" gomb:* Kattintásra a felületen megjelenik a generált 6 jegyű belépési kód prototípus gépelési tájékoztatóval (`"Prototípus mód: ... itt láthatja a belépési kódot"`).
-- *Információs alert:* Tájékoztatja a tesztelőt, hogy a prototípusban a generált kóddal nem lehet továbbhaladni, a fix jelszót kell használni.
-- *Hivatkozások:* `"Vissza a bejelentkezéshez"` és `"Mégis emlékszem a jelszavamra"`.
+#### 4.6.4. Manuális Regisztrációs Igény / Kapcsolatfelvételi Űrlap
+A zárt szakmai jelleg miatt **nincs azonnali önkiszolgáló fiókregisztráció**:
+- Az új orvos vagy gyógyszerész a bejelentkezési oldalról elérhető kapcsolatfelvételi linken keresztül nyithatja meg a regisztrációs igény űrlapot.
+- **Kötelező adatok:** Teljes név, Szakmai e-mail, Telefonszám, Orvosi/Gyógyszerészi pecsétszám, Szakterület/Munkahely, valamint az adatkezelési szabályzat elfogadása.
+- **Folyamat:** Az űrlap beküldésekor a rendszer visszaigazolást ad az igény rögzítéséről. Az adminisztrátor a kamarai nyilvántartásban ellenőrzi a pecsétszámot, és az adminisztrációs felületen manuálisan hozza létre az új aktív fiókot.
 
-#### 4.6.4. Manuális Felhasználói Regisztráció és Kapcsolatfelvételi Űrlap
-
-A BENUvény Orvosi Portál zárt szakmai rendszer, amely kizárólag hitelesített orvosok, gyógyszerészek és egészségügyi szakemberek számára érhető el.
-
-- **Manuális regisztrációs folyamat:** A portálon **nincs közvetlen, azonnali önkiszolgáló felhasználói regisztráció**. A felhasználói fiókok létrehozása és aktiválása kizárólag kézzel, az adminisztrátor által történik.
-- **Kapcsolatfelvétel a bejelentkezési oldalról:**
-  - Az új szakmai felhasználó a bejelentkezési felületen (`/login`) elhelyezett kapcsolatfelvételi hivatkozáson / gombon keresztül érheti el a **Regisztrációs Igény / Kapcsolatfelvételi Űrlapot** (modális ablakban vagy dedikált aloldalon).
-  - **Űrlapon megadandó adatok:** Teljes név, Szakmai e-mail cím, Telefonszám, Orvosi/Gyógyszerészi pecsétszám (működési nyilvántartási szám), Szakterület/Munkahely, valamint tetszőleges kiegészítő megjegyzés/üzenet és az adatkezelési nyilatkozat elfogadása.
-  - **Visszajelzés a felhasználónak:** Az űrlap beküldésekor a felület egyértelmű tájékoztatást ad arról, hogy az igény rögzítésre került, és az adminisztrátor a szakmai jogosultság (pecsétszám) ellenőrzése után manuálisan felveszi a kapcsolatot a felhasználóval és létrehozza a fiókot.
-- **Adminisztrátori jóváhagyás és fiókrögzítés:** Az adminisztrátor a beküldött adatok alapján elvégzi a kamarai/hatósági nyilvántartási ellenőrzést, majd az [Adminisztráció -> Felhasználókezelés](#471-felhasználókezelés) felületen manuálisan rögzíti az új felhasználót, beállítja a jogosultságát (`User`), és eljuttatja számára a kezdeti belépési információkat.
-- **Jövőbeli tervek és önkiszolgáló regisztráció:** Későbbiekben elképzelhető, hogy a rendszer kiegészül egy önkiszolgáló, automatizált regisztrációs felülettel (pl. közvetlen szakmai adatbázis-verifikációval), de **jelenleg a rendszerben nem tervezünk ilyennel**, a regisztráció kizárólag a kapcsolatfelvételi űrlapon és kézi adminisztrátori rögzítésen keresztül működik.
-
-#### 4.6.5. Jogosultságkezelés és Munkamenet Biztonság
-- Szerepkörök: `Admin` (teljes hozzáférés az `/admin/*` útvonalakhoz) és `User` (szakmai felhasználó).
-- **Munkamenet biztonság:** Adminisztrátori fiók-felfüggesztés vagy munkamenet-lezárás (Force Logout) esetén a felhasználó a következő műveletnél azonnal kijelentkeztetésre kerül.
+#### 4.6.5. Hibakezelés és Biztonság
+- **Hibás jelszó vagy e-mail:** Piros figyelmeztető üzenet jelenik meg a beviteli mezők alatt (*"Érvénytelen e-mail cím vagy jelszó"*).
+- **Inaktív fiók:** Inaktív vagy felfüggesztett felhasználó (pl. `teszt@example.com`) belépési kísérletét a rendszer azonnal elutasítja: *"A fiók felfüggesztésre került. Kérjük, keresse az adminisztrátort."*
+- **AC-4.6.1:** Helyes bejelentkezési adatokkal a felhasználó közvetlenül a Dashboardra érkezik.
+- **AC-4.6.2:** A 30 napos megbízható eszköz pipálása esetén a következő belépéskor a rendszer nem kéri újra a kétfaktoros kódot.
 
 ---
 
 ### 4.7. Adminisztráció
 
-Kizárólag `Admin` szerepkörrel rendelkező felhasználók számára elérhető felület.
+Kizárólag `Admin` szerepkörű felhasználók számára engedélyezett felületcsoport.
 
 #### 4.7.1. Felhasználókezelés
-
 **Útvonal:** [https://bvo.uneb.hu/admin/users](https://bvo.uneb.hu/admin/users)
-
-##### 4.7.1.1. Felhasználó Lista Táblázat
-- **Táblázat oszlopai:** Név / E-mail cím, Szerepkör (`Admin` / `Orvos`), Fiók státusz (`Aktív` / `Inaktív`), Szakterületek (max 2 megjelenítve + `+N`), Műveleti menü (`⋮`).
-
-##### 4.7.1.2. Felhasználó Szerkesztő Modal Fülek (Alapadatok, Profil, Hírlevél)
-- **1. Alapadatok Fül (Modal):**
-  - *Teljes név:* Egysoros szövegmező. Kötelező.
-  - *Elsődleges e-mail cím:* Email mező. Kötelező, egyedi.
-  - *Szerepkör (Role):* Legördülő menü (`User` / `Admin`).
-  - *Fiók Státusz (Status):* Legördülő menü (`Active` / `Inactive`).
-- **2. Profil Fül (Modal):**
-  - *Másodlagos e-mail cím:* Email mező. Opcionális.
-  - *Szakterületek:* Kódlistás multi-select jelölőnégyzet szakterületekből.
-- **3. Hírlevél Fül (Modal):**
-  - Elsődleges és Másodlagos e-mail cím hírlevél preferenciáinak adminisztrátori beállítása.
-  - **Kategóriák:** `"Közösség, Fórum"` (kiküldés ideje, rendszeresség, téma, csak saját témák — a kivezetett fórum maradványa) és `"Készletinfó"`.
-
-##### 4.7.1.3. Adminisztrátori Műveletek & Védelmek
-- **Deaktiválás / Aktiválás:** Megerősítő dialog. *(Az adminisztrátor saját fiókját nem deaktiválhatja).*
-- **Munkamenet Azonnali Lezárása (Force Logout):** Növeli a munkamenet verziót, azonnal kijelentkezteti a felhasználót.
-- **Jelszó-visszaállítás kezdeményezése:** Értesítést generál a jelszó-visszaállításról.
+- **Felhasználói Táblázat:** Név, E-mail cím, Szerepkör (`Admin` / `User`), Státusz (`Aktív` / `Inaktív`), Szakterületek, Műveleti gomb (`⋮`).
+- **Felhasználó Szerkesztő Modál (3 Fül):**
+  1. *Alapadatok:* Név, Elsődleges e-mail, Szerepkör váltás (`User` / `Admin`), Státusz váltás (`Active` / `Inactive`).
+  2. *Profil:* Másodlagos e-mail és orvosi szakterületek hozzárendelése.
+  3. *Hírlevél:* Készletértesítő és egyéb preferenciák adminisztrátori konfigurálása.
+- **Adminisztrátori Műveletek:**
+  - Fiók felfüggesztése / aktiválása megerősítő kérdéssel. *(Saját fiókját az adminisztrátor nem deaktiválhatja).*
+  - **Munkamenet Kényszerített Lezárása (Force Logout):** Azonnal érvényteleníti az aktív bejelentkezést, a felhasználó azonnal kijelentkezik.
 
 #### 4.7.2. Fórum és Tartalom Moderálás
-
 **Útvonal:** [https://bvo.uneb.hu/admin/forum](https://bvo.uneb.hu/admin/forum)
+- Témák és hozzászólások teljes listája.
+- **Műveletek:** Téma lezárása (nincs új hozzászólás), Elrejtés / Megjelenítés (visszavonható moderálás), Szöveg javítása, Szerző anonimizálása (`"Anonim Felhasználó"` megnevezésre).
 
-- Témák és Hozzászólások áttekintése (az admin számára a rejtett tartalmak is láthatók).
-- **Moderációs műveletek:**
-  - *Téma Lezárása / Feloldása:* Lezárt témához nem lehet új hozzászólást fűzni.
-  - *Elrejtés / Megjelenítés (Téma és Hozzászólás):* Visszavonható elrejtés toggle (nem törlés!).
-  - *Szöveg Szerkesztése:* Téma leírásának vagy hozzászólás szövegének módosítása moderálási céllal.
-  - *Szerző Anonimizálása:* Lecseréli a szerző nevét `"Anonim Felhasználó"` feliratra.
-  - *Lenyitható komment-lista:* Témánként megtekinthetők és moderálhatók a kapcsolódó hozzászólások.
-
-#### 4.7.3. Gyógyszertár Karbantartás
-
+#### 4.7.3. Gyógyszertár Karbantartás és Készletáttekintés
 **Útvonal:** [https://bvo.uneb.hu/admin/pharmacies](https://bvo.uneb.hu/admin/pharmacies)
+- A portálon **nincs patika-szerkesztő űrlap** (az adatok forrása a külső Patika Kezelő rendszer).
+- A felület **áttekintést és készletellenőrzést** biztosít: patikák listája, BF kódok, adatszinkron és készletszinkron időpontok, valamint az adott patika termékkészletének tételes táblázata.
 
-A prototípusban **NINCS patika-szerkesztő űrlap**. A felületen az alábbi tájékoztató látható: *"Az adatok szerkesztése a Patika Kezelő rendszerben történik. Itt csak áttekintő nézet érhető el."*
-
-##### 4.7.3.1. Gyógyszertárak Lista Oldal
-- *Keresőmező:* Keresés név, település, cím vagy BF kód alapján.
-- *Táblázat oszlopai:* BF kód, Név, Település, Cím, Nyitvatartás (ma), Utolsó adatszinkron időpontja, Utolsó készletszinkron időpontja, Részletek gomb.
-
-##### 4.7.3.2. Részletes Patika Nézet és Készletáttekintés
-- *Patikai alapadatok:* Név, BF kód, Cím, Telefonszám, E-mail, Szinkronidőpontok (olvasható kártyákon).
-- *Termékkészlet Táblázat:* Megjeleníti a patikához tartozó termékeket: TK-szám, Terméknév, Hatóanyag, Kiszerelés, Gyártó, Státusz, Raktári darabszám (`dapieces`).
-- *Táblázatos Funkciók:* Oszloponkénti szűrősor, növekvő/csökkenő rendezés, 25 elemes lapozó, `"Szűrők törlése"` gomb.
+#### 4.7.4. Elfogadási Kritériumok
+- **AC-4.7.1:** Normál szakmai felhasználó (`User`) nem érheti el az `/admin/*` útvonalakat; jogosulatlan próbálkozás esetén a rendszer visszairányítja a Dashboardra.
+- **AC-4.7.2:** A Force Logout végrehajtásakor a célfelhasználó böngészőjében a következő kattintáskor azonnal megjelenik a bejelentkezési ablak.
 
 ---
 
-### 4.8. Felhasználói Profil
+### 4.8. Felhasználói Profil és Értesítéskezelés
 
-A felhasználó saját adataik, preferenciáik és fiókbiztonságuk kezelési központja.
+A felhasználó személyes adatainak, értesítéseinek és fiókbiztonságának kezelési központja.
 
 **Útvonal:** [https://bvo.uneb.hu/profile](https://bvo.uneb.hu/profile)
 
 #### 4.8.1. Személyes Adatok és Szakterületek
-- **Név, Elsődleges e-mail, Másodlagos e-mail:** Megjelenítő mezők olvasási módban. *Magyarázó felirat:* `"Szerkesztéséhez keresse az adminisztrációt."`
-- **Szakterületek Módosítása:**
-  - *Típus:* Kereshető multi-select komponens szakterület keresővel.
-  - *Megadható értékek:* Az orvosi szakterület kódlista elemei.
-  - *Gomb:* `"Szakterületek mentése"`.
+- Név, Elsődleges és Másodlagos e-mail cím olvasási módban jelenik meg (*"Módosításához keresse az adminisztrációt"*).
+- **Szakterületek szerkesztése:** Kereshető többválasztós listában az orvos szabadon frissítheti szakorvosi képesítéseit, majd a *"Szakterületek mentése"* gombbal rögzítheti.
 
 #### 4.8.2. Preferált Gyógyszertár Kezelése
-- Megjeleníti a jelenleg kiválasztott preferált patika kártyáját.
-- *Gombok:* `"Módosítás"` (megnyitja a modális patikakeresőt) és `"Törlés"` (megerősítő dialogot nyit).
+- Megjeleníti a jelenleg kijelölt közeli patika kártyáját.
+- Gombok: *"Módosítás"* (megnyitja a modális patikakeresőt) és *"Törlés"* (eltávolítja a kijelölést).
 
-#### 4.8.3. Hírlevél Beállítások Szekció
+#### 4.8.3. Készletinfó Hírlevél és Értesítési Beállítások
+Külön-külön konfigurálható az **Elsődleges ÉS a Másodlagos e-mail címre**:
+- Kapcsoló: `Be` / `Ki`.
+- Gyakoriság: `Napi`, `Heti`, `Havi`.
+- Kiküldés órája: `0` és `23` óra között.
+- Témák: `Újra elérhető`, `Készlethiány`, `Megszűnt`.
+- Hatókör: `Minden`, `Szakterület + mentett gyógyszerek`, `Csak szakterület`, `Csak mentett gyógyszer`.
 
-A profil egyik legterjedelmesebb funkcióblokkja, amely **külön konfigurálható az Elsődleges ÉS a Másodlagos e-mail címre**:
+#### 4.8.4. Aloldalak: Kedvencek és Készletértesítések
+- **Mentett Kedvencek Oldal:** [https://bvo.uneb.hu/profile/favorites](https://bvo.uneb.hu/profile/favorites)
+  - Elmentett gyógyszerek listája, készletállapotuk, és közvetlen eltávolítási opció.
+- **Készletértesítések Oldal:** [https://bvo.uneb.hu/profile/notifications](https://bvo.uneb.hu/profile/notifications)
+  - Aktív értesítés-feliratkozások táblázata a feliratkozás pontos dátumával és azonnali leiratkozási gombbal.
 
-##### 4.8.3.1. BENU Képzési Program Hírlevél
-   - *Feliratkozás kapcsoló:* `Be` / `Ki`.
-   - *Érdekelt témakörök gombok:* `Akkreditált`, `Gyártói`, `Eladásösztönző`.
+#### 4.8.5. Biztonság és Kétfaktoros Azonosítás (2FA / Passkey)
+- **2FA Kapcsoló és Csatorna:** `Be`/`Ki` kapcsoló, csatornaválasztás: `E-mail OTP`, `SMS OTP`, `Hitelesítő App (TOTP)`.
+- **Passkey Kezelés:** Regisztrált biometrikus eszközök listája, *"Új Passkey hozzáadása"* gomb és törlési lehetőség.
+- **Megbízható Eszközök Elfelejtése:** *"Eszközök elfelejtése"* gomb, amely azonnal érvényteleníti az összes 30 napos megjegyzett böngészőt.
 
-##### 4.8.3.2. Készletinfó Hírlevél
-   - *Feliratkozás kapcsoló:* `Be` / `Ki`.
-   - *Rendszeresség (Select):* `Napi`, `Heti`, `Havi`.
-   - *Kiküldés ideje (Számmező):* `0` – `23` óra között.
-   - *Téma (Multiselect gombok):* `Újra elérhető`, `Készlethiány`, `Megszűnt`.
-   - *Témakör / Hatókör (Select):* `Minden`, `Szakterület + mentett gyógyszerek`, `Csak szakterület`, `Csak mentett gyógyszer`.
+#### 4.8.6. Elfogadási Kritériumok
+- **AC-4.8.1:** A hírlevél beállítások módosításai azonnal mentésre kerülnek és a rendszer a visszajelző üzenetet megjeleníti.
+- **AC-4.8.2:** Az "Eszközök elfelejtése" gombra kattintva a megbízható eszközök számlálója nullázódik.
 
-#### 4.8.4. Mentett Kedvencek Oldal
-- **Útvonal:** [https://bvo.uneb.hu/profile/favorites](https://bvo.uneb.hu/profile/favorites)
-- Tájékoztató infó-kártya, mentett gyógyszerek listája törlési lehetőséggel és értesítések közvetlen kezelésével.
+---
 
-#### 4.8.5. Készletértesítések Oldal
-- **Útvonal:** [https://bvo.uneb.hu/profile/notifications](https://bvo.uneb.hu/profile/notifications)
-- Aktív készletértesítések táblázata a **feliratkozás időpontjával** és egykattintásos leiratkozási opcióval.
+### 4.9. Közösség és Szakmai Fórum
 
-#### 4.8.6. Biztonság és Kétfaktoros Azonosítás (2FA / Passkey)
+Zárt szakmai kommunikációs tér orvosok és gyógyszerészek közötti tapasztalatcserére.
 
-##### 4.8.6.1. Kétfaktoros Azonosítás (2FA) Kapcsoló és Csatornák
-   - *Kapcsoló:* `Be` / `Ki`.
-   - *2FA Csatorna választás:* `E-mail OTP (alapértelmezett)`, `SMS OTP (mobil telefonszámra)`, `Hitelesítő App (TOTP)`. SMS választása esetén megjeleníti a regisztrált telefonszámot.
+**Útvonal:** [https://bvo.uneb.hu/kozosseg](https://bvo.uneb.hu/kozosseg) *(Közvetlen eléréssel érhető el; a főmenüben nem szerepel)*.
 
-##### 4.8.6.2. Passkey Kulcsok Kezelése (Biometria)
-   - *Regisztrált eszközök listája:* Megjeleníti a fiókhoz kapcsolt eszközök nevét és regisztrációs dátumát (pl. `"Work Mac TouchID - 2026-01-15"`).
-   - *"Új Passkey" gomb:* Megnyit egy modális ablakot az eszköz nevének megadásához.
-   - *Törlés gomb:* Passkey eltávolítása.
-
-##### 4.8.6.3. Megbízható Eszközök Kezelése
-   - Kijelzi a 30 napra megjegyzett munkamenetek számát.
-   - *"Eszközök elfelejtése" gomb:* Azonnal érvényteleníti az összes megjegyzett eszközt, így a rákövetkező belépéskor minden böngészőben kötelezővé válik a 2FA kód megadása.
-
-##### 4.8.6.4. Kijelentkezés a Rendszerből
-- *"Kijelentkezés a rendszerből"* gomb: Azonnali kijelentkezés a munkamenetből.
+#### 4.9.1. Működés és Témakezelés
+- **Szakterületi szűrés:** Témák böngészése orvosi szakágak szerint.
+- **Téma Részletes Oldal:** Téma indító bejegyzése, hozzászólások időrendben, új hozzászólás beküldése.
+- **Új Téma Indítása:** Cím, szakterület és szöveg megadásával. Lehetőség van **anonim közzétételre** is (a szerző neve helyett `"Anonim Felhasználó"` jelenik meg).
+- **Lezárt Téma:** Lezárt státuszú témához a felület nem engedélyez új hozzászólást fűzni.
 
 ---
 
@@ -1111,43 +799,27 @@ A profil egyik legterjedelmesebb funkcióblokkja, amely **külön konfigurálhat
 
 ## 5. Korábban tervezett, de elvetett / külső rendszerbe átsorolt funkciók
 
-Ez a szekció azokat a funkciókat tartalmazza, amelyek korábbi tervekben szerepeltek, de a jelenlegi felületen nem aktívak, módosultak vagy külső rendszerbe kerültek át.
+Ez a fejezet összefoglalja azokat az elemeket, amelyek korábbi koncepciókban szerepeltek, de a jelenlegi érvényes felületen nem aktívak vagy külső rendszer feladatkörébe tartoznak:
 
-### 5.1. Közösségi Fórum a Felhasználói Főmenüben és a Globális Keresőben
-> **Státusz:** Nem aktív a fő navigációs menüben és a globális keresőben – szerepét a Képzési Program vette át.  
-> **Elérhetőség:** Korábbi útvonal: `https://bvo.uneb.hu/kozosseg`. A témák és hozzászólások közvetlen URL-lel továbbra is elérhetők (témalétrehozás, hozzászólások működnek). A moderációs felület az adminisztrációban megmaradt (`/admin/forum`).
-
-### 5.2. Közösségi Aktivitás Dashboard-Widget
-> **Státusz:** Elvetve (a kódban explicit `"HASZNÁLATON KÍVÜL"` jelöléssel).  
-> Helyét az Irányítópulton a Képzési Program promóciós widget vette át.
-
-### 5.3. Jelszó Módosítása a Felhasználói Profilban
-> **Státusz:** Nem aktív a felületen.  
-> A profiloldalon az alapadatok csak olvashatók. Jelszó módosításához vagy adategyeztetéshez a felhasználónak az adminisztrációt kell keresnie.
-
-### 5.4. Betegtájékoztató Letöltése a Gyógyszer Adatlapról
-> **Státusz:** Tervezett / Jelenleg nem aktív.  
-> A kódkommentben szereplő letöltési funkció a prototípusban nem készült el.
-
-### 5.5. Globális Kereső: "Összes találat megtekintése" Gomb
-> **Státusz:** Nem funkcionális gomb.  
-> A kereső panel láblécében megjelenik, meglévő felületi elem, de nem indít külön találati oldalt.
-
-### 5.6. Adminisztrációs Gyógyszertár Szerkesztő Űrlap
-> **Státusz:** Külső rendszerbe átsorolva.  
-> Az adminisztrációs felületen nincs patika-szerkesztő űrlap (koordináták, nyitvatartás szerkesztése). A patikaadatok szerkesztése a külső Patika Kezelő rendszerben történik, az admin felület kizárólag áttekintést és készletellenőrzést nyújt.
-
-### 5.7. Gyógyszer Lista: Kártya Nézet Váltás
-> **Státusz:** Nem aktív a felületen.  
-> A gyógyszerlista a szakmai áttekinthetőség érdekében kizárólag a rendezhető és szűrhető táblázatos nézetben érhető el.
-
-### 5.8. Gyógyszer Keresés: ATC Kód és Gyártó Alapján a Szabad Szöveges Keresőben
-> **Státusz:** Nem aktív a szabad szöveges mezőben.  
-> A keresőmező Név és Hatóanyag alapján keres. Az ATC kód és Gyártó adatok az oszlopszűrőkben és a kijelölhető oszlopokban érhetők el.
-
-### 5.9. Önkiszolgáló Automatikus Felhasználói Regisztrációs Felület
-> **Státusz:** Jelenleg nem tervezett / Későbbi fejlesztési lehetőség.  
-> A rendszerben nem érhető el közvetlen, azonnali önkiszolgáló regisztrációs folyamat. A felhasználók regisztrációja kézzel (manuálisan) történik az adminisztrátor által, miután az érdeklődő orvos/gyógyszerész felvette a kapcsolatot az üzemeltetéssel a bejelentkezési felületről elérhető kapcsolatfelvételi űrlapon keresztül. Későbbiekben elképzelhető egy automatizált önkiszolgáló regisztrációs felület kialakítása, de jelenleg nem tervezünk ilyennel.
+1. **Képzési Program (BENU Képzések - `/kepzesek`):**
+   - *Státusz:* ⚠️ Nem aktív felület.
+   - *Részletek:* A prototípus korábbi fázisában megkezdett képzési felület és a külső LMS hivatkozások a végleges orvosi portál felületéről kivezetésre kerültek: a navigációs fejlécben (Navbar), az Irányítópulton és a Globális Keresőben sem érhető el hivatkozás rá. A funkció teljes specifikációját a 4.4. fejezet tartalmazza a funkcionális nyilvántartás és az esetleges későbbi bekapcsolás érdekében.
+2. **Közösségi Fórum a Főmenüben és a Globális Keresőben:**
+   - *Státusz:* Kivezetve a kiemelt főmenüből. A fórum közvetlen URL-en (`/kozosseg`) elérhető maradt, az adminisztrációs felügyelet működik.
+3. **Közösségi Aktivitás Widget az Irányítópulton:**
+   - *Státusz:* Elvetve.
+4. **Jelszó Módosítása a Felhasználói Profilban:**
+   - *Státusz:* Nem aktív felületi elem. Az orvosi profilban a személyes adatok védettek; módosításuk adminisztrátori közreműködéssel történik.
+5. **Betegtájékoztató Letöltése a Gyógyszer Adatlapról:**
+   - *Státusz:* Jelenleg nem aktív a prototípus felületén.
+6. **Globális Kereső: "Összes találat megtekintése" külön találati oldal:**
+   - *Státusz:* Nem vezet külön gyűjtőoldalra; a találatok a felugró panelen közvetlenül kattinthatók.
+7. **Adminisztrációs Gyógyszertár Adatszerkesztő Űrlap:**
+   - *Státusz:* Külső rendszerbe átsorolva. A patikák alapadatainak karbantartása a központi Patika Kezelő rendszerben történik; a portál kizárólag áttekintést és készletellenőrzést nyújt.
+8. **Gyógyszer Lista Kártyás Nézete:**
+   - *Státusz:* Elvetve. A gyógyszerek böngészése a magas adattartalom és a szakmai szempontok miatt kizárólag rendezhető táblázatos nézetben történik.
+9. **Önkiszolgáló Automatikus Felhasználói Regisztrációs Felület:**
+   - *Státusz:* Jelenleg nem tervezett. A rendszer zárt szakmai jellege miatt a regisztráció kizárólag a bejelentkező felületről indított kapcsolatfelvételi űrlapon és kézi adminisztrátori jóváhagyáson keresztül működik.
 
 ---
 
@@ -1155,33 +827,33 @@ Ez a szekció azokat a funkciókat tartalmazza, amelyek korábbi tervekben szere
 
 ## 6. Tesztfiókok és Hozzáférések
 
-> **Megjegyzés:** Az alábbi tesztfiókok a prototípus élő kipróbálására szolgálnak a [https://bvo.uneb.hu/login](https://bvo.uneb.hu/login) oldalon.
+A működő prototípus élő kipróbálására szolgáló tesztfiókok a [https://bvo.uneb.hu/login](https://bvo.uneb.hu/login) oldalon.
 
-**Minden fiók egységes jelszava:** `vény123`
+> **Egységes jelszó minden tesztfiókhoz:** `vény123`  
+> *(2FA tesztelése esetén a működő demó ellenőrző kód: `123456`)*
 
-### 6.1. Adminisztrátor Tesztfiók
-- **Email:** `admin@example.com`
+### 6.1. Rendszeradminisztrátor Tesztfiók
+- **E-mail:** `admin@example.com`
 - **Jelszó:** `vény123`
 - **Szerepkör:** Admin
 - **Státusz:** Aktív
-- **Szakterületek:** –
-- **Tesztelési Rendeltetés:** Adminisztrációs felület és felhasználókezelés tesztelése ([https://bvo.uneb.hu/admin/users](https://bvo.uneb.hu/admin/users)).
+- **Rendeltetés:** Az adminisztrációs felület (`/admin/users`, `/admin/pharmacies`, `/admin/forum`) és a teljes körű moderációs műveletek tesztelése.
 
-### 6.2. Dr. Kovács István (Szakmai Felhasználó)
-- **Email:** `demo@example.com`
+### 6.2. Dr. Kovács István (Szakmai Felhasználó Tesztfiók)
+- **E-mail:** `demo@example.com`
 - **Jelszó:** `vény123`
 - **Szerepkör:** User
 - **Státusz:** Aktív
-- **Szakterületek:** Háziorvos, Belgyógyász
-- **Tesztelési Rendeltetés:** Szakmai portál teljes körű tesztelése (keresés, kedvencek, értesítések, profilbeállítások). Az admin felület elérése számára korlátozott.
+- **Szakterületek:** Háziorvostan, Belgyógyászat
+- **Rendeltetés:** A normál orvosi munkafolyamatok tesztelése (Dashboard, fluid gyógyszerlista, kedvencek, értesítések, patikakereső térkép, profilbeállítások). Védett adminisztrációs oldalakra nem léphet be.
 
-### 6.3. Dr. Teszt Szabolcs (Inaktív / Felfüggesztett Fiók)
-- **Email:** `teszt@example.com`
+### 6.3. Dr. Teszt Szabolcs (Felfüggesztett / Inaktív Fiók Tesztelése)
+- **E-mail:** `teszt@example.com`
 - **Jelszó:** `vény123`
 - **Szerepkör:** User
 - **Státusz:** Inaktív
-- **Szakterületek:** Kardiológus
-- **Tesztelési Rendeltetés:** Felfüggesztett/Inaktív fiók bejelentkezési elutasításának és védelmének tesztelése.
+- **Szakterületek:** Kardiológia
+- **Rendeltetés:** Az inaktív fiókok belépési elutasításának és biztonsági védelmének ellenőrzése.
 
 ---
 
@@ -1189,9 +861,12 @@ Ez a szekció azokat a funkciókat tartalmazza, amelyek korábbi tervekben szere
 
 ## 7. Változásnapló (Verziótörténet)
 
-Ez a fejezet a funkcionális specifikáció dokumentumban eszközölt módosítások, pontosítások és kiegészítések időrendi követésére és archiválására szolgál.
+Ez a fejezet a funkcionális specifikációban eszközölt módosítások és kiegészítések időrendi naplója.
 
-| Verzió | Dátum | Változás Típusa | Változások Összefoglalása |
+| Verzió | Dátum | Változás Típusa | Változások Részletes Összefoglalása |
 | :--- | :--- | :--- | :--- |
-| **v1.5.1** | 2026.09.08. | Módosítás | **Gyógyszerlista táblázat fluid (teljes képernyőszélességű) elrendezése:**<br>• A gyógyszerek oldal és az adatáblázat fix maximális szélességi korlátja (1440px) feloldásra került; a felület dinamikusan és rugalmasan (fluid módon) kitölti a teljes rendelkezésre álló képernyőszélességet.<br>• Nagyobb felbontású monitorokon és széles kijelzőkön jelentősen javul az adatok átláthatósága és olvashatósága, minimalizálva a vízszintes görgetés szükségességét sok oszlop bekapcsolása esetén is.<br>• Frissítésre került a 4.2.1. Gyógyszer Lista Oldal funkcionális leírása (4.2.1.0. pont). |
-| **v1.4.1** | 2026.08.24. | Kiegészítés | **Manuális felhasználói regisztráció és kapcsolatfelvételi űrlap rögzítése:**<br>• Tisztázásra került, hogy a rendszerbe a felhasználók regisztrációja kézzel (manuálisan) történik az adminisztrátor által.<br>• Az új szakmai felhasználó a bejelentkezési felületről elérhető űrlapon keresztül veszi fel a kapcsolatot az adminisztrátorral a szakmai adatok (pl. név, pecsétszám, szakterület) megadásával.<br>• Rögzítésre került, hogy későbbiekben elképzelhető önkiszolgáló regisztrációs felület bevezetése, de jelenleg nem tervezünk ilyennel.<br>• Új adatmodell fejezet hozzáadása: 3.6. Regisztrációs Igény / Kapcsolatfelvételi Űrlap Adatmodell.<br>• Új funkcionális alfejezet: 4.6.4. Manuális Felhasználói Regisztráció és Kapcsolatfelvételi Űrlap.<br>• Elvetett/későbbi funkciók közé felvéve: 5.9. Önkiszolgáló Automatikus Felhasználói Regisztrációs Felület.<br>• Új fejezet bevezetése a dokumentum végén: 7. Változásnapló (Verziótörténet). |
+| **v1.6.0** | 2026.10.20. | Átfogó Revízió & FRS Bővítés | **Prototípus működés szerinti teljes körű funkcionális szinkronizáció és követelménybővítés:**<br>• Új dátumozott kiadás (`bvo-funkcionalis-specifikacio-20261020.md`) létrehozása és a főkatalógus szinkronizálása.<br>• **Képzési Program dokumentációjának megőrzése inaktív felületi státuszjelzéssel:** A Képzési Program és az LMS integráció részletes funkcionális leírása a dokumentumban megmaradt (3.4. és 4.4. fejezetek), de egyértelműen és kiemelten megjelölve, hogy a felület a jelenlegi éles prototípusban **nem aktív** (a navigációból kivezetve).<br>• Minden fő funkcionális modul kiegészítése strukturált **Bemenetek és Kimenetek**, felhasználói szintű **Hibakezelés** és pontosan ellenőrizhető **Elfogadási Kritériumok (Acceptance Criteria - AC)** fejezetekkel a globális követelményszabályoknak megfelelően.<br>• A 4 szintű készletstátusz (`Készleten`, `Korlátozottan`, `Rendelésre (1-2 munkanap)`, `Nem elérhető`) és a hozzá tartozó hálózati / helyi felületi megjelenítés megerősítése.<br>• A Gyógyszertárak modul SubHeader keresőjének, pill szűrőinek (`Most nyitva`, `Hétvégén nyitva`, `0-24`), GPS helymeghatározó paneljének, valamint a heti nyitvatartási modal és mélylinkelés (`/gyogyszertarak?id=...`) leírásának véglegesítése.<br>• A fejléc Mentett gyorslista "Összes" gombjának navigációs viselkedése (`onlyFavorites=true` szinkron) a gyógyszerlista oldallal.<br>• Manuális regisztrációs kapcsolatfelvételi űrlap, 2FA és passkey biztonsági folyamatok pontosítása. |
+| **v1.5.1** | 2026.09.08. | Módosítás | **Gyógyszerlista táblázat fluid (teljes képernyőszélességű) elrendezése:**<br>• A gyógyszerek oldal és az adatáblázat fix maximális szélességi korlátja (1440px) feloldásra került; a felület dinamikusan kitölti a teljes képernyőszélességet.<br>• Nagyobb monitorokon jelentősen javult az adatok átláthatósága és olvashatósága, minimalizálva a vízszintes görgetés szükségességét.<br>• Frissítésre került a 4.2.1. pont (Fluid elrendezés). |
+| **v1.4.1** | 2026.08.24. | Kiegészítés | **Manuális felhasználói regisztráció és kapcsolatfelvételi űrlap rögzítése:**<br>• Tisztázásra került, hogy a felhasználók regisztrációja kézzel (manuálisan) történik az adminisztrátor által.<br>• Az új szakmai felhasználó a bejelentkezési felületről elérhető űrlapon veszi fel a kapcsolatot az adminisztrációval (pecsétszám, szakterület megadásával).<br>• Új adatmodell (3.6) és új funkcionális leírás (4.6.4), elvetett funkciók (5.9) és Változásnapló (7) bevezetése. |
+
+<!-- DOKUMENTUM VÉGE -->
