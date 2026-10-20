@@ -12,6 +12,7 @@ A rendszer egy átfogó orvosi portál alkalmazás, melynek célja, hogy naprak�
 
 **Célcsoport:** Orvosok, gyógyszerészek és egészségügyi szakemberek.
 **Technológia:** Web alapú alkalmazás (Next.js), reszponzív megjelenítéssel.
+**Akadálymentesség és SEO Irányelvek:** Törekedni kell a WCAG 2.2 alapelvekre, de zárt rendszer lévén a maximális megfelelőség és a klasszikus keresőoptimalizálás nem követelmény. A böngésző lapfül címének kötelező egységes formátuma: `"{lap neve} | BENUvény Orvosi Portál"`.
 
 ---
 
@@ -60,8 +61,8 @@ A rendszerben nyilvántartott gyógyszerkészítmény.
 *   **Kiszerelés (kiszereles):** Csomagolási egység és forma.
 *   **Csomagolás részletei (packagingDetails):** Részletes leírás.
 *   **Ár (price):** Bruttó eladási ár (numerikus).
-*   **Státusz (status):** [Gyógyszer Státusz](#37-státuszok) (Elérhető, Készlethiány, Megszűnt).
-*   **Kiadhatóság (dispensability):** Vényköteles vagy vény nélküli.
+*   **Státusz (status):** [Gyógyszer Státusz](#37-státuszok) (Elérhető, Készlethiány, Megszűnt). Kizárólag OTC és vényköteles készítményeknél követett.
+*   **Kiadhatóság (dispensability):** Vényköteles vagy vény nélküli (OTC). A rendszer kizárólag ezen két kategória státuszait követi.
 *   **Kiadhatóság alcsoport (dispensabilitySub):** Részletesebb besorolás.
 *   **Biztonsági elemek (safetyFeatures):** Pl. szerializációs követelmények.
 *   **Engedélyezés dátuma (authorizationDate):** Forgalomba hozatali engedély dátuma.
@@ -111,10 +112,11 @@ Rendszer által generált jelzés. Kontextusból (NotificationContext) kezelve.
 *   **Feliratkozás (isSubscribed):** Gyógyszer TK-szám alapján.
 
 ### 3.7. Státuszok
-*   **Gyógyszer Státusz:**
+*   **Gyógyszer Státusz (Kizárólag OTC és vényköteles termékeknél):**
     *   🟢 *Elérhető*
     *   🟡 *Készlethiány*
     *   🔴 *Megszűnt*
+    *(Nem gyógyszer kategóriájú termékek, pl. étrend-kiegészítők, gyógytermékek, kozmetikumok státuszait a rendszer nem követi.)*
 *   **Patika Nyitvatartás:** Nyitva / Hamarosan zár / Zárva (dinamikusan számított).
 
 ### 3.8. Jogosultság (UserRole)

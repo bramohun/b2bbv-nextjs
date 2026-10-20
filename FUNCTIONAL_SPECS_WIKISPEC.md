@@ -22,10 +22,11 @@ kerülnek strukturálásra.
 ---
 
 > **Dokumentum azonosító:** FRS-BVO-20261020  
-> **Verzió:** 1.6.0  
+> **Verzió:** 1.6.1  
 > **Dátum:** 2026.10.20.  
-> **Státusz:** Aktív / Hatályos (Prototípus működés szerinti átfogó szinkronizáció)  
+> **Státusz:** Aktív / Hatályos (Termékköri státuszkövetés rögzítése: kizárólag OTC és vényköteles gyógyszerek)  
 > **Élő prototípus elérhetőség:** [https://bvo.uneb.hu/](https://bvo.uneb.hu/) (tesztfiókok a 6. fejezetben)  
+> **Önálló Elfogadási Kritériumok (AC) jegyzék:** [ACCEPTANCE_CRITERIA.md](file:///c:/Users/abramov.gabor/GitHub/b2bbv-nextjs/ACCEPTANCE_CRITERIA.md)  
 
 ---
 
@@ -39,12 +40,13 @@ kerülnek strukturálásra.
    - 1.5. Live Prototípus
    - 1.6. Felhasználói Szerepkörök
    - 1.7. Modulok és Felületek Áttekintése
+   - 1.8. Akadálymentesség (WCAG 2.2) és Technikai SEO Irányelvek
 2. [Fogalomtár](#2-fogalomtár)
 3. [Adatmodellek Specifikációja](#3-adatmodellek-specifikációja)
    - 3.1. Felhasználó (User) Adatmodell
    - 3.2. Gyógyszer (Medicine) Adatmodell
    - 3.3. Gyógyszertár (Pharmacy) Adatmodell
-   - 3.4. Képzés / Kurzus (Course) Adatmodell *(Nem aktív felület)*
+   - 3.4. Képzés / Kurzus (Course) Adatmodell *(Nem fejlesztési scope, prototípusban sem látható)*
    - 3.5. Patikai Készletrekord Adatmodell
    - 3.6. Regisztrációs Igény / Kapcsolatfelvételi Űrlap Adatmodell
    - 3.7. Közösségi Téma és Hozzászólás Adatmodell
@@ -53,7 +55,7 @@ kerülnek strukturálásra.
    - 4.1. Irányítópult (Dashboard)
    - 4.2. Gyógyszer Nyilvántartás (Lista és Adatlap)
    - 4.3. Gyógyszertár Kereső és Térkép
-   - 4.4. Képzési Program *(Nem aktív felület)*
+   - 4.4. Képzési Program *(Nem fejlesztési scope, prototípusban sem látható)*
    - 4.5. Globális Keresés (Asztali és Mobil Overlay)
    - 4.6. Hitelesítés, Jogosultságok és Kapcsolatfelvétel
    - 4.7. Adminisztráció (Felhasználók, Patikák, Moderálás)
@@ -74,9 +76,16 @@ A **BENUvény Orvosi Portál** egy modern, zárt orvosi szakmai információs é
 
 A portál elsődleges üzleti küldetése, hogy valós idejű, átlátható és megbízható tájékoztatást adjon:
 1. **Gyógyszerkészletekről és piaci hiányokról:** Az országos szintű hiánycikkekről, a gyártási fennakadásokról, valamint a készletpótlás várható idejéről.
+   > [!IMPORTANT]
+   > **Státuszkövetési Hatókör (Termékköri Scope):**
+   > A portál státuszkövetési funkcionalitása (piaci hiányok, kivonások, elérhetőség, valamint gyógyszertári polckészletek) **szigorúan és kizárólag a humán gyógyszerek alábbi két kategóriájára terjed ki:**
+   > - **OTC (Over-The-Counter / Vény nélkül kapható gyógyszerek):** Hivatalosan törzskönyvezett humán gyógyszerek, amelyek orvosi rendelvény nélkül is kiadhatók a patikákban.
+   > - **Vényköteles gyógyszerek (Rx):** Kizárólag orvosi rendelvényre (receptre) expediálható törzskönyvezett humán gyógyszerek.
+   >
+   > **Kizárt kategóriák (Nem követett termékstátuszok):** A rendszer határozottan **NEM követi** az egyéb nem gyógyszer besorolású patikai cikkek (étrend-kiegészítők, vitaminok és ásványi anyagok [nem gyógyszer formában], gyógyhatású készítmények, dermokozmetikumok, tápszerek, orvostechnikai eszközök, gyógyászati segédeszközök, kötszerek, diagnosztikai tesztek és egyéb drogéria áruk) készlet- és piaci státuszait. Ez biztosítja a rendszer orvosszakmai tisztaságát, magas megbízhatóságát és a betegellátási terápia közvetlen döntéstámogatását.
 2. **Készítmények helyettesíthetőségéről:** Azonnali terápiás és hatóanyag-alapú (INN) alternatívák felkínálásával, elkerülve a betegek kezelésének megszakadását.
 3. **Gyógyszertári elérhetőségről:** A legközelebbi vagy kijelölt preferált gyógyszertár naprakész polckészletéről, nyitvatartásáról és elérhetőségéről.
-4. **Szakmai továbbképzési lehetőségekről:** Akkreditált kreditpontos és gyártói képzési anyagok specifikált keretrendszeréről *(a felület jelenleg nem aktív a prototípusban, részletek a 4.4. és 5.1. pontokban)*.
+4. **Szakmai továbbképzési lehetőségekről:** Akkreditált kreditpontos és gyártói képzési anyagok specifikált keretrendszeréről *(Nem fejlesztési scope, prototípusban sem látható, részletek a 4.4. és 5.1. pontokban)*.
 
 ### 1.2. Megvalósítási Keretek és Szabadság
 A specifikáció és a kapcsolódó prototípus kizárólag a rendszer üzleti és funkcionális működését, a felhasználói folyamatokat, az adatstruktúrákat és a felületi viselkedési szabályokat határozza meg.
@@ -111,12 +120,37 @@ A rendszerben két alapvető szerepkör létezik:
 | **Gyógyszer Nyilvántartás** | `https://bvo.uneb.hu/gyogyszerek` | Teljes képernyős fluid táblázat, oszloprendezés, szűrés, kedvencek. | **Aktív** |
 | **Gyógyszer Adatlap** | `https://bvo.uneb.hu/gyogyszerek/adatlap` | 4 szintű készletstátusz, árak, hiánybannerek, helyettesítők, történet. | **Aktív** |
 | **Gyógyszertár Kereső** | `https://bvo.uneb.hu/gyogyszertarak` | Térkép, szinkronizált kártyalista, GPS helymeghatározás, heti rend modal. | **Aktív** |
-| **Képzési Program** | `https://bvo.uneb.hu/kepzesek` | Kurzusok listázása, kategóriák, akkreditáció, LMS átirányítás. | ⚠️ **Nem aktív felület** |
+| **Képzési Program** | `https://bvo.uneb.hu/kepzesek` | Kurzusok listázása, kategóriák, akkreditáció, LMS átirányítás. | ⚠️ **Nem fejlesztési scope, prototípusban sem látható** |
 | **Globális Keresés** | Globális / Mobil Overlay | Instant keresés gyógyszerek, hatóanyagok és patikák között. | **Aktív** |
 | **Hitelesítés & Jogosultság** | `https://bvo.uneb.hu/login` | Jelszavas, Passkey és Magic Code belépés, 2FA, kapcsolatfelvételi űrlap. | **Aktív** |
 | **Felhasználói Profil** | `https://bvo.uneb.hu/profile` | Szakterületek, preferált patika, hírlevelek, biztonság, 2FA, passkey. | **Aktív** |
 | **Adminisztráció** | `https://bvo.uneb.hu/admin/*` | Felhasználók kezelése, patikák felügyelete, tartalommoderáció. | **Aktív** |
 | **Közösség és Fórum** | `https://bvo.uneb.hu/kozosseg` | Szakmai eszmecsere, témák, hozzászólások (közvetlen URL elérés). | **Közvetlen URL** |
+
+### 1.8. Akadálymentesség (WCAG 2.2) és Technikai SEO Irányelvek
+
+A rendszer felületi megvalósításakor az alábbi elvek tekintendők irányadónak az akadálymentesség és a technikai keresőoptimalizálás kapcsán:
+
+1. **Akadálymentesség és WCAG 2.2 Sztenderdek:**
+   - **Törekedni kell a betartására (Jó gyakorlat):** A felületfejlesztés során törekedni kell az ésszerű ergonómiai és WCAG 2.2 irányelvek (kontrasztos megjelenés, olvasható betűméretek, egyértelmű interaktív elemek, alapvető billentyűzet-navigáció) betartására.
+   - **Nem szigorú követelmény a maximális megfelelőség:** Tekintettel arra, hogy a portál **publikusan nem elérhető** (zártkörű, hatósági orvosi/gyógyszerészi azonosításhoz kötött szakmai rendszer), valamint a célcsoport (orvosok, gyógyszerészek) **jellemzően nincsen akadályoztatva**, a fejlesztés során **nem követelmény a maximális (pl. AAA) szintű akadálymentességi előírások betartása**, erre külön túlzott erőforrást nem szükséges fordítani.
+
+2. **Technikai SEO és Böngészőhasználatot Segítő Megoldások:**
+   - **Klasszikus SEO mentesség:** Mivel a portál zárt szakmai megoldás, **nem kötelező betartani a klasszikus keresőmotor-optimalizálási (SEO) irányelveket** (pl. külső keresőindexelés engedélyezése, meta leírások keresőrobotoknak, strukturált sémaadatok, webhelytérkép).
+   - **Böngészést és lapfül-azonosítást segítő megoldások:** Ezzel szemben elvárt és kötelező a szakemberek mindennapi, gyakran több lapfüles munkavégzését támogató böngésző segítő megoldások alkalmazása.
+   - **Egységes Lapfül Cím (Page `<title>`) Formátum:** A böngészőfül gyors és egyértelmű beazonosíthatósága érdekében minden oldal fejlécében a HTML `<title>` címke kötelezően az alábbi formátumot követi:
+     ```
+     {lap neve} | BENUvény Orvosi Portál
+     ```
+     *Hivatalos felületi példák:*
+     - `Irányítópult | BENUvény Orvosi Portál`
+     - `Gyógyszerek | BENUvény Orvosi Portál`
+     - `Gyógyszer Adatlap | BENUvény Orvosi Portál` (vagy konkrét terméknél: `{Kereskedelmi név} | BENUvény Orvosi Portál`)
+     - `Gyógyszertárak | BENUvény Orvosi Portál`
+     - `Bejelentkezés | BENUvény Orvosi Portál`
+     - `Profil és Beállítások | BENUvény Orvosi Portál`
+     - `Adminisztráció | BENUvény Orvosi Portál`
+     - `Közösség | BENUvény Orvosi Portál`
 
 ---
 
@@ -152,8 +186,8 @@ A gyógyszer aktív hatóanyagának hivatalos nemzetközi elnevezése (pl. `"met
 ### 2.8. ATC-kód
 Az Egészségügyi Világszervezet (WHO) Anatómiai, Terápiás és Kémiai osztályozási kódja (pl. `"N02BB02"`).
 
-### 2.9. BENU LMS (Külső Rendszer / Nem aktív modulhoz kapcsolódó fogalom)
-A BENU külső online e-learning és akkreditált továbbképzési portálja. A tananyagok tényleges feldolgozása, a vizsgatesztek kitöltése és a kreditpontok jóváírása ezen a külső felületen történik. *(A prototípusban jelenleg nem aktív felület, részletek: 4.4. és 5.1. pont).*
+### 2.9. BENU LMS (Külső Rendszer / Nem fejlesztési scope, prototípusban sem látható)
+A BENU külső online e-learning és akkreditált továbbképzési portálja. A tananyagok tényleges feldolgozása, a vizsgatesztek kitöltése és a kreditpontok jóváírása ezen a külső felületen történik. *(Nem fejlesztési scope, prototípusban sem látható, részletek: 4.4. és 5.1. pont).*
 
 ### 2.10. Passkey (Biometrikus Azonosító)
 FIDO2 szabványon alapuló eszközalapú azonosítás (Face ID, Touch ID, Windows Hello), amely jelszó megadása nélkül, 1-kattintásos biztonságos belépést nyújt.
@@ -163,6 +197,12 @@ Adminisztrátori biztonsági művelet, amely érvényteleníti a felhasználó a
 
 ### 2.12. Manuális Regisztrációs Igény / Kapcsolatfelvétel
 A portál zárt jellege miatt nincs automatikus azonnali önkiszolgáló fióknyitás. Az új szakmai érdeklődők a bejelentkezési oldalról elérhető űrlap beküldésével veszik fel a kapcsolatot az üzemeltetéssel, akik hatósági pecsétszám-ellenőrzés után kézzel aktiválják a fiókot.
+
+### 2.13. Státuszkövetési Hatókör: Kizárólag OTC és Vényköteles Termékek
+A gyógyszerészeti nyilvántartásban és készletkezelésben a rendszer a státuszok követését (piaci szinten: `Elérhető`, `Készlethiány`, `Megszűnt`; gyógyszertári polcszinten: `Készleten`, `Korlátozottan`, `Rendelésre (1-2 munkanap)`, `Nem elérhető`) szigorúan csak két termékkörre alkalmazza:
+1. **OTC (Over-The-Counter / Vény nélkül kapható gyógyszer):** Hatóságilag törzskönyvezett humán gyógyszerkészítmény, mely vény nélkül kapható.
+2. **Vényköteles (Rx) Gyógyszer:** Hatóságilag törzskönyvezett humán gyógyszerkészítmény, mely kizárólag orvosi rendelvényre (receptre) adható ki.
+*Egyéb termékek:* A gyógyszertári forgalomban jelen lévő nem gyógyszer termékek (pl. étrend-kiegészítők, gyógyhatású készítmények, kozmetikumok, gyógyászati segédeszközök) státuszait a rendszer nem követi.
 
 ---
 
@@ -263,8 +303,9 @@ Ez a szakasz a rendszer üzleti entitásainak felületi paramétereit részletez
   - **Példa Érték:** `"20x filmtabletta buborékcsomagolásban és dobozban"`
 - **Kiadhatóság:**
   - **Felületi Típus:** Szöveges kategória
-  - **Megadható Értékek:** `Vényköteles` / `Vény nélkül kapható (VN)`
+  - **Megadható Értékek:** `Vényköteles` / `Vény nélkül kapható (VN / OTC)`
   - **Példa Érték:** `Vényköteles`
+  - **Limitációk és Szabályok:** A rendszerben nyilvántartott és készlet-/hiánystátusz szempontjából követett termékek köre zárt: kizárólag `Vényköteles` és `Vény nélkül kapható (VN / OTC)` kiadhatóságú készítmények státuszait követi a rendszer. Nem gyógyszer kategóriák (pl. étrend-kiegészítők, gyógytermékek) nem képezik a követett adatbázis részét.
 - **Biztonsági Elemek:**
   - **Felületi Típus:** Állapotjelző
   - **Megadható Értékek:** `Van` / `Nincs`
@@ -273,6 +314,7 @@ Ez a szakasz a rendszer üzleti entitásainak felületi paramétereit részletez
   - **Felületi Típus:** Színkódolt címke
   - **Megadható Értékek:** `Elérhető` (zöld), `Készlethiány` (sárga), `Megszűnt` (piros)
   - **Példa Érték:** `Készlethiány`
+  - **Limitációk:** A piaci státuszok követése, hiánybejelentések és forgalomból történő kivonások monitorozása kizárólag az OTC és a vényköteles készítményekre vonatkozik.
 - **Hiány Részletei (ha státusza Készlethiány):**
   - **Hiány kezdete:** Dátum (`2026.07.15`)
   - **Várható befejezés:** Dátum (`2026.11.30`) vagy `"Folyamatban"`
@@ -307,10 +349,10 @@ Ez a szakasz a rendszer üzleti entitásainak felületi paramétereit részletez
   - **Telefonszám:** Hívható formátum (pl. `"+36 1 234 5678"`)
   - **E-mail cím:** Kattintható levélcím (pl. `"aranysas@benu.hu"`)
 
-### 3.4. Képzés / Kurzus (Course) Adatmodell *(Nem aktív felület)*
+### 3.4. Képzés / Kurzus (Course) Adatmodell *(Nem fejlesztési scope, prototípusban sem látható)*
 
 > [!NOTE]
-> Ez az adatmodell a prototípusban korábban definiált képzési struktúrát rögzíti, a hozzá kapcsolódó felület a jelenlegi éles prototípusban nem aktív.
+> Ez az adatmodell a rendszerben korábban megtervezett képzési struktúrát rögzíti; jelenleg nem fejlesztési scope, a prototípusban sem látható.
 
 - **Kurzus azonosító:** Karakterlánc (pl. `"c1"`)
 - **Cím:** Szöveg (pl. `"A hipertónia legújabb terápiás irányelvei"`)
@@ -396,6 +438,7 @@ A portál minden oldalának tetején rögzített (sticky), központi navigáció
 - **AC-4.0.2:** A Közeli patika blokkra kattintva a Patikaválasztó modál megnyílik, és új patika kiválasztásakor a fejléc azonnal frissül a választott patika nevével.
 - **AC-4.0.3:** A Mentett lenyíló ablakban lévő "Összes" hivatkozásra kattintva a gyógyszerlista megnyílik, és a táblázatban kizárólag a mentett gyógyszerek jelennek meg.
 - **AC-4.0.4:** Kijelentkezéskor a rendszer érvényteleníti a munkamenetet és a bejelentkezési oldalra (`/login`) irányít át.
+- **AC-4.0.5:** A böngésző lapfülének megnevezése (HTML `<title>`) minden belső és publikus oldalon kötelezően a `"{lap neve} | BENUvény Orvosi Portál"` egységes formátumot jeleníti meg, elősegítve a böngészőlapok gyors azonosítását.
 
 ---
 
@@ -413,10 +456,11 @@ A bejelentkezést követő központi áttekintő felület, amely összefoglalja 
 2. **"Globális Készletváltozás" Összesítő Kártya (Bal hasáb):**
    - Kiemelt, világossárga kártya (`#FFFCE9`) felkiáltójel ikonnal a bal hasáb tetején.
    - Részletes összefoglalót ad: hány gyógyszer került újonnan készlethiányba, mennyi vált újra elérhetővé, és hány terméket vontak ki a forgalomból (megszűnt).
+   - **Hatóköri szabály:** Az összesítés kizárólag az OTC és vényköteles gyógyszerek változásait kalkulálja; egyéb nem gyógyszer termékek (pl. táplálékkiegészítők, kozmetikumok) nem képezik a statisztika részét.
    - Amennyiben van beállított közeli patika, külön mondat emeli ki a preferált patikában történt változásokat.
    - A szöveges számértékek közvetlenül kattintható hivatkozások, amelyek a gyógyszerlistát az adott státuszra előszűrve nyitják meg.
 3. **Legutóbbi 20 Készletváltozás Táblázata (Bal hasáb):**
-   - Időrendi lista a legfrissebb 20 készlet- és piaci státuszváltozásról.
+   - Időrendi lista a legfrissebb 20 készlet- és piaci státuszváltozásról (kizárólag OTC és vényköteles készítmények).
    - Oszlopok: Színes státuszjelvény (`Elérhető`, `Hiány`, `Megszűnt`), Gyógyszer kereskedelmi neve (adatlapra vezető link), Változás rögzítésének dátuma.
    - A táblázat alatt az *"Összes változás megtekintése"* gomb a teljes gyógyszerlistára navigál dátum szerinti csökkenő rendezéssel.
 4. **Gyógyszertári Készlet és Térkép Widget (Jobb hasáb):**
@@ -434,6 +478,7 @@ A bejelentkezést követő központi áttekintő felület, amely összefoglalja 
 - **AC-4.1.1:** Az időszak-választóban történő módosítás (pl. 7 napról 30 napra) azonnal és oldalújratöltés nélkül újraszámolja a készletváltozások darabszámait.
 - **AC-4.1.2:** A figyelmeztető kártyán a "készlethiány" számára kattintva a rendszer a gyógyszerlistára navigál, ahol a státuszszűrő automatikusan `Készlethiány` értékre van állítva.
 - **AC-4.1.3:** Beállított preferált patika esetén a widgetben a helyi készletváltozások az adott patika BF kódjára szűrt valós adatokat mutatják.
+- **AC-4.1.4:** Az Irányítópulton megjelenő összesítő kártya és a legutóbbi 20 készletváltozás táblázata kizárólag az OTC és vényköteles termékek adatait számolja és jeleníti meg; egyéb patikai árucikkek nem szerepelhetnek a készletmozgásokban.
 
 ---
 
@@ -532,6 +577,7 @@ Három oszlopos áttekintő kártya:
 - **AC-4.2.2:** A jobb szélső "Műveletek" oszlop vízszintes görgetéskor mindvégig látható marad a monitor jobb szélén rögzített módon.
 - **AC-4.2.3:** A gyógyszer adatlapon a "Közeli gyógyszertár" nevére kattintva azonnal felugrik a Gyógyszertár Részletek modális ablak anélkül, hogy a böngésző elnavigálna a gyógyszer oldaláról.
 - **AC-4.2.4:** Készlethiányos gyógyszer esetén a hiány oka, kezdete és a helyettesítő javaslat jól láthatóan megjelenik a sárga figyelmeztető bannerben.
+- **AC-4.2.5:** A gyógyszer-nyilvántartásban és a státuszkövetésben kizárólag OTC és vényköteles készítmények vesznek részt; egyéb nem gyógyszer termékek (étrend-kiegészítők, gyógyhatású termékek, kozmetikumok, gyógyászati segédeszközök) státuszait a rendszer nem monitorozza és nem jeleníti meg státuszkövetett tételként.
 
 ---
 
@@ -603,12 +649,12 @@ A lista tetején két kiemelt információs kártya segíti a tájékozódást:
 
 ---
 
-### 4.4. Képzési Program *(Nem aktív felület)*
+### 4.4. Képzési Program *(Nem fejlesztési scope, prototípusban sem látható)*
 
 > [!WARNING]
-> **Felületi Státusz: Nem aktív felület**  
-> Ez a modul és felület a jelenlegi éles prototípusban nem aktív (a navigációs fejlécből, a főoldali irányítópultról és a globális keresőből kivezetésre került, közvetlen menühivatkozás nem vezet rá).  
-> Az alábbi fejezet a korábbi prototípus-specifikáció szerinti működést, a kurzusadatokat és az LMS kapcsolódási logikát dokumentálja nyilvántartási és későbbi reaktiválhatósági céllal.
+> **Felületi Státusz: Nem fejlesztési scope, prototípusban sem látható**  
+> Ez a modul és felület jelenleg nem képezi a fejlesztési scope részét, a prototípusban sem látható (a navigációs fejlécből, a főoldali irányítópultról és a globális keresőből kivezetésre került, közvetlen menühivatkozás nem vezet rá).  
+> Az alábbi fejezet a korábbi koncepció szerinti működést, a kurzusadatokat és az LMS kapcsolódási logikát rögzíti specifikációs nyilvántartás céljából.
 
 **Útvonal:** `https://bvo.uneb.hu/kepzesek` *(Közvetlen eléréssel érhető el)*
 
@@ -793,6 +839,10 @@ Zárt szakmai kommunikációs tér orvosok és gyógyszerészek közötti tapasz
 - **Új Téma Indítása:** Cím, szakterület és szöveg megadásával. Lehetőség van **anonim közzétételre** is (a szerző neve helyett `"Anonim Felhasználó"` jelenik meg).
 - **Lezárt Téma:** Lezárt státuszú témához a felület nem engedélyez új hozzászólást fűzni.
 
+#### 4.9.2. Elfogadási Kritériumok (Acceptance Criteria)
+- **AC-4.9.1:** Anonim témaindítás vagy hozzászólás esetén a szerző valós neve és azonosítója rejtve marad, kizárólag az "Anonim Felhasználó" megnevezés jelenik meg a többi felhasználó számára.
+- **AC-4.9.2:** Lezárt státuszú fórumtémánál a rendszer letiltja az új hozzászólás beküldésének lehetőségét és tájékoztató feliratot jelenít meg.
+
 ---
 
 ---
@@ -802,8 +852,8 @@ Zárt szakmai kommunikációs tér orvosok és gyógyszerészek közötti tapasz
 Ez a fejezet összefoglalja azokat az elemeket, amelyek korábbi koncepciókban szerepeltek, de a jelenlegi érvényes felületen nem aktívak vagy külső rendszer feladatkörébe tartoznak:
 
 1. **Képzési Program (BENU Képzések - `/kepzesek`):**
-   - *Státusz:* ⚠️ Nem aktív felület.
-   - *Részletek:* A prototípus korábbi fázisában megkezdett képzési felület és a külső LMS hivatkozások a végleges orvosi portál felületéről kivezetésre kerültek: a navigációs fejlécben (Navbar), az Irányítópulton és a Globális Keresőben sem érhető el hivatkozás rá. A funkció teljes specifikációját a 4.4. fejezet tartalmazza a funkcionális nyilvántartás és az esetleges későbbi bekapcsolás érdekében.
+   - *Státusz:* ⚠️ Nem fejlesztési scope, prototípusban sem látható.
+   - *Részletek:* A képzési felület és a külső LMS hivatkozások nem részei a fejlesztési scope-nak, és a prototípusban sem láthatók (a navigációs fejlécben [Navbar], az Irányítópulton és a Globális Keresőben sem érhető el hivatkozás rájuk). A funkció részletes leírását a 4.4. fejezet tartalmazza a funkcionális nyilvántartás érdekében.
 2. **Közösségi Fórum a Főmenüben és a Globális Keresőben:**
    - *Státusz:* Kivezetve a kiemelt főmenüből. A fórum közvetlen URL-en (`/kozosseg`) elérhető maradt, az adminisztrációs felügyelet működik.
 3. **Közösségi Aktivitás Widget az Irányítópulton:**
@@ -820,6 +870,9 @@ Ez a fejezet összefoglalja azokat az elemeket, amelyek korábbi koncepciókban 
    - *Státusz:* Elvetve. A gyógyszerek böngészése a magas adattartalom és a szakmai szempontok miatt kizárólag rendezhető táblázatos nézetben történik.
 9. **Önkiszolgáló Automatikus Felhasználói Regisztrációs Felület:**
    - *Státusz:* Jelenleg nem tervezett. A rendszer zárt szakmai jellege miatt a regisztráció kizárólag a bejelentkező felületről indított kapcsolatfelvételi űrlapon és kézi adminisztrátori jóváhagyáson keresztül működik.
+10. **Nem Gyógyszer Patikai Termékek (Étrend-kiegészítők, Orvostechnikai Eszközök, Kozmetikumok) Státuszkövetése:**
+    - *Státusz:* Rendszer hatókörén kívüli (Out of scope) funkció.
+    - *Részletek:* A BENUvény orvosi portál célzottan a gyógyító és terápia-meghatározó orvosok és gyógyszerészek számára készült. A készlet- és piaci státuszok, hiányok és helyettesíthetőség monitorozása emiatt szigorúan a törzskönyvezett humán gyógyszerekre – azon belül is kizárólag az OTC és a vényköteles készítményekre – korlátozódik. A patikai forgalomban jelen lévő több tízezer egyéb cikk (étrend-kiegészítők, vitaminok, kozmetikumok, orvostechnikai eszközök, tápszerek) státuszkövetése tudatos döntés alapján nem része a portál funkcionalitásának, megelőzve az orvosi fókusz felhígulását és az adatzajt.
 
 ---
 
@@ -865,6 +918,7 @@ Ez a fejezet a funkcionális specifikációban eszközölt módosítások és ki
 
 | Verzió | Dátum | Változás Típusa | Változások Részletes Összefoglalása |
 | :--- | :--- | :--- | :--- |
+| **v1.6.1** | 2026.10.20. | Funkcionális Hatókör & Irányelvek Pontosítása | **Gyógyszer státuszkövetés, WCAG és böngésző title követelmények rögzítése:**<br>• Rögzítésre került, hogy a portál gyógyszerkészlet- és hiánystátuszkövetési funkciói kizárólag a humán gyógyszerek két csoportjára korlátozódnak: **OTC (vény nélkül kapható)** és **vényköteles (Rx)** készítmények; egyéb nem gyógyszer cikkek (étrend-kiegészítők, kozmetikumok, tápszerek, gyógyászati segédeszközök) státuszai kívül esnek a hatókörön.<br>• **WCAG 2.2 irányelvek:** Törekedni kell az alapvető sztenderdek betartására, de zárt szakmai rendszer lévén és a nem akadályoztatott orvosi célcsoport miatt nem követelmény a maximális szintű megfelelőség.<br>• **Technikai SEO és lapfül title formátum:** Zárt rendszer lévén klasszikus SEO elvárások nincsenek, de a böngészést segítő lapfülcím kötelezően a `"{lap neve} \| BENUvény Orvosi Portál"` formátumban kell megjelenjen (új 1.8 fejezet és AC-4.0.5). |
 | **v1.6.0** | 2026.10.20. | Átfogó Revízió & FRS Bővítés | **Prototípus működés szerinti teljes körű funkcionális szinkronizáció és követelménybővítés:**<br>• Új dátumozott kiadás (`bvo-funkcionalis-specifikacio-20261020.md`) létrehozása és a főkatalógus szinkronizálása.<br>• **Képzési Program dokumentációjának megőrzése inaktív felületi státuszjelzéssel:** A Képzési Program és az LMS integráció részletes funkcionális leírása a dokumentumban megmaradt (3.4. és 4.4. fejezetek), de egyértelműen és kiemelten megjelölve, hogy a felület a jelenlegi éles prototípusban **nem aktív** (a navigációból kivezetve).<br>• Minden fő funkcionális modul kiegészítése strukturált **Bemenetek és Kimenetek**, felhasználói szintű **Hibakezelés** és pontosan ellenőrizhető **Elfogadási Kritériumok (Acceptance Criteria - AC)** fejezetekkel a globális követelményszabályoknak megfelelően.<br>• A 4 szintű készletstátusz (`Készleten`, `Korlátozottan`, `Rendelésre (1-2 munkanap)`, `Nem elérhető`) és a hozzá tartozó hálózati / helyi felületi megjelenítés megerősítése.<br>• A Gyógyszertárak modul SubHeader keresőjének, pill szűrőinek (`Most nyitva`, `Hétvégén nyitva`, `0-24`), GPS helymeghatározó paneljének, valamint a heti nyitvatartási modal és mélylinkelés (`/gyogyszertarak?id=...`) leírásának véglegesítése.<br>• A fejléc Mentett gyorslista "Összes" gombjának navigációs viselkedése (`onlyFavorites=true` szinkron) a gyógyszerlista oldallal.<br>• Manuális regisztrációs kapcsolatfelvételi űrlap, 2FA és passkey biztonsági folyamatok pontosítása. |
 | **v1.5.1** | 2026.09.08. | Módosítás | **Gyógyszerlista táblázat fluid (teljes képernyőszélességű) elrendezése:**<br>• A gyógyszerek oldal és az adatáblázat fix maximális szélességi korlátja (1440px) feloldásra került; a felület dinamikusan kitölti a teljes képernyőszélességet.<br>• Nagyobb monitorokon jelentősen javult az adatok átláthatósága és olvashatósága, minimalizálva a vízszintes görgetés szükségességét.<br>• Frissítésre került a 4.2.1. pont (Fluid elrendezés). |
 | **v1.4.1** | 2026.08.24. | Kiegészítés | **Manuális felhasználói regisztráció és kapcsolatfelvételi űrlap rögzítése:**<br>• Tisztázásra került, hogy a felhasználók regisztrációja kézzel (manuálisan) történik az adminisztrátor által.<br>• Az új szakmai felhasználó a bejelentkezési felületről elérhető űrlapon veszi fel a kapcsolatot az adminisztrációval (pecsétszám, szakterület megadásával).<br>• Új adatmodell (3.6) és új funkcionális leírás (4.6.4), elvetett funkciók (5.9) és Változásnapló (7) bevezetése. |

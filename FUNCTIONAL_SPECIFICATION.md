@@ -72,6 +72,8 @@ A modul célja a gyógyszertárak gyors és hatékony megtalálása, valamint az
 ### 3.3. Gyógyszer Nyilvántartás és Készletfigyelés
 A rendszer központi eleme a gyógyszerek adatbázisa és azok státuszának követése.
 
+> **Státuszkövetési Hatókör:** A rendszerben a státuszok (piaci hiányok, kivonások és készletelérhetőségek) követése **kizárólag az OTC (vény nélkül kapható) és vényköteles (Rx) humán gyógyszerekre** terjed ki. Nem gyógyszer kategóriák (pl. étrend-kiegészítők, gyógyhatású készítmények, kozmetikumok, gyógyászati segédeszközök) státuszait a rendszer nem monitorozza.
+
 *   **Tábla Nézet:**
     *   Részletes táblázatos megjelenítés (Név, TK-szám, Hatóanyag, Kiszerelés, Gyártó, Státusz, Utolsó frissítés, stb.).
     *   Oszlopok rendezhetősége kattintással (növekvő/csökkenő).
