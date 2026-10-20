@@ -1,6 +1,13 @@
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ - TÉMA RÉSZLETEK OLDAL
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez az útvonal és a kapcsolódó közösségi funkciók jelenleg NEM képezik
+ * a fejlesztési scope részét. Kód- és felületi szinten kizárólag tervezetként
+ * / koncepcióként van jelen a prototípusban, a navigációból kivezetve.
+ * ============================================================================
+ * 
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - TÉMA RÉSZLETEK OLDAL (INAKTÍV TERVEZET)
  * ============================================================================
  * 
  * ÚTVONAL: /kozosseg/[topicId]

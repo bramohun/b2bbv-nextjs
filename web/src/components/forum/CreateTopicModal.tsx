@@ -2,7 +2,13 @@
 
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ - ÚJ TÉMA LÉTREHOZÁSA MODAL
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez a komponens jelenleg NEM képezi a fejlesztési scope részét.
+ * Kód- és felületi szinten kizárólag tervezetként / koncepcióként van jelen a prototípusban.
+ * ============================================================================
+ * 
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - ÚJ TÉMA LÉTREHOZÁSA MODAL (INAKTÍV TERVEZET)
  * ============================================================================
  * 
  * CÉL:

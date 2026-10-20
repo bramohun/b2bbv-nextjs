@@ -2,7 +2,14 @@
 
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez a komponens és a kapcsolódó külső LMS integráció jelenleg NEM képezi a
+ * fejlesztési scope részét. Kód- és felületi szinten kizárólag tervezetként /
+ * koncepcióként van jelen a prototípusban, éles funkcióként még nem elérhető.
+ * ============================================================================
+ * 
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - LMS TÁJÉKOZTATÓ MODAL (INAKTÍV TERVEZET)
  * ============================================================================
  * 
  * LEÍRÁS:

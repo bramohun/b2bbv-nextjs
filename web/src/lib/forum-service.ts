@@ -1,6 +1,13 @@
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ - FÓRUM SZOLGÁLTATÁS
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez a modul és a kapcsolódó közösségi fórum szolgáltatás jelenleg NEM képezi a
+ * fejlesztési scope részét. Kód- és felületi szinten kizárólag tervezetként
+ * / koncepcióként van jelen a prototípusban, éles funkcióként még nem elérhető.
+ * ============================================================================
+ * 
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - FÓRUM SZOLGÁLTATÁS (INAKTÍV TERVEZET)
  * ============================================================================
  * 
  * CÉL:

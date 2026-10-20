@@ -2,7 +2,14 @@
 
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ - TÉMA RÉSZLETEK OLDAL
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez a komponens és a kapcsolódó közösségi funkciók jelenleg NEM képezik a
+ * fejlesztési scope részét. Kód- és felületi szinten kizárólag tervezetként /
+ * koncepcióként van jelen a prototípusban, éles funkcióként még nem elérhető.
+ * ============================================================================
+ * 
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - TÉMA RÉSZLETEK OLDAL (INAKTÍV TERVEZET)
  * ============================================================================
  * 
  * ÚTVONAL: /kozosseg/[topicId]
@@ -166,6 +173,15 @@ export default function TopicDetailClient() {
                 <span className="material-symbols-rounded">arrow_back</span>
                 Vissza a fórumhoz
             </Link>
+
+            {/* Tervezet figyelmeztető banner */}
+            <div className="alert alert-warning shadow-md rounded-2xl mb-6 border border-amber-300 bg-amber-50 text-amber-900 flex items-center gap-3 p-4">
+                <span className="material-symbols-rounded text-2xl text-amber-600 shrink-0">warning</span>
+                <div>
+                    <span className="font-bold block text-sm">Tervezet – Jelenleg nem fejlesztési scope</span>
+                    <span className="text-xs text-amber-800">Ez a közösségi fórum felület és a kapcsolódó funkciók jelenleg nem képezik a fejlesztési scope részét, kizárólag felületi koncepcióként tekinthetők meg.</span>
+                </div>
+            </div>
 
             <div className="card bg-base-100 shadow-lg mb-6">
                 <div className="card-body">

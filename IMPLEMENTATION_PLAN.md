@@ -29,7 +29,7 @@ A jelenlegi rendszer kliens oldalon tölti be és parsolja a CSV-ket. Ezt átala
 *   **JSON API:** A Next.js API Route-ok (`/api/medicines`, `/api/pharmacies`) szolgálják ki a feldolgozott JSON adatot, így a kliensnek nem kell CSV-t parsolnia.
 *   **Előny:** Gyorsabb betöltés, kisebb adatforgalom a kliens felé.
 
-### 2.2 Dinamikus Adatok (Felhasználó, Kedvencek, Fórum)
+### 2.2 Dinamikus Adatok (Felhasználó, Kedvencek)
 A jelenlegi LocalStorage alapú "mock" backendet React Context-be és Custom Hook-okba szervezzük.
 *   **AuthContext:** Kezeli a bejelentkezett felhasználót, regisztrációt (mock) és jogosultságokat.
 *   **StorageService:** Egy absztrakciós réteg a LocalStorage fölött, hogy később könnyen lecserélhető legyen valódi adatbázisra.
@@ -63,8 +63,6 @@ A meglévő HTML oldalak átültetése Next.js Route-okká:
 | `stock-history.html` | `/stock-history` | Készletváltozások naplója. |
 | `pharmacy-locator.html` | `/pharmacies` | Patikakereső térképpel. |
 | `pharmacy-detail.html` | `/pharmacies/[id]` | Patika részletek. |
-| `forum.html` | `/forum` | Fórum témák listája. |
-| `forum-topic.html` | `/forum/[topicId]` | Fórum téma és hozzászólások. |
 | `profile.html` | `/profile` | Felhasználói profil. |
 
 ## 5. Funkcionalitások Migrációja (Business Logic)
@@ -98,6 +96,6 @@ A `assets/js/*.js` fájlok logikájának átírása TypeScript-be:
 2.  **Fázis (Adat):** Gyógyszerlista (`/medicines`) és Részletek (`/medicines/[id]`) CSV adatokkal.
 3.  **Fázis (Patikák):** Patikakereső és Térkép.
 4.  **Fázis (User Features):** Kedvencek, Értesítések, Profil (LocalStorage alapon).
-5.  **Fázis (Extra):** Fórum és Készletelőzmények.
+5.  **Fázis (Extra):** Készletelőzmények.
 
 Készen áll a fejlesztés megkezdésére?

@@ -9,18 +9,17 @@
 
 ## 1. BEVEZETÉS (BRIEF)
 
-A rendszer egy szakmai orvosi portál, amelynek elsődleges célja a hiteles gyógyszerinformációk szolgáltatása, a gyógyszertári készletek nyomon követése, valamint egy zárt szakmai közösségi tér biztosítása orvosok számára.
+A rendszer egy szakmai orvosi portál, amelynek elsődleges célja a hiteles gyógyszerinformációk szolgáltatása és a gyógyszertári készletek nyomon követése orvosok számára.
 
 **Fő pillérek:**
 1.  **Gyógyszerinformáció:** Részletes, kereshető adatbázis valós idejű készletinformációkkal.
 2.  **Gyógyszertárkereső:** "Közeli patika" funkcióval támogatott elérhetőségi rendszer.
-3.  **Szakmai Fórum:** Moderált, szakosított kommunikációs felület.
 
 ---
 
 ## 2. FOGALMAK (CONCEPTS)
 
-A rendszerben használt adatszerkezetek és entitások definíciója a kódbázis (`types/index.ts`, `types/forum.ts`, `user-service.ts`) alapján.
+A rendszerben használt adatszerkezetek és entitások definíciója a kódbázis (`types/index.ts`, `user-service.ts`) alapján.
 
 ### 2.1. Felhasználó (User)
 A rendszerbe regisztrált orvos vagy adminisztrátor.
@@ -32,7 +31,6 @@ A rendszerbe regisztrált orvos vagy adminisztrátor.
 *   **[Státusz (status)](#felhasználó-státusz):** `active` vagy `inactive`.
 *   **[Szakterületek (specialties)](#orvosi-szakterület):** A felhasználó orvosi szakképesítéseinek listája.
 *   **[Hírlevél Beállítások (newsletterSettings)](#hírlevél-beállítások):**
-    *   *Közösségi értesítések:* Gyakoriság, téma, saját témák szűrése.
     *   *Készletértesítések:* Gyakoriság, témák (pl. "Újra elérhető"), hatókör (pl. "Szakterület + kedvenc").
 *   **[Munkamenet Verzió (sessionVersion)](#munkamenet-verzió):** Biztonsági számláló a kijelentkeztetéshez.
 
@@ -53,26 +51,12 @@ Gyógyszertári szolgáltató pont.
 *   **[Cím Adatok](#cím-adatok):** Irányítószám, Város, Utca, Házszám, Geolokáció (GPS).
 *   **[Nyitvatartás](#nyitvatartás):** Hétfőtől vasárnapig tartó nyitási és zárási idők.
 
-### 2.4. Fórum Téma (ForumTopic)
-Szakmai beszélgetés indító bejegyzése.
-*   **[Szerző (author)](#szerző):** Kapcsolat a [Felhasználóhoz](#21-felhasználó-user). Lehet `Anonim`.
-*   **[Szakterület (specialties)](#orvosi-szakterület):** Mely szakterületeket érinti (pl. "Kardiológia").
-*   **[Moderálási Státuszok](#moderálási-státuszok):**
-    *   `isHidden`: Admin által elrejtve.
-    *   `isLocked`: Admin által lezárva (nem kommentelhető).
-    *   `isAuthorAnonymized`: A szerző neve admin által elrejtve (GDPR/kérés).
-
-### 2.5. Hozzászólás (ForumComment)
-Reakció egy [Fórum Témára](#24-fórum-téma-forumtopic).
-*   **Tulajdonságok:** Szöveg, Szerző, Dátum.
-*   **Moderálási Státuszok:** Hasonló a témához (`isHidden`, `isAuthorAnonymized`).
-
-### 2.6. Nézet Beállítások (ViewSettings)
+### 2.4. Nézet Beállítások (ViewSettings)
 A felhasználó egyéni beállításai a táblázatok megjelenítéséhez.
 *   **[Látható Oszlopok (tableColumns)](#látható-oszlopok):** Mely oszlopok jelenjenek meg (Boolean map).
 *   **[Oszlop Sorrend (tableColumnOrder)](#oszlop-sorrend):** Az oszlopok azonosítóinak rendezett listája.
 
-### 2.7. Orvosi Szakterület (MedicalSpecialty)
+### 2.5. Orvosi Szakterület (MedicalSpecialty)
 Előre definiált lista (Enum).
 *   *Értékek:* Háziorvos, Belgyógyász, Kardiológus, stb.
 
@@ -105,26 +89,9 @@ A központi felület a gyógyszeradatbázis böngészésére.
 *   **[Átrendezés (D&D)](#oszlop-átrendezés):** Fejléc megragadásával az oszlopok sorrendje módosítható.
 *   **[Lapozás](#lapozás):** Oldalszám választó a lista alján.
 
-### 3.2. Fórum Adminisztráció
-**Útvonal:** `/admin/forum`
-Az adminisztrátorok moderációs felülete.
-
-**Elemek:**
-*   **[Téma Lista](#téma-lista):** Táblázatos nézet, amely tartalmazza a rejtett elemeket is.
-*   **[Műveleti Gombok](#műveleti-gombok):** Minden sor végén dropdown menü.
-    *   *Szerkesztés:* Szöveges tartalom módosítása.
-    *   *Lezárás/Feloldás:* Hozzászólások tiltása/engedélyezése.
-    *   *Elrejtés/Megjelenítés:* Láthatóság kapcsolása.
-    *   *Anonimizálás:* Szerző nevének végleges törlése.
-*   **[Részletek (Lenyitható)](#részletes-nézet):** A sorra kattintva megjelennek a témához tartozó hozzászólások, hasonló moderációs lehetőségekkel.
-
-**Modális Ablakok:**
-*   **[Megerősítő Modal](#megerősítő-modal):** Kritikus műveletek (pl. Anonimizálás, Elrejtés) előtt kér jóváhagyást.
-*   **[Szerkesztő Modal](#szerkesztő-modal):** Szövegdoboz a tartalom átírásához.
-
-### 3.3. Fejléc (Navbar)
+### 3.2. Fejléc (Navbar)
 Globális navigációs komponens.
-*   **Elemek:** Menüpontok (Gyógyszerek, Patikák, Fórum), Profil legördülő, [Közeli Patika Widget](#közeli-patika-widget).
+*   **Elemek:** Menüpontok (Gyógyszerek, Patikák), Profil legördülő, [Közeli Patika Widget](#közeli-patika-widget).
 
 ---
 
@@ -162,17 +129,7 @@ A rendszer perszonalizációs eleme.
     *   Ha a felhasználó törölni akar egy Kedvencet, amire aktív Értesítése van, a rendszer **figyelmeztető megerősítést** kér (`FavoriteRemovalModal`).
     *   Megerősítés esetén a Kedvenc státusz és az Értesítés is törlődik.
 
-### 4.4. Fórum Moderálás (Admin)
-Az adminisztrátorok jogkörei a tartalom felett.
-
-*   **[Elrejtés](#téma-elrejtés):** A tartalom (Téma vagy Komment) megmarad az adatbázisban, de a publikus felületen nem jelenik meg (`isHidden = true`).
-*   **[Lezárás](#téma-lezárás):** A Téma látható marad, de új hozzászólás nem írható hozzá (`isLocked = true`).
-*   **[Anonimizálás](#szerző-anonimizálás):**
-    *   A szerző neve felülírásra kerül (`Anonim`-ra), az `isAuthorAnonymized` flag `true` lesz.
-    *   Ez a lépés visszafordíthatatlan (GDPR megfelelőség).
-*   **[Tartalom Szerkesztés](#tartalom-szerkesztés):** Az admin átírhatja a bejegyzés szövegét (pl. trágár kifejezések eltávolítása).
-
-### 4.5. Bejelentkezés és Jogosultság
+### 4.4. Bejelentkezés és Jogosultság
 *   **Hitelesítés:** Simple email/password check (`UserService.validateCredentials`).
 *   **Demo Jelszó:** A prototípus minden felhasználónál a `vény123` jelszót fogadja el.
 *   **Munkamenet:** `localStorage` alapú munkamenet kezelés verziószámmal (`sessionVersion`). Ha a verzió szerver oldalon (mock) nő, a kliens kijelentkeztet.

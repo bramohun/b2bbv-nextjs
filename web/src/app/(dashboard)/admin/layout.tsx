@@ -43,7 +43,7 @@ export default function AdminLayout({
                         Adminisztrációs felület
                     </h1>
                 </div>
-                <p className="text-[#62788f] text-[15px]">Rendszerfelhasználók, gyógyszertárak és a közösségi fórum kezelése</p>
+                <p className="text-[#62788f] text-[15px]">Rendszerfelhasználók és gyógyszertárak kezelése</p>
             </div>
 
             <div role="tablist" className="tabs tabs-lifted">
@@ -60,13 +60,6 @@ export default function AdminLayout({
                     href="/admin/pharmacies"
                 >
                     Gyógyszertárak
-                </Link>
-                <Link
-                    role="tab"
-                    className={`tab ${pathname.includes('/forum') ? 'tab-active' : ''}`}
-                    href="/admin/forum"
-                >
-                    Fórum Moderálás
                 </Link>
             </div>
 

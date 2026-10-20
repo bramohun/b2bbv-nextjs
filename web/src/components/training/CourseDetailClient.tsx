@@ -2,7 +2,14 @@
 
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez a komponens és a kapcsolódó képzési modul jelenleg NEM képezi a
+ * fejlesztési scope részét. Kód- és felületi szinten kizárólag tervezetként /
+ * koncepcióként van jelen a prototípusban, éles funkcióként még nem elérhető.
+ * ============================================================================
+ * 
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - KÉPZÉS ADATLAP (INAKTÍV TERVEZET)
  * ============================================================================
  * 
  * ÚTVONAL: /kepzesek/[courseId]
@@ -53,6 +60,15 @@ export default function CourseDetailClient() {
                 <span className="material-symbols-rounded group-hover:-translate-x-1 transition-transform">arrow_back</span>
                 Vissza a képzésekhez
             </Link>
+
+            {/* Tervezet figyelmeztető banner */}
+            <div className="alert alert-warning shadow-md rounded-2xl mb-6 border border-amber-300 bg-amber-50 text-amber-900 flex items-center gap-3 p-4">
+                <span className="material-symbols-rounded text-2xl text-amber-600 shrink-0">warning</span>
+                <div>
+                    <span className="font-bold block text-sm">Tervezet – Jelenleg nem fejlesztési scope</span>
+                    <span className="text-xs text-amber-800">Ez a képzés adatlap és a kapcsolódó képzési rendszer jelenleg nem képezi a fejlesztési scope részét, kizárólag felületi koncepcióként tekinthető meg.</span>
+                </div>
+            </div>
 
             {/* Main Content Card */}
             <div className="card bg-base-100 shadow-2xl border border-base-200 overflow-hidden rounded-3xl">

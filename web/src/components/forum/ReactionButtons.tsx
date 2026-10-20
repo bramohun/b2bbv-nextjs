@@ -2,7 +2,13 @@
 
 /**
  * ============================================================================
- * REAKCIÓ GOMBOK KOMPONENS
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez a komponens jelenleg NEM képezi a fejlesztési scope részét.
+ * Kód- és felületi szinten kizárólag tervezetként / koncepcióként van jelen a prototípusban.
+ * ============================================================================
+ * 
+ * REAKCIÓ GOMBOK KOMPONENS (INAKTÍV TERVEZET)
  * ============================================================================
  * 
  * Like/dislike gombok újrafelhasználható komponense.

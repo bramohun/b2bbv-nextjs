@@ -61,10 +61,6 @@ export default function ProfilePage() {
 
     // Hírlevél beállítások típusai és állapota
     type NewsletterConfig = {
-        training: {
-            subscribed: boolean;
-            topics: string[]; // Akkreditált, Gyártói, Eladásösztönző
-        };
         stock: {
             subscribed: boolean;
             frequency: 'Napi' | 'Heti' | 'Mavi';
@@ -76,18 +72,16 @@ export default function ProfilePage() {
 
     const [newsletterSettings, setNewsletterSettings] = useState<{ primary: NewsletterConfig; secondary: NewsletterConfig }>({
         primary: {
-            training: { subscribed: true, topics: ['Akkreditált', 'Gyártói'] },
             stock: { subscribed: true, frequency: 'Heti', sendTime: 9, topics: ['Újra elérhető', 'Készlethiány'], scope: 'Szakterület + mentett gyógyszerek' }
         },
         secondary: {
-            training: { subscribed: false, topics: [] },
             stock: { subscribed: false, frequency: 'Havi' as any, sendTime: 10, topics: [], scope: 'Csak szakterület' }
         }
     });
 
     const updateNewsletter = (
         emailType: 'primary' | 'secondary',
-        category: 'training' | 'stock',
+        category: 'stock',
         field: string,
         value: any
     ) => {
@@ -101,14 +95,6 @@ export default function ProfilePage() {
                 }
             }
         }));
-    };
-
-    const toggleTrainingTopic = (emailType: 'primary' | 'secondary', topic: string) => {
-        const currentTopics = newsletterSettings[emailType].training.topics;
-        const newTopics = currentTopics.includes(topic)
-            ? currentTopics.filter(t => t !== topic)
-            : [...currentTopics, topic];
-        updateNewsletter(emailType, 'training', 'topics', newTopics);
     };
 
     const toggleStockTopic = (emailType: 'primary' | 'secondary', topic: string) => {
@@ -170,58 +156,7 @@ export default function ProfilePage() {
                 <span className="text-primary/70">{emailAddress}</span>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* BENU Képzési Program kártya */}
-                <div className="card bg-base-200/50 border border-base-300">
-                    <div className="card-body p-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold flex items-center gap-2 text-lg text-primary">
-                                <span className="material-symbols-rounded">school</span>
-                                BENU Képzési Program
-                            </h3>
-                            <div className="form-control">
-                                <label className="label cursor-pointer p-0 gap-2">
-                                    <span className="label-text font-medium">{newsletterSettings[emailType].training.subscribed ? 'Feliratkozva' : 'Leiratkozva'}</span>
-                                    <input
-                                        type="checkbox"
-                                        className="toggle toggle-primary toggle-sm"
-                                        checked={newsletterSettings[emailType].training.subscribed}
-                                        onChange={(e) => updateNewsletter(emailType, 'training', 'subscribed', e.target.checked)}
-                                    />
-                                </label>
-                            </div>
-                        </div>
-
-                        {newsletterSettings[emailType].training.subscribed && (
-                            <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                                <p className="text-sm text-base-content/60">Értesítést kérek az új képzésekről a megjelölt témakörökben.</p>
-
-                                <div className="form-control w-full">
-                                    <label className="label">
-                                        <span className="label-text font-bold text-xs uppercase tracking-wider">Érdekelt képzési témakörök</span>
-                                    </label>
-                                    <div className="flex flex-wrap gap-2 mt-1">
-                                        {['Akkreditált', 'Gyártói', 'Eladásösztönző'].map(topic => (
-                                            <button
-                                                key={topic}
-                                                onClick={() => toggleTrainingTopic(emailType, topic)}
-                                                className={`btn btn-sm rounded-xl px-4 normal-case font-bold transition-all ${newsletterSettings[emailType].training.topics.includes(topic)
-                                                    ? 'btn-primary shadow-md'
-                                                    : 'btn-outline border-base-300 hover:bg-base-300 hover:border-transparent'
-                                                    }`}
-                                            >
-                                                {topic}
-                                                {newsletterSettings[emailType].training.topics.includes(topic) && (
-                                                    <span className="material-symbols-rounded text-sm ml-2">check_circle</span>
-                                                )}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
+            <div className="grid grid-cols-1 max-w-2xl gap-6">
 
                 {/* Készletinfó kártya */}
                 <div className="card bg-base-200/50 border border-base-300">

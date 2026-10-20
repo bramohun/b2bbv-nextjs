@@ -1,6 +1,13 @@
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez a modul és a kapcsolódó képzési adatok jelenleg NEM képezik a fejlesztési
+ * scope részét. Kód- és felületi szinten kizárólag tervezetként / koncepcióként
+ * van jelen a prototípusban, éles funkcióként még nem elérhető.
+ * ============================================================================
+ * 
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - KÉPZÉSI ADATOK (INAKTÍV TERVEZET)
  * ============================================================================
  * 
  * LEÍRÁS:

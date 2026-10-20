@@ -2,7 +2,13 @@
 
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ - TÉMA KÁRTYA
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez a komponens jelenleg NEM képezi a fejlesztési scope részét.
+ * Kód- és felületi szinten kizárólag tervezetként / koncepcióként van jelen a prototípusban.
+ * ============================================================================
+ * 
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - TÉMA KÁRTYA (INAKTÍV TERVEZET)
  * ============================================================================
  * 
  * CÉL:

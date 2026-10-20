@@ -2,7 +2,14 @@
 
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez az oldal és a kapcsolódó képzési program funkciók jelenleg NEM képezik
+ * a fejlesztési scope részét. Kód- és felületi szinten kizárólag tervezetként
+ * / koncepcióként van jelen a prototípusban, a navigációból kivezetve.
+ * ============================================================================
+ * 
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - KÉPZÉSEK FŐOLDAL (INAKTÍV TERVEZET)
  * ============================================================================
  * 
  * ÚTVONAL: /kepzesek
@@ -35,6 +42,15 @@ export default function TrainingListPage() {
 
     return (
         <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12">
+            {/* Tervezet figyelmeztető banner */}
+            <div className="alert alert-warning shadow-md rounded-2xl mb-6 border border-amber-300 bg-amber-50 text-amber-900 flex items-center gap-3 p-4">
+                <span className="material-symbols-rounded text-2xl text-amber-600 shrink-0">warning</span>
+                <div>
+                    <span className="font-bold block text-sm">Tervezet – Jelenleg nem fejlesztési scope</span>
+                    <span className="text-xs text-amber-800">Ez a képzési felület és a kapcsolódó képzési rendszer jelenleg nem képezi a fejlesztési scope részét, kizárólag felületi koncepcióként tekinthető meg.</span>
+                </div>
+            </div>
+
             {/* Header Area */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
                 <div>

@@ -1,10 +1,14 @@
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ - [HASZNÁLATON KÍVÜL]
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez a modul és a kapcsolódó közösségi fórum aktivitás widget jelenleg NEM képezi
+ * a fejlesztési scope részét. Kód- és felületi szinten kizárólag tervezetként
+ * van jelen a prototípusban, a felületen nincs használatban.
  * ============================================================================
  * 
- * FIGYELEM: Ez a modul jelenleg nincsen hivatkozva a felületen. 
- * A funkcióját a BENU Képzési Program (TrainingPromoWidget) vette át.
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - KÖZÖSSÉGI AKTIVITÁS WIDGET (INAKTÍV TERVEZET)
+ * ============================================================================
  * 
  * USER STORY:
  * Felhasználóként szeretném látni a közösségi fórum legfrissebb aktivitásait, 

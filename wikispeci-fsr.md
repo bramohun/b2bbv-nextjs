@@ -8,7 +8,7 @@
 
 ## 1. BRIEF
 
-A rendszer egy átfogó orvosi portál alkalmazás, melynek célja, hogy naprakész információt biztosítson gyógyszerekről, gyógyszertárakról és szakmai közösségi teret nyújtson felhasználói számára.
+A rendszer egy átfogó orvosi portál alkalmazás, melynek célja, hogy naprakész információt biztosítson gyógyszerekről és gyógyszertárakról a felhasználói számára.
 
 **Célcsoport:** Orvosok, gyógyszerészek és egészségügyi szakemberek.
 **Technológia:** Web alapú alkalmazás (Next.js), reszponzív megjelenítéssel.
@@ -22,14 +22,13 @@ Az alábbi stratégiai célokat fogalmaztuk meg a rendszerrel kapcsolatban:
 
 *   **Naprakész Gyógyszerinformáció:** A felhasználók azonnal értesüljenek a készlethiányokról, megszűnésekről és elérhető helyettesítő termékekről.
 *   **Gyógyszertár Elérhetőség:** A felhasználók könnyen találjanak nyitva tartó és készlettel rendelkező gyógyszertárakat, különös tekintettel a saját "közeli patikájukra".
-*   **Szakmai Közösségépítés:** Lehetőséget biztosítani szakmai diskurzusra, anonimitás lehetőségével a kényes témákban.
-*   **Hatékony Adminisztráció:** A rendszer karbantartása, felhasználók és tartalom moderálása központi felületen.
+*   **Hatékony Adminisztráció:** A rendszer karbantartása és a felhasználók kezelése központi felületen.
 
 ---
 
 ## 3. FOGALMAK (ADATBÁZIS)
 
-Ebben a fejezetben definiáljuk a rendszerben előforduló entitásokat és azok tulajdonságait, szinkronban a `types/index.ts`, `types/forum.ts` és `lib/user-service.ts` definíciókkal.
+Ebben a fejezetben definiáljuk a rendszerben előforduló entitásokat és azok tulajdonságait, szinkronban a `types/index.ts` és `lib/user-service.ts` definíciókkal.
 
 ### 3.1. Felhasználó (User)
 A rendszerbe regisztrált személy.
@@ -38,16 +37,15 @@ A rendszerbe regisztrált személy.
 *   **Email cím (email):** Egyedi azonosító, belépéshez szükséges (elsődleges).
 *   **Másodlagos email (secondaryEmail):** Opcionális alternatív email cím.
 *   **Jelszó:** Titkosított hitelesítési adat (Demo: fix "vény123").
-*   **Szerepkör (role):** [Jogosultság](#38-jogosultság) (`admin` vagy `user`).
+*   **Szerepkör (role):** [Jogosultság](#36-jogosultság) (`admin` vagy `user`).
 *   **Státusz (status):** `active` (Aktív) vagy `inactive` (Inaktív).
 *   **Munkamenet verzió (sessionVersion):** Belső számláló a felhasználó érvényes bejelentkezéseinek kezeléséhez. Kijelentkeztetéskor növekszik.
 *   **Utolsó bejelentkezés (lastLogin):** Az utolsó sikeres belépés időbélyege.
 *   **Szakterületek (specialties):** Orvosi/szakmai érdeklődési körök listája (pl. 'Kardiológus', 'Belgyógyász').
 *   **Hírlevél beállítások (newsletterSettings):** Összetett konfiguráció:
     *   **Elsődleges (primary) és Másodlagos (secondary):** Külön-külön állítható.
-        *   *Közösségi (community):* Feliratkozva (igen/nem), Időpont (óra), Gyakoriság (Napi/Heti/Havi), Téma (Minden/Csak szakterület), Csak saját témák (igen/nem).
         *   *Készletinfó (stock):* Feliratkozva (igen/nem), Időpont (óra), Gyakoriság (Napi/Heti/Havi), Témák (pl. 'Újra elérhető', 'Készlethiány'), Hatókör (Minden/Szakterület + kedvenc/Csak szakterület/Csak kedvenc).
-*   **Kapcsolódó adatok:** [Kedvenc Gyógyszerek](#32-gyógyszer-medicine), [Közeli Patika](#33-gyógyszertár-pharmacy), [Értesítések](#36-értesítés-notification).
+*   **Kapcsolódó adatok:** [Kedvenc Gyógyszerek](#32-gyógyszer-medicine), [Közeli Patika](#33-gyógyszertár-pharmacy), [Értesítések](#34-értesítés-notification).
 
 ### 3.2. Gyógyszer (Medicine)
 A rendszerben nyilvántartott gyógyszerkészítmény.
@@ -80,38 +78,11 @@ Fizikai gyógyszertári egység.
 *   **Elérhetőség:** Telefonszám (telefon), Email cím (email).
 *   **Nyitvatartás:** Napi nyitás/zárás (mondayOpen, mondayClose ... sundayClose).
 
-### 3.4. Fórum Téma (ForumTopic)
-Egy szakmai beszélgetés indító bejegyzése.
-*   **Azonosító (id):** Egyedi azonosító.
-*   **Cím (title):** A téma megnevezése.
-*   **Leírás (description):** A téma részletes kifejtése.
-*   **Címkék (tags):** Témához kapcsolódó kulcsszavak tömbje.
-*   **Szakterület (specialties):** Orvosi szakterületek listája (MedicalSpecialty enum).
-*   **Általános (isGeneral):** Logikai, ha mindenkit érint.
-*   **Szerző (authorId, authorName):** [Felhasználó](#31-felhasználó-user) ID és név (vagy "Anonim").
-*   **Anonim (isAnonymous):** Logikai jelző.
-*   **Dátum (createdAt):** Létrehozás időbélyege.
-*   **Statisztika:** Like (likes), Dislike (dislikes), Hozzászólások száma (commentCount).
-*   **Moderálási állapotok:**
-    *   *Rejtett (isHidden):* Admin által elrejtve.
-    *   *Lezárt (isLocked):* Nem lehet hozzászólni.
-    *   *Szerző anonimizálva (isAuthorAnonymized):* GDPR/kérés esetén törölt név.
-
-### 3.5. Hozzászólás (ForumComment)
-Egy [Fórum Témához](#34-fórum-téma-forumtopic) fűzött válasz.
-*   **Azonosító (id):** Egyedi azonosító.
-*   **Téma azonosító (topicId):** Melyik témához tartozik.
-*   **Tartalom (text):** Szöveges üzenet.
-*   **Szerző:** [Felhasználó](#31-felhasználó-user) adatok (hasonlóan a témához).
-*   **Dátum (createdAt):** Közzététel ideje.
-*   **Reakciók:** Like/Dislike számlálók.
-*   **Moderálási állapotok:** Rejtett (isHidden), Szerző anonimizálva (isAuthorAnonymized).
-
-### 3.6. Értesítés (Notification)
+### 3.4. Értesítés (Notification)
 Rendszer által generált jelzés. Kontextusból (NotificationContext) kezelve.
 *   **Feliratkozás (isSubscribed):** Gyógyszer TK-szám alapján.
 
-### 3.7. Státuszok
+### 3.5. Státuszok
 *   **Gyógyszer Státusz (Kizárólag OTC és vényköteles termékeknél):**
     *   🟢 *Elérhető*
     *   🟡 *Készlethiány*
@@ -119,11 +90,11 @@ Rendszer által generált jelzés. Kontextusból (NotificationContext) kezelve.
     *(Nem gyógyszer kategóriájú termékek, pl. étrend-kiegészítők, gyógytermékek, kozmetikumok státuszait a rendszer nem követi.)*
 *   **Patika Nyitvatartás:** Nyitva / Hamarosan zár / Zárva (dinamikusan számított).
 
-### 3.8. Jogosultság (UserRole)
+### 3.6. Jogosultság (UserRole)
 *   **admin:** Teljes hozzáférés.
 *   **user:** Alapvető funkciók.
 
-### 3.9. Nézet Beállítások (ViewSettings)
+### 3.7. Nézet Beállítások (ViewSettings)
 A [Gyógyszer Lista](#45-gyógyszer-lista) testreszabásához.
 *   **tableColumns:** Mely oszlopok láthatóak (Record<Column, boolean>).
 *   **tableColumnOrder:** Oszlopok sorrendje tömbben.
@@ -142,7 +113,7 @@ A rendszer felhasználói felületeinek (UI) definíciója a `src/app` struktúr
 ### 4.2. Fejléc (Navbar)
 Globális komponens.
 *   **Elemek:**
-    *   Navigáció: Irányítópult, Gyógyszerek, Gyógyszertárak, Közösség.
+    *   Navigáció: Irányítópult, Gyógyszerek, Gyógyszertárak.
     *   Profil menü: [Felhasználó](#31-felhasználó-user) adatok, Kijelentkezés.
     *   [Közeli Patika](#33-gyógyszertár-pharmacy) widget (ha van beállítva).
 
@@ -151,7 +122,6 @@ Globális komponens.
 *   **Widgetek:**
     *   Készletváltozások (LegacySource adatokból).
     *   Közeli Patika státusz.
-    *   Közösségi aktivitás.
 
 ### 4.5. Gyógyszer Lista
 Útvonal: `/gyogyszerek`
@@ -191,21 +161,12 @@ Globális komponens.
 *   **Nézetek:** Térkép (Leaflet) és Lista.
 *   **Funkció:** "Közeli patikának jelölöm" (Context-be menti).
 
-### 4.8. Fórum (Közösség)
-Útvonal: `/kozosseg`
-*   **Implementáció:** `src/types/forum.ts` típusaira épül.
-*   **Funkciók:**
-    *   Témák listázása, szűrése (Címke, Szakterület).
-    *   Új téma létrehozása (Modal).
-    *   Hozzászólás, Like/Dislike.
-
 ### 4.10. Adminisztráció
 Útvonal: `/admin`
 *   **Jogosultság:** Csak `role: 'admin'` esetén (middleware + layout check).
 *   **Modulok:**
     *   Felhasználók (`/admin/users`): Lista, Szerkesztés (Modal), Deaktiválás.
     *   Gyógyszertárak (`/admin/pharmacies`): Lista, Részletek.
-    *   Fórum Moderálás (`/admin/forum`): Témák/Kommentek elrejtése, lezárása, anonimizálása.
 
 ### 4.15. Profil Oldal
 Útvonal: `/profile`

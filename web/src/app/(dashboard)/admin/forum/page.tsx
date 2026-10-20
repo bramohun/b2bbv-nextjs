@@ -16,7 +16,15 @@ import { ForumTopic, ForumComment } from '@/types/forum';
 
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ - FÓRUM MODERÁLÁS (ADMIN)
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez a modul és a kapcsolódó közösségi fórum moderációs funkciók jelenleg
+ * NEM képezik a fejlesztési scope részét. Kód- és felületi szinten kizárólag
+ * tervezetként / koncepcióként van jelen a prototípusban, az admin navigációból
+ * kivezetve.
+ * ============================================================================
+ * 
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - FÓRUM MODERÁLÁS (ADMIN - INAKTÍV TERVEZET)
  * ============================================================================
  * 
  * ÚTVONAL: /admin/forum
@@ -198,6 +206,15 @@ export default function AdminForumPage() {
     return (
         <div className="card bg-base-100 shadow-xl border border-base-300">
             <div className="card-body">
+                {/* Tervezet figyelmeztető banner */}
+                <div className="alert alert-warning shadow-md rounded-2xl mb-6 border border-amber-300 bg-amber-50 text-amber-900 flex items-center gap-3 p-4">
+                    <span className="material-symbols-rounded text-2xl text-amber-600 shrink-0">warning</span>
+                    <div>
+                        <span className="font-bold block text-sm">Tervezet – Jelenleg nem fejlesztési scope</span>
+                        <span className="text-xs text-amber-800">Ez az adminisztrációs fórum moderációs felület jelenleg nem képezi a fejlesztési scope részét, kizárólag felületi koncepcióként tekinthető meg.</span>
+                    </div>
+                </div>
+
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="card-title text-2xl">
                         <span className="material-symbols-rounded text-primary">forum</span>

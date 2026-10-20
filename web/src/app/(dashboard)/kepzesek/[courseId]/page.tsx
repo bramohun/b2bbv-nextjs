@@ -1,12 +1,16 @@
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez az útvonal és a kapcsolódó képzési funkciók jelenleg NEM képezik
+ * a fejlesztési scope részét. Kód- és felületi szinten kizárólag tervezetként
+ * / koncepcióként van jelen a prototípusban, a navigációból kivezetve.
+ * ============================================================================
+ * 
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - KÉPZÉS ADATLAP OLDAL (INAKTÍV TERVEZET)
  * ============================================================================
  * 
  * ÚTVONAL: /kepzesek/[courseId]
- * 
- * CÉL:
- * Egy konkrét tanfolyam részletes adatlapja (Server Component wrapper a statikus generáláshoz).
  */
 
 import { COURSES } from '@/lib/training-data';

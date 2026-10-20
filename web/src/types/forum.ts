@@ -1,6 +1,13 @@
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ - FÓRUM TÍPUSOK
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez a modul és a kapcsolódó közösségi fórum típusok jelenleg NEM képezik a
+ * fejlesztési scope részét. Kód- és felületi szinten kizárólag tervezetként
+ * / koncepcióként van jelen a prototípusban, éles funkcióként még nem elérhető.
+ * ============================================================================
+ * 
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - FÓRUM TÍPUSOK (INAKTÍV TERVEZET)
  * ============================================================================
  * 
  * CÉL:

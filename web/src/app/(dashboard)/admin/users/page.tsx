@@ -175,67 +175,7 @@ export default function AdminUsersPage() {
                     Beállítások a(z) {type === 'primary' ? 'elsődleges' : 'másodlagos'} email címhez.
                 </div>
 
-                {/* Közösség Szekció */}
-                <div className="collapse collapse-arrow bg-base-200">
-                    <input type="checkbox" defaultChecked />
-                    <div className="collapse-title text-lg font-medium flex items-center gap-2">
-                        <span className="material-symbols-rounded text-primary">forum</span>
-                        Közösség, Fórum
-                        <div className="ml-auto flex items-center gap-2 z-10" onClick={(e) => e.stopPropagation()}>
-                            <input
-                                type="checkbox"
-                                className="toggle toggle-sm toggle-primary"
-                                checked={config.community.subscribed}
-                                onChange={(e) => updateNewsletter(type, 'community', 'subscribed', e.target.checked)}
-                            />
-                        </div>
-                    </div>
-                    {config.community.subscribed && (
-                        <div className="collapse-content space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="form-control">
-                                    <label className="label text-xs">Kiküldés ideje (óra)</label>
-                                    <input
-                                        type="number" min="0" max="23" className="input input-sm input-bordered"
-                                        value={config.community.sendTime}
-                                        onChange={(e) => updateNewsletter(type, 'community', 'sendTime', parseInt(e.target.value))}
-                                    />
-                                </div>
-                                <div className="form-control">
-                                    <label className="label text-xs">Rendszeresség</label>
-                                    <select
-                                        className="select select-sm select-bordered"
-                                        value={config.community.frequency}
-                                        onChange={(e) => updateNewsletter(type, 'community', 'frequency', e.target.value)}
-                                    >
-                                        <option>Napi</option><option>Heti</option><option>Havi</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="form-control">
-                                <label className="label text-xs">Téma</label>
-                                <select
-                                    className="select select-sm select-bordered"
-                                    value={config.community.topic}
-                                    onChange={(e) => updateNewsletter(type, 'community', 'topic', e.target.value)}
-                                >
-                                    <option>Minden</option><option>Csak szakterület</option>
-                                </select>
-                            </div>
-                            <div className="form-control">
-                                <label className="label cursor-pointer justify-start gap-4">
-                                    <span className="label-text text-xs">Csak saját témák</span>
-                                    <input
-                                        type="checkbox"
-                                        className="checkbox checkbox-sm checkbox-primary"
-                                        checked={config.community.ownTopicOnly}
-                                        onChange={(e) => updateNewsletter(type, 'community', 'ownTopicOnly', e.target.checked)}
-                                    />
-                                </label>
-                            </div>
-                        </div>
-                    )}
-                </div>
+
 
                 {/* Készletinfó Szekció */}
                 <div className="collapse collapse-arrow bg-base-200">

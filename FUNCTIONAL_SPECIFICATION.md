@@ -7,9 +7,9 @@
 ## 1. Bevezetés
 Jelen dokumentum az Orvosi Portál Rendszer (továbbiakban: Rendszer) részletes funkcionális specifikációját tartalmazza. A dokumentum célja, hogy pontos, műszaki és üzleti szintű leírást adjon a rendszer képességeiről, működéséről és a felhasználói igények kiszolgálásáról, amely alapjául szolgálhat ajánlattételi (tender) dokumentációknak.
 
-A Rendszer egy modern, webes alapú alkalmazás, amely orvosok és egészségügyi szakemberek számára nyújt naprakész információkat gyógyszerkészletekről, gyógyszertárakról, valamint szakmai kapcsolattartási lehetőséget biztosít egy közösségi fórumon keresztül.
+A Rendszer egy modern, webes alapú alkalmazás, amely orvosok és egészségügyi szakemberek számára nyújt naprakész információkat gyógyszerkészletekről és gyógyszertárakról.
 
-> **Megjegyzés:** A jelenlegi verzió prototípus. A gyógyszertárak alapadatait és a gyógyszertári termékstátuszokat egy meglévő Middleware rendszer fogja biztosítani API-n keresztül. A gyógyszer-terméklista forrása jelenleg még nem véglegesített (lásd 3.7. szekció). Az éles üzemben a mock adatgenerálást a tényleges adatforrások fogják kiváltani.
+> **Megjegyzés:** A jelenlegi verzió prototípus. A gyógyszertárak alapadatait és a gyógyszertári termékstátuszokat egy meglévő Middleware rendszer fogja biztosítani API-n keresztül. A gyógyszer-terméklista forrása jelenleg még nem véglegesített (lásd 3.6. szekció). Az éles üzemben a mock adatgenerálást a tényleges adatforrások fogják kiváltani.
 
 ## 2. Rendszer Áttekintés
 A Rendszer egy reszponzív webalkalmazás, amely asztali és mobil eszközökön egyaránt teljes funkcionalitást biztosít. A rendszer kiemelt figyelmet fordít a felhasználói élményre, a gyors információelérésre és a személyre szabhatóságra.
@@ -18,9 +18,8 @@ A Rendszer egy reszponzív webalkalmazás, amely asztali és mobil eszközökön
 1.  **Irányítópult (Dashboard):** Azonnali áttekintés a legfontosabb változásokról.
 2.  **Gyógyszertár Kereső és Térkép:** Patikák lokáció alapú keresése és információszolgáltatás.
 3.  **Gyógyszer Nyilvántartás:** Részletes gyógyszeradatbázis készletinformációkkal.
-4.  **Közösségi Fórum:** Szakmai diskurzus platform anonimitás lehetőségével.
-5.  **Felhasználói Profil és Beállítások:** Személyre szabott funkciók (kedvencek, közeli patika, hírlevél).
-6.  **Autentikáció:** Bejelentkezés és jelszó-visszaállítás.
+4.  **Felhasználói Profil és Beállítások:** Személyre szabott funkciók (kedvencek, közeli patika, hírlevél).
+5.  **Autentikáció:** Bejelentkezés és jelszó-visszaállítás.
 
 ## 3. Részletes Funkcionális Követelmények
 
@@ -40,10 +39,6 @@ Az irányítópult a belépési pont, amely a felhasználó számára legrelevá
     *   Ha nincs beállítva közeli patika, térképes nézetet és választási lehetőséget kínál.
     *   Statisztikát mutat a kiválasztott patikában elérhető és hiánycikké vált termékekről (kattintható linkek).
     *   Listázza a legutóbbi készletváltozásokat dátummal és státusszal a közeli patikában.
-*   **Közösségi Aktivitás Widget:**
-    *   Listázza a fórum legfrissebb (legfeljebb 10) témáit.
-    *   Megjeleníti a téma címét, szerzőjét, szakterületi badge-ét és a hozzászólások számát.
-    *   Közvetlen navigáció az egyes fórumtémákhoz és a Közösség oldalra.
 
 ### 3.2. Gyógyszertár Kereső Modul
 A modul célja a gyógyszertárak gyors és hatékony megtalálása, valamint azok adatainak megjelenítése.
@@ -111,25 +106,7 @@ A rendszer központi eleme a gyógyszerek adatbázisa és azok státuszának kö
         1.  **NNGYK (OGYEI) adatbázis:** Az [ogyei.gov.hu/gyogyszeradatbazis](https://ogyei.gov.hu/gyogyszeradatbazis) oldalon elérhető "Összes engedéllyel rendelkező készítmény" és "Összes termékhiány" listák letöltése és napi szintű frissítése. A prototípus mock adatai ezek alapján készültek.
         2.  **BENU / Phoenix Middleware átalakítása:** A meglévő Middleware rendszer kiterjesztése, hogy ne csak a webshopban elérhető termékeket, hanem a teljes termékportfóliót kezelje.
 
-### 3.4. Közösségi Fórum
-Szakmai diskurzus platform ellenőrzött felhasználók (orvosok) számára.
-
-*   **Témák Kezelése:**
-    *   Új téma létrehozása modális ablakban: cím, leírás, címkék és szakterület megjelölése.
-    *   Szakterület-specifikus vagy általános témák támogatása.
-    *   **Anonim Posztolás:** Lehetőség a név elrejtésére ("Anonim" megjelenítés) érzékeny szakmai kérdések esetén — témáknál és hozzászólásoknál egyaránt.
-*   **Téma Részletek Oldal:**
-    *   A teljes téma tartalmának megjelenítése szerzővel, dátummal, szakterülettel, címkékkel.
-    *   Hozzászólások listázása és hozzászólás hozzáadása (anonim opcióval).
-    *   Reakciók (Like/Dislike) témákra és hozzászólásokra. A Like és Dislike kölcsönösen kizárják egymást.
-*   **Keresés és Navigáció:**
-    *   Szűrés szakterületek szerint ("Saját szakterületem", "Kardiológia", stb.) — multi-select.
-    *   Címke alapú szűrés (legördülő menü/dropdown).
-    *   Keresés a témák címében, opcionálisan a tartalmában is (checkbox).
-    *   Rendezési opciók (legújabb, ABC sorrend).
-    *   Címkék és szakterületek a kártyákon kattinthatók, és az adott szűrővel nyitják meg a fórum főoldalt.
-
-### 3.5. Globális Kereső és Navigáció
+### 3.4. Globális Kereső és Navigáció
 *   **Navigációs Sáv:**
     *   Minden oldalról elérhető, fix pozícióban.
     *   Tartalmazza a "Közeli Patika" gyorsinformációját: a kiválasztott patika neve megjelenik; kattintásra teljes képernyős modális ablakban nyílik meg a Gyógyszertár Kereső.
@@ -138,11 +115,10 @@ Szakmai diskurzus platform ellenőrzött felhasználók (orvosok) számára.
     *   Intelligens keresőmező, amely egyszerre keres az aktívan használt tartalmakban:
         *   Gyógyszerek között (név, hatóanyag).
         *   Gyógyszertárak között (név, település, cím).
-        *   BENU Képzési Program tanfolyamai között (cím, leírás, kategória).
-    *   Kategóriák szerinti találati lista (ikonokkal jelölve a típust: `medication`, `local_pharmacy`, `school`).
+    *   Kategóriák szerinti találati lista (ikonokkal jelölve a típust: `medication`, `local_pharmacy`).
     *   A keresés kis- és nagybetű érzéketlen.
 
-### 3.6. Autentikáció és Profil
+### 3.5. Autentikáció és Profil
 
 *   **Bejelentkezés:**
     *   Email és jelszó alapú bejelentkezés.
@@ -155,8 +131,7 @@ Szakmai diskurzus platform ellenőrzött felhasználók (orvosok) számára.
     *   Visszalépési lehetőség a bejelentkezéshez.
 *   **Profil Oldal:**
     *   A felhasználó alapadatainak megjelenítése és szerkesztése (név, szakterületek).
-    *   **Hírlevél beállítások:** Két email címhez (elsődleges és másodlagos) konfigurálható hírlevél feliratkozások:
-        *   Közösségi hírlevél: feliratkozás, gyakoriság (napi/heti), küldési idő.
+    *   **Hírlevél beállítások:** Két email címhez (elsődleges és másodlagos) konfigurálható hírlevél feliratkozások a készletváltozások tekintetében:
         *   Készletváltozási hírlevél: feliratkozás, gyakoriság, témakörök (pl. hatóanyag, gyártó, gyógyszertár), hatókör (Minden / Szakterület + kedvenc / Csak szakterület / Csak kedvenc).
     *   Kijelentkezés.
 *   **Kedvencek Kezelő Oldal (`/profile/favorites`):**
@@ -169,7 +144,7 @@ Szakmai diskurzus platform ellenőrzött felhasználók (orvosok) számára.
     *   Leiratkozás.
     *   Üres állapot kezelése.
 
-### 3.7. Technikai Követelmények és Adatkezelés (Non-funkcionális)
+### 3.6. Technikai Követelmények és Adatkezelés (Non-funkcionális)
 
 *   **Technológiai Stack:**
     *   **Frontend keretrendszer:** Next.js (App Router, React Server Components és Client Components).
@@ -180,13 +155,11 @@ Szakmai diskurzus platform ellenőrzött felhasználók (orvosok) számára.
     *   A rendszer a `localStorage`-ot használja a felhasználói beállítások perzisztens tárolására:
         *   Kedvencek (`FavoriteContext`)
         *   Közeli patika (`NearbyPharmacyContext`)
-        *   Fórum reakciók és saját témák
         *   Nézet testreszabások (oszlopok, sorrend)
     *   React Context providerek biztosítják az alkalmazás-szintű állapotot: `AuthContext`, `FavoriteContext`, `NearbyPharmacyContext`, `NotificationContext`, `ToastContext`.
 *   **Adatforrások (Prototípus):**
     *   **Gyógyszertárak és termékstátusz:** A prototípusban mock adatok. Éles üzemben egy meglévő Middleware rendszer REST API-ja biztosítja a gyógyszertárak alapadatait (név, cím, koordináták, nyitvatartás) és a gyógyszertári termékstátusz-információkat.
     *   **Gyógyszerek (terméklista):** A prototípusban a `src/lib/data.ts` modul generálja a termékadatokat az NNGYK/OGYEI adatbázis mintájára. A végleges adatforrás még nem eldöntött (lásd 3.3. Adatforrás szekció).
-    *   **Fórum:** LocalStorage-ban tárolt mock adatok; első betöltéskor automatikusan generálódnak.
 *   **Sebesség és Optimalizáció:**
     *   Dinamikus importok (`next/dynamic`) használata a nehéz komponensek (pl. térkép) esetén az oldalbetöltés optimalizálása érdekében.
     *   `useMemo` és `useEffect` hook-ok a szükségtelen újrarenderelés minimalizálására.

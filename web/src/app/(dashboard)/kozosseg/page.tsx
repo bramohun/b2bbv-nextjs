@@ -2,11 +2,15 @@
 
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ - FÓRUM FŐOLDAL [HASZNÁLATON KÍVÜL]
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez az oldal és a kapcsolódó közösségi fórum funkciók jelenleg NEM képezik
+ * a fejlesztési scope részét. Kód- és felületi szinten kizárólag tervezetként
+ * / koncepcióként van jelen a prototípusban, a navigációból kivezetve.
  * ============================================================================
  * 
- * FIGYELEM: Ez az oldal jelenleg nincs hivatkozva a navigációban.
- * A funkcióját a BENU Képzési Program (/kepzesek) vette át.
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - FÓRUM FŐOLDAL (INAKTÍV TERVEZET)
+ * ============================================================================
  * 
  * ÚTVONAL: /kozosseg
  * 
@@ -116,6 +120,15 @@ export default function ForumPage() {
 
     return (
         <div className="w-full max-w-[1440px] mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-12">
+            {/* Tervezet figyelmeztető banner */}
+            <div className="alert alert-warning shadow-md rounded-2xl mb-6 border border-amber-300 bg-amber-50 text-amber-900 flex items-center gap-3 p-4">
+                <span className="material-symbols-rounded text-2xl text-amber-600 shrink-0">warning</span>
+                <div>
+                    <span className="font-bold block text-sm">Tervezet – Jelenleg nem fejlesztési scope</span>
+                    <span className="text-xs text-amber-800">Ez a közösségi fórum felület és a kapcsolódó funkciók jelenleg nem képezik a fejlesztési scope részét, kizárólag felületi koncepcióként tekinthetők meg.</span>
+                </div>
+            </div>
+
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                 <div>

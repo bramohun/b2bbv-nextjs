@@ -4,7 +4,7 @@
 
 > **Cél:** Ez a dokumentum a BENU Orvosi Portál prototípus összes felhasználói felületét és elérhető funkcióját mutatja be — közérthető nyelven, interjú forgatókönyv készítéséhez.
 > 
-> **Fontos:** A közösségi/fórum funkciók és az adminisztrátori felületek **nem** részei ennek az összefoglalónak, mivel a felhasználók számára nem elérhetők.
+> **Fontos:** Az adminisztrátori felületek **nem** részei ennek az összefoglalónak.
 
 ---
 
@@ -33,9 +33,9 @@ A képernyő tetején egy állandó menüsor található, amely minden oldalról
 | Elem | Leírás |
 |---|---|
 | **Logo / „Orvosi Portál"** | Visszavisz az Irányítópultra |
-| **Menüpontok** | Irányítópult · Gyógyszerek · Gyógyszertárak · BENU Képzési Program |
+| **Menüpontok** | Irányítópult · Gyógyszerek · Gyógyszertárak |
 | **Közeli patika jelzés** | Ha be van állítva, a navigációs sávban látható a kiválasztott patika neve és címe. Rákattintva módosítható. |
-| **Globális kereső** | Egy keresőmező, amelybe bármit beírva azonnal megjelennek a találatok gyógyszerek, gyógyszertárak és képzések között |
+| **Globális kereső** | Egy keresőmező, amelybe bármit beírva azonnal megjelennek a találatok gyógyszerek és gyógyszertárak között |
 | **Mentett gyógyszerek ikon** | Könyvjelző ikon, mellette egy szám jelzi a mentett gyógyszerek számát. Rákattintva egy gyorslista jelenik meg a mentett gyógyszerekről. |
 | **Profil menü** | A felhasználó nevének kezdőbetűi, rákattintva legördülő menü: Profil beállítások, Kijelentkezés |
 
@@ -44,7 +44,6 @@ A képernyő tetején egy állandó menüsor található, amely minden oldalról
 A keresőmezőbe gépelve azonnal megjelennek a találatok, típus szerint csoportosítva:
 - **Gyógyszerek** – név és hatóanyag alapján keres
 - **Gyógyszertárak** – név, település és cím alapján keres
-- **Képzések** – a BENU Képzési Program tanfolyamainak címe, rövid leírása és kategóriája alapján keres
 
 A találatokra kattintva közvetlenül az adott elemre navigálhatunk.
 
@@ -58,7 +57,7 @@ Mobilon a menüpontok egy „hamburger" menü mögé kerülnek (három vízszint
 
 🔗 [Megnyitás a prototípusban](https://bvorvosi.vercel.app/dashboard)
 
-Az Irányítópult a belépés utáni főoldal, amely három fő szekciót tartalmaz egymás mellett (asztalon), vagy egymás alatt (mobilon).
+Az Irányítópult a belépés utáni főoldal, amely két fő szekciót tartalmaz egymás mellett (asztalon), vagy egymás alatt (mobilon).
 
 ### 3.1 Készletváltozások
 
@@ -73,14 +72,7 @@ A középső oszlop a **kiválasztott közeli patika** készletváltozásait mut
 - Ha van beállítva patika: megjeleníti a patika nevét, statisztikát (hány termék fogyott el / lett újra elérhető), és a legutóbbi változásokat táblázatban
 - Ha nincs beállítva patika: egy interaktív térképet mutat, amelyen kiválasztható egy patika
 
-### 3.3 Képzési Program
-
-A harmadik oszlop a **BENU Képzési Program** legújabb tanfolyamait mutatja rövid kártyákként:
-- Minden kártyán: tanfolyam címe, kategóriája (Akkreditált / Gyártói / Eladásösztönző), időtartama
-- Kattintásra átvezet a képzés részletes adatlapjára
-- „Összes képzés megtekintése" link az alján
-
-### 3.4 Időszak választó
+### 3.3 Időszak választó
 
 Az oldal tetején egy időszak-választó található, amellyel beállítható, hogy az adatok melyik időszakra vonatkozzanak (pl. 1 nap, 7 nap, 30 nap).
 
@@ -206,77 +198,28 @@ Minden patika kártyáján az alábbi adatok láthatók:
 
 ---
 
-## 7. BENU Képzési Program
-
-🔗 [Megnyitás a prototípusban](https://bvorvosi.vercel.app/kepzesek)
-
-A képzési program oldal orvosoknak és gyógyszerészeknek szánt továbbképzéseket kínál.
-
-### 7.1 Képzések listája
-
-Az elérhető képzések kártyás nézetben jelennek meg, kategóriákra szűrhetően:
-
-| Kategória | Jelentése |
-|---|---|
-| **Összes** | Minden képzés |
-| **Akkreditált** | Hivatalosan akkreditált, kreditpontos képzések |
-| **Gyártói** | Gyártók által szervezett szakmai képzések |
-| **Eladásösztönző** | Eladástámogatási célú képzések |
-
-Minden kártyán:
-- Tanfolyam címe és rövid leírása
-- Kategória megjelölés (színkóddal)
-- Időtartam (percben)
-- Tartalom típusa (videó vagy PDF)
-- **„Részletek"** gomb – a képzés részletes adatlapjára navigál
-- **„Érdekel"** gomb – egy felugró ablakot nyit meg a BENU LMS rendszer ismertetésével
-
-### 7.2 Képzés részletes oldala
-
-Egy képzés részleteit megnyitva az alábbi tartalom érhető el:
-- **Bevezető videó helye** (vizuális placeholder)
-- **Tanfolyam címe**, kategóriája, időtartama, tartalom típusa
-- **Részletes leírás** a tanfolyam tematikájáról
-- **Tartalmi elemek listája** (modulok, pl. „Modul 1: Alapfogalmak", „Modul 2: Klinikai vizsgálatok"), egyes modulok lezárva jelöléssel
-- **Akkreditált pontok** információ (pl. 2 kreditpont szerezhető)
-- **„Érdekel"** gomb – megnyitja a BENU LMS információs felugró ablakot
-
-### 7.3 BENU LMS felugró ablak
-
-Az „Érdekel" gombra kattintva egy tájékoztató felugró ablak jelenik meg, amely:
-- Bemutatja a BENU Képzési program koncepcióját
-- Ismerteti az e-learning felületen elérhető képzéstípusokat
-- **„Tovább a BENU LMS-re"** gomb – átirányítana a külső tanulási felületre (a prototípusban ez nem vezet valódi oldalra)
-- „Bezárás" gomb
-
----
-
-## 8. Profil beállítások
+## 7. Profil beállítások
 
 🔗 [Megnyitás a prototípusban](https://bvorvosi.vercel.app/profile)
 
 A profil oldalon a felhasználó megtekintheti és kezelheti saját beállításait. Az oldal több szekcióra tagolódik:
 
-### 8.1 Alapadatok
+### 7.1 Alapadatok
 
 - **Név** – megtekinthető, de nem módosítható (az adminisztrációhoz kell fordulni)
 - **E-mail cím** – az elsődleges bejelentkezési azonosító, nem módosítható
 - **Másodlagos e-mail cím** – biztonsági mentés és értesítések céljára, nem módosítható
 - **Szakterület(ek)** – módosítható, több szakterület is választható egy listából. A „Szerkesztés" gombra kattintva megjelenik egy kereséssel segített lista, ahol checkboxokkal jelölhetőek a szakterületek.
 
-### 8.2 Közeli Patikám
+### 7.2 Közeli Patikám
 
 Ezen a részen a felhasználó beállíthatja vagy módosíthatja a számára kiemelt közeli patikát:
 - Ha van beállítva: megjelenik a patika neve, címe és telefonszáma, valamint egy „Módosítás" és „Törlés" gomb
 - Ha nincs beállítva: egy tájékoztató szöveg és „Patika keresése" gomb jelenik meg, amely megnyitja a gyógyszertár-keresőt egy felugró ablakban
 
-### 8.3 Hírlevél beállítások
+### 7.3 Hírlevél beállítások
 
-A hírlevél beállítások **mindkét e-mail címre** (elsődleges és másodlagos) külön konfigurálhatók. Két témakörben:
-
-#### BENU Képzési Program értesítések
-- Be-/kikapcsolható (feliratkozás/leiratkozás)
-- Ha bekapcsolt: kiválasztható, mely képzési témakörökről kér értesítést (Akkreditált, Gyártói, Eladásösztönző)
+A hírlevél beállítások **mindkét e-mail címre** (elsődleges és másodlagos) külön konfigurálhatók a készletinfó értesítések tekintetében:
 
 #### Készletinfó értesítések
 - Be-/kikapcsolható
@@ -286,29 +229,29 @@ A hírlevél beállítások **mindkét e-mail címre** (elsődleges és másodla
   - **Téma:** Újra elérhető / Készlethiány / Megszűnt (több is választható)
   - **Témakör:** Minden / Szakterület + mentett gyógyszerek / Csak szakterület / Csak mentett gyógyszer
 
-### 8.4 Biztonság
+### 7.4 Biztonság
 
 - **Jelszó módosítás** gomb – segítségével a felhasználó megváltoztathatja jelszavát
 
-### 8.5 Kijelentkezés
+### 7.5 Kijelentkezés
 
 Az oldal alján egy **„Kijelentkezés a rendszerből"** gomb érhető el.
 
 ---
 
-## 9. Mentett gyógyszerek oldala
+## 8. Mentett gyógyszerek oldala
 
 🔗 [Megnyitás a prototípusban](https://bvorvosi.vercel.app/profile/favorites)
 
 Elérhető: a navigációs sáv könyvjelző ikonjának legördülő menüjéből, vagy a profil aloldalról.
 
-### 9.1 Tájékoztató
+### 8.1 Tájékoztató
 
 Az oldal tetején egy kétoszlopos tájékoztató blokk magyarázza a „Mentés" és az „Értesítés kérése" közötti különbséget:
 - **Mentett gyógyszerek:** A könyvjelzővel megjelölt gyógyszerek gyűjtőlistája, gyors elérés céljából
 - **Értesítések:** Ha bekapcsoljuk az értesítést (csengő ikon), a rendszer automatikusan jelzi, ha a gyógyszer készlete vagy elérhetősége megváltozik
 
-### 9.2 Táblázat
+### 8.2 Táblázat
 
 A mentett gyógyszerek táblázatos formában jelennek meg:
 
@@ -325,7 +268,7 @@ Ha eltávolítunk egy mentett gyógyszert, amelyre értesítés is aktív, a ren
 
 ---
 
-## 10. Értesítés kezelés oldala
+## 9. Értesítés kezelés oldala
 
 🔗 [Megnyitás a prototípusban](https://bvorvosi.vercel.app/profile/notifications)
 
@@ -350,7 +293,6 @@ flowchart TD
     A[Bejelentkezés] --> B[Irányítópult]
     B --> C[Gyógyszerek lista]
     B --> D[Gyógyszertárak kereső]
-    B --> E[Képzési Program]
     B --> F[Profil beállítások]
     
     C --> G[Gyógyszer adatlap]
@@ -361,9 +303,6 @@ flowchart TD
     
     D --> K[Közeli patika beállítása]
     
-    E --> L[Képzés adatlap]
-    L --> M[BENU LMS felugró]
-    
     F --> N[Szakterületek módosítása]
     F --> O[Hírlevél beállítások]
     F --> P[Közeli patika kezelése]
@@ -373,4 +312,4 @@ flowchart TD
 
 ---
 
-> **Megjegyzés a prototípusról:** Az alkalmazás prototípus szintű, ami azt jelenti, hogy bizonyos funkciók (pl. jelszó tényleges módosítása, valódi e-mail küldés, BENU LMS-re navigáció) vizuálisan megjelennek, de nem végeznek valódi műveletet a háttérben. A készletadatok és patikainformációk szimulált példaadatokból származnak.
+> **Megjegyzés a prototípusról:** Az alkalmazás prototípus szintű, ami azt jelenti, hogy bizonyos funkciók (pl. jelszó tényleges módosítása, valódi e-mail küldés) vizuálisan megjelennek, de nem végeznek valódi műveletet a háttérben. A készletadatok és patikainformációk szimulált példaadatokból származnak.

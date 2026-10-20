@@ -2,7 +2,14 @@
 
 /**
  * ============================================================================
- * FUNKCIONÁLIS SPECIFIKÁCIÓ
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez a modul és a képzési promóciós widget jelenleg NEM képezi a fejlesztési
+ * scope részét. Kód- és felületi szinten kizárólag tervezetként van jelen,
+ * az éles irányítópulton nincs használatban.
+ * ============================================================================
+ * 
+ * FUNKCIONÁLIS SPECIFIKÁCIÓ - KÉPZÉS PROMÓ WIDGET (INAKTÍV TERVEZET)
  * ============================================================================
  * 
  * LEÍRÁS:

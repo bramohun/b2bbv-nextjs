@@ -2,7 +2,13 @@
 
 /**
  * ============================================================================
- * TÉMA SZŰRŐ KOMPONENS
+ * FIGYELEM: NEM FEJLESZTÉSI SCOPE RÉSZ / TERVEZET
+ * ============================================================================
+ * Ez a komponens jelenleg NEM képezi a fejlesztési scope részét.
+ * Kód- és felületi szinten kizárólag tervezetként / koncepcióként van jelen a prototípusban.
+ * ============================================================================
+ * 
+ * TÉMA SZŰRŐ KOMPONENS (INAKTÍV TERVEZET)
  * ============================================================================
  * 
  * Keresés, címke szűrés, szakterület szűrés és rendezés.
