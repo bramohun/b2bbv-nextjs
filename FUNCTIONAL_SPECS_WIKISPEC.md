@@ -19,53 +19,11 @@ kerülnek strukturálásra.
 
 # BENUvény orvosi portál funkcionális specifikáció
 
----
-
 > **Dokumentum azonosító:** FRS-BVO-20261020  
-> **Verzió:** 1.8.1  
+> **Verzió:** 1.8.2  
 > **Dátum:** 2026.10.20.  
 > **Státusz:** Aktív / Hatályos (Dashboard kétszintes kompakt készletváltozási lista, Mobil nézet és helyszíni orvosi vizit támogatása, Accordion szűrőpanel, gyógyszerkártyák, patika Split View)  
 > **Élő prototípus elérhetőség:** [https://bvo.uneb.hu/](https://bvo.uneb.hu/) (tesztfiókok a 6. fejezetben)  
-
----
-
-## Tartalomjegyzék
-
-1. [Brief és Rendszer Áttekintés](#1-brief)
-   - 1.1. Cél és Rendszer Áttekintés
-   - 1.2. Megvalósítási Keretek és Szabadság
-   - 1.3. Készletinformációk és LogiNet Middleware Integráció
-   - 1.4. Kivitelezői Dokumentációs Igények
-   - 1.5. Live Prototípus
-   - 1.6. Felhasználói Szerepkörök
-   - 1.7. Modulok és Felületek Áttekintése
-   - 1.8. Akadálymentesség (WCAG 2.2) és Technikai SEO Irányelvek
-   - 1.9. Eszközhasználati Környezet: Asztali/Laptop Fókusz és Helyszíni Orvosi Vizit (Mobil Kontextus)
-2. [Fogalomtár](#2-fogalomtár)
-3. [Adatmodellek Specifikációja](#3-adatmodellek-specifikációja)
-   - 3.1. Felhasználó (User) Adatmodell
-   - 3.2. Gyógyszer (Medicine) Adatmodell
-   - 3.3. Gyógyszertár (Pharmacy) Adatmodell
-   - 3.4. Patikai Készletrekord Adatmodell
-   - 3.5. Regisztrációs Igény / Kapcsolatfelvételi Űrlap Adatmodell
-4. [Modulok és Funkciók Részletes Leírása](#4-modulok-és-funkciók-részletes-leírása)
-   - 4.0. Fejléc és Navigációs Sáv Modul
-     - 4.0.5. Desktop vs. Mobil Felületi Eltérések a Fejlécben és a Navigációban
-   - 4.1. Irányítópult (Dashboard)
-   - 4.2. Gyógyszer Nyilvántartás (Lista és Adatlap)
-     - 4.2.1.4. Desktop vs. Mobil Felületi Eltérések a Gyógyszerkeresőben
-     - 4.2.2.6. Desktop vs. Mobil Felületi Eltérések a Gyógyszer Adatlapon
-   - 4.3. Gyógyszertár Kereső és Térkép
-     - 4.3.8. Desktop vs. Mobil Felületi Eltérések a Gyógyszertár Keresőben (Split View)
-   - 4.4. Globális Keresés (Asztali és Mobil Overlay)
-   - 4.5. Hitelesítés, Jogosultságok és Kapcsolatfelvétel
-   - 4.6. Adminisztráció (Felhasználók és Patikák)
-   - 4.7. Felhasználói Profil és Értesítéskezelés
-5. [Korábban tervezett, de elvetett / külső rendszerbe átsorolt funkciók](#5-korábban-tervezett-de-elvetett--külső-rendszerbe-átsorolt-funkciók)
-6. [Tesztfiókok és Hozzáférések](#6-tesztfiókok-és-hozzáférések)
-7. [Változásnapló (Verziótörténet)](#7-változásnapló-verziótörténet)
-
----
 
 ---
 
@@ -167,8 +125,6 @@ A BENUvény Orvosi Portál funkcionális kialakításakor alapvető szempont az 
 
 ---
 
----
-
 ## 2. Fogalomtár
 
 ### 2.1. Piaci Gyógyszerkészlet
@@ -216,8 +172,6 @@ A gyógyszerészeti nyilvántartásban és készletkezelésben a rendszer a stá
 1. **OTC (Over-The-Counter / Vény nélkül kapható gyógyszer):** Hatóságilag törzskönyvezett humán gyógyszerkészítmény, mely vény nélkül kapható.
 2. **Vényköteles (Rx) Gyógyszer:** Hatóságilag törzskönyvezett humán gyógyszerkészítmény, mely kizárólag orvosi rendelvényre (receptre) adható ki.
 *Egyéb termékek:* A gyógyszertári forgalomban jelen lévő nem gyógyszer termékek (pl. étrend-kiegészítők, gyógyhatású készítmények, kozmetikumok, gyógyászati segédeszközök) státuszait a rendszer nem követi.
-
----
 
 ---
 
@@ -353,8 +307,6 @@ Ez a szakasz a rendszer üzleti entitásainak felületi paramétereit részletez
 - **Szakterület / Munkahely:** Szöveg (pl. `"Háziorvosi Rendelő, Szeged"`) — Kötelező
 - **Megjegyzés / Üzenet:** Többsoros szövegmező — Opcionális
 - **Adatkezelési nyilatkozat:** Jelölőnégyzet — Kötelezően elfogadandó
-
----
 
 ---
 
@@ -739,8 +691,6 @@ Külön-külön konfigurálható az **Elsődleges ÉS a Másodlagos e-mail címr
 
 ---
 
----
-
 ## 5. Korábban tervezett, de elvetett / külső rendszerbe átsorolt funkciók
 
 Ez a fejezet összefoglalja azokat az elemeket, amelyek korábbi koncepciókban szerepeltek, de a jelenlegi érvényes felületen nem aktívak vagy külső rendszer feladatkörébe tartoznak:
@@ -760,8 +710,6 @@ Ez a fejezet összefoglalja azokat az elemeket, amelyek korábbi koncepciókban 
 7. **Nem Gyógyszer Patikai Termékek (Étrend-kiegészítők, Orvostechnikai Eszközök, Kozmetikumok) Státuszkövetése:**
    - *Státusz:* Rendszer hatókörén kívüli (Out of scope) funkció.
    - *Részletek:* A BENUvény orvosi portál célzottan a gyógyító és terápia-meghatározó orvosok és gyógyszerészek számára készült. A készlet- és piaci státuszok, hiányok és helyettesíthetőség monitorozása emiatt szigorúan a törzskönyvezett humán gyógyszerekre – azon belül is kizárólag az OTC és a vényköteles készítményekre – korlátozódik. A patikai forgalomban jelen lévő több tízezer egyéb cikk (étrend-kiegészítők, vitaminok, kozmetikumok, orvostechnikai eszközök, tápszerek) státuszkövetése tudatos döntés alapján nem része a portál funkcionalitásának, megelőzve az orvosi fókusz felhígulását és az adatzajt.
-
----
 
 ---
 
@@ -794,8 +742,6 @@ A működő prototípus élő kipróbálására szolgáló tesztfiókok a [https
 - **Státusz:** Inaktív
 - **Szakterületek:** Kardiológia
 - **Rendeltetés:** Az inaktív fiókok belépési elutasításának és biztonsági védelmének ellenőrzése.
-
----
 
 ---
 
