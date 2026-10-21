@@ -20,9 +20,9 @@ kerülnek strukturálásra.
 # BENUvény orvosi portál funkcionális specifikáció
 
 > **Dokumentum azonosító:** FRS-BVO-20261020  
-> **Verzió:** 1.14.0  
+> **Verzió:** 1.15.0  
 > **Dátum:** 2026.10.21.  
-> **Státusz:** Aktív / Hatályos (Adminisztráció teljes körű specifikációja: tab-navigáció, „+ Új felhasználó” gomb, műveleti menü új jelszó küldéssel, részletes gyógyszertári admin adatlap GPS koordinátákkal, heti nyitvatartással, szinkronizációs mérőszámokkal és 7 oszlopos, szűrhető-rendezhető, színkódolt darabszámos termékkészlet táblázattal 25-ös lapozóval)  
+> **Státusz:** Aktív / Hatályos (Login felület átalakítása egyszerű felhasználónév/jelszó bejelentkezésre, autentikációs háttérrendszer fejlesztési hatókörön kívüli [out of scope] jelölése; Adminisztráció teljes körű specifikációja: tab-navigáció, „+ Új felhasználó” gomb, műveleti menü új jelszó küldéssel, részletes gyógyszertári admin adatlap GPS koordinátákkal, heti nyitvatartással, szinkronizációs mérőszámokkal és 7 oszlopos, szűrhető-rendezhető, színkódolt darabszámos termékkészlet táblázattal 25-ös lapozóval)  
 > **Élő prototípus elérhetőség:** [https://bvo.uneb.hu/](https://bvo.uneb.hu/) (tesztfiókok a 6. fejezetben)  
 
 ---
@@ -78,7 +78,7 @@ A rendszerben két alapvető szerepkör létezik:
 | **Gyógyszer Adatlap** | `https://bvo.uneb.hu/gyogyszerek/adatlap` (és `/gyogyszerek/[...id]`) | 4 szintű készletstátusz, 250 patikás országos hálózati eloszlás, megszűnt termék és hiány figyelmeztető kártyák, 3 oszlopos termékjellemzők és árak, helyettesítők, történet orvosi adatbázis időbélyeggel. | **Aktív** |
 | **Gyógyszertár Kereső** | `https://bvo.uneb.hu/gyogyszertarak` | Térkép, szinkronizált kártyalista, GPS helymeghatározás, heti rend modal. | **Aktív** |
 | **Globális Keresés** | Globális / Mobil Overlay | Instant keresés gyógyszerek, hatóanyagok és patikák között. | **Aktív** |
-| **Hitelesítés & Jogosultság** | `https://bvo.uneb.hu/login` | Jelszavas, Passkey és Magic Code belépés, 2FA, kapcsolatfelvételi űrlap. | **Aktív** |
+| **Hitelesítés & Jogosultság** | `https://bvo.uneb.hu/login` | Egyszerűsített felhasználónév és jelszó alapú bejelentkezés, elfelejtett jelszó, manuális kapcsolatfelvételi űrlap. *(Tervezet – a háttér autentikációs és SSO rendszer nem képezi a közvetlen fejlesztési scope részét).* | **Tervezet / Nem scope** |
 | **Felhasználói Profil** | `https://bvo.uneb.hu/profile` | Szakterületek, preferált patika, hírlevelek, biztonság, 2FA, passkey. | **Aktív** |
 | **Adminisztráció** | `https://bvo.uneb.hu/admin/*` (`/admin/users`, `/admin/pharmacies`, `/admin/pharmacies/[id]`) | Tab-navigációs keret, felhasználók kezelése, „+ Új felhasználó” rögzítés, jelszóküldés és munkamenet-bontás, gyógyszertárak felügyelete, részletes patika adatlap koordinátákkal és heti renddel, szinkronizációs mérőszámok, valamint 7 oszlopos, szűrhető-rendezhető, színkódolt darabszámos termékkészlet táblázat 25-ös lapozóval. | **Aktív** |
 
@@ -937,42 +937,98 @@ A portál hivatalos, orvosi szakmai azonosítási és beléptetési rendszere.
 
 **Útvonal:** [https://bvo.uneb.hu/login](https://bvo.uneb.hu/login)
 
-#### 4.5.1. Bejelentkezési Módok (3 Fül)
-A képernyő közepén lévő 479px széles, letisztult kártyán három belépési mód választható:
-1. **Jelszavas Bejelentkezés (Alapértelmezett):**
-   - 56px magas e-mail cím mező (`demo@example.com`).
-   - 56px magas maszkolt jelszómező (`vény123`).
-   - 56px magas sötétkék *"Bejelentkezés"* akciógomb jobbra mutató nyíllal.
-   - *"Elfelejtett jelszó"* hivatkozás, amely a `/forgot-password` oldalra vezet.
-2. **Passkey Biometrikus Belépés:**
-   - 1-kattintásos belépés Touch ID, Face ID vagy Windows Hello azonosítással jelszó gépelése nélkül.
-3. **Egyszeri E-mail Kódos Belépés (Magic Code):**
-   - Jelszó nélküli belépési kérelem: az e-mail cím megadása után a rendszer 6-jegyű ellenőrző kódot generál és a 2FA felületre navigál.
+> [!NOTE]
+> **Hatóköri Rendelkezés (Nem Fejlesztési Scope Nyilatkozat):**
+> A végfelhasználók (orvosok, gyógyszerészek, adminisztrátorok) tényleges hitelesítése, a központi orvosi kamarai vagy intézményi azonosítás (Single Sign-On / SSO), a munkamenet-tokenek kiadása és a komplex többlépcsős biztonsági eljárások a megrendelő meglévő vagy külső orvosi azonosító infrastruktúrájának hatáskörébe tartoznak, így **nem képezik a közvetlen webes felületfejlesztési scope részét**.
+>
+> A prototípus és a jelen specifikáció a fenti külső integrációt modellezve egy **egyszerűsített, letisztult felhasználónév / jelszó alapú bejelentkezési felületet** biztosít a rendszer zárt funkcióinak (Irányítópult, Gyógyszer Nyilvántartás, Gyógyszertár Kereső, Adminisztráció) eléréséhez és bemutatásához. A háttérben a forráskódban a meglévő autentikációs segédfüggvények megőrzésre kerülnek a stabil prototípus-működés érdekében.
 
-#### 4.5.2. Kétfaktoros Azonosítás (2FA) Igazolási Képernyő
-Amennyiben a felhasználó fiókjában aktív a 2FA és az eszköz még nem megbízható:
-- Tájékoztató pajzs ikon és az ellenőrző kód kiküldésének visszaigazolása.
-- 56px magas, nagyméretű, középre zárt 6-jegyű OTP kód beviteli mező.
-- **"Megbízható eszköz megjegyzése (ne kérjen kódot 30 napig)" jelölőnégyzet:** Alapértelmezetten bepipálva. Megjelölése esetén a böngésző 30 napig mentesül az újabb kódkérés alól.
-- *"Kód igazolása"* sötétkék akciógomb, amely sikeres azonosítás után beléptet a Dashboardra.
-- *(A prototípus felületén tesztelői segédlet mutatja a működő demó kódot: `123456`).*
+#### 4.5.1. Képernyőfelépítés és Felületi Elemek (Egyszerű Jelszavas Bejelentkezés)
+
+A bejelentkezési oldal egy reszponzív, tiszta fehér hátterű munkafelület, melynek központi fókuszában a következők helyezkednek el:
+
+1. **Fejléc Blokkolás:**
+   - Képernyő közepére zárt hivatalos színes **BENU VÉNY** logó (`214x33px`).
+   - Alatta 22px-es sötétkék félkövér alcím: **„Orvosoknak”**.
+2. **Bejelentkezési Kártya:**
+   - 479px maximális szélességű, `16px` saroklekerekítésű, finom szürke hátterű (`#F9F9FB`), szegéllyel ellátott központi panel.
+3. **Nem Fejlesztési Scope Tájékoztató Jelvény (Banner):**
+   - A kártya legfelső elemeként egy sárga/borostyán tónusú információs blokk (`#FFF8E6`, szegély: `#FFE082`), benne információs ikonnal és a következő szöveggel:  
+     *„Tervezet – Jelenleg nem fejlesztési scope: A bejelentkezési és hitelesítési rendszer meglévő orvosi azonosítóból / SSO-ból érkezik. A prototípus az egyszerű felhasználónév és jelszó alapú bejelentkezési felületet szemlélteti.”*
+4. **Kártya Címsor:**
+   - 22px-es sötétkék (`#002664`) félkövér cím: **„Bejelentkezés”**.
+5. **Értesítési és Visszajelző Sávok:**
+   - Piros hibaüzenet doboz hibás adatok vagy hálózati probléma esetén (`#FEEAED`).
+   - Zöld visszajelző doboz sikeres művelet esetén (`#E8F8E2`).
+6. **Egyszerűsített Bejelentkezési Űrlap:**
+   - Egymás alatt elhelyezkedő 56px magas beviteli mezők az azonosító és a jelszó rögzítésére.
+   - Teljes szélességű, 56px magas, sötétkék (`#002664`) **„Bejelentkezés”** akciógomb jobbra mutató fehér nyíl ikonnal.
+   - Balra zárt kék **„Elfelejtett jelszó”** szöveges hivatkozás, amely a `/forgot-password` útvonalra navigál.
+
+#### 4.5.2. Beviteli Mezők Részletes Specifikációja
+
+A bejelentkezési űrlapon kizárólag az alábbi két beviteli mező szerepel:
+
+| Mező Megnevezése és Célja | Adattípus és Formátum | Konkrét Példaérték | Kötelezőség | Érvényességi Korlátok és Limitációk |
+| :--- | :--- | :--- | :--- | :--- |
+| **E-mail cím vagy felhasználónév:** A szakmai felhasználó vagy adminisztrátor fiókazonosítója. | Szöveges e-mail cím vagy alfanumerikus azonosító string. | `"demo@example.com"` | **Kötelező** | 56px magasság, szürke körvonal (`#D8D9E0`), fókuszban kék kiemelés. Nem lehet üres, minimum 3, maximum 100 karakter. |
+| **Jelszó:** A fiókhoz tartozó titkos hitelesítési karaktersorozat. | Maszkolt jelszó string (pontokkal megjelenítve). | `"vény123"` | **Kötelező** | 56px magasság. Nem lehet üres, böngésző jelszókezelővel és vágólappal kompatibilis. Minimum 6, maximum 64 karakter. |
 
 #### 4.5.3. Elfelejtett Jelszó Oldal
+
 **Útvonal:** [https://bvo.uneb.hu/forgot-password](https://bvo.uneb.hu/forgot-password)
-- E-mail cím megadása után belépési kód igényelhető. A prototípus felületén tájékoztató doboz emlékeztet a működő demó jelszóra.
 
-#### 4.5.4. Manuális Regisztrációs Igény / Kapcsolatfelvételi Űrlap
-A zárt szakmai jelleg miatt **nincs azonnali önkiszolgáló fiókregisztráció**:
-- Az új orvos vagy gyógyszerész a bejelentkezési oldalról elérhető kapcsolatfelvételi linken keresztül nyithatja meg a regisztrációs igény űrlapot.
-- **Kötelező adatok:** Teljes név, Szakmai e-mail, Telefonszám, Orvosi/Gyógyszerészi pecsétszám, Szakterület/Munkahely, valamint az adatkezelési szabályzat elfogadása.
-- **Folyamat:** Az űrlap beküldésekor a rendszer visszaigazolást ad az igény rögzítéséről. Az adminisztrátor a kamarai nyilvántartásban ellenőrzi a pecsétszámot, és az adminisztrációs felületen manuálisan hozza létre az új aktív fiókot.
+Amennyiben a felhasználó elfelejtette belépési jelszavát:
+1. Az „Elfelejtett jelszó” linkre kattintva a jelszó-visszaállítási segédoldal nyílik meg.
+2. A regisztrált e-mail cím megadása után a felület tájékoztatja az orvost a jelszó-helyreállítási folyamat lépéseiről.
+3. A prototípus felületén tájékoztató doboz emlékezteti a tesztelőket a működő demó hozzáférési adatokra (`vény123`).
+4. A felületről a „Vissza a bejelentkezéshez” gombbal közvetlenül visszatérhet a `/login` oldalra.
 
-#### 4.5.5. Hibakezelés és Biztonság
-- **Hibás jelszó vagy e-mail:** Piros figyelmeztető üzenet jelenik meg a beviteli mezők alatt (*"Érvénytelen e-mail cím vagy jelszó"*).
-- **Inaktív fiók:** Inaktív vagy felfüggesztett felhasználó (pl. `teszt@example.com`) belépési kísérletét a rendszer azonnal elutasítja: *"A fiók felfüggesztésre került. Kérjük, keresse az adminisztrátort."*
-- **AC-4.5.1:** Helyes bejelentkezési adatokkal a felhasználó közvetlenül a Dashboardra érkezik.
-- **AC-4.5.2:** A 30 napos megbízható eszköz pipálása esetén a következő belépéskor a rendszer nem kéri újra a kétfaktoros kódot.
-- **AC-4.5.3:** Felfüggesztett fiók esetén a belépés elutasításra kerül és hibaüzenet jelenik meg.
+#### 4.5.4. Manuális Regisztrációs Igény és Kapcsolatfelvételi Folyamat
+
+A zárt szakmai és jogszabályi megfelelőség miatt a portálon **nincs automatikus, önkiszolgáló regisztrációs felület**:
+- **Kapcsolatfelvételi Igény:** Az új orvos vagy gyógyszerész a bejelentkezési környezetből elérhető kapcsolatfelvételi űrlapon keresztül jelzi regisztrációs szándékát.
+- **Rögzítendő Adatok:** Teljes név, szakmai e-mail cím, telefonszám, orvosi/gyógyszerészi pecsétszám, szakterület / intézmény, adatkezelési szabályzat elfogadása.
+- **Adminisztrátori Jóváhagyás:** A beküldött igényt a rendszer rögzíti, majd a rendszeradminisztrátor a hivatalos kamarai nyilvántartásban (pl. ENKK/OKFŐ) ellenőrzi az orvosi jogosultságot, és az Adminisztrációs modulban (`/admin/users`) manuálisan aktiválja a felhasználói fiókot.
+
+#### 4.5.5. Bemenetek és Kimenetek
+
+1. **Felhasználói Bemenetek:**
+   - E-mail cím vagy felhasználónév beírása.
+   - Jelszó beírása.
+   - „Bejelentkezés” gombra kattintás vagy `Enter` billentyű lenyomása.
+   - „Elfelejtett jelszó” hivatkozásra kattintás.
+2. **Rendszer Kimenetek:**
+   - **Sikeres bejelentkezés:** Betöltési animáció a gombon (*„Azonosítás...”*), a munkamenet inicializálása, majd azonnali átirányítás az Irányítópultra (`/dashboard`).
+   - **Hibás adatok:** A beviteli mezők felett piros hibaüzenet sáv jelenik meg (*„Hibás e-mail cím vagy jelszó!”*), a jelszómező fókuszba kerül.
+   - **Inaktív / Felfüggesztett fiók:** Piros hibaüzenet: *„A fiók felfüggesztésre került. Kérjük, keresse az adminisztrátort.”*
+   - **Kötelező mező hiánya:** Böngésző natív validációs figyelmeztetése (*„Kérjük, töltse ki ezt a mezőt”*).
+
+#### 4.5.6. Felhasználói Hibakezelés és Biztonsági Visszajelzések
+
+- **Érvénytelen azonosítási adatok:** Amennyiben a megadott e-mail/felhasználónév vagy jelszó nem egyezik a nyilvántartott adatokkal, a rendszer nem fedi fel, hogy melyik adat volt hibás (biztonsági jó gyakorlat), hanem egységes hibaüzenetet ad:  
+  `„Hibás e-mail cím vagy jelszó!”`
+- **Felfüggesztett fiók:** Felfüggesztett vagy archivált státuszú fiók esetén (pl. teszt fiók: `teszt@example.com`) a rendszer a belépést azonnal megtagadja:  
+  `„A fiók felfüggesztésre került. Kérjük, keresse az adminisztrátort.”`
+- **Túlterhelés vagy hálózati kiesés:** Hálózati hiba esetén a rendszer diszkrét üzenettel tájékoztat:  
+  `„Azonosítási hiba történt a belépés során. Kérjük, próbálja újra később!”`
+
+#### 4.5.7. Desktop vs. Mobil Felületi Eltérések a Bejelentkezési Felületen
+
+| Felületi Terület | Asztali Munkaállomás (≥1024px) | Mobil Érintőképernyő (<1024px) |
+| :--- | :--- | :--- |
+| **Kártya szélesség és margók** | Fix 479px szélesség, képernyő közepére zárt lebegő kártya, 24px belső margóval. | 100% szélesség (max. 479px), 16px oldalsó margók a képernyőszélekhez képest. |
+| **Beviteli mezők és gombok** | Egérkattintásos fókusz, billentyűzet `Tab` és `Enter` navigáció. | 56px érintésbarát touch target, virtuális billentyűzet felugrásakor a kártya automatikusan a képernyő fókuszába görgül. |
+| **Tájékoztató jelvény (Scope note)** | Kártyán belüli felső sáv 12px-es betűmérettel. | Automatikusan 3 sorba tördelődő, kompakt figyelmeztető doboz. |
+| **Logó és fejléc** | `214x33px` logó, 22px-es alcím 24px-es alsó térközzel. | Kompaktabb elrendezés 16px-es térközzel a függőleges helytakarékosságért. |
+
+#### 4.5.8. Elfogadási Kritériumok (Acceptance Criteria)
+
+- **AC-4.5.1:** A bejelentkezési felületen kizárólag egyszerű felhasználónév/e-mail cím és jelszó beviteli mezők, valamint a Bejelentkezés gomb és az Elfelejtett jelszó link látható; semmilyen biometrikus Passkey vagy e-mail kódos fülválasztó nem jelenik meg.
+- **AC-4.5.2:** A bejelentkezési kártya tetején jól láthatóan és folyamatosan megjelenik a sárga információs jelvény, amely egyértelműen rögzíti, hogy a bejelentkezési rendszer egy tervezet, és a tényleges orvosi autentikáció nem képezi a fejlesztési scope részét.
+- **AC-4.5.3:** Érvényes szakmai felhasználói adatok (`demo@example.com` / `vény123`) vagy adminisztrátori adatok (`admin@example.com` / `vény123`) megadásakor a rendszer azonnal belépteti a felhasználót és közvetlenül a Dashboardra (`/dashboard`) navigál.
+- **AC-4.5.4:** Inaktív vagy felfüggesztett fiókkal történő belépési kísérlet esetén (`teszt@example.com`) a rendszer a belépést megtagadja, és megjeleníti a felfüggesztésre figyelmeztető hibaüzenetet.
+- **AC-4.5.5:** Az „Elfelejtett jelszó” linkre kattintva a rendszer a jelszó-helyreállító aloldalra (`/forgot-password`) irányít át.
 
 ---
 
@@ -1245,6 +1301,9 @@ Ez a fejezet összefoglalja azokat az elemeket, amelyek korábbi koncepciókban 
 7. **Nem Gyógyszer Patikai Termékek (Étrend-kiegészítők, Orvostechnikai Eszközök, Kozmetikumok) Státuszkövetése:**
    - *Státusz:* Rendszer hatókörén kívüli (Out of scope) funkció.
    - *Részletek:* A BENUvény orvosi portál célzottan a gyógyító és terápia-meghatározó orvosok és gyógyszerészek számára készült. A készlet- és piaci státuszok, hiányok és helyettesíthetőség monitorozása emiatt szigorúan a törzskönyvezett humán gyógyszerekre – azon belül is kizárólag az OTC és a vényköteles készítményekre – korlátozódik. A patikai forgalomban jelen lévő több tízezer egyéb cikk (étrend-kiegészítők, vitaminok, kozmetikumok, orvostechnikai eszközök, tápszerek) státuszkövetése tudatos döntés alapján nem része a portál funkcionalitásának, megelőzve az orvosi fókusz felhígulását és az adatzajt.
+8. **Biometrikus Passkey és E-mail Kódos (Magic Code) Bejelentkezés:**
+   - *Státusz:* Külső rendszerbe átsorolva / Nem fejlesztési scope.
+   - *Részletek:* A beléptetés és jogosultságkezelés a megrendelő meglévő központi azonosítási rendszerében (külső Identity Provider / orvosi SSO) valósul meg. A portál webes felületén nem készül egyedi biometrikus Passkey vagy Magic code hitelesítési mechanizmus; a prototípus és a specifikáció az egyszerűsített felhasználónév / jelszó alapú bejelentkezési felületre szűkül le.
 
 ---
 
@@ -1253,7 +1312,7 @@ Ez a fejezet összefoglalja azokat az elemeket, amelyek korábbi koncepciókban 
 A működő prototípus élő kipróbálására szolgáló tesztfiókok a [https://bvo.uneb.hu/login](https://bvo.uneb.hu/login) oldalon.
 
 > **Egységes jelszó minden tesztfiókhoz:** `vény123`  
-> *(2FA tesztelése esetén a működő demó ellenőrző kód: `123456`)*
+> *(Egyszerű felhasználónév/jelszó bejelentkezés a prototípusban)*
 
 ### 6.1. Rendszeradminisztrátor Tesztfiók
 - **E-mail:** `admin@example.com`
@@ -1286,6 +1345,7 @@ Ez a fejezet a funkcionális specifikációban eszközölt módosítások és ki
 
 | Verzió | Dátum | Változás Típusa | Változások Részletes Összefoglalása |
 | :--- | :--- | :--- | :--- |
+| **v1.15.0** | 2026.10.21. | Funkcionális Tisztítás & Scope Pontosítás | **Bejelentkezési felület átalakítása egyszerű felhasználónév/jelszó bejelentkezésre és az autentikációs rendszer fejlesztési hatókörön kívüli (out of scope) rögzítése (4.5):**<br>• **Egyszerűsített felhasználónév/jelszó felület (`/login`):** A korábbi 3 lapfüles (Jelszó, Passkey, Magic Code) összetett bejelentkezési választó kivezetésre került a felületről. A bejelentkezési kártya letisztult, 2 mezős (E-mail cím vagy felhasználónév, Jelszó) űrlappá alakult át 56px-es beviteli mezőkkel, „Bejelentkezés” akciógombbal és „Elfelejtett jelszó” hivatkozással.<br>• **Nem fejlesztési scope hivatalos nyilatkozat és felületi jelvény:** Rögzítésre került a specifikációban és a bejelentkezési kártya fejlécében elhelyezett sárga tájékoztató jelvényben, hogy a felhasználói azonosítás, beléptetés és SSO kezelés meglévő külső orvosi azonosító infrastruktúrából érkezik, így az autentikációs háttérrendszer nem képezi a közvetlen fejlesztési scope részét.<br>• **Részletes beviteli mező és folyamatspecifikáció:** Teljes körű mezőtáblázat rögzítése adatformátumokkal, kötelezőséggel és validációval; bemenetek és kimenetek, valamint felhasználói hibakezelési forgatókönyvek specifikálása.<br>• **Desktop vs. Mobil felületi összehasonlító táblázat:** Érintőképernyős (56px touch target, viewport fókusz) és asztali (billentyűzet navigáció) felületi különbségek rögzítése.<br>• **Korábban tervezett funkciók (5. fejezet) bővítése:** A biometrikus Passkey és Magic code belépési mechanizmusok áthelyezése az 5. fejezetbe (külső rendszerbe átsorolt funkciók).<br>• Új és frissített elfogadási kritériumok (AC-4.5.1 – AC-4.5.5). |
 | **v1.14.0** | 2026.10.21. | Funkcionális Bővítés & Pontosítás | **Adminisztráció (/admin/users, /admin/pharmacies, /admin/pharmacies/[id]) modulok teljes körű specifikációja a prototípus működése alapján (4.6):**<br>• **Felső lapfül (Tab) navigációs keretrendszer (`admin/layout.tsx`):** Felső tab-navigáció rögzítése a `Felhasználók` (`/admin/users`) és a `Gyógyszertárak` (`/admin/pharmacies`) felületek közötti azonnali váltáshoz, adminisztrációs jogosultság-ellenőrzéssel.<br>• **Felhasználókezelés új funkciói (`/admin/users`):** Specifikálásra került a fejlécben elhelyezett kiemelt **„+ Új felhasználó”** létrehozó gomb (3 lapfüles felugró űrlappal), valamint a műveleti menü (`⋮`) **„Új jelszó küldése”** (`reset-pw`) funkciója megerősítő modális ablakkal, a kényszerített munkamenet-bontás (Force Logout), valamint az adminisztrátori önkizárás védelme.<br>• **Gyógyszertár Admin Részletes Adatlap (`/admin/pharmacies/[id]`):** A listaoldalról a *„Részletek”* gombbal megnyíló dedikált admin adatlap specifikálása: patika alapadatok, 4 tizedesjegy pontosságú GPS koordináták, heti nyitvatartási rend és valós idejű 3 állapotú nyitvatartási jelvény; Szinkronizációs mérőszám-kártya (`Utolsó adatszinkron`, `Utolsó készletszinkron` másodperces pontossággal és `Készleten lévő termékek` száma); valamint **7 oszlopos, oszloponként szűrhető és kétirányúan rendezhető Termékkészlet táblázat** 25-ös lapozóval, szűrőtörlő gombbal és **3 szintű színkódolt darabszámmal** (`dapieces`: 0 db piros, 1–9 db sárga, ≥10 db zöld).<br>• Új és frissített elfogadási kritériumok (AC-4.6.1 – AC-4.6.11). |
 | **v1.13.0** | 2026.10.21. | Funkcionális Pontosítás | **Gyógyszertár Kereső (/gyogyszertarak, PharmacyFinder, PharmacyCard, PharmacyDetailModal) teljes körű pontosítása a prototípus működése alapján (4.3):**<br>• **3 állapotú nyitvatartási státusz (`pharmacy-utils.ts`):** Rögzítésre került a valós idejű, 3 állapotú nyitvatartási logikát követő státuszjelzés a patikakártyán és a modálban: `Nyitva` (zöld), **`Hamarosan zár`** (sárga/olíva – a napi zárás előtt legfeljebb 60 perccel), valamint `Zárva` (piros).<br>• **Patikakártya feliratok és funkciók (`PharmacyCard.tsx`):** A kártyán a részletező link pontos felirata **„Többit mutasd”**; a preferált patika kijelölő gomb kétállású kapcsolóként (toggle) működik: alapállapotban **„Közelinek jelölöm +”** (halványzöld), aktív állapotban **„✓ Közeli gyógyszertár”** (sötétzöld), amelyre ismételten rákattintva a kijelölés azonnal törlődik.<br>• **Részletes adatlap modál és elérhetőségek (`PharmacyDetailModal.tsx`):** Tisztázásra került, hogy a patika telefonszáma és e-mail címe a zsúfoltság elkerülése érdekében nem a kártyán, hanem a felugró modális ablakban érhető el közvetlenül kattintható (`tel:`, `mailto:`) formában, a modál láblécében pedig helyet kapott a **„Mutasd térképen”** akciógomb is (amely a modál bezárása mellett közvetlenül a patikára centrálja a térképet és kinyitja az adatbuborékot).<br>• **50 elemes renderelési korlát:** A patikalista a gördülékeny felületi teljesítmény megőrzése érdekében egyszerre legfeljebb 50 patikakártyát renderel le a térképen látható találatokból (`visiblePharmacies.slice(0, 50)`).<br>• Új és frissített elfogadási kritériumok (AC-4.3.2, AC-4.3.7, AC-4.3.8, AC-4.3.9). |
 | **v1.12.0** | 2026.10.21. | Funkcionális Pontosítás | **Gyógyszer Részletes Adatlap (/gyogyszerek/adatlap és /gyogyszerek/[...id]) teljes körű pontosítása a prototípus működése alapján (4.2.2):**<br>• **Megszűnt termék figyelmeztető doboz:** `Megszűnt` piaci státusz esetén a sárga hiánybanner helyett egy halványpiros figyelmeztető kártya jelenik meg (*„Megszűnt termék”*), amely 2 oszlopos strukturált elrendezésben feltünteti a termék megszűnésének pontos idejét és hivatalos szabályozói okát (*„Forgalmazási engedély visszavonása / Forgalomból kivonva”*).<br>• **Országos hálózati készletblokk (`BENU GYÓGYSZERTÁRAK`):** A közeli patika szekció felett elhelyezkedő új hálózati készletblokk rögzítése, amely a teljes hálózat 250 BENU gyógyszertárára vetítve mutatja a megoszlást (elérhető terméknél `Készleten` és `Rendelésre [1-2 munkanap]`, hiánycikk vagy megszűnt terméknél `Korlátozottan` és `Nem elérhető`), közvetlen kattintható továbbnavigációval a gyógyszertárkeresőre (`/gyogyszertarak`).<br>• **Termékjellemzők és Árak 3 oszlopos rács:** A termékprofil kártya alsó sávjának specifikálása a `FORGALMAZÓ / GYÁRTÓ`, `KISZERELÉS MÉRETE`, `TÁMOGATÁSI KATEGÓRIA`, **`EKVIVALENCIA CSOPORT`** (*„Helyettesíthető bázisgyógyszer”* / *„Referencia készítmény”*), kiemelt magenta `PUBLIKUS FOGYASZTÓI ÁR` és sötétkék **`TÉRÍTÉSI DÍJ (BECSÜLT)`** mezőkkel.<br>• **Státuszváltozási előzmények lábléce (`MedicineStatusHistory.tsx`):** A státusztörténeti napló alsó szürke zárósávjában rögzítésre került az *„Utolsó lekérdezés orvosi adatbázisból: {dátum}”* időbélyeg megjelenítése.<br>• **Visszafelé kompatibilis dinamikus útvonalátirányítás:** A korábbi vagy külső `/gyogyszerek/[...id]` útvonalkérések automatikus és transzparens átirányításának rögzítése az új lekérdezési paraméteres `/gyogyszerek/adatlap?tk=...` formátumra.<br>• Új elfogadási kritériumok (AC-4.2.16 – AC-4.2.20). |

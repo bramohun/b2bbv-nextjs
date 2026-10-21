@@ -114,7 +114,7 @@ const DEFAULT_USERS: User[] = [
         twoFactorType: 'email',
         phoneNumber: '+36209876543',
         passkeys: [],
-        trustedDevices: []
+        trustedDevices: ['device-demo-1']
     },
     {
         id: 'user-2',
