@@ -12,11 +12,11 @@
  * 
  * KAPCSOLÓDÓ USER STORY-K:
  * - Orvosként páciensvizit során szeretném egy kompakt kártyán látni a készítmény
- *   nevét, országos készletstátuszát és a közeli gyógyszertári elérhetőségét.
- * - Orvosként szeretném látni a hatóanyagot és kiszerelést anélkül, hogy a részletes
- *   adatlapra kellene navigálnom.
+ *   nevét, országos készletstátuszát és a jobb felső sarokban az utolsó frissítés pontos idejét.
+ * - Orvosként szeretném látni a hatóanyagot, kiszerelést, gyártót és a törzskönyvi azonosítót (TK-szám)
+ *   anélkül, hogy a részletes adatlapra kellene navigálnom vagy lenyitnám a másodlagos adatokat.
  * - Felhasználóként egy kattintással szeretném lenyitni a másodlagos adatokat
- *   (gyártó, csomagolás, kiadhatóság, engedély dátuma).
+ *   (csomagolás, kiadhatóság, engedély dátuma).
  * - Felhasználóként közvetlenül a kártyáról szeretném a gyógyszert kedvencnek jelölni,
  *   hiányértesítésre feliratkozni, vagy megnyitni a részletes adatlapot.
  * 
@@ -124,14 +124,14 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine, visibleFie
             />
 
             <div>
-                {/* 1. Fejléc: Státuszok & Közeli patika */}
+                {/* 1. Fejléc: Státuszok & Utolsó frissítés */}
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
                     <div className="flex items-center gap-2">
                         {renderStatusBadge()}
                         <NearbyPharmacyStockIndicator medicineId={medicine.tkSzam} />
                     </div>
-                    <span className="text-[12px] font-mono text-[#62788f] bg-[#f9f9fb] px-2 py-0.5 rounded border border-[#e7e8ec]">
-                        {medicine.tkSzam}
+                    <span className="text-[12px] text-[#62788f] bg-[#f9f9fb] px-2 py-0.5 rounded border border-[#e7e8ec] whitespace-nowrap">
+                        Utolsó frissítés: {formatDate(medicine.lastUpdate)}
                     </span>
                 </div>
 
@@ -167,6 +167,12 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine, visibleFie
                             </span>
                         </div>
                     )}
+                    <div className="flex items-start justify-between gap-2">
+                        <span className="text-[#62788f] shrink-0">Azonosító:</span>
+                        <span className="font-mono font-medium text-[#002664] text-right truncate">
+                            {medicine.tkSzam}
+                        </span>
+                    </div>
                 </div>
 
                 {/* 4. Lenyitható további adatok szekció */}
@@ -200,12 +206,6 @@ export const MedicineCard: React.FC<MedicineCardProps> = ({ medicine, visibleFie
                             <div className="flex items-start justify-between gap-2">
                                 <span>Engedély dátuma:</span>
                                 <span className="font-medium text-[#002664] text-right">{medicine.authorizationDate}</span>
-                            </div>
-                        )}
-                        {medicine.lastUpdate && (
-                            <div className="flex items-start justify-between gap-2">
-                                <span>Utolsó frissítés:</span>
-                                <span className="font-medium text-[#002664] text-right">{formatDate(medicine.lastUpdate)}</span>
                             </div>
                         )}
                     </div>
