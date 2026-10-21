@@ -84,16 +84,76 @@ interface PharmacyMapProps {
     onViewDetails?: (pharmacy: Pharmacy) => void;
 }
 
-// Helper component to center and zoom map dynamically
-const MapUpdater = ({ center, zoom }: { center: [number, number]; zoom: number }) => {
+// Setup Leaflet default icon fallback in Next.js
+if (typeof window !== 'undefined' && L && L.Icon && L.Icon.Default) {
+    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    L.Icon.Default.mergeOptions({
+        iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+    });
+}
+
+const DEFAULT_CENTER: [number, number] = [47.1625, 19.5033];
+
+// Helper component to center and zoom map dynamically without breaking initial mount
+const MapUpdater = ({ center, zoom }: { center?: [number, number]; zoom?: number }) => {
     const map = useMap();
+    const isFirstMountRef = React.useRef(true);
+    const prevKeyRef = React.useRef<string>('');
+
     useEffect(() => {
-        map.setView(center, zoom, { animate: true });
+        if (!center || typeof center[0] !== 'number' || typeof center[1] !== 'number') return;
+        const currentZoom = typeof zoom === 'number' ? zoom : 7;
+        const key = `${center[0].toFixed(4)}-${center[1].toFixed(4)}-${currentZoom}`;
+
+        // Skip setView on initial mount because MapContainer already set the initial view
+        if (isFirstMountRef.current) {
+            isFirstMountRef.current = false;
+            prevKeyRef.current = key;
+            return;
+        }
+
+        if (prevKeyRef.current !== key) {
+            prevKeyRef.current = key;
+            map.setView(center, currentZoom, { animate: false });
+        }
     }, [center, zoom, map]);
+
     return null;
 };
 
-// Helper component to detect visible markers
+// Helper component to force Leaflet to recalculate container dimensions (fixes white/empty map)
+const MapResizeHandler = () => {
+    const map = useMap();
+    useEffect(() => {
+        const resize = () => {
+            try {
+                map.invalidateSize();
+            } catch (e) {
+                // Ignore if unmounted
+            }
+        };
+
+        resize();
+        const t1 = setTimeout(resize, 100);
+        const t2 = setTimeout(resize, 350);
+        const t3 = setTimeout(resize, 800);
+        const t4 = setTimeout(resize, 1500);
+
+        window.addEventListener('resize', resize);
+        return () => {
+            clearTimeout(t1);
+            clearTimeout(t2);
+            clearTimeout(t3);
+            clearTimeout(t4);
+            window.removeEventListener('resize', resize);
+        };
+    }, [map]);
+    return null;
+};
+
+// Helper component to detect visible markers safely
 const MapBoundsListener = ({
     pharmacies,
     onVisiblePharmaciesChange
@@ -107,14 +167,18 @@ const MapBoundsListener = ({
         if (!onVisiblePharmaciesChange) return;
 
         const updateVisible = () => {
-            const bounds = map.getBounds();
-            const visibleIds = pharmacies
-                .filter(p => p.latitude && p.longitude && bounds.contains([p.latitude, p.longitude]))
-                .map(p => p.id);
-            onVisiblePharmaciesChange(visibleIds);
+            try {
+                const bounds = map.getBounds();
+                if (!bounds) return;
+                const visibleIds = (pharmacies || [])
+                    .filter(p => p.latitude && p.longitude && bounds.contains([p.latitude, p.longitude]))
+                    .map(p => p.id);
+                onVisiblePharmaciesChange(visibleIds);
+            } catch (err) {
+                console.warn('Map bounds check error:', err);
+            }
         };
 
-        // Initial check and on every move/zoom
         updateVisible();
         map.on('moveend', updateVisible);
 
@@ -126,9 +190,112 @@ const MapBoundsListener = ({
     return null;
 };
 
+// Native event-safe nearby button inside Leaflet Popup (bypasses Leaflet popup click swallowing)
+const PopupNearbyButton: React.FC<{
+    markedNearby: boolean;
+    onToggle: () => void;
+}> = ({ markedNearby, onToggle }) => {
+    const btnRef = React.useRef<HTMLButtonElement>(null);
+    const lastClickRef = React.useRef<number>(0);
+
+    const handleClick = React.useCallback((e: Event | React.MouseEvent) => {
+        if (e) {
+            e.stopPropagation();
+            if ('preventDefault' in e && typeof (e as any).preventDefault === 'function') {
+                (e as any).preventDefault();
+            }
+        }
+        const now = Date.now();
+        if (now - lastClickRef.current < 250) return;
+        lastClickRef.current = now;
+        onToggle();
+    }, [onToggle]);
+
+    React.useEffect(() => {
+        const btn = btnRef.current;
+        if (!btn) return;
+        btn.addEventListener('click', handleClick);
+        btn.addEventListener('touchend', handleClick);
+        return () => {
+            btn.removeEventListener('click', handleClick);
+            btn.removeEventListener('touchend', handleClick);
+        };
+    }, [handleClick]);
+
+    return (
+        <button
+            ref={btnRef}
+            type="button"
+            onClick={handleClick}
+            className={`h-[32px] px-[12px] py-[4px] rounded-[22px] flex items-center justify-center gap-[8px] text-[14px] font-['Ubuntu',sans-serif] font-medium transition-all cursor-pointer ${
+                markedNearby
+                    ? 'bg-[#378509] text-white hover:bg-[#2f7108]'
+                    : 'bg-[#e8f8e2] text-[#317907] hover:bg-[#d7f1cf]'
+            }`}
+        >
+            {markedNearby ? (
+                <>
+                    <span className="material-symbols-rounded text-[18px]">check</span>
+                    <span>Közeli gyógyszertár</span>
+                </>
+            ) : (
+                <>
+                    <span>Közelinek jelölöm</span>
+                    <span className="material-symbols-rounded text-[18px]">add</span>
+                </>
+            )}
+        </button>
+    );
+};
+
+// Native event-safe detail button inside Leaflet Popup
+const PopupDetailLink: React.FC<{
+    onClick: () => void;
+    children: React.ReactNode;
+    className?: string;
+}> = ({ onClick, children, className }) => {
+    const btnRef = React.useRef<HTMLButtonElement>(null);
+    const lastClickRef = React.useRef<number>(0);
+
+    const handleClick = React.useCallback((e: Event | React.MouseEvent) => {
+        if (e) {
+            e.stopPropagation();
+            if ('preventDefault' in e && typeof (e as any).preventDefault === 'function') {
+                (e as any).preventDefault();
+            }
+        }
+        const now = Date.now();
+        if (now - lastClickRef.current < 250) return;
+        lastClickRef.current = now;
+        onClick();
+    }, [onClick]);
+
+    React.useEffect(() => {
+        const btn = btnRef.current;
+        if (!btn) return;
+        btn.addEventListener('click', handleClick);
+        btn.addEventListener('touchend', handleClick);
+        return () => {
+            btn.removeEventListener('click', handleClick);
+            btn.removeEventListener('touchend', handleClick);
+        };
+    }, [handleClick]);
+
+    return (
+        <button
+            ref={btnRef}
+            type="button"
+            onClick={handleClick}
+            className={className}
+        >
+            {children}
+        </button>
+    );
+};
+
 const PharmacyMap: React.FC<PharmacyMapProps> = ({
     pharmacies,
-    center = [47.1625, 19.5033], // Default Hungary center
+    center = DEFAULT_CENTER,
     zoom = 7,
     selectedPharmacyId,
     userLocation,
@@ -144,51 +311,43 @@ const PharmacyMap: React.FC<PharmacyMapProps> = ({
     const dayNamesHu = useMemo(() => ['Vasárnap', 'Hétfő', 'Kedd', 'Szerda', 'Csütörtök', 'Péntek', 'Szombat'], []);
     const currentDayName = `${dayNamesHu[new Date().getDay()]}:`;
 
-    return (
-        <div className="relative w-full h-full">
-            <style jsx global>{`
-                .leaflet-popup-content-wrapper {
-                    padding: 0 !important;
-                    border-radius: 16px !important;
-                    box-shadow: 0px 10px 25px -5px rgba(0, 26, 72, 0.2), 0px 8px 10px -6px rgba(0, 26, 72, 0.1) !important;
-                    overflow: hidden !important;
-                }
-                .leaflet-popup-content {
-                    margin: 0 !important;
-                    line-height: inherit !important;
-                    min-width: 340px !important;
-                    max-width: 400px !important;
-                }
-                .leaflet-container a.leaflet-popup-close-button {
-                    top: 12px !important;
-                    right: 12px !important;
-                    color: #002664 !important;
-                    font-size: 18px !important;
-                    width: 24px !important;
-                    height: 24px !important;
-                    line-height: 24px !important;
-                    border-radius: 50% !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: center !important;
-                }
-                .leaflet-container a.leaflet-popup-close-button:hover {
-                    background-color: #f0f4f9 !important;
-                }
-            `}</style>
+    const selectedPharmacy = useMemo(() => {
+        if (!selectedPharmacyId || !pharmacies) return null;
+        return pharmacies.find(p => p.id === selectedPharmacyId) || null;
+    }, [selectedPharmacyId, pharmacies]);
 
+    const safeCenter: [number, number] = useMemo(() => {
+        if (selectedPharmacy && selectedPharmacy.latitude && selectedPharmacy.longitude) {
+            return [selectedPharmacy.latitude, selectedPharmacy.longitude];
+        }
+        if (Array.isArray(center) && typeof center[0] === 'number' && typeof center[1] === 'number') {
+            return center;
+        }
+        return DEFAULT_CENTER;
+    }, [center, selectedPharmacy]);
+
+    const safeZoom = useMemo(() => {
+        if (selectedPharmacy) return 14;
+        return typeof zoom === 'number' ? zoom : 7;
+    }, [zoom, selectedPharmacy]);
+
+    return (
+        <div className="w-full h-full min-h-[500px] relative">
             <MapContainer
-                center={center}
-                zoom={zoom}
-                style={{ height: '100%', width: '100%', zIndex: 0 }}
+                center={safeCenter}
+                zoom={safeZoom}
+                className="w-full h-full min-h-[500px]"
+                style={{ height: '100%', width: '100%', minHeight: '500px', zIndex: 0 }}
                 scrollWheelZoom={true}
             >
                 <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    maxZoom={19}
                 />
 
-                <MapUpdater center={center} zoom={zoom} />
+                <MapResizeHandler />
+                <MapUpdater center={safeCenter} zoom={safeZoom} />
                 <MapBoundsListener
                     pharmacies={pharmacies}
                     onVisiblePharmaciesChange={onVisiblePharmaciesChange}
@@ -218,17 +377,26 @@ const PharmacyMap: React.FC<PharmacyMapProps> = ({
                                 },
                             }}
                         >
-                            <Popup>
+                            <Popup
+                                eventHandlers={{
+                                    add: (e) => {
+                                        const popupNode = e.target.getElement();
+                                        if (popupNode) {
+                                            L.DomEvent.disableClickPropagation(popupNode);
+                                            L.DomEvent.disableScrollPropagation(popupNode);
+                                        }
+                                    }
+                                }}
+                            >
                                 <div className="bg-white p-[16px] flex flex-col gap-[12px] w-full text-left font-['Ubuntu',sans-serif]">
                                     <div className="flex flex-col gap-[8px] w-full pr-4">
                                         <div className="flex flex-col items-start w-full">
-                                            <button
-                                                type="button"
+                                            <PopupDetailLink
                                                 onClick={() => onViewDetails?.(pharmacy)}
-                                                className="text-left font-['Ubuntu',sans-serif] text-[16px] text-[#002664] underline decoration-solid hover:text-[#378509] leading-[24px]"
+                                                className="text-left font-['Ubuntu',sans-serif] text-[16px] text-[#002664] underline decoration-solid hover:text-[#378509] leading-[24px] cursor-pointer"
                                             >
                                                 {pharmacy.nev}
-                                            </button>
+                                            </PopupDetailLink>
                                             <p className="font-['Ubuntu',sans-serif] font-bold text-[16px] text-[#002664] leading-[24px]">
                                                 {pharmacy.cim}
                                             </p>
@@ -274,13 +442,12 @@ const PharmacyMap: React.FC<PharmacyMapProps> = ({
                                             </div>
                                         </div>
 
-                                        <button
-                                            type="button"
+                                        <PopupDetailLink
                                             onClick={() => onViewDetails?.(pharmacy)}
-                                            className="text-left font-['Ubuntu',sans-serif] text-[14px] text-[#002664] underline decoration-solid hover:text-[#378509] leading-[21px]"
+                                            className="text-left font-['Ubuntu',sans-serif] text-[14px] text-[#002664] underline decoration-solid hover:text-[#378509] leading-[21px] cursor-pointer"
                                         >
                                             Többit mutasd
-                                        </button>
+                                        </PopupDetailLink>
                                     </div>
 
                                     {/* Divider */}
@@ -288,34 +455,16 @@ const PharmacyMap: React.FC<PharmacyMapProps> = ({
 
                                     {/* Action button */}
                                     <div className="flex items-center w-full">
-                                        <button
-                                            type="button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
+                                        <PopupNearbyButton
+                                            markedNearby={markedNearby}
+                                            onToggle={() => {
                                                 if (markedNearby) {
                                                     clearNearbyPharmacy();
                                                 } else {
                                                     setNearbyPharmacy(pharmacy);
                                                 }
                                             }}
-                                            className={`h-[32px] px-[12px] py-[4px] rounded-[22px] flex items-center justify-center gap-[8px] text-[14px] font-['Ubuntu',sans-serif] font-medium transition-all ${
-                                                markedNearby
-                                                    ? 'bg-[#378509] text-white hover:bg-[#2f7108]'
-                                                    : 'bg-[#e8f8e2] text-[#317907] hover:bg-[#d7f1cf]'
-                                            }`}
-                                        >
-                                            {markedNearby ? (
-                                                <>
-                                                    <span className="material-symbols-rounded text-[18px]">check</span>
-                                                    <span>Közeli gyógyszertár</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span>Közelinek jelölöm</span>
-                                                    <span className="material-symbols-rounded text-[18px]">add</span>
-                                                </>
-                                            )}
-                                        </button>
+                                        />
                                     </div>
                                 </div>
                             </Popup>

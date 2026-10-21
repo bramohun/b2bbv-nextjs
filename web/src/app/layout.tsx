@@ -20,6 +20,7 @@
 
 import type { Metadata } from "next";
 import { Ubuntu } from "next/font/google";
+import "leaflet/dist/leaflet.css";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 

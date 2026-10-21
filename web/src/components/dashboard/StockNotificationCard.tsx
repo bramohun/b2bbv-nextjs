@@ -22,7 +22,6 @@
  */
 
 import React from 'react';
-import Link from 'next/navigation';
 import Image from 'next/image';
 
 interface StockNotificationCardProps {
@@ -33,6 +32,8 @@ interface StockNotificationCardProps {
     megszunt: number;
     hiany: number;
     elerheto: number;
+    onModifyPharmacy?: () => void;
+    onClearPharmacy?: () => void;
 }
 
 export const StockNotificationCard: React.FC<StockNotificationCardProps> = ({
@@ -42,7 +43,9 @@ export const StockNotificationCard: React.FC<StockNotificationCardProps> = ({
     total,
     megszunt,
     hiany,
-    elerheto
+    elerheto,
+    onModifyPharmacy,
+    onClearPharmacy
 }) => {
     const isPharmacy = type === 'pharmacy';
 
@@ -56,6 +59,31 @@ export const StockNotificationCard: React.FC<StockNotificationCardProps> = ({
                 <p className="font-medium text-[#62788f]">
                     elmúlt {period} nap változása
                 </p>
+                {isPharmacy && (onModifyPharmacy || onClearPharmacy) && (
+                    <div className="flex items-center gap-3 pt-1.5 text-xs">
+                        {onModifyPharmacy && (
+                            <button
+                                type="button"
+                                onClick={onModifyPharmacy}
+                                className="text-[#002664] hover:text-[#378509] font-medium underline cursor-pointer transition-colors"
+                            >
+                                Másik patika választása
+                            </button>
+                        )}
+                        {onModifyPharmacy && onClearPharmacy && (
+                            <span className="text-[#c4c7d0]">•</span>
+                        )}
+                        {onClearPharmacy && (
+                            <button
+                                type="button"
+                                onClick={onClearPharmacy}
+                                className="text-[#b1174e] hover:underline font-medium cursor-pointer transition-colors"
+                            >
+                                Kijelölés törlése
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Nagy darabszám számláló */}
