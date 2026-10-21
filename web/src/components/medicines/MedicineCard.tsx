@@ -13,6 +13,9 @@
  * KAPCSOLÓDÓ USER STORY-K:
  * - Orvosként páciensvizit során szeretném egy kompakt kártyán látni a készítmény
  *   nevét, országos készletstátuszát és a jobb felső sarokban az utolsó frissítés pontos idejét.
+ * - Orvosként szeretném, ha a kártya fejlécében a Közeli patika készletindikátor (NearbyPharmacyStockIndicator)
+ *   megjelenítené a választott patika nevét, elérhetőségét és a patikai adat frissítési idejét (Frissítve: ÉÉÉÉ-HH-NN ÓÓ:PP).
+ * - Felhasználóként szeretném, ha a kártyarács nagy képernyőn (≥1280px) 3 oszlopos (xl:grid-cols-3) rácsként jelenne meg.
  * - Orvosként szeretném látni a hatóanyagot, kiszerelést, gyártót és a törzskönyvi azonosítót (TK-szám)
  *   anélkül, hogy a részletes adatlapra kellene navigálnom vagy lenyitnám a másodlagos adatokat.
  * - Felhasználóként egy kattintással szeretném lenyitni a másodlagos adatokat

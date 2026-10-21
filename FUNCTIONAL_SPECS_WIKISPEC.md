@@ -20,9 +20,9 @@ kerülnek strukturálásra.
 # BENUvény orvosi portál funkcionális specifikáció
 
 > **Dokumentum azonosító:** FRS-BVO-20261020  
-> **Verzió:** 1.8.2  
-> **Dátum:** 2026.10.20.  
-> **Státusz:** Aktív / Hatályos (Dashboard kétszintes kompakt készletváltozási lista, Mobil nézet és helyszíni orvosi vizit támogatása, Accordion szűrőpanel, gyógyszerkártyák, patika Split View)  
+> **Verzió:** 1.14.0  
+> **Dátum:** 2026.10.21.  
+> **Státusz:** Aktív / Hatályos (Adminisztráció teljes körű specifikációja: tab-navigáció, „+ Új felhasználó” gomb, műveleti menü új jelszó küldéssel, részletes gyógyszertári admin adatlap GPS koordinátákkal, heti nyitvatartással, szinkronizációs mérőszámokkal és 7 oszlopos, szűrhető-rendezhető, színkódolt darabszámos termékkészlet táblázattal 25-ös lapozóval)  
 > **Élő prototípus elérhetőség:** [https://bvo.uneb.hu/](https://bvo.uneb.hu/) (tesztfiókok a 6. fejezetben)  
 
 ---
@@ -72,15 +72,15 @@ A rendszerben két alapvető szerepkör létezik:
 
 | Modul Megnevezése | Elsődleges Felületi Útvonal (URL) | Fő Funkcionális Felelősség | Felületi Státusz |
 | :--- | :--- | :--- | :--- |
-| **Fejléc & Navigációs Sáv** | Globális komponens | Kereső, gyorslista, közeli patika kijelző, modulváltás, profil menü. | **Aktív** |
+| **Fejléc, Lábléc & Globális UI** | Globális komponens | Kereső, gyorslista, közeli patika kijelző, modulváltás, profil menü, lábléc (verziószám és szerzői jog), Toast értesítési rendszer. | **Aktív** |
 | **Irányítópult (Dashboard)** | `https://bvo.uneb.hu/dashboard` | Időszakos készletváltozások, preferált patika widget, gyors navigáció. | **Aktív** |
 | **Gyógyszer Nyilvántartás** | `https://bvo.uneb.hu/gyogyszerek` | Teljes képernyős fluid táblázat, oszloprendezés, szűrés, kedvencek. | **Aktív** |
-| **Gyógyszer Adatlap** | `https://bvo.uneb.hu/gyogyszerek/adatlap` | 4 szintű készletstátusz, árak, hiánybannerek, helyettesítők, történet. | **Aktív** |
+| **Gyógyszer Adatlap** | `https://bvo.uneb.hu/gyogyszerek/adatlap` (és `/gyogyszerek/[...id]`) | 4 szintű készletstátusz, 250 patikás országos hálózati eloszlás, megszűnt termék és hiány figyelmeztető kártyák, 3 oszlopos termékjellemzők és árak, helyettesítők, történet orvosi adatbázis időbélyeggel. | **Aktív** |
 | **Gyógyszertár Kereső** | `https://bvo.uneb.hu/gyogyszertarak` | Térkép, szinkronizált kártyalista, GPS helymeghatározás, heti rend modal. | **Aktív** |
 | **Globális Keresés** | Globális / Mobil Overlay | Instant keresés gyógyszerek, hatóanyagok és patikák között. | **Aktív** |
 | **Hitelesítés & Jogosultság** | `https://bvo.uneb.hu/login` | Jelszavas, Passkey és Magic Code belépés, 2FA, kapcsolatfelvételi űrlap. | **Aktív** |
 | **Felhasználói Profil** | `https://bvo.uneb.hu/profile` | Szakterületek, preferált patika, hírlevelek, biztonság, 2FA, passkey. | **Aktív** |
-| **Adminisztráció** | `https://bvo.uneb.hu/admin/*` | Felhasználók kezelése, patikák felügyelete és készletellenőrzés. | **Aktív** |
+| **Adminisztráció** | `https://bvo.uneb.hu/admin/*` (`/admin/users`, `/admin/pharmacies`, `/admin/pharmacies/[id]`) | Tab-navigációs keret, felhasználók kezelése, „+ Új felhasználó” rögzítés, jelszóküldés és munkamenet-bontás, gyógyszertárak felügyelete, részletes patika adatlap koordinátákkal és heti renddel, szinkronizációs mérőszámok, valamint 7 oszlopos, szűrhető-rendezhető, színkódolt darabszámos termékkészlet táblázat 25-ös lapozóval. | **Aktív** |
 
 ### 1.8. Akadálymentesség (WCAG 2.2) és Technikai SEO Irányelvek
 
@@ -120,7 +120,7 @@ A BENUvény Orvosi Portál funkcionális kialakításakor alapvető szempont az 
      - *Készlethiány esetén milyen azonnali helyettesítő (azonos hatóanyagú, INN) készítmény kapható a közeli patikában?*
    - **Mobiltervezési alapelv:** A mobil felület nem csupán az asztali nézet egyszerűsítése, hanem egykezes, érintésbarát orvosi döntéstámogató munkaeszköz:
      - A horizontálisan görgetendő táblázat helyett áttekinthető, modern **gyógyszerkártyák** jelennek meg.
-     - A táblázatfejléc szűrői helyett a szűrést és rendezést egyetlen gombbal kezelhető, lenyitható **Accordion szűrőpanel** biztosítja számlálóval.
+      - A szűrést és rendezést mind mobilon, mind asztali nézetben egyetlen gombbal kezelhető, lenyitható központi **Accordion szűrőpanel** biztosítja aktív szűrőszámlálóval.
      - A gyógyszertár keresőben **osztott képernyős (Split View)** elrendezés segíti az egyidejű térképes és listás tájékozódást (40% térkép, 60% lista).
 
 ---
@@ -139,8 +139,10 @@ Egy adott konkrét fizikai gyógyszertárban (BF kód alapján azonosítva) rend
 ### 2.3. Helyettesíthetőség (Terápiás és Hatóanyag Ekvivalencia)
 Amennyiben egy készítmény hiánycikk vagy megszűnt, a rendszer azonos hatóanyag (INN) és anatómiai/terápiás osztály (ATC) alapján felkínálja az orvos számára a rendelhető, készleten lévő alternatívákat.
 
-### 2.4. Készletértesítés
-Feliratkozás egy adott gyógyszer országos vagy helyi státuszváltozására (harang ikon). Készlethiány megszűnésekor vagy újra elérhető állapotba kerüléskor a rendszer automatikus e-mail értesítőt / hírlevelet küld. Az értesítés bekapcsolása automatikusan a kedvencek közé is menti a gyógyszert.
+### 2.4. Készletértesítés és Kedvenc-Értesítés Összekapcsolódás
+Feliratkozás egy adott gyógyszer országos vagy helyi státuszváltozására (harang ikon). Készlethiány megszűnésekor vagy újra elérhető állapotba kerüléskor a rendszer automatikus e-mail értesítőt / hírlevelet küld.
+- **Kétirányú Logikai Kapcsolat:** A készletértesítés bekapcsolása szorosan összefonódik a mentett gyógyszerekkel: a harang ikon aktiválásakor a rendszer automatikusan a mentett kedvencek közé is hozzáadja a készítményt (a csillag ikon is aktívvá válik).
+- **Védelmi Megerősítő Mechanizmus (`FavoriteRemovalModal`):** Ha a felhasználó egy olyan gyógyszert kíván eltávolítani a mentett kedvencek közül, amelyre korábban aktív készletértesítést is beállított, a rendszer védelmi célból **megerősítő felugró figyelmeztető ablakot** jelenít meg (*„Értesítés is megszűnik!”*). Ezzel elkerülhető, hogy az orvos véletlenül elmulasszon egy fontos hiány- vagy készletértesítést. A törlés jóváhagyásakor mindkét állapot (kedvenc státusz és aktív értesítés feliratkozás) egyszerre törlődik.
 
 ### 2.5. A Négy Készletstátusz (Készletelérhetőségi Szintek)
 A rendszer a készítmények elérhetőségét négy üzleti állapotba sorolja:
@@ -172,6 +174,12 @@ A gyógyszerészeti nyilvántartásban és készletkezelésben a rendszer a stá
 1. **OTC (Over-The-Counter / Vény nélkül kapható gyógyszer):** Hatóságilag törzskönyvezett humán gyógyszerkészítmény, mely vény nélkül kapható.
 2. **Vényköteles (Rx) Gyógyszer:** Hatóságilag törzskönyvezett humán gyógyszerkészítmény, mely kizárólag orvosi rendelvényre (receptre) adható ki.
 *Egyéb termékek:* A gyógyszertári forgalomban jelen lévő nem gyógyszer termékek (pl. étrend-kiegészítők, gyógyhatású készítmények, kozmetikumok, gyógyászati segédeszközök) státuszait a rendszer nem követi.
+
+### 2.13. Toast Értesítési Rendszer és Művelet-visszavonás (Undo)
+A képernyő jobb alsó sarkában lebegő, nem modális (a munkafolyamatot nem blokkoló) vizuális visszajelző kártya, amely kiemelt felhasználói műveletek – elsősorban mentett kedvenc gyógyszer eltávolítása – után jelenik meg.
+- **Időzített Megjelenés és Vizuális Idősáv:** Alapértelmezetten 10 másodpercig marad látható a felületen. A kártya alján egy folyamatosan és egyenletesen fogyó lineáris csík (progress bar) jelzi vissza a hátralévő időablakot.
+- **Egykattintásos Visszavonás („Visszavonom”):** A felhasználó egyetlen gombnyomással visszavonhatja a törlést, azonnal visszahelyezve a gyógyszert a mentett kedvencek közé anélkül, hogy a keresőből újra elő kellene keresnie.
+- **Közvetlen Adatlap Hivatkozás:** Az értesítésben a gyógyszer neve kattintható hivatkozásként funkcionál, azonnali navigációt biztosítva az adott készítmény részletes adatlapjára.
 
 ---
 
@@ -255,16 +263,37 @@ Ez a szakasz a rendszer üzleti entitásainak felületi paramétereit részletez
   - **Megadható Értékek:** `Elérhető` (zöld pill) / `Készlethiány` (sárga/narancs pill) / `Megszűnt` (piros pill)
 - **Helyi Készletelérhetőségi Szint (Patikai Státusz):**
   - **Megadható Értékek:** `Készleten` / `Korlátozottan` / `Rendelésre (1-2 munkanap)` / `Nem elérhető`
-- **Bruttó Fogyasztói Ár:**
-  - **Felületi Típus:** Pénzösszeg (HUF)
-  - **Példa Érték:** `"2 490 Ft"`
-- **Támogatási Kategória (Kiadhatóság):**
-  - **Példa Érték:** `"Vényköteles (Rx)"` / `"Nem vényköteles (OTC)"`
-- **Hiányinformációk (Csak hiány esetén):**
+- **Országos Hálózati Készleteloszlás (BENU Gyógyszertárak):**
+  - **Felületi Típus:** Statisztikai összesítő kártyablokk 250 gyógyszertárra vetítve
+  - **Megadható Értékek:** Elérhető terméknél: `Készleten` és `Rendelésre (1-2 munkanap)` patikák száma; Hiánycikk vagy megszűnt terméknél: `Korlátozottan` és `Nem elérhető` patikák száma.
+  - **Példa Érték:** `198 db BENU Gyógyszertárban készleten, 52 db rendelésre (1-2 munkanap)`
+  - **Limitációk:** Közvetlen továbbnavigáló linkkel ellátva a patikakeresőre (`/gyogyszertarak`).
+- **Publikus Fogyasztói Ár:**
+  - **Felületi Típus:** Pénzösszeg (HUF) kiemelt magenta/bordó színnel (`#b1174e`) és megnövelt 20px betűmérettel
+  - **Példa Érték:** `"4 825 Ft"`
+  - **Limitációk:** Hivatalos vagy irányadó bruttó kiskereskedelmi fogyasztói ár.
+- **Térítési Díj (Becsült):**
+  - **Felületi Típus:** Pénzösszeg (HUF) sötétkék vastag betűs kiemeléssel
+  - **Példa Érték:** `"2 171 Ft"`
+  - **Limitációk:** Számított becsült betegtérítési díj a társadalombiztosítási (NEAK) támogatási kulcs levonása után.
+- **Támogatási Kategória (Finanszírozás & Kiadhatóság):**
+  - **Felületi Típus:** Szöveges besorolás százalékos kulccsal
+  - **Példa Érték:** `"Kiemelt támogatásban részesülő (55%)"`, `"Normatív támogatás (25%)"`, `"Vényköteles (Rx)"` / `"Nem vényköteles (OTC)"`
+- **Ekvivalencia Csoport:**
+  - **Felületi Típus:** Orvosszakmai besorolási címke
+  - **Megadható Értékek:** `Helyettesíthető bázisgyógyszer` (ha rendelkezik azonos hatóanyagú generikus alternatívával) / `Referencia készítmény` (originális referencia-gyógyszer)
+  - **Példa Érték:** `"Helyettesíthető bázisgyógyszer"`
+- **Hiányinformációk (Csak Készlethiány esetén):**
   - **Hiány kezdete:** Dátum (`"2026.01.15."`)
   - **Várható befejezése:** Dátum vagy `"Bizonytalan"`
-  - **Hivatalos ok:** Szöveg (pl. `"Gyártási kapacitáshiány"`)
-  - **Terápiás javaslat:** Szöveg (helyettesítő INN készítmények listája)
+  - **Hivatalos ok:** Szöveg (pl. `"Gyártási kapacitáshiány"`, `"Alapanyaghiány"`)
+  - **Terápiás javaslat:** Szöveg (helyettesítő terápiás ajánlás)
+- **Megszűnés Információk (Csak Megszűnt státusz esetén):**
+  - **Megszűnés ideje:** Dátum (`"2026.01.01."`)
+  - **Megszűnés oka:** Hivatalos szabályozói szöveg (pl. `"Forgalmazási engedély visszavonása / Forgalomból kivonva"`)
+- **Státusztörténet Orvosi Adatbázis Időbélyeg:**
+  - **Felületi Típus:** Információs időbélyeg a történeti napló alsó láblécében
+  - **Példa Érték:** `"2026.10.21 00:35"` / `"2026.09.04 12:00"`
 
 ### 3.3. Gyógyszertár (Pharmacy) Adatmodell
 
@@ -287,16 +316,51 @@ Ez a szakasz a rendszer üzleti entitásainak felületi paramétereit részletez
 - **Heti Nyitvatartás:**
   - **Megadható Formátum:** Hétfőtől vasárnapig naponta nyitási-zárási idő (pl. `"08:00 - 19:00"`) vagy `"Zárva"`
   - **Példa Érték:** H-P: 08:00-19:00, Szo: 08:00-14:00, V: Zárva
-- **Elérhetőségek:**
-  - **Telefonszám:** Hívható formátum (pl. `"+36 1 234 5678"`)
-  - **E-mail cím:** Kattintható levélcím (pl. `"aranysas@benu.hu"`)
+- **Számított Napi Nyitvatartási Státusz (3 állapotú):**
+  - **Felületi Típus:** Valós idejű dinamikus szöveg és színkódolt státuszjelvény
+  - **Megadható Értékek:**
+    - `Nyitva` (zöld - `#317907` / badge-success: ha a gyógyszertár nyitva tart és a zárásig több mint 60 perc van hátra)
+    - `Hamarosan zár` (sárga/olíva - `#7a6c21` / badge-warning: ha a gyógyszertár nyitva tart, de a napi zárási időpontig legfeljebb 60 perc van hátra)
+    - `Zárva` (piros - `#b1174e` / badge-error: nyitvatartási időn kívül, zárás után, vagy heti pihenőnapon, pl. `Ma zárva`)
+  - **Példa Érték:** `"Nyitva"`, `"Hamarosan zár"`, `"Zárva"`
+  - **Limitációk:** Kliensoldali valós idejű állapotkalkuláció a helyi idő és a patika napi nyitvatartási adatai alapján.
+- **Közvetlen Kapcsolattartási Elérhetőségek:**
+  - **Telefonszám:** Hívható link formátum (`tel:` hivatkozás, pl. `"+36 1 234 5678"`)
+  - **E-mail cím:** Kattintható levélcím (`mailto:` hivatkozás, pl. `"aranysas@benu.hu"`)
+  - **Limitációk:** A kompakt kártyafelület tisztasága érdekében nem jelennek meg közvetlenül a patikakártyán; kizárólag a „Többit mutasd” linkre vagy a patikanévre kattintva felugró részletes adatlap modális ablakban (`PharmacyDetailModal`) érhetők el közvetlen interakcióval.
 
-### 3.4. Patikai Készletrekord Adatmodell
+### 3.4. Patikai Készletrekord Adatmodell (Adminisztrációs és Polckészlet)
 
-- **TK-szám:** Hivatkozott gyógyszerkészítmény kódja
-- **Raktári darabszám:** Pozitív egész szám (pl. `14 db`)
-- **Patikai státuszbesorolás:** `Készleten` / `Korlátozottan` / `Rendelésre` / `Nem elérhető`
-- **Utolsó készletszinkron:** Időbélyeg (pl. `2026.10.20 08:30:15`)
+- **TK-szám (Törzskönyvi szám):**
+  - **Felületi Típus:** Szöveges kód, oszlopfejléc szerint rendezhető és szűrhető
+  - **Példa Érték:** `"OGYI-T-8898/01"`
+  - **Limitációk:** Egyedi készítményazonosító.
+- **Megnevezés:**
+  - **Felületi Típus:** Kiemelt félkövér terméknév, oszlopfejléc szerint rendezhető és szűrhető
+  - **Példa Érték:** `"Algopyrin 500 mg tabletta"`
+- **Hatóanyag (INN):**
+  - **Felületi Típus:** Szöveges megnevezés, rendezhető és szűrhető
+  - **Példa Érték:** `"metamizol-nátrium"`
+- **Kiszerelés:**
+  - **Felületi Típus:** Csomagolási leírás, rendezhető és szűrhető
+  - **Példa Érték:** `"10x buborékcsomagolásban"`
+- **Gyártó:**
+  - **Felületi Típus:** Forgalmazó vagy gyártó neve lebegő címmel, rendezhető és szűrhető
+  - **Példa Érték:** `"Sanofi-Aventis Zrt."`
+- **Országos Termékstátusz:**
+  - **Felületi Típus:** Színkódolt státuszjelvény és legördülő szűrő
+  - **Megadható Értékek:** `Elérhető` (zöld), `Készlethiány` (sárga), `Megszűnt` (piros)
+  - **Példa Érték:** `"Elérhető"`
+- **Készlet / Raktári darabszám (`dapieces`):**
+  - **Felületi Típus:** Jobbra zárt numerikus érték, növekvő és csökkenő irányban rendezhető oszlop
+  - **Színkódolt Státuszhatárok:**
+    - `0 db`: piros szöveg (`text-error`) – kifogyott készlet
+    - `1 – 9 db`: sárga szöveg (`text-warning`) – kritikus / alacsony készletszint
+    - `≥ 10 db`: zöld szöveg (`text-success`) – bőséges, stabil raktárkészlet
+  - **Példa Érték:** `14`
+- **Utolsó szinkronizáció:**
+  - **Felületi Típus:** Dátum és időbélyeg másodperces pontossággal
+  - **Példa Érték:** `"2026.10.21 14:15:30"`
 
 ### 3.5. Regisztrációs Igény / Kapcsolatfelvételi Űrlap Adatmodell
 
@@ -312,11 +376,11 @@ Ez a szakasz a rendszer üzleti entitásainak felületi paramétereit részletez
 
 ## 4. Modulok és Funkciók Részletes Leírása
 
-### 4.0. Fejléc és Navigációs Sáv Modul
+### 4.0. Globális Keretrendszer: Fejléc, Navigációs Sáv és Lábléc Modul
 
-A portál minden oldalának tetején rögzített (sticky), központi navigációs vezérlősávja.
+A portál minden bejelentkezett oldalán egységesen jelen lévő felső rögzített (sticky) navigációs vezérlősáv, valamint az alsó sötétkék lábléc.
 
-#### 4.0.1. Működés és Felületi Elemek
+#### 4.0.1. Fejléc és Főmenü Felületi Elemek és Működés
 1. **Arculat és Főoldali Navigáció:**
    - A hivatalos sötétkék/zöld **BENU VÉNY** embléma bal oldalt található.
    - Rákattintva az Irányítópultra (`https://bvo.uneb.hu/dashboard`) visz.
@@ -336,22 +400,39 @@ A portál minden oldalának tetején rögzített (sticky), központi navigáció
 5. **Mobil Navigáció (<1024px):**
    - Bal oldali Hamburger menü gomb, amely lenyíló mobil menüpanelt nyit meg az összes fő navigációs útvonallal.
 
-#### 4.0.2. Bemenetek és Kimenetek
-- **Bemenet:** Menüelemekre történő kattintás, Patikaválasztó megnyitása, Mentett lista lenyitása, *"Összes"* gombra kattintás.
-- **Kimenet:** Útvonalváltás (URL navigáció), modális ablak vagy legördülő panel megjelenítése, kijelölt patikanév azonnali felületi frissülése.
+#### 4.0.2. Globális Lábléc (Footer)
+Minden bejelentkezett belső oldalon (Dashboard, Gyógyszer nyilvántartás, Gyógyszer adatlap, Gyógyszertárak, Profilfelületek) az oldal alján megjelenő egységes zárókomponens, amely hivatalos jogi és verzió-azonosítási funkciót lát el.
 
-#### 4.0.3. Hibakezelés és Speciális Esetek
+1. **Vizuális Megjelenés és Színvilág:**
+   - Teljes felületszélességű, prémium sötétkék (`#002664`) háttérszín kontrasztos fehér szövegezéssel és ikonográfiával.
+   - Automatikusan az oldal legaljára illeszkedik (`mt-auto`), így kisebb tartalmú képernyőkön is a viewport alján zárja le az oldalt.
+2. **Tartalmi Elemek és Szerkezet:**
+   - **Bal oldali jogi és verzió blokk:**
+     - Szerzői jogi nyilatkozat: *„Minden jog fenntartva. © 2026 BENU Magyarország Zrt”
+   - **Jobb oldali készítői blokk:**
+     - Szöveges megjelölés: *„Created by:”* felirat.
+     - Készítői logó: A hivatalos **Color and Code** arculati partnerlogó beágyazott vektoros formátumban.
+3. **Reszponzív Elrendezés és Töréspontok:**
+   - **Asztali / Tablet nézet (≥640px):** Egyetlen horizontális sorban, kétoldali kifutással (`justify-between`), 48 képpontos oldalsó margóval (`px-12`) jeleníti meg a jogi és a fejlesztői információkat.
+   - **Mobil nézet (<640px):** Az elemek automatikusan függőleges oszlopba rendeződnek (`flex-col`), 16 képpontos térközzel (`gap-4`) és középre zárt igazítással, így keskeny kijelzőn sem fedik el egymást és kényelmesen olvashatók maradnak.
+
+#### 4.0.3. Bemenetek és Kimenetek
+- **Bemenet:** Menüelemekre történő kattintás, Patikaválasztó megnyitása, Mentett lista lenyitása, *"Összes"* gombra kattintás.
+- **Kimenet:** Útvonalváltás (URL navigáció), modális ablak vagy legördülő panel megjelenítése, kijelölt patikanév azonnali felületi frissülése, lábléc állandó megjelenítése az oldalak alján.
+
+#### 4.0.4. Hibakezelés és Speciális Esetek
 - **Hálózati késleltetés patikaválasztáskor:** A kijelölés azonnal helyi állapotba kerül, a mentés háttérben fut le, biztosítva az akadásmentes élményt.
 - **Nincs mentett gyógyszer:** A Mentett gyorslista megnyitásakor üres állapotot jelző szöveg jelenik meg (*"Nincs még mentett gyógyszered."*).
 
-#### 4.0.4. Elfogadási Kritériumok (Acceptance Criteria)
+#### 4.0.5. Elfogadási Kritériumok (Acceptance Criteria)
 - **AC-4.0.1:** A fejléc logójára kattintva a rendszer minden esetben az Irányítópultra navigál.
 - **AC-4.0.2:** A Közeli patika gombra kattintva felugrik a kereső modal, és a választott patika azonnal megjelenik a fejlécben.
 - **AC-4.0.3:** A Mentett gyorslistában az "Összes" linkre kattintva a felület a gyógyszerlistára navigál kizárólag a mentett kedvencekre szűrve (`onlyFavorites=true`).
 - **AC-4.0.4:** A Profil menü Kijelentkezés gombjára kattintva a munkamenet azonnal érvényét veszti és a login oldal nyílik meg.
 - **AC-4.0.5:** Minden oldal lapfülcíme kötelezően a `"{lap neve} | BENUvény Orvosi Portál"` formátumban jelenik meg.
+- **AC-4.0.6:** A globális sötétkék lábléc (`Footer`) minden bejelentkezett oldalon az oldal alján megjelenik, hiánytalanul feltüntetve a szerzői jogi nyilatkozatot (*„Minden jog fenntartva. © 2026 BENU Magyarország Zrt”*), az érvényes verziószámot (`v6.1.0`), valamint a hivatalos készítői megjelölést és Color and Code logót; mobil képernyőn az elemek automatikusan függőlegesen egymás alá törnek.
 
-#### 4.0.5. Desktop vs. Mobil Felületi Eltérések a Fejlécben és a Navigációban
+#### 4.0.6. Desktop vs. Mobil Felületi Eltérések a Fejlécben, Navigációban és Láblécben
 
 | Funkció / Felületi Elem | Asztali / Laptop Nézet (≥1024px) | Mobil / Tablet Portré Nézet (<1024px) |
 | :--- | :--- | :--- |
@@ -360,42 +441,117 @@ A portál minden oldalának tetején rögzített (sticky), központi navigáció
 | **Közeli Patika Kijelzése és Módosítása** | A fejléc jobb oldalán folyamatosan látható felirat és zöld aláhúzott patikanév; kattintásra felugró modal. | A hamburger menü fejlécében elhelyezett kiemelt információs kártya patikanévvel és „Módosítás” akciógombbal. |
 | **Mentett Gyógyszerek Gyorselérése** | Lebegő gyorsablak a fejlécből kék számláló jelvénnyel, tetején közvetlen „Összes” hivatkozással. | A mobil hamburger menüben önálló „Mentett gyógyszerek” sor az aktuális darabszámot mutató kék jelvénnyel. |
 | **Profil és Munkamenet Kezelés** | Jobb szélső profil avatar legördülő menüvel (Profil adatok, Adminisztráció, Kijelentkezés). | A mobil hamburger menü alsó szekciójába integrált profilbeállítások és piros kiemelt Kijelentkezés gomb. |
+| **Globális Lábléc (Footer)** | Egyetlen vízszintes sorban elhelyezkedő sáv (bal oldalon a szerzői jog és a verziószám, jobb oldalon a készítői logó). | Függőlegesen egymás alá rendeződő (flex-col) blokkok középre zárt térközzel, biztosítva a kis képernyős olvashatóságot. |
 
 ---
 
 ### 4.1. Irányítópult (Dashboard)
 
-A sikeres bejelentkezést követő központi áttekintő felület.
+A sikeres bejelentkezést követő központi orvosi áttekintő felület, amely egyidejűleg biztosítja az országos piaci készletmozgások és a preferált helyi gyógyszertár készletváltozásainak valós idejű monitorozását.
 
 **Útvonal:** [https://bvo.uneb.hu/dashboard](https://bvo.uneb.hu/dashboard)
 
 #### 4.1.1. Működés és Képernyőfelépítés
-Kétoszlopos modern reszponzív elrendezés (Figma elrendezési minták alapján):
-1. **Bal oldali oszlop (Globális készletváltozások):**
-   - **Időszak-választó Kapszula:** `Elmúlt 3 nap` (alapértelmezett), `Elmúlt 1 nap`, `Elmúlt 7 nap`, `Elmúlt 30 nap`.
-   - **Globális Figyelmeztető Kártya:** Sárga keretes összesítő, amely mutatja az adott időszakban bekövetkezett változásokat: összes változás, megszűnt, készlethiány és újra elérhető tételek száma. A készlethiány számlálóra kattintva azonnali gyorsszűrt átnavigálás történik a gyógyszerlistára.
-   - **Legutóbbi Készletváltozások Listája:** A legfrissebb 20 piaci készletmozgás áttekinthető, kétszintes kompakt kártyasorokban:
-     - *Felső szint (1. sor):* A terméknév a teljes rendelkezésre álló szélességet megkapja, maximum 2 soros intelligens szövegtördeléssel (`line-clamp-2`), sötétkék félkövér kiemeléssel és közvetlen hivatkozással a gyógyszer adatlapjára (`/gyogyszerek/adatlap?tk=...`). A teljes hivatalos terméknév lebegő szövegként (title attribútum) is olvasható.
-     - *Alsó szint (2. sor):* Szuper kompakt metainfó sáv: bal oldalon a színkódolt országos státuszjelvény (`Elérhető`, `Hiány`, `Megszűnt`), jobb oldalon a készletváltozás pontos időbélyege (ÉÉÉÉ-HH-NN ÓÓ:PP).
-     - *Oszlopfejléc mentesség:* A merev 3 oszlopos táblázatfejlécek helyett a lista közvetlenül a kártyafejléc alatt kezdődik, minimális sormagasságot és maximális adatsűrűséget biztosítva.
-2. **Jobb oldali oszlop (Közeli Gyógyszertár állapota):**
-   - **Ha nincs preferált patika:** Kiemelt figyelmeztető doboz nagy térkép-illusztrációval és *"Patika keresése"* gombbal, amely megnyitja a keresőt.
-   - **Ha van kijelölt preferált patika:** A gyógyszertár neve, címe, heti nyitvatartási összefoglalója, valamint a patika saját, helyi készletmozgásainak összesítője és azonos kétszintes kompakt készletváltozási listája.
+
+Az Irányítópult kétoszlopos, modern, asztali és hordozható képernyőkhöz optimalizált elrendezést alkalmaz (Figma tervek alapján):
+
+##### Fejléc Sáv és Időszak-választó Kapszula (Dropdown)
+A lap tetején a bal oldalon az oldal címe (*„Irányítópult”*) és grafikus ikonja látható, a jobb oldalon pedig egy lekerekített kapszula (pill) formájú **legördülő menü (dropdown)** kapott helyet:
+- **Nem különálló gombok sora**, hanem egy kompakt, lebegő vezérlőelem lenyíló nyílikonnal.
+- **Kiválasztható időablakok:**
+  - `Elmúlt 1 nap`
+  - `Elmúlt 3 nap` (a rendszer alapértelmezett beállítása a belépéskor)
+  - `Elmúlt 7 nap`
+  - `Elmúlt 30 nap`
+- **Interakció és állapotmegőrzés:** Az aktuálisan aktív időszak kiemelt sötétkék háttérrel és fehér vastag betűvel jelenik meg a lenyíló menüben. Új időszak kiválasztásakor a böngésző URL paramétere azonnal szinkronizálódik (`?period=X`), és mind a bal oldali piaci, mind a jobb oldali patikai statisztikai kártyák és listák azonnal, oldalújratöltés nélkül újraszámolódnak. A menü a választás után automatikusan bezáródik, és a képernyőn kívülre kattintva is becsukódik.
+
+##### 1. Bal Oldali Oszlop: Globális Készletinformációk
+1. **Globális Készletösszesítő Kártya:**
+   - Kiemelt krémsárga hátterű figyelmeztető doboz.
+   - Fejlécében a *„Globális készletváltozás”* cím és az *„elmúlt X nap változása”* felirat látható a beállított időablaknak megfelelően.
+   - Középen nagyméretű, figyelemfelkeltő össz-darabszám számláló jelzi az adott időszakban bekövetkezett összes országos termékmozgást (pl. `14 db`).
+   - Alatta három kategóriabontás szerepel kerek ikonokkal és pontos darabszámokkal:
+     - **Megszűnt:** Piros ikon, darabszám (pl. `1 db megszűnt`).
+     - **Készlethiány:** Sárga ikon, darabszám (pl. `12 db készlethiány`). A hiányszámlálóra kattintva a rendszer azonnal a gyógyszerlistára navigál automatikusan bekapcsolt `Készlethiány` szűrővel.
+     - **Újra elérhető:** Zöld ikon, darabszám (pl. `1 db újra elérhető`).
+2. **Globális Legutóbbi Készletváltozások Listája:**
+   - Fehér hátterű, lekerekített sarkú kártya, fejlécében: *„Legutóbbi 20 készletváltozás”*, alatta magyarázó alcímmel: *„Élő készletinformációk és beérkező termékek állapota”*.
+   - A legfrissebb 20 piaci készletmozgást jeleníti meg időrendi sorrendben visszafelé, kétszintes kompakt kártyasorokban:
+     - *Felső szint (1. sor):* A gyógyszer teljes hivatalos kereskedelmi neve a teljes kártyaszélességet megkapja, legfeljebb 2 soros intelligens szövegtördeléssel, sötétkék kiemeléssel és közvetlen hivatkozással a gyógyszer részletes adatlapjára (`/gyogyszerek/adatlap?tk=...`).
+     - *Alsó szint (2. sor):* Letisztult metainfó sáv: bal oldalon a színkódolt országos státuszjelvény (`Elérhető` zöld, `Hiány` sárga, `Megszűnt` piros jelvény), jobb oldalon a készletváltozás pontos időbélyege (ÉÉÉÉ-HH-NN ÓÓ:PP).
+3. **„Összes változás” Navigációs Link a lista láblécében:**
+   - A kártya alsó szegélyében egy vékony elválasztó vonallal lezárt lábléc található.
+   - A láblécben elhelyezett vastag betűs, nyíllal ellátott *„Összes változás →”* linkre kattintva az orvos közvetlenül a teljes gyógyszerlista oldalra jut, a legutolsó módosítás szerint csökkenő időrendben rendezve (`/gyogyszerek?sort=lastUpdate&order=desc`).
+
+##### 2. Jobb Oldali Oszlop: Közeli Gyógyszertár Állapota és Készlete
+A jobb oldali oszlop funkcionális tartalma automatikusan igazodik ahhoz, hogy a felhasználó rendelkezik-e beállított preferált gyógyszertárral:
+
+###### A) Nincs preferált patika kiválasztva (Alapértelmezett állapot)
+Amennyiben a felhasználó még nem jelölt ki közeli patikát (vagy törölte a kijelölést):
+1. **Fejléc:**
+   - Kártyacím: *„Közeli gyógyszertár kiválasztása”*.
+   - Tájékoztató felirat: *„Válasszon egy gyógyszertárat, hogy láthassa a készletváltozásait!”*.
+2. **Teljes Értékű Interaktív OpenStreetMap Térkép (`PharmacyMap`):**
+   - Közvetlenül a Dashboard felületébe integrált, nagyméretű, interaktív térképes modul (nem statikus illusztráció vagy kép).
+   - Térképi görgetéssel, mozgatással és nagyítással szabadon felfedezhetők a környékbeli vagy országos BENU gyógyszertárak.
+   - Minden gyógyszertár hivatalos zöld-fehér-kék csepp alakú BENU Pin jelölővel szerepel a térképen.
+3. **Helyszíni Patikakijelölés az Irányítópulton:**
+   - Bármelyik térképi pinre kattintva a térképen helyben felugrik a patika információs kártyája (patikanév, pontos cím, távolság km-ben a felhasználó pozíciójától, a hét adott napjára vonatkozó nyitvatartási idő és pillanatnyi státusz).
+   - A felugró kártya alján található zöld *„Közelinek jelölöm”* akciógombra kattintva a felhasználó közvetlenül, a Dashboard elhagyása nélkül kijelölheti a patikát.
+   - A kijelölés pillanatában a jobb oldali oszlop azonnal és zökkenőmentesen átvált a kijelölt patika készletösszesítő és lista állapotára.
+4. **Lábléc Hivatkozás:**
+   - A térkép alatti láblécsávban található a *„Tovább a gyógyszertárkeresőre →”* hivatkozás, amely a teljes értékű, listás és szűrős gyógyszertárkereső főoldalra (`/gyogyszertarak`) navigál.
+
+###### B) Van kijelölt preferált patika
+Amikor a felhasználó rendelkezik kijelölt gyógyszertárral, a jobb oldali oszlop a patika helyi ellátottsági dinamikájára vált:
+1. **Patikai Készletösszesítő Kártya (`StockNotificationCard`):**
+   - Kiemelt krémsárga hátterű doboz, fejlécében a kiválasztott gyógyszertár hivatalos nevével (pl. *„BENU Gyógyszertár Budapest Allee”*) és az *„elmúlt X nap változása”* felirattal.
+   - Középen a gyógyszertárban a vizsgált időszakban bekövetkezett összesített készletmozgások darabszáma látható (pl. `24 db`).
+   - A globális kártyával ellentétben itt **kifejezetten 2 helyi mutató** szerepel (mivel lokális polcszinten a gyógyszerek vagy elfogynak, vagy újra készletre érkeznek):
+     - **Elfogyott:** Piros kerek ikon és pontos darabszám (pl. `7 db elfogyott`).
+     - **Újra elérhető:** Zöld kerek ikon és pontos darabszám (pl. `1 db újra elérhető`).
+   - *(Megjegyzés: A patika címe és részletes heti nyitvatartási rendje a fejléc navigációs patikaindikátorából vagy a patikakeresőből érhető el; a Dashboardon a helyi készletmozgások számszerűsített és listázott követése kap elsőbbséget).*
+2. **Patikai Legutóbbi Készletváltozások Listája (`StockChangesWidget`):**
+   - Fehér hátterű kártya a bal oldali listával megegyező kétszintes kompakt kialakításban.
+   - Fejlécében: *„Legutóbbi 20 készletváltozás”*, alatta személyre szabott alcímmel: *„Élő készletinformációk és beérkező termékek itt: [Kijelölt patika neve]”*.
+   - A kijelölt gyógyszertár polckészletének legutóbbi legfeljebb 20 készletmozgását sorolja fel időrendben (felső szinten kattintható terméknév, alsó szinten helyi státuszjelvény és pontos időbélyeg).
+3. **„Összes változás” Navigációs Link a patikai lista láblécében:**
+   - A patikai lista alján található *„Összes változás →”* hivatkozásra kattintva a rendszer a gyógyszerlista oldalra navigál, miközben **automatikusan bekapcsolja a közeli patika készletszűrőjét és a legutolsó frissítés szerinti csökkenő rendezést** (`/gyogyszerek?nearbyOnly=true&sort=lastUpdate&order=desc`).
+   - Ezáltal az orvos egyetlen kattintással a preferált patikájának teljes készletmozgási listájához jut.
 
 #### 4.1.2. Bemenetek és Kimenetek
-- **Bemenet:** Időszakválasztó gombokra kattintás (1, 3, 7, 30 nap), összesítő számlálóra kattintás, terméknév linkre kattintás.
-- **Kimenet:** A statisztikák és a táblázat adatainak azonnali frissülése, átnavigálás a gyógyszerlistára előszűrt státusszal vagy az adott gyógyszer adatlapjára.
+- **Bemenetek:**
+  - Időszak-választó kapszula legördülő menü (dropdown) lenyitása és időintervallum (1, 3, 7, 30 nap) kiválasztása.
+  - Globális összesítő kártyán a készlethiány számlálóra kattintás.
+  - Készletváltozási lista sorában a terméknév linkre kattintás.
+  - A globális készletváltozási lista láblécében az *„Összes változás →”* linkre kattintás.
+  - A patikai készletváltozási lista láblécében az *„Összes változás →”* linkre kattintás.
+  - Térképi interakciók (nincs patika kiválasztva): térkép mozgatása, zoomolása, patika pinre kattintás az információs kártya megnyitásához.
+  - Térképi felugró kártyán a *„Közelinek jelölöm”* gombra kattintás.
+  - Térkép alatti láblécben a *„Tovább a gyógyszertárkeresőre →”* linkre kattintás.
+- **Kimenetek:**
+  - Időszakváltáskor a statisztikák és a listák azonnali frissülése az URL paraméter szinkronizálásával (`?period=X`).
+  - Globális hiányszámlálóra kattintva átnavigálás a gyógyszerlistára bekapcsolt `Készlethiány` szűrővel.
+  - Gyógyszernévre kattintva átnavigálás az adott gyógyszer részletes adatlapjára (`/gyogyszerek/adatlap?tk=...`).
+  - Globális *„Összes változás”* gomb hatására navigáció a `/gyogyszerek?sort=lastUpdate&order=desc` oldalra.
+  - Patikai *„Összes változás”* gomb hatására navigáció a `/gyogyszerek?nearbyOnly=true&sort=lastUpdate&order=desc` oldalra.
+  - Térképi *„Közelinek jelölöm”* kattintás után a jobb oldali oszlop azonnali átváltása a kiválasztott patika 2-mutatós készletösszesítő kártyájára és 20 tételes készletmozgási listájára.
+  - *„Tovább a gyógyszertárkeresőre”* kattintás után navigáció a `/gyogyszertarak` útvonalra.
 
 #### 4.1.3. Hibakezelés a Dashboardon
-- **Nincs készletváltozás az adott időszakban:** A táblázat helyén diszkrét, tiszta információs sáv jelenik meg: *"A kiválasztott időszakban nem történt készletváltozás."*
-- **Kieső patikaadatok:** Amennyiben a beállított preferált patika adatai nem tölthetők be, a rendszer automatikusan felajánlja a patikaválasztó újbóli megnyitását.
+- **Nincs készletváltozás az adott időszakban:** A lista sorai helyén diszkrét, tiszta információs sáv jelenik meg: *„Nincs megjeleníthető készletváltozás az adott időszakban.”*
+- **Térkép betöltési állapota:** A térkép aszinkron betöltése közben szürke hátterű betöltőpanel jelenik meg központi töltésjelző spinnerrel és *„Térkép betöltése...”* tájékoztatással.
+- **Kieső patikaadatok:** Amennyiben a kiválasztott preferált patika készletadatai átmenetileg nem elérhetők, a felület nem omlik össze: a rendszer alapértelmezett készletértékeket jelenít meg, miközben a navigációs és patikakereső hivatkozások továbbra is működőképesek maradnak.
 
 #### 4.1.4. Elfogadási Kritériumok (Acceptance Criteria)
-- **AC-4.1.1:** Az időszakválasztó gombokra kattintva a kártyák és a táblázat adatai oldalújratöltés nélkül, azonnal frissülnek.
-- **AC-4.1.2:** Az összesítő kártyán a hiánycikkek számára kattintva a gyógyszerlista nyílik meg, automatikusan `Készlethiány` szűrővel.
-- **AC-4.1.3:** Kijelölt preferált patika esetén a jobb oldali panel kizárólag az adott patika valós helyi készletmozgásait jeleníti meg.
-- **AC-4.1.4:** Az Irányítópulton megjelenő adatok kizárólag az OTC és vényköteles humán gyógyszerek készletmozgásait tartalmazzák; egyéb termékek nem jelenhetnek meg.
-- **AC-4.1.5:** A legutóbbi készletváltozások listájában a hosszú terméknevek a rendelkezésre álló teljes szélességben, levágás nélkül legfeljebb 2 sorba tördelődnek, közvetlenül az adatlapra navigálnak, alattuk pedig egységesen látható a státuszjelvény és az időbélyeg.
+- **AC-4.1.1:** A fejléc jobb szélén található lekerekített kapszula formájú időszakválasztó legördülő menüből (dropdown) kiválasztva az 1, 3, 7 vagy 30 napos intervallumot, a bal és jobb oldali kártyák és listák adatai oldalújratöltés nélkül azonnal frissülnek, a böngésző URL-je pedig kiegészül a `?period=X` paraméterrel.
+- **AC-4.1.2:** A globális összesítő kártyán a készlethiány számlálóra kattintva a gyógyszerlista oldal nyílik meg, automatikusan bekapcsolt `Készlethiány` szűrővel.
+- **AC-4.1.3:** Amennyiben a felhasználó még nem választott preferált patikát, a jobb oldali oszlopban teljes értékű, interaktív OpenStreetMap térkép jelenik meg a partner patikák BENU Pin jelölőivel. A markerekre kattintva megjelenő információs kártyán a „Közelinek jelölöm” gombbal a patika helyben, oldalváltás nélkül kijelölhető, azonnal átváltva a felületet a patikai készletösszesítőre.
+- **AC-4.1.4:** A térképes modul alsó láblécében elhelyezett „Tovább a gyógyszertárkeresőre” hivatkozásra kattintva a rendszer a `/gyogyszertarak` oldalra navigál.
+- **AC-4.1.5:** Kijelölt preferált patika esetén a jobb oldali oszlop a patika nevével és az időszakkal ellátott készletösszesítő kártyát jeleníti meg pontosan 2 helyi mutatóval (*„X db elfogyott”* és *„Y db újra elérhető”*), alatta pedig a patika saját legutóbbi 20 helyi készletmozgását kétszintes kompakt kártyasorokban.
+- **AC-4.1.6:** Mind a globális készletváltozási lista, mind a patikai készletváltozási lista alsó láblécében működik az „Összes változás” hivatkozás, amely a globális listából a `/gyogyszerek?sort=lastUpdate&order=desc`, a patikai listából pedig a `/gyogyszerek?nearbyOnly=true&sort=lastUpdate&order=desc` oldalra navigál.
+- **AC-4.1.7:** Az Irányítópulton megjelenő adatok kizárólag az OTC és vényköteles humán gyógyszerek készletmozgásait tartalmazzák; egyéb nem gyógyszer cikkek nem jelenhetnek meg.
+- **AC-4.1.8:** A legutóbbi készletváltozások listájában a hosszú terméknevek a rendelkezésre álló teljes kártyaszélességben, levágás nélkül legfeljebb 2 sorba tördelődnek, közvetlenül az adatlapra navigálnak, alattuk pedig egységesen látható a státuszjelvény és az időbélyeg.
 
 ---
 
@@ -410,50 +566,156 @@ A portál központi munkafelülete a gyógyszerek keresésére, szűrésére és
    - A táblázat a rendelkezésre álló teljes monitor-szélességet kihasználja (`w-full`), minimalizálva a szükségtelen vízszintes görgetést nagyméretű monitorokon.
 2. **Keresési és Szűrési Vezérlősáv (Toolbar):**
    - Élő szöveges szűrő: azonnal keres gyógyszernévben, hatóanyagban és TK-számban.
-   - Piaci Státusz Szűrő: `Minden státusz`, `Elérhető`, `Készlethiány`, `Megszűnt`.
-   - Preferált Patika Készlet Szűrő: `Minden`, `Készleten`, `Korlátozottan`, `Rendelésre (1-2 munkanap)`, `Nem elérhető`.
-   - *"Csak mentett gyógyszerek"* kapcsoló: kizárólag a könyvjelzőzött tételeket mutatja.
-   - *"Csak szakterületem"* gomb: automatikusan az orvos profiljában megjelölt szakterületekhez tartozó készítményeket szűri.
-3. **Interaktív Táblázat Tulajdonságai:**
-   - **Drag & Drop Oszlopátrendezés:** Az oszlopfejlécek tetszőleges sorrendbe húzhatók; a beállított sorrend a böngészőben megőrződik.
-   - **Oszlopkezelő Modál:** Az oszlopok láthatósága egyénileg ki-be kapcsolható.
-   - **Rögzített (Sticky) Műveletek Oszlop:** A táblázat jobb szélén lévő műveleti oszlop (Adatlap megtekintése, Kedvenc csillag, Készletértesítő harang) vízszintes görgetés esetén is a képernyő jobb szélén rögzítve marad.
-   - **Rendezhetőség:** Oszlopfejlécekre kattintva növekvő/csökkenő rendezés (név, ár, dátum stb.).
-
-4. **Mobil Kártyás Megjelenítés és Nézetváltó (<1024px vagy Kézi Váltás):**
-   - **Automatikus Töréspont:** 1024 képpont alatti képernyőszélesség esetén a felület automatikusan átvált az ergonomikus kártyás megjelenítésre (`MedicineCard`).
-   - **Kétállású Nézetváltó Gomb:** A fejlécben elhelyezett kapcsoló (`Kártyák` / `Táblázat`) lehetővé teszi, hogy az orvos tabletjén vagy telefonján szükség esetén manuálisan visszaváltson a sokoszlopos táblázatra.
-   - **Lenyitható Accordion Szűrőpanel:** A keresősáv alatt egyetlen gombbal nyitható/csukható szűrő- és rendeződoboz, amely jelzi az aktív szűrők számát (`X aktív szűrő`).
-   - **Mobil Gyógyszerkártya Struktúra:** Fejléc (gyógyszernév, országos státuszbadge, közeli patika indikátor, jobb felső sarokban konstans megjelenített utolsó frissítési dátum és időpont – pl. `Utolsó frissítés: 2026-10-21 00:35`), törzs (hatóanyag, kiszerelés, gyártó, valamint a termékazonosító / TK-szám), lenyitható „További adatok” fül (csomagolás, kiadhatóság, alcsoport, biztonsági elemek, engedély dátuma), és lábléc nagyméretű érintőgombokkal (Mentés kedvencnek, Hiányértesítés, Részletek adatlap gomb).
+   - Kétállású Nézetváltó Gomb: Kényelmes váltás a kártyás (`Kártyák`) és a sokoszlopos táblázatos (`Táblázat`) megjelenítés között.
+   - Gyorskapcsolók asztali nézetben: *"Csak mentett"* és *"Közeli patikában elérhető"* jelölőnégyzetek közvetlen szűréshez.
+   - Oszlopkezelő Menü: Az „Oszlopok” gombra kattintva lebegő menü jelenik meg, ahol a 15 oszlop bármelyike egyénileg ki-be kapcsolható.
+3. **Központi Accordion Szűrő- és Rendezési Panel (Asztali és Mobil Nézetben Egyaránt):**
+   - A címsor és keresősáv alatt elhelyezkedő, egyetlen kattintással lenyitható és becsukható összefoglaló vezérlőpanel (`isFilterAccordionOpen`), amely **nem csak mobilon (<1024px), hanem asztali nézetben (≥1024px) is közvetlenül elérhető a táblázat felett**.
+   - **Fejléc sáv és dinamikus visszajelzés:**
+     - Szűrőikon és *„Szűrés és rendezés”* felirat nyitási/zárási állapotjelző piktogrammal.
+     - **Aktív szűrő számláló jelvény:** Bármely szűrési vagy rendezési feltétel érvényesülésekor kék számláló jelvény mutatja az aktív feltételek darabszámát (pl. *„3 aktív szűrő”*).
+     - **„Szűrők törlése” funkciógomb:** Aktív szűrő esetén a fejléc jobb oldalán közvetlenül megjelenik az egykattintásos törlési lehetőség, amely azonnal alaphelyzetbe állítja az összes szűrőt és az 1. oldalra ugrik.
+   - **Integrált szűrőmezők kinyitott állapotban (4 hasábos elrendezésben):**
+     - *1. Rendezés:* Legutóbb frissült elöl (alapértelmezett), Legrégebben frissült elöl, Gyógyszer neve (A → Z), Gyógyszer neve (Z → A), Közeli patikában elérhető elöl.
+     - *2. Országos státusz:* Mindegyik státusz, Elérhető, Készlethiány, Megszűnt.
+     - *3. Gyorsszűrők:* Csak mentett gyógyszerek, Közeli patikában elérhető tételek jelölőnégyzetekkel.
+     - *4. Frissítés dátuma:* Kezdő dátum és záró dátum naptár választó mezők a módosítási időablak szűkítésére.
+4. **Interaktív Fluid Adattáblázat és Oszlopkezelés:**
+   - **Teljes körű 15 oszlopos törzskönyvi struktúra:** A rendszer összesen 15 adatmezőt kezel: `Dátum / idő`, `Státusz`, `Termék neve`, `Hatóanyag`, `Kiszerelés`, `Gyártó`, `Közeli patika`, `Közeli patika frissítve`, `TK szám`, `Csomagolás`, `Kiadhatóság`, `Kiadhatósági alcsoport`, `Biztonsági elemek`, `Engedély dátuma`, `Műveletek`.
+   - **Alapértelmezett oszlopok (7 aktív oszlop):** Új munkamenetben és alaphelyzetben a 15 oszlopból pontosan **7 oszlop aktív és látható**:
+     1. `Dátum / idő` (Utolsó módosítás időpontja)
+     2. `Státusz` (Országos piaci elérhetőség: Elérhető, Készlethiány, Megszűnt)
+     3. `Termék neve` (Hivatalos kereskedelmi megnevezés közvetlen adatlap hivatkozással)
+     4. `Hatóanyag` (INN nemzetközi szabadnév)
+     5. `Kiszerelés` (Csomagolási darabszám és forma)
+     6. `TK szám` (Hatósági törzskönyvi azonosító)
+     7. `Műveletek` (Jobb szélen fixált akciógombok: kedvenc csillag, készletértesítő harang, Részletek adatlap gomb).
+   - **Automatikus oszlopmegjelenítés patikaválasztáskor:** Amennyiben a felhasználónak van kijelölt közeli patikája, a táblázatban a `Közeli patika` (elérhetőségi állapot) és a `Közeli patika frissítve` (patikai készlet frissítési ideje) oszlopok **automatikusan bekapcsolódnak és megjelennek a táblázatban**, biztosítva a helyi polckészlet azonnali orvosi áttekintését manuális oszlopkonfiguráció nélkül.
+   - **Háromállapotú (3-state) Oszlopfejléc Rendezés:** A rendezhető oszlopok fejléceire kattintva a sorba rendezés ciklikusan három állapotot követ:
+     1. Első kattintás: **Növekvő sorrend** (megjelenik a felfelé mutató `▲` ikon).
+     2. Második kattintás: **Csökkenő sorrend** (megjelenik a lefelé mutató `▼` ikon).
+     3. Harmadik kattintás: **Alaphelyzet / rendezés törlése** (a nyílikon eltűnik, a lista visszaáll az alapértelmezett sorrendre).
+   - **Drag & Drop Oszlopátrendezés:** Az oszlopfejlécek fogantyújuknál fogva tetszőleges sorrendbe húzhatók; a beállított egyedi oszlopsorrend megőrződik a böngésző helyi tárolójában (`localStorage`).
+   - **Rögzített (Sticky) Műveletek Oszlop:** A jobb szélső műveleti oszlop (Adatlap link, Kedvenc csillag, Értesítő harang) vízszintes görgetés esetén is folyamatosan rögzítve marad a képernyő jobb szélén.
+   - **Oszlopszintű Gyorsszűrők Fejlécsora:** A táblázat fejlécében minden adatmező alatt közvetlen beviteli mező, státusz és patika legördülő, vagy naptári dátumválasztó (tól-ig) biztosítja a gyors helyszíni szűrést.
+5. **Kártyás Nézet (`MedicineCard`) és Reszponzív Rácselrendezés:**
+   - **Automatikus és kézi nézetváltás:** 1024 képpont alatti képernyőszélesség esetén a felület automatikusan átvált az ergonomikus kártyás megjelenítésre, de a fejlécben elhelyezett kétállású kapcsolóval (`Kártyák` / `Táblázat`) asztali nézetben is bármikor bekapcsolható a kártyarács.
+   - **Reszponzív kártyarács oszlopszám:**
+     - *Nagy képernyő / asztali nézet (≥1280px / XL):* **3 oszlopos kártyarács** (`xl:grid-cols-3`).
+     - *Közepes kijelző / tablet fekvő nézet (768px – 1279px):* **2 oszlopos kártyarács** (`md:grid-cols-2`).
+     - *Mobil / okostelefon nézet (<768px):* **1 oszlopos függőleges kártyafolyam** (`grid-cols-1`).
+   - **Közeli Patika Készletindikátor (`NearbyPharmacyStockIndicator`):**
+     - A gyógyszerkártya fejlécében (az országos státuszbadge mellett/alatt) elhelyezett információs blokk, amely kijelölt preferált gyógyszertár esetén jelenik meg.
+     - Megjeleníti a választott közeli patika hivatalos nevét dőlt betűvel, zárójelben (pl. *„(BENU Gyógyszertár Budapest Corvin)”*).
+     - Helyi elérhetőségi státuszjelvényt mutat: zöld színű *„Közeli patikában elérhető”* (pipa ikonnal) vagy szürke színű *„Közeli patikában nem elérhető”* (tiltás ikonnal).
+     - Óra/perc pontossággal feltünteti a patikai adat utolsó szinkronizálási/frissítési idejét időikonnal kísérve: *„Frissítve: ÉÉÉÉ-HH-NN ÓÓ:PP”* (pl. *„Frissítve: 2026-10-21 00:35”*).
+   - **Kártya Törzsadatok és Másodlagos Mezők:**
+     - Fejléc jobb felső sarok: Konstans látható országos adatmódosítási időpont (*„Utolsó frissítés: ÉÉÉÉ-HH-NN ÓÓ:PP”*).
+     - Elsődleges törzsadatok: Kereskedelmi név (legfeljebb 2 sorban tördelve, közvetlen adatlap hivatkozással), Hatóanyag (INN), Kiszerelés, Gyártó és termékazonosító (TK-szám).
+     - Lenyitható szekció: *„További adatok megjelenítése”* gombbal kibontható csomagolás, kiadhatóság, kiadhatósági alcsoport, biztonsági elemek, engedély dátuma.
+     - Kártya lábléc: Nagyméretű érintőgombok a Kedvenc mentéshez, Készletértesítés feliratkozáshoz és az Adatlap megnyitásához.
+6. **Alsó Lapozó Sáv és Oldalankénti Találatszám Választó:**
+   - A táblázat és a kártyarács alján elhelyezkedő integrált alsó sáv egységesen szolgálja ki mindkét megjelenítési módot.
+   - **Numerikus oldalléptetés:** Előző oldal (`<`), közvetlen lapszámgombok, kihagyási indikátorok (`...`), utolsó oldal és Következő oldal (`>`).
+   - **Oldalankénti Találatszám Választó Legördülő Menü:**
+     - A lapozósáv jobb oldalán elhelyezett lekerekített kapszula formájú legördülő menü nyíl piktogrammal.
+     - **Választható opciók:**
+       - `10 találat / oldal`
+       - `20 találat / oldal` (**Rendszerszintű alapértelmezett beállítás**)
+       - `50 találat / oldal`
+       - `100 találat / oldal`
+     - A találatszám megváltoztatásakor a lista automatikusan az 1. oldalra ugrik az új tételszámítás szerint, a legördülő menü pedig azonnal bezáródik.
 
 #### 4.2.1.4. Desktop vs. Mobil Felületi Eltérések a Gyógyszerkeresőben
 
 | Funkció / Képernyőelem | Asztali / Laptop Nézet (≥1024px) | Mobil Nézet (<1024px) |
 | :--- | :--- | :--- |
-| **Elsődleges Megjelenítés** | Teljes képernyős, 15 oszlopos fluid adattáblázat horizontális görgetéssel. | 1 vagy 2 oszlopos érintésbarát gyógyszerkártya-rács (`MedicineCard`). |
+| **Elsődleges Megjelenítés** | Teljes képernyős, 15 oszlopos fluid adattáblázat horizontális görgetéssel (alapértelmezetten 7 aktív oszloppal és 3-állapotú rendezéssel), vagy kézi váltással 3 oszlopos kártyarács (≥1280px). | 1 vagy 2 oszlopos érintésbarát gyógyszerkártya-rács (`MedicineCard`). |
 | **Nézet Felülbírálása** | Alapértelmezett a táblázat, de a fejléc Nézetváltó gombjával kártyás nézetre is kapcsolható. | Alapértelmezett a kártyás rács, de a Nézetváltó gombbal táblázatra váltható. |
-| **Szűrési Felület** | A táblázat oszlopfejlécei alatt elhelyezkedő különálló beviteli mezők, dátumválasztók és legördülők. | A keresőmező alatt elhelyezett, egy kattintással lenyitható **Accordion szűrőpanel**. |
-| **Szűrőpanel Beviteli Mezői** | Oszloponkénti szűrők (TK szám, Hatóanyag, Gyártó, Státusz, Patika, Dátum tól-ig). | • **Rendezés:** Legutóbb frissült, Legrégebben frissült, Név A-Z, Név Z-A, Közeli patika készlet elöl.<br>• **Státusz:** Mindegyik, Elérhető, Készlethiány, Megszűnt.<br>• **Gyorskapcsolók:** Csak mentett, Közeli patikában elérhető.<br>• **Frissítés dátuma:** Kezdő dátum és záró dátum naptár választó.<br>• **Szűrők törlése:** Egykattintásos alaphelyzetbe állítás. |
-| **Aktív Szűrők Visszajelzése** | A beviteli mezők kitöltöttsége jelzi a szűrést. | Az Accordion szűrőgombon számláló jelvény jelenik meg (pl. *"3 aktív szűrő"*), mellette közvetlen *"Szűrők törlése"* gombbal. |
-| **Oszlopkezelés & Testreszabás** | Drag & Drop oszlopátrendezés az egérrel és oszlopki/be kapcsoló modális ablak. | Kártyás nézetben a kártyák „További adatok megjelenítése” gombjával egy érintéssel kinyithatók a részletes mezők. |
-| **Műveleti Gombok Elhelyezése** | A táblázat jobb szélén folyamatosan rögzített (sticky) fix oszlop. | A gyógyszerkártya alján elhelyezett, nagyméretű ujjal kényelmesen érinthető gombsor (Mentés, Értesítés, Részletek). |
-| **Lapozó és Eredménysor** | Széles, egy soros alsó lábléc lapszámozó gombokkal és találatszám választóval. | Egymás alá törő, kártya-alapú kompakt mobil lapszámozó érintőgombokkal. |
+| **Szűrési Felület** | A táblázat felett elérhető egy kattintással lenyitható központi **Accordion szűrőpanel**, valamint a táblázat oszlopfejlécei alatt közvetlenül elérhető oszlopszintű gyorsszűrők és dátumválasztók. | A fejléc alatti egy kattintással lenyitható **Accordion szűrőpanel** aktív szűrőszámlálóval és egykattintásos szűrőtörléssel. |
+| **Szűrőpanel Beviteli Mezői** | • **Rendezés:** Legutóbb frissült, Legrégebben frissült, Név A-Z, Név Z-A, Közeli patika készlet elöl.<br>• **Státusz:** Mindegyik, Elérhető, Készlethiány, Megszűnt.<br>• **Gyorskapcsolók:** Csak mentett, Közeli patikában elérhető.<br>• **Frissítés dátuma:** Kezdő és záró dátum.<br>• **Szűrők törlése:** Egykattintásos alaphelyzetbe állítás. | Megegyezik az asztali nézettel: integrált 4-funkciós beállítópanel egyérintéses szűrőtörléssel és aktív számlálóval. |
+| **Aktív Szűrők Visszajelzése** | Az Accordion gombon számláló jelvény (`X aktív szűrő`), a fejléc kapcsolókon és a táblázat oszlopszűrő mezőiben kitöltöttség. | Az Accordion szűrőgombon számláló jelvény jelenik meg (pl. *"3 aktív szűrő"*), mellette közvetlen *"Szűrők törlése"* gombbal. |
+| **Oszlopkezelés & Testreszabás** | Drag & Drop oszlopátrendezés, Oszlopok menü (alapértelmezetten 7 aktív oszlop), patikaválasztáskor a 2 közeli patika oszlop automatikus aktiválása. | Kártyás nézetben a kártyák „További adatok megjelenítése” gombjával egy érintéssel kinyithatók a részletes másodlagos mezők. |
+| **Műveleti Gombok Elhelyezése** | A táblázat jobb szélén folyamatosan rögzített (sticky) fix oszlop (Mentés, Értesítés, Részletek). | A gyógyszerkártya alján elhelyezett, nagyméretű ujjal kényelmesen érinthető gombsor (Mentés, Értesítés, Részletek). |
+| **Lapozó és Eredménysor** | Lapozósáv lapszámozó gombokkal és legördülő oldalankénti találatszám választóval (10, 20 [alapértelmezett], 50, 100 találat / oldal). | Kártyaszerű alsó lapozó sáv azonos funkciókkal és találatszám választóval (10, 20, 50, 100 találat / oldal). |
 
 #### 4.2.2. Gyógyszer Részletes Adatlap
-**Útvonal:** [https://bvo.uneb.hu/gyogyszerek/adatlap?tk=[tkSzam]](https://bvo.uneb.hu/gyogyszerek/adatlap) (Példa: `/gyogyszerek/adatlap?tk=OGYI-T-8898/01`)
+**Hivatalos Elérési Útvonal:** [https://bvo.uneb.hu/gyogyszerek/adatlap?tk=[tkSzam]](https://bvo.uneb.hu/gyogyszerek/adatlap) (Példa: `/gyogyszerek/adatlap?tk=OGYI-T-8898/01`)  
+**Visszafelé Kompatibilis Dinamikus Útvonal:** `/gyogyszerek/[...id]` (Példa: `/gyogyszerek/OGYI-T-8898/01` automatikus HTTP átirányítással a query paraméteres címre)
 
-1. **Termék Fejléc és Kulcsazonosítók:**
-   - Kereskedelmi név, hatóanyag (INN), kiszerelés, gyártó, hivatalos TK-szám és ATC-kód.
-   - Piaci státuszbadge (`Elérhető` / `Készlethiány` / `Megszűnt`) és utolsó adatszinkron időpontja.
-2. **Készlethiány Figyelmeztető Doboz (Csak hiány esetén):**
-   - Sárga kiemelt szekció: hiány kezdete, várható megszűnése, hivatalos indoklás és szakmai pótlási javaslat.
-3. **Preferált Patika Helyi Készletkártyája:**
-   - Megjeleníti a kijelölt gyógyszertár nevét, címét, nyitvatartását és a 4 szintű helyi készletbesorolást (`Készleten`, `Korlátozottan`, `Rendelésre`, `Nem elérhető`).
-   - A patikanévre kattintva helyben felugrik a **Gyógyszertár Részletek Modál** a nyitvatartási renddel anélkül, hogy elhagynánk az adatlapot.
-4. **Helyettesíthetőség (Terápiás Alternatívák):**
-   - Azonos hatóanyagú (INN) vagy azonos terápiás csoportba tartozó helyettesítő készítmények listája készletelérhetőségi adatokkal és árakkal.
-5. **Készletváltozási Előzmények (Történet):**
-   - Időrendi lista a készítmény korábbi státuszváltozásairól (dátum, korábbi állapot, új állapot).
+A részletes gyógyszeradatlap az orvosi döntéstámogató munkafolyamat legfontosabb vizsgálati felülete, amely egy kiválasztott készítmény valamennyi törzskönyvi adatát, aktuális piaci státuszát, országos hálózati és helyi preferált patikai készletelérhetőségét, hivatalos fogyasztói és becsült térítési árait, valamint a terápiás helyettesíthetőséget mutatja be egyetlen áttekinthető, strukturált képernyőn.
+
+1. **Visszanavigálás és Fejléc Műveletek:**
+   - **„← Részletek” Navigációs Gomb:** Az oldal tetején elhelyezett diszkrét visszalépési vezérlő (`/gyogyszerek`), amellyel a felhasználó egyetlen kattintással visszatérhet a gyógyszerkereső főoldalra, megőrizve az ott korábban aktív szűrési és lapozási állapotot.
+   - **Elsődleges Termékazonosítók:**
+     - **Gyógyszer Hivatalos Neve:** Kiemelt méretű cím (pl. *„Xyzal 5 mg filmtabletta”*).
+     - **Hatóanyag és ATC Kód Sor:** Közvetlenül a név alatt elhelyezett leíró adatsáv (pl. *„Hatóanyag: levocetirizin-dihidroklorid | ATC Kód: R06AE09”*).
+   - **Fejléc Akciógombok:**
+     - **Mentés Gomb (Csillag ikon):** Egykattintásos elmentés a helyi kedvencek közé, azonnali fejléc-számláló növekedéssel.
+     - **Értesítés Kérése Gomb (Harang ikon):** Feliratkozás a készítmény készletváltozási riasztásaira (egyidejűleg automatikusan elmenti a gyógyszert a kedvencek közé is).
+
+2. **Készlethiány Figyelmeztető Doboz (Csak Készlethiány státusz esetén):**
+   - Ha a készítmény piaci státusza `Készlethiány`, a fejléc alatt egy sárga hátterű (`#fffce9`), aranybarna szegélyű (`#f5e8a3`) figyelmeztető kártya jelenik meg.
+   - **Fejléc:** Figyelmeztető ikon és kiemelt *„Készlethiány”* felirat.
+   - **3 Oszlopos Adatmező Elrendezés:**
+     - **Készlethiány kezdete:** A hiány beálltának hivatalos bejelentési dátuma (formátum: `ÉÉÉÉ.HH.NN.`, pl. `2026.01.15.`).
+     - **Tervezett vége:** A hiány megszűnésének várható ideje (formátum: `ÉÉÉÉ.HH.NN.`, pl. `2026.12.31.` vagy ismeretlen esetben *„Bizonytalan”*).
+     - **Hiány oka:** Hivatalos indoklás (pl. *„Gyártási kapacitáshiány”*, *„Alapanyaghiány”*).
+   - **Javaslat a pótlásra:** A kártya alsó leválasztott sávjában megjelenő szakmai helyettesítési ajánlás.
+
+3. **Megszűnt Termék Figyelmeztető Doboz (Csak Megszűnt státusz esetén):**
+   - Amennyiben a termék piaci státusza `Megszűnt`, a sárga hiánybanner helyett egy különálló halványpiros hátterű (`#fef7f8`), diszkrét piros kerettel (`#fbd3db`) ellátott figyelmeztető kártya jelenik meg.
+   - **Fejléc:** Piros információs/figyelmeztető ikon és kiemelt *„Megszűnt termék”* cím (`text-[#002664] text-[22px] font-bold`).
+   - **2 Oszlopos Adatmező Elrendezés:**
+     - **Ideje:** A készítmény törzskönyvből való törlésének, forgalomból történő kivonásának vagy az utolsó piaci státuszmódosításnak a pontos ideje (formátum: `ÉÉÉÉ.HH.NN.`, pl. `2026.01.01.`).
+     - **Megszűnés oka:** A forgalmazás megszűnésének hivatalos szakmai és szabályozói oka (pl. *„Forgalmazási engedély visszavonása / Forgalomból kivonva”*).
+
+4. **Országos Hálózati Készletblokk (`BENU GYÓGYSZERTÁRAK`):**
+   - A `KÖZELI GYÓGYSZERTÁR` szekció közvetlen felett elhelyezkedő, nagybetűs kékesszürke felirattal (`BENU GYÓGYSZERTÁRAK`) bevezetett országos hálózati eloszlási sáv.
+   - A rendszer a teljes BENU gyógyszertári hálózat **250 patikájára vetítve** reprezentálja az aktuális készlethelyzetet a 4 állapotú készletbesorolás szerint:
+     - **Elérhető státuszú termék esetén:**
+       - **Készleten:** Zöld pipás készletjelvény mellett mutatja, hogy pontosan hány patikában van a gyógyszer azonnal, fizikailag raktáron (pl. `198 db BENU Gyógyszertárban`). A patikaszám aláhúzott interaktív hivatkozás, amely közvetlenül a Gyógyszertár Kereső (`/gyogyszertarak`) oldalra navigál.
+       - **Rendelésre (1-2 munkanap):** Kék körbefutó nyilas készletjelvény mellett jelzi, hány patikába rendelhető meg nagykereskedelmi raktárból rövid szállítási idővel (pl. `52 db BENU Gyógyszertárban (1-2 munkanap)`), szintén közvetlen továbbnavigáló linkkel a patikakeresőre.
+     - **Készlethiány vagy Megszűnt státuszú termék esetén:**
+       - **Korlátozottan:** Sárga készletjelvény mutatja azon patikák számát, ahol a termékhiány ellenére még fellelhető maradék polckészlet (pl. `42 db BENU Gyógyszertárban`), közvetlen linkkel a `/gyogyszertarak` felületre.
+       - **Nem elérhető:** Szürke/piros készletjelvény mutatja a készlettel nem rendelkező patikák számát (pl. `208 gyógyszertárban`).
+
+5. **Közeli Gyógyszertár Helyi Készletblokk (`KÖZELI GYÓGYSZERTÁR`):**
+   - Nagybetűs kékesszürke címkével (`KÖZELI GYÓGYSZERTÁR`) megjelölt kiemelt blokk.
+   - **Ha a felhasználónak van kijelölt közeli patikája:**
+     - A 4 szintű készletstátusz jelvény (`Készleten`, `Korlátozottan`, `Rendelésre (1-2 munkanap)`, `Nem elérhető`).
+     - A kijelölt preferált patika hivatalos megnevezése (pl. *„BENU Gyógyszertár Budapest Corvin”*).
+     - **Interaktív Modál Megnyitás:** A patika nevére kattintva helyben felugrik a **Gyógyszertár Részletek Modális Ablak (`PharmacyDetailModal`)**, ahol a felhasználó az adatlap elhagyása nélkül áttekintheti a patika heti nyitvatartási rendjét, pontos címét és elérhetőségeit.
+   - **Ha nincs kijelölt közeli patika:**
+     - Dőlt betűs tájékoztató szöveg: *„Nincs beállítva közeli gyógyszertár.”*
+     - Közvetlen link: *„Gyógyszertár kiválasztása”* hivatkozás a `/gyogyszertarak` keresőoldalra.
+
+6. **Termékjellemzők és Árak 3 Oszlopos Rács:**
+   - A profilkártya alsó részén vízszintes szürke választóvonal alatt elhelyezkedő háromhasábos strukturált információs mátrix:
+     - **1. oszlop – Gyártási és Kiszerelési Adatok:**
+       - `FORGALMAZÓ / GYÁRTÓ`: A forgalomba hozatali engedély jogosultjának és a gyártó üzemnek a megnevezése (pl. `KRKA, d.d., Novo mesto (Szlovénia)`).
+       - `KISZERELÉS MÉRETE`: A gyógyszer formai és csomagolási adatai (pl. `90x - buborékcsomagolásban`).
+     - **2. oszlop – Finanszírozási és Ekvivalencia Adatok:**
+       - `TÁMOGATÁSI KATEGÓRIA`: A Nemzeti Egészségbiztosítási Alapkezelő (NEAK) által nyújtott társadalombiztosítási támogatás mértéke (pl. `Kiemelt támogatásban részesülő (55%)`, `Normatív támogatás (25%)` vagy `Nem támogatott`).
+       - `EKVIVALENCIA CSOPORT`: Orvosszakmai helyettesíthetőségi csoportbesorolás:
+         - *„Helyettesíthető bázisgyógyszer”*: Amennyiben a készítmény hatóanyaga (INN) alapján elérhető egyenértékű bioekvivalens alternatíva.
+         - *„Referencia készítmény”*: Originális innovatív készítmény vagy referencia-alapú gyógyszer.
+     - **3. oszlop – Fogyasztói és Térítési Árak:**
+       - `PUBLIKUS FOGYASZTÓI ÁR`: A készítmény hivatalos bruttó kiskereskedelmi fogyasztói ára, megnövelt (20px) betűmérettel és kiemelt magenta színnel (`#b1174e`) megjelenítve (pl. `4 825 Ft`).
+       - `TÉRÍTÉSI DÍJ (BECSÜLT)`: A támogatás levonása után a beteg által ténylegesen fizetendő, becsült térítési díj sötétkék vastag betűkkel kiemelve (pl. `2 171 Ft`).
+
+7. **Helyettesíthetőség és Terápiás Alternatívák (`SimilarMedicines`):**
+   - Az adatlapon a fő termékkártya alatt elhelyezkedő különálló szekció, amely az azonos hatóanyagú (INN), jelenleg piacilag `Elérhető` készítményeket listázza ki.
+   - Asztali nézetben 6 oszlopos táblázatban jelenik meg: *Kereskedelmi név*, *Kiszerelés*, *Gyártó*, *Státusz*, *Közeli patika készlet*, *Műveletek* (Mentés, Értesítés, Részletek link).
+   - Mobil nézetben (<1024px) automatikusan kártyás listává alakul át, teljes szélességű érintőgombokkal.
+
+8. **Státuszváltozási Előzmények és Adatbázis-lekérdezési Időbélyeg (`MedicineStatusHistory`):**
+   - Fehér hátterű kártya *„Státusz változások”* fejlécfelirattal.
+   - Időrendi lista a gyógyszer korábbi készlet- és forgalmazási állapotváltozásairól (dátum és státuszjelvény: `Elérhető`, `Hiány`, `Megszűnt`), legfelül a legfrissebb állapottal.
+   - **Alsó Lábléc (Footer sáv):**
+     - A kártya legalsó élén elhelyezett diszkrét szürke sáv (`bg-slate-50 border-t border-[#e7e8ec]`).
+     - Bal oldalon: *„Utolsó lekérdezés orvosi adatbázisból:”* felirat.
+     - Jobb oldalon: Kiemelt sötétkék vastag betűs időbélyeg formátumban: `{dátum}` (pl. `2026.10.21 00:35` vagy `2026.09.04 12:00`), amely hitelesíti a gyógyszeradatok frissességét.
 
 #### 4.2.2.6. Desktop vs. Mobil Felületi Eltérések a Gyógyszer Adatlapon
 
@@ -461,27 +723,73 @@ A portál központi munkafelülete a gyógyszerek keresésére, szűrésére és
 | :--- | :--- | :--- |
 | **Kártya Elrendezés és Margók** | Kényelmes, nagyméretű 32px belső margó; többhasábos vízszintes információs blokkok. | Kompakt 16px belső margó a képernyőszélesség maximális kihasználásához; egymás alá rendeződő függőleges blokkok. |
 | **Fejléc Akciógombok** | Jobb felső sarokba igazított gombok (Mentés, Értesítés kérése). | A gyógyszernév alatt automatikusan új sorba törő, kényelmes teljes szélességű gombsor. |
-| **Készlethiány és Megszűnés Bannerek** | 3 oszlopos adatmező elrendezés (Kezdet, Vége, Indoklás). | Egymás alá törő kártyasor, kiemelt vastag betűs olvashatósággal. |
-| **Gyógyszertári Készletjelvények** | Szöveges leírás mellett elhelyezett státusz pill-ek. | Ujjbegyre optimalizált, nagy kontrasztú készletjelvények és közvetlen patika megnyitó linkek. |
+| **Készlethiány és Megszűnés Bannerek** | Készlethiánynál 3 oszlopos (Kezdet, Vége, Indoklás), Megszűnésnél 2 oszlopos (Ideje, Megszűnés oka) strukturált adatelrendezés. | Egymás alá törő kártyasor, kiemelt vastag betűs olvashatósággal. |
+| **Országos Hálózati Készletblokk (BENU)** | Vízszintes sorok státuszjelvénnyel és aláhúzott interaktív hivatkozással a patikakeresőre. | Teljes szélességű, nagy érintési felülettel ellátott linksor közvetlen hálózati patikanavigációval. |
+| **Gyógyszertári Készletjelvények és Modál** | Szöveges leírás mellett elhelyezett státusz pill-ek; patikanévre kattintva felugró részletes nyitvatartási ablak. | Ujjbegyre optimalizált készletjelvények és modális nyitvatartás megnyitó linkek. |
+| **Termékjellemzők és Árak Rács** | 3 oszlopos párhuzamos adatrács: 1. Forgalmazó és Kiszerelés, 2. Támogatási kategória és Ekvivalencia csoport, 3. Kiemelt Publikus ár és Térítési díj. | 1 oszlopos, egymás alá törő kártyablokkok jól elkülönülő címkékkel és nagyméretű kiemelt ármegjelenítéssel. |
+| **Státuszváltozási Előzmények Lábléce** | Kétoldalra igazított lábléc (balra a leíró felirat, jobbra a vastag betűs orvosi adatbázis időbélyeg). | Kompakt elrendezés az orvosi adatbázis lekérdezési dátumának feltüntetésével. |
 | **Helyettesítő Készítmények (SimilarMedicines)** | 6 oszlopos táblázat (Név, Kiszerelés, Gyártó, Státusz, Közeli Patika, Műveletek). | **Mobil Kártyás Lista:** Minden helyettesítő gyógyszer önálló kis kártyaként jelenik meg hatóanyaggal, készletjelvénnyel és egyérintéses Mentés/Értesítés/Részletek gombokkal. |
 
-#### 4.2.3. Bemenetek és Kimenetek
-- **Bemenet:** Keresési karakterek beírása, szűrőpill-ek váltása, oszlopok áthúzása, könyvjelző/értesítés ikonok kattintása, mobil accordion szűrők és nézetváltó érintése.
-- **Kimenet:** Valós idejű táblázatszűrés vagy kártyarács-frissülés, nézetváltás (grid/table), adatlap megnyitása, modális ablak felugrása, könyvjelző számláló növekedése a fejlécben.
+#### 4.2.3. Kedvenc-kezelési Munkafolyamat, Törlés-megerősítő Modál és Toast Visszavonás
+A portál orvosi döntéstámogatásának egyik leggyakrabban használt funkciója a releváns gyógyszerek gyorselérése és készletváltozásaik figyelemmel kísérése. A rendszer a véletlen adatvesztés és értesítésvesztés elkerülése érdekében szigorúan szabályozott kétlépcsős védőmechanizmust alkalmaz.
 
-#### 4.2.4. Hibakezelés a Gyógyszer Modulban
+1. **Gyógyszer Mentése a Kedvencek Közé:**
+   - A táblázat műveleti oszlopában található csillag ikonra, a mobil gyógyszerkártya „Mentés” gombjára vagy az adatlap fejlécében található Mentés akciógombra kattintva a készítmény azonnal bekerül a helyileg tárolt kedvencek közé (`localStorage`).
+   - A fejléc Mentett számláló jelvénye (badge) azonnal frissül és mutatja az új darabszámot.
+2. **Készletértesítés Feliratkozás (Harang ikon) és Automatikus Mentés:**
+   - Amennyiben az orvos feliratkozik egy termék készletváltozásaira (harang ikonra kattint a táblázatban, a kártyán vagy az adatlapon), a rendszer **automatikusan menti a gyógyszert a kedvencek közé is** (a csillag ikon is azonnal aktív, mentett állapotra vált), amennyiben korábban még nem szerepelt a mentettek között.
+3. **Kedvenc Gyógyszer Eltávolítása és a Megerősítő Modális Védőablak (`FavoriteRemovalModal`):**
+   - **A eset – Nincs aktív készletértesítés a gyógyszeren:** Ha a felhasználó egy olyan készítmény mentését vonja vissza (csillag ikonra kattintva), amelyre nem állított be értesítést, a gyógyszer azonnal kikerül a mentettek közül, és közvetlenül megjelenik a jobb alsó Toast értesítés (lásd 4. pont).
+   - **B eset – Van aktív készletértesítés a gyógyszeren (Védelmi megerősítő mechanizmus):**
+     - Mivel az értesítés feliratkozása a mentett állapothoz kapcsolódik, a mentés törlésekor a rendszer **nem távolítja el azonnal a tételt**, hanem a képernyő közepén felugrasztja a **Megerősítő Modális Ablakot (`FavoriteRemovalModal`)**.
+     - **A modális ablak funkcionális felépítése:**
+       - **Fejléc:** Figyelmeztető sárga/piros ikon és kiemelt figyelmeztető cím: *„Értesítés is megszűnik!”*
+       - **Fő üzenet:** Kiemelt vastag figyelmeztetés: *„Ha kiveszi a mentett gyógyszerek közül a terméket, nem kap több értesítést!”*
+       - **Kiegészítő kérdés:** *„Biztosan szeretné kivenni a mentett gyógyszerek közül és ezzel nem kap a termékről több értesítést sem?”*
+       - **Műveleti gombok:**
+         - **„Mégsem” gomb:** Kék színű, alapértelmezett billentyűzet-fókusszal ellátott elsődleges gomb. Rákattintva (vagy az ablak melletti elsötétített háttérre / backdrop-ra kattintva) a modál bezárul, a törlési folyamat megszakad; mind a mentett kedvenc állapot, mind a készletértesítési feliratkozás változatlanul aktív marad.
+         - **„Igen, biztosan” gomb:** Figyelmeztető stílusú (piros hover kiemelésű) másodlagos gomb. Megnyomásakor a felhasználó kifejezetten megerősíti szándékát: a rendszer egyszerre törli a készítményt a mentett kedvencek közül (`removeFavorite`), visszavonja az aktív készletértesítést (`unsubscribe`), bezárja a modált, és elindítja a visszavonási Toast időablakot.
+4. **Toast Értesítési Rendszer és „Visszavonom” (Undo) Funkció:**
+   - **Elhelyezkedés:** A képernyő jobb alsó sarkában fixen rögzített (`fixed bottom-4 right-4`), a többi felületi réteg felett lebegő (`z-[100]`), árnyékolt információs kártya, amely elegáns jobbról becsúszó animációval jelenik meg.
+   - **Megjelenített Adatok és Funkciók:**
+     - **Információs piktogram:** Kék/sárga információs ikon.
+     - **Kattintható Terméknév és Kiszerelés:** Szöveges visszajelzés: *„{Gyógyszernév} ({Kiszerelés}) eltávolítva a mentett gyógyszerek közül.”* A gyógyszer neve közvetlenül kattintható link, amellyel a felhasználó azonnal a készítmény részletes adatlapjára juthat.
+     - **„Visszavonom” akciógomb:** Kiemelt gomb, amelyre kattintva a törlési művelet azonnal megsemmisül: a rendszer a gyógyszert haladéktalanul visszahelyezi a mentett kedvencek közé, a Toast pedig azonnal bezárul.
+     - **Manuális Bezáró Gomb („X”):** A kártya jobb felső sarkában elhelyezett diszkrét bezáró gombbal a felhasználó azonnal eltüntetheti az értesítést, ha nem kíván élni a visszavonási lehetőséggel.
+     - **Vizuális Visszaszámláló Csík (Progress Bar):** A kártya legalsó élén elhelyezett kék állapotjelző sáv, amely 10 másodperc (10 000 ms) alatt egyenletesen és folyamatosan nullára fogy. Amikor a csík lejár, a Toast automatikusan elhalványul és eltűnik a felületről.
+     - **Többszörös törlés kezelése (Stacking):** Ha a felhasználó gyors egymásutánban több kedvencet töröl, a Toast kártyák egymás fölé rendeződve (oszlopban) jelennek meg, mindegyik önálló 10 másodperces időzítővel, egyedi gyógyszernévvel és saját „Visszavonom” gombbal.
+
+#### 4.2.4. Bemenetek és Kimenetek
+- **Bemenet:** Keresési karakterek beírása, szűrőpill-ek váltása, oszlopok áthúzása, könyvjelző/értesítés ikonok kattintása, mobil accordion szűrők és nézetváltó érintése, megerősítő modális ablak gombjainak megnyomása („Mégsem” / „Igen, biztosan”), Toast „Visszavonom” gombjára kattintás, adatlapon a „← Részletek” navigációs gomb megnyomása, országos BENU patikaszám linkre vagy a közeli patika nevére kattintás (modális ablak megnyitása).
+- **Kimenet:** Valós idejű táblázatszűrés vagy kártyarács-frissülés, nézetváltás (grid/table), adatlap megnyitása, megerősítő modális ablak felugrása aktív értesítésnél, lebegő visszavonási Toast megjelenítése a jobb alsó sarokban dinamikus időcsíkkal, kedvenc és értesítési állapotok szinkronizált frissülése, könyvjelző számláló frissülése a fejlécben, adatlapon a hiány és megszűnt figyelmeztető dobozok dinamikus megjelenítése, 250 patikás országos hálózati készleteloszlás, 3 oszlopos termékjellemzők és árak megjelenítése, státusztörténet orvosi adatbázis időbélyegzője, dinamikus útvonalak automatikus átirányítása.
+
+#### 4.2.5. Hibakezelés a Gyógyszer Modulban
 - **Nincs találat a szűrésre:** A táblázatban és a kártyás nézetben is megjelenik a *"Nem található a keresésnek megfelelő gyógyszer"* felirat, valamint a *"Szűrők törlése"* akciógomb.
-- **Érvénytelen TK-szám az adatlapon:** Ha az URL-ben nem létező azonosító szerepel, a rendszer információs képernyőt jelenít meg: *"A keresett gyógyszer nem található"*, felkínálva a visszatérést a gyógyszerlistához.
+- **Érvénytelen TK-szám az adatlapon:** Ha az URL query paraméterben nem létező azonosító szerepel (`/gyogyszerek/adatlap?tk=...`), a rendszer strukturált információs hibaállapotot jelenít meg: *"Gyógyszer nem található"*, feltüntetve a hibás törzskönyvi számot és felkínálva a *"Vissza a gyógyszerek listájához"* gombot.
+- **Régi vagy külső dinamikus útvonal használata (`/gyogyszerek/[...id]`):** Nem eredményez 404-es hibát vagy törött oldalt; a rendszer transzparens átirányítással közvetlenül a megfelelő lekérdezési paraméteres címre (`/gyogyszerek/adatlap?tk=...`) vezeti a felhasználót.
+- **Véletlen kedvenc- és értesítéstörlés megelőzése:** Kétlépcsős védelmi ellenőrzés óvja meg az orvost a téves kattintásoktól: aktív értesítésnél a `FavoriteRemovalModal` megerősítés nélkül nem engedi a törlést, míg a lefutott törléseknél a 10 másodperces Toast „Visszavonom” gombja biztosít azonnali helyreállítást.
 
-#### 4.2.5. Elfogadási Kritériumok (Acceptance Criteria)
+#### 4.2.6. Elfogadási Kritériumok (Acceptance Criteria)
 - **AC-4.2.1:** Az oszlopok Drag & Drop átrendezése azonnal működik és az új sorrend újratöltés után is megmarad.
 - **AC-4.2.2:** A Műveletek oszlop vízszintes görgetés esetén is folyamatosan látható marad a monitor jobb szélén rögzítve.
 - **AC-4.2.3:** Az adatlapon a preferált patika nevére kattintva a nyitvatartási modal helyben, oldalváltás nélkül megnyílik.
-- **AC-4.2.4:** Készlethiány esetén az adatlapon a sárga figyelmeztető doboz hiánytalanul tartalmazza az okot és a várható befejezést.
+- **AC-4.2.4:** Készlethiány esetén az adatlapon a sárga figyelmeztető doboz hiánytalanul tartalmazza a hiány kezdetét, tervezett végét, a hivatalos indoklást és a szakmai pótlási javaslatot.
 - **AC-4.2.5:** A gyógyszernyilvántartásban kizárólag OTC és vényköteles humán gyógyszerek szerepelnek; nem gyógyszer termékek státuszkövetése kizárt.
 - **AC-4.2.6:** 1024px alatti képernyőszélesség esetén a gyógyszerek oldalon automatikusan a kártyás nézet jelenik meg, az Accordion szűrőpanel pedig egy érintéssel lenyitható és az aktív szűrők számát jelvénnyel mutatja.
 - **AC-4.2.7:** A gyógyszerkártyán a „További adatok megjelenítése” gombra kattintva a másodlagos adatok (csomagolás, kiadhatóság, engedély dátuma) oldalváltás nélkül kibomlanak.
 - **AC-4.2.8:** A gyógyszerkártya fejlécének jobb felső sarkában az utolsó adatmódosítás/szinkronizálás pontos dátuma és ideje (`Utolsó frissítés: ÉÉÉÉ-HH-NN ÓÓ:PP`, pl. `Utolsó frissítés: 2026-10-21 00:35`) konstans módon, a másodlagos adatok lenyitása nélkül is közvetlenül és folyamatosan olvasható, míg a termékazonosító (TK-szám) az elsődleges törzsadatok között kap helyet.
+- **AC-4.2.9:** Mentett gyógyszer eltávolításakor a felület jobb alsó sarkában 10 másodpercig megjelenik a lebegő Toast értesítés folyamatosan fogyó vizuális visszaszámláló sávval (progress bar), közvetlen termékadatlap-linkkel és „Visszavonom” akciógombbal, amellyel a törlés azonnal visszafordítható.
+- **AC-4.2.10:** Amennyiben a felhasználó olyan mentett gyógyszert próbál eltávolítani a kedvencek közül, amelyhez aktív készletértesítés (harang) tartozik, a rendszer kötelező megerősítő modális ablakot jelenít meg (*„Értesítés is megszűnik!”*). A „Mégsem” gomb megnyomásakor a művelet megszakad és mindkét állapot változatlan marad, míg az „Igen, biztosan” gomb választásakor mind a mentés, mind az értesítés törlődik, és felugrik a visszavonást biztosító Toast értesítés.
+- **AC-4.2.11:** A „Szűrés és rendezés” Accordion szűrőpanel mind asztali (`≥1024px`), mind mobil nézetben elérhető a gyógyszerlista felett, egyetlen kattintással lenyitható és becsukható, aktív szűrés esetén dinamikusan jelzi a feltételek darabszámát (`X aktív szűrő`), és közvetlen „Szűrők törlése” egykattintásos alaphelyzetbe állító gombot biztosít.
+- **AC-4.2.12:** A gyógyszertáblázat 15 oszlopából alapértelmezetten pontosan 7 aktív (`Dátum / idő`, `Státusz`, `Termék neve`, `Hatóanyag`, `Kiszerelés`, `TK szám`, `Műveletek`). Amennyiben a felhasználó rendelkezik kijelölt közeli patikával, a `Közeli patika` és a `Közeli patika frissítve` oszlopok automatikusan bekapcsolódnak és megjelennek a táblázatban.
+- **AC-4.2.13:** A táblázat oszlopfejléceire kattintva a rendezés háromállapotú ciklust követ (1. kattintás: növekvő `▲` -> 2. kattintás: csökkenő `▼` -> 3. kattintás: alaphelyzet / rendezés törlése).
+- **AC-4.2.14:** A gyógyszerkártya (`MedicineCard`) fejlécében a `NearbyPharmacyStockIndicator` megjeleníti a kijelölt közeli patika nevét, az elérhetőségi státuszjelvényt és a patikai adat frissítési idejét (`Frissítve: ÉÉÉÉ-HH-NN ÓÓ:PP`); a kártyarács nagy képernyőn (`≥1280px`) 3 oszlopos, közepes kijelzőn 2 oszlopos, mobilon 1 oszlopos elrendezésben jelenik meg.
+- **AC-4.2.15:** A lapozó sávban elhelyezett legördülő találatszám-választó menüből kiválasztható a `10`, `20` (alapértelmezett), `50` vagy `100 találat / oldal` beállítás; a találatszám módosításakor a felület azonnal az 1. oldalra ugrik az új lapszámok szerint.
+- **AC-4.2.16:** Megszűnt piaci státuszú gyógyszer adatlapján a hiánybanner helyett egy különálló halványpiros figyelmeztető kártya jelenik meg (*„Megszűnt termék”*), amely hiánytalanul feltünteti a készítmény megszűnésének pontos idejét (dátumát) és hivatalos szakmai okát (*„Forgalmazási engedély visszavonása / Forgalomból kivonva”*).
+- **AC-4.2.17:** Az adatlapon a közeli patika szekció felett elhelyezkedő országos hálózati készletblokk (`BENU GYÓGYSZERTÁRAK`) a teljes hálózat 250 gyógyszertárára vetítve reprezentálja az aktuális készletmegoszlást (elérhető termékeknél `Készleten` és `Rendelésre [1-2 munkanap]`, hiánycikk vagy megszűnt termék esetén `Korlátozottan` és `Nem elérhető`), és a patikaszámra kattintva közvetlen hivatkozást biztosít a Gyógyszertárak keresőoldalra (`/gyogyszertarak`).
+- **AC-4.2.18:** A termékjellemzők és árak 3 oszlopos elrendezésű rácsa hiánytalanul megjeleníti a `FORGALMAZÓ / GYÁRTÓ`, `KISZERELÉS MÉRETE`, `TÁMOGATÁSI KATEGÓRIA`, `EKVIVALENCIA CSOPORT` (*Helyettesíthető bázisgyógyszer* vagy *Referencia készítmény*), valamint a kiemelt magenta színű `PUBLIKUS FOGYASZTÓI ÁR` és sötétkék `TÉRÍTÉSI DÍJ (BECSÜLT)` mezőket.
+- **AC-4.2.19:** A státuszváltozási előzmények kártya (`MedicineStatusHistory.tsx`) alsó szürke zárósávjában a rendszer állandó jelleggel feltünteti az *„Utolsó lekérdezés orvosi adatbázisból: {dátum}”* időbélyeget, igazolva az orvosi törzsadatok frissességét.
+- **AC-4.2.20:** A korábbi vagy külső forrásból érkező dinamikus útvonalakat (`/gyogyszerek/[...id]`, pl. `/gyogyszerek/OGYI-T-8898/01`) a rendszer zökkenőmentesen és automatikusan átirányítja az új szabványos query paraméteres címre (`/gyogyszerek/adatlap?tk=...`).
 
 ---
 
@@ -501,7 +809,7 @@ Gyógyszertárak felkutatása, helymeghatározás, nyitvatartási információk 
 2. **GPS Helymeghatározó Panel:**
    - *"Közeli patikák keresése (GPS)"* gomb: a böngésző engedélyével lekéri a felhasználó aktuális koordinátáit és távolság szerint növekvő sorrendbe rendezi a patikákat.
 3. **Kettős Nézet és Mobil Bottom Sheet:**
-   - **Asztali nézet (≥1024px):** Kétpaneles elrendezés: bal oldalon 476px széles gördülő sáv a patikák adataival (név, cím, nyitvatartás ma, távolság km-ben, telefonszám, e-mail), a tartózkodási hely és a közeli patika kártyákkal a lista elején; jobb oldalon a teljes fennmaradó területet kitöltő OpenStreetMap térkép.
+   - **Asztali nézet (≥1024px):** Kétpaneles elrendezés: bal oldalon 476px széles gördülő sáv a patikák adataival (név, cím, mai nyitvatartási idősáv, 3 állapotú nyitvatartási státusz, távolság km-ben, „Többit mutasd” link, „Közelinek jelölöm +” / „✓ Közeli gyógyszertár” toggle akciógomb; a telefonszám és e-mail a felugró részletes adatlap modálban érhető el), a tartózkodási hely és a közeli patika kártyákkal a lista elején; jobb oldalon a teljes fennmaradó területet kitöltő OpenStreetMap térkép.
    - **Mobil nézet (<1024px):** A fejléc címsorával egy sorban elhelyezkedő 3-állású nézetválasztó (`[Térkép | Osztott | Lista]`) és a térkép feletti interaktív **Bottom Sheet (alsó felhúzható lap)**:
      - *Peek / Térkép fókusz (~92px magasság):* A térkép dominál a háttérben; az alsó lapon a fogantyú és egy kompakt összegző sor jelzi a térképen látható patikák számát, koppintásra kinyílik.
      - *Fél / Osztott nézet (~50% magasság):* Kiegyensúlyozott térkép és lista elrendezés (50% térkép, 50% lista) a keresősáv és a szűrőgombok alatt.
@@ -513,21 +821,60 @@ Gyógyszertárak felkutatása, helymeghatározás, nyitvatartási információk 
 5. **Dinamikus Térképi Találatszámláló és Összes (n db) Link:**
    - A patikalista fejlécében (asztali és mobil nézetben egyaránt) a kiírás közvetlenül és dinamikusan követi a térkép aktuális kivágatában látható patikák számát: `"{X} BENU gyógyszertár a térképen"` formátumban (zöld pont jelzés nélkül).
    - Amennyiben a térkép nagyítása vagy elmozgatása miatt kevesebb patika látható, mint a teljes találati halmaz, a felirat mellett megjelenik a közvetlen `"Összes ({n} db)"` szöveges hivatkozás, amelyre kattintva a térkép azonnal visszaáll a teljes országos áttekintő nézetre.
+6. **Patikakártya Felépítése és 50 Elemes Találati Renderelési Korlát:**
+   - **Kártyán megjelenő adatok:**
+     - A patika neve aláhúzott kék hivatkozásként (rákattintva megnyitja a részletes modális adatlapot).
+     - Pontos cím (irányítószám, település, utca, házszám).
+     - Légvonalbeli távolság a tartózkodási helytől (vagy budapesti referencia-ponttól), pl. `~1.2 km`.
+     - Aktuális napi nyitvatartási információ: a mai nap neve magyarul (pl. `Kedd:`), a mai nyitvatartási idősáv (pl. `08:00 - 18:00` vagy `Ma zárva`), mellette óra ikon.
+     - **3 állapotú nyitvatartási státusz:**
+       - `Nyitva` (zöld színnel, `#317907`): a gyógyszertár nyitva tart, és a zárásig több mint 60 perc van hátra.
+       - `Hamarosan zár` (sárga/olíva színnel, `#7a6c21`): a gyógyszertár nyitva tart, de a napi zárási időpontig legfeljebb 60 perc van hátra.
+       - `Zárva` (piros színnel, `#b1174e`): a gyógyszertár az adott időpontban zárva tart (nyitás előtt, zárás után, vagy heti zárva tartási napon).
+     - **„Többit mutasd” részletező hivatkozás:** aláhúzott kék link a kártya alsó sávjában, amelyre kattintva felugrik a részletes adatlap modális ablak (`PharmacyDetailModal`).
+     - **Preferált patika akciógomb (Kétállású Toggle):**
+       - Alapállapotban: lekerekített halványzöld kapszula **„Közelinek jelölöm +”** felirattal és plusz (`+`) ikonnal.
+       - Kijelölt állapotban: telt zöld kapszula **„✓ Közeli gyógyszertár”** felirattal és pipa (`check`) ikonnal.
+       - Újabb kattintásra a kijelölés azonnal visszavonható (törlődik), a gomb pedig visszaáll az alapállapotba.
+     - **Elérhetőségek elhelyezése:** A patika telefonszáma és e-mail címe közvetlenül nem szerepel a kártyán a vizuális tisztaság és ergonómia megőrzése érdekében; ezek a „Többit mutasd” linkre vagy a patikanévre kattintva felugró részletes modális ablakban érhetők el.
+   - **Maximális Találati Renderelési Korlát (50 patika):**
+     - A patikalista mind asztali sávban, mind a mobil alsó lapon a folyamatos gördülékenység és a böngésző DOM-terhelésének minimalizálása érdekében **egyszerre legfeljebb 50 patikakártyát renderel le** a térképen látható találatok közül (`visiblePharmacies.slice(0, 50)`).
+     - Amennyiben a térképi látóterületen 50-nél több patika található (pl. országos nézetben), a fejléc számlálója a teljes látható darabszámot jelzi ki (pl. `248 BENU gyógyszertár a térképen`), az orvos a térkép zoomolásával, mozgatásával vagy szűrőkkel szűkítheti a listát.
 
-#### 4.3.2. Preferált Gyógyszertár Kijelölése
-- Minden patikakártyán található egy *"Közelinek jelölöm"* akciógomb.
-- Kattintásra a választott patika zöld pipás aktív státuszt kap (*"Közeli gyógyszertáram"*), és azonnal megjelenik a felső navigációs fejlécben, valamint az Irányítópulton.
+#### 4.3.2. Preferált Gyógyszertár Kijelölése (Kétállású Toggle Funkció)
+- Minden patikakártyán és a felugró részletes adatlap modális ablakban is megtalálható a kijelölő akciógomb.
+- Alapállapotban a gombon a **„Közelinek jelölöm +”** felirat látható halványzöld háttérrel és hozzáadás ikonnal.
+- Rákattintva a rendszer azonnal preferált státuszba lépteti a patikát:
+  - A gomb felirata azonnal átvált: **„✓ Közeli gyógyszertár”** (telt zöld háttér, fehér pipa ikon).
+  - A választott gyógyszertár azonnal, az oldal újratöltése nélkül megjelenik a felső navigációs fejléc állandó információs sávjában és az Irányítópulton is.
+- **Kijelölés visszavonása (Toggle):** Amennyiben a felhasználó egy már kijelölt patika **„✓ Közeli gyógyszertár”** gombjára ismételten rákattint, a rendszer törli a kijelölést, a gomb visszavált a kiinduló „Közelinek jelölöm +” állapotba, a fejlécből és az Irányítópultról pedig eltávolításra kerül a patika.
 
-#### 4.3.3. Heti Nyitvatartási Részletek Modál
-- A patika címére vagy a *"Nyitvatartás részletei"* linkre kattintva felugró modális ablak részletesen bemutatja a hét minden napjára érvényes nyitási és zárási időpontokat, az ügyeleti rendet, valamint a közvetlen telefonhívási lehetőséget.
+#### 4.3.3. Részletes Gyógyszertár Adatlap Modál és Elérhetőségek (PharmacyDetailModal)
+- A patika címére, aláhúzott nevére vagy a kártya alján lévő **„Többit mutasd”** linkre kattintva felugró modális ablak részletesen bemutatja a gyógyszertár teljes profilját a kereső elhagyása nélkül:
+  - **Fejléc:** Gyógyszertár hivatalos neve, belső azonosítója (pl. `BF001`), kijelölt állapot esetén kiemelt „Közeli gyógyszertár” házikó jelvénnyel, valamint „Bezárás” (X) gombbal.
+  - **3 állapotú nyitvatartási és státuszblokk:**
+    - Színes státuszjelvény pulzáló ponttal: `Nyitva` (zöld jelvény), `Hamarosan zár` (sárga jelvény – a zárási idő előtt legfeljebb 60 perccel), vagy `Zárva` (piros jelvény).
+    - Aktuális napi nyitvatartási idősáv (pl. `08:00 - 18:00` vagy `Ma zárva`).
+  - **Pontos cím:** Irányítószám, település, utca, házszám térképjelölő ikonnal.
+  - **Közvetlen Kapcsolattartási Elérhetőségek (kizárólag a modálban):**
+    - **Telefonszám:** Közvetlenül hívható link formátumban (`tel:` hivatkozás, pl. `+36 1 234 5678`), amellyel mobilkészüléken egyetlen érintéssel közvetlen telefonhívás indítható a patikába.
+    - **E-mail cím:** Közvetlenül kattintható levél hivatkozás (`mailto:` link, pl. `patika@benu.hu`), amely azonnal megnyitja az alapértelmezett levelezőprogramot.
+  - **Heti Nyitvatartási Rend:**
+    - Részletes táblázat Hétfőtől Vasárnapig a napi nyitási és zárási időpontokkal.
+    - Az aktuális naptári nap automatikusan kiemelést kap diszkrét háttérszínnel és `Ma` jelvénnyel.
+    - A heti pihenő- vagy zárva tartó napok dőlt betűs `ZÁRVA` felirattal jelennek meg.
+  - **Lábléc Akciógombok:**
+    - **„Mutasd térképen” gomb:** Térkép ikonnal ellátott akciógomb, amely bezárja a modális ablakot, a háttérben lévő OpenStreetMap térképet azonnal az adott gyógyszertár koordinátáira centrálja, és automatikusan kinyitja a patika térképi adatbuborékját (popup).
+    - **„Közeli patikának jelölöm” / „Közeli jelölés eltávolítása” gomb:** A felugró ablakból helyben is elvégezhető vagy visszavonható a preferált patika kijelölése.
+    - **„Bezárás” gomb:** Elrejti a modális ablakot (amely az Escape billentyű leütésére vagy a sötétített háttér kattintására is bezáródik).
 
 #### 4.3.4. Mélylinkelés (Deep Linking) Támogatása
 - Az oldal támogatja a közvetlen azonosítóval történő hivatkozást: `/gyogyszertarak?id=BF133`.
 - Ilyen link megnyitásakor a térkép automatikusan a hivatkozott gyógyszertárra fókuszál (centrálás és zoom), a kártya kiemelést kap, és a nyitvatartási modal automatikusan felugrik.
 
 #### 4.3.5. Bemenetek és Kimenetek
-- **Bemenet:** Cím vagy település gépelése, nyitvatartási pill szűrők kattintása, "Keresés és szűrők" accordion gomb megnyomása, GPS gomb megnyomása, térkép görgetése/kattintása, Bottom Sheet fogantyú húzása/koppintása, `"Összes (n db)"` linkre kattintás.
-- **Kimenet:** Szűrt patikalista, térképi jelölők frissülése, preferált patika felületi beállítása, dinamikus számláló felirat frissülése, térképi nézet visszaállítása országos méretre, keresősáv animált kinyitása/összecsukása, aktív szűrőszámláló badge kijelzése.
+- **Bemenet:** Cím vagy település gépelése, nyitvatartási pill szűrők kattintása, "Keresés és szűrők" accordion gomb megnyomása, GPS gomb megnyomása, térkép görgetése/kattintása, Bottom Sheet fogantyú húzása/koppintása, `"Összes (n db)"` linkre kattintás, patikanév link vagy „Többit mutasd” link kattintása, „Közelinek jelölöm +” / „✓ Közeli gyógyszertár” toggle gomb megnyomása, modál „Mutasd térképen” gombjának megnyomása, telefonhívás (`tel:`) és e-mail küldés (`mailto:`) kezdeményezése a modálból.
+- **Kimenet:** Szűrt patikalista legfeljebb 50 renderelt kártyával, térképi jelölők frissülése, preferált patika kétállású beállítása/törlése és globális szinkronizációja, dinamikus számláló felirat frissülése, térképi nézet visszaállítása országos méretre, keresősáv animált kinyitása/összecsukása, aktív szűrőszámláló badge kijelzése, 3 állapotú nyitvatartási jelvény (`Nyitva`, `Hamarosan zár`, `Zárva`), részletes adatlap modális ablak megjelenítése heti renddel és elérhetőségekkel, térkép közvetlen fókuszálása a modálból.
 
 #### 4.3.6. Hibakezelés a Gyógyszertár Modulban
 - **GPS helymeghatározás megtagadása:** Ha a felhasználó böngészőjében letiltja a helymeghatározást, a rendszer nem dob hibát, hanem diszkrét értesítést ad, és megtartja az alapértelmezett budapesti referencia-helyzetet.
@@ -535,23 +882,26 @@ Gyógyszertárak felkutatása, helymeghatározás, nyitvatartási információk 
 
 #### 4.3.7. Elfogadási Kritériumok (Acceptance Criteria)
 - **AC-4.3.1:** A keresőmezőbe beírt településnévre (pl. "Szeged") a kártyalista és a térkép jelölői késlekedés nélkül kizárólag a szegedi patikákat jelenítik meg.
-- **AC-4.3.2:** A "Közelinek jelölöm" gombra kattintva a választott patika azonnal megjelenik a fejlécben és az Irányítópulton is újratöltés nélkül.
+- **AC-4.3.2:** A patikakártyán és a részletes modális ablakban a "Közelinek jelölöm +" gombra kattintva a választott patika azonnal megkapja az aktív preferált státuszt ("✓ Közeli gyógyszertár"), és újratöltés nélkül megjelenik a fejlécben és az Irányítópulton is. Kijelölt állapotban a gombra történő újbóli kattintás törli a kijelölést, visszaállítva az alapállapotot és törölve a patikát a fejlécből és az Irányítópultról.
 - **AC-4.3.3:** Mélylinkkel érkezve (`/gyogyszertarak?id=BF133`) a térkép automatikusan a megadott patikára fókuszál, és a heti nyitvatartási modal felugrik.
 - **AC-4.3.4:** Mobil nézetben (<1024px) a gyógyszertár kereső fejlécében a nézetválasztó (`[Térkép | Osztott | Lista]`) közvetlenül a címsorral egy sorban helyezkedik el. A 'Lista' gombra kattintva a lista 100%-ban kitakarja a címsor alatti részt, a lista tetején kompakt gyorskeresővel és szűrőkapszulákkal. 'Osztott' állapotban a felület 50% térkép és 50% lista arányban oszlik meg a keresősáv alatt, 'Térkép' állapotban pedig a lap minimalizált (~92px) betekintő szintre csukódik. A fogantyú húzásával vagy a címsori vezérlővel a szintek szabadon válthatók. A tartózkodási hely és a közeli patika kártyák a lap görgethető listájának elején helyezkednek el, így lefelé görgetve elgördülnek a képernyőről, maximális helyet adva a patikáknak. A listában lévő patikára koppintva a térkép odaugrik a patika koordinátájára és kinyitja annak információs buborékját; térképi marker érintésekor pedig a lap automatikusan legalább 50%-ra nyílik.
 - **AC-4.3.5:** A patikalista fejlécében a számláló kizárólag a térkép aktuális nézetében látható patikák számát jelzi ki (`"{X} BENU gyógyszertár a térképen"` formátumban zöld pont nélkül). Az `"Összes ({n} db)"` szöveges linkre kattintva a térkép nézete azonnal visszaáll a teljes országos nézetre.
 - **AC-4.3.6:** A Gyógyszertár Kereső fejlécében a "Keresés és szűrők" gombra kattintva a keresőmező és a pill szűrők panelje animáltan összecsukható és kinyitható (accordion). Összecsukott állapotban a keresősáv nem foglal helyet a képernyőből (viewport). Ha legalább egy szűrési feltétel aktív (beírt keresőszöveg vagy bekapcsolt nyitvatartási pill), a gombon egy számláló jelvény (badge) jelzi az aktív szűrők darabszámát nyitott és csukott állapotban egyaránt. A szűrők törlésekor a jelvény automatikusan eltűnik.
+- **AC-4.3.7:** A rendszer a patikák nyitvatartását a helyi idő és a napi nyitási-zárási idő alapján valós időben 3 állapotú státuszként kezeli és jelzi ki mind a patikakártyán, mind a felugró modális ablakban: `Nyitva` (zöld színnel), `Hamarosan zár` (sárga/olíva színnel – ha a zárás időpontjáig legfeljebb 60 perc van hátra), valamint `Zárva` (piros színnel).
+- **AC-4.3.8:** A patikakártyán a részletező hivatkozás pontos felirata „Többit mutasd”. A patika telefonszáma és e-mail címe közvetlenül nem a kártyán, hanem a „Többit mutasd” linkre vagy a patikanévre kattintva felugró `PharmacyDetailModal` ablakban érhető el kattintható formátumban (`tel:`, `mailto:`). A modál tartalmaz egy „Mutasd térképen” akciógombot is, amely a felugró ablak bezárásával egyidejűleg a térképet közvetlenül az adott patikára centrálja és kinyitja annak jelölő popupját.
+- **AC-4.3.9:** A patikalista mind asztali, mind mobil nézetben a térképi kivágatban látható patikák közül egyszerre legfeljebb 50 patikakártyát renderel le (`visiblePharmacies.slice(0, 50)`), miközben a lista fejlécében lévő számláló a teljes látható darabszámot jelzi ki.
 
 #### 4.3.8. Desktop vs. Mobil Felületi Eltérések a Gyógyszertár Keresőben (Bottom Sheet)
 
 | Funkció / Képernyőelem | Asztali / Laptop Nézet (≥1024px) | Mobil Nézet (<1024px) |
 | :--- | :--- | :--- |
-| **Képernyőelrendezés** | Bal oldalon 476px széles fix sáv, mellette a monitor teljes fennmaradó részét kitöltő nagy térkép. | Teljes képernyős térkép a háttérben, felette interaktív, érintéssel húzható **Bottom Sheet (alsó felhúzható lap)**. |
+| **Képernyőelrendezés** | Bal oldalon 476px széles fix sáv (legfeljebb 50 patikakártyát renderelve), mellette a monitor teljes fennmaradó részét kitöltő nagy térkép. | Teljes képernyős térkép a háttérben, felette interaktív, érintéssel húzható **Bottom Sheet (alsó felhúzható lap)** legfeljebb 50 kártyával. |
 | **Kereső és Szűrősáv Megjelenése** | A fejlécben accordionnal összecsukható/kinyitható sáv; aktív szűrők esetén a címsor gombján számláló jelvény (badge) jelzi a darabszámot, így összecsukva is biztosított a maximális térképi viewport. | A címsorban lévő gombbal bármikor összecsukható; alapértelmezetten csukott állapotban nyílik meg a mobil képernyőterület maximalizálására, aktív szűrő badge jelzéssel. |
 | **Nézetvezérlő Lehetőségek** | Nincs szükség lapváltásra; a lista és a nagy térkép egymás mellett folyamatosan látható. | A címsorral egy sorban elhelyezett 3-állású **nézetválasztó gomb** (`[Térkép | Osztott | Lista]`): Lista nézetben a lista kitakarja a címsor alatti teljes területet (100% magasság beépített keresővel); Osztott nézetben 50/50 felosztás; Térkép módban betekintő lap (~92px). A lap alsó fogantyúja érintéses húzással is szinkronban vezérli az állapotokat. |
 | **Információs Kártyák Elhelyezése** | A bal oldali sáv görgethető listájának elején, így kisebb monitorokon is elúsznak a patikák elől. | A Bottom Sheet görgethető listájának legtetején (nem sticky): lefelé görgetve elúsznak, így a teljes sheet-magasság a patikáké marad. |
 | **Interakció és Térképszinkron** | Patikakártyára kattintva a jobb oldali térkép simán odagördül a markerre és kinyitja az adatbuborékot. | Az alsó kártyalistában koppintva a háttértérkép azonnal odaugrik; a térképi markerre koppintva a lap automatikusan Fél (~50%) magasságra ugrik és kijelöli a patikát. |
-| **Preferált Patika Kijelölése** | A kártya jobb szélén lévő „Közelinek jelölöm” gomb. | Ujjbegyre optimalizált nagyméretű, teljes szélességű érintőgomb a mobil kártya alsó részén. |
-| **Nyitvatartási Részletek** | Modális ablakban nyílik meg a térkép felett. | Érintésre felugró, mobil képernyőre igazított részletes heti táblázat és közvetlen egyérintéses telefonhívás (`tel:`) lehetőség. |
+| **Preferált Patika Kijelölése** | A kártya jobb szélén lévő „Közelinek jelölöm +” kétállású toggle gomb (újrakattintva a „✓ Közeli gyógyszertár” gomb törli a kijelölést). | Ujjbegyre optimalizált nagyméretű érintőgomb a mobil kártya alsó részén kétállású toggle működéssel („Közelinek jelölöm +” / „✓ Közeli gyógyszertár”). |
+| **Nyitvatartási Részletek és Elérhetőségek** | A „Többit mutasd” linkre vagy patikanévre kattintva felugró `PharmacyDetailModal`: 3 állapotú nyitvatartási jelvény, közvetlenül kattintható telefonszám (`tel:`) és e-mail cím (`mailto:`), heti táblázat és „Mutasd térképen” gomb. | Érintésre felugró, mobil képernyőre optimalizált részletes heti táblázat, 3 állapotú nyitvatartás, közvetlen egyérintéses telefonhívás (`tel:`) és e-mail indítás, valamint „Mutasd térképen” gomb. |
 
 ---
 
@@ -626,29 +976,214 @@ A zárt szakmai jelleg miatt **nincs azonnali önkiszolgáló fiókregisztráci�
 
 ---
 
-### 4.6. Adminisztráció (Felhasználók és Patikák)
+### 4.6. Adminisztráció (Felhasználók és Gyógyszertárak Felügyelete)
 
-Kizárólag `Admin` szerepkörű felhasználók számára engedélyezett felületcsoport.
+Kizárólag `Admin` szerepkörű felhasználók számára engedélyezett, védett adminisztrációs modulcsoport.
 
-#### 4.6.1. Felhasználókezelés
+> [!IMPORTANT]
+> **Hozzáférés-védelem és Jogosultságkezelés:**
+> Az `/admin/*` útvonalak közvetlen elérése szigorúan jogosultságfüggő:
+> - Nem hitelesített (kijelentkezett) felhasználó kísérlete esetén a rendszer azonnal a bejelentkező felületre (`https://bvo.uneb.hu/login`) irányítja át a látogatót.
+> - Normál szakmai felhasználó (`User` / Orvos) jogosulatlan belépési kísérlete esetén a rendszer megtagadja a hozzáférést és transzparensen visszairányítja a munkamenetet az Irányítópultra (`https://bvo.uneb.hu/dashboard`).
+
+#### 4.6.1. Adminisztrációs Keretrendszer és Lapfül (Tab) Navigáció
+**Elsődleges felületi keret:** `https://bvo.uneb.hu/admin/*`
+- **Fejléc:**
+  - Sötétkék címsorban adminisztrációs pajzs ikon (`admin_panel_settings`), **„Adminisztrációs felület”** főcím és *„Rendszerfelhasználók és gyógyszertárak kezelése”* funkcióleíró alcím.
+- **Felső Lapfül (Tab) Navigációs Sáv:**
+  - Kiemelt lapfül-struktúra a két fő adminisztrációs felületcsoport közötti azonnali navigációhoz:
+    1. **„Felhasználók” lapfül:** Közvetlen hivatkozás a felhasználókezelő felületre (`/admin/users`). Automatikusan aktív állapotba kerül a `/admin/users` és az alapértelmezett `/admin` gyökérútvonal megnyitásakor.
+    2. **„Gyógyszertárak” lapfül:** Közvetlen hivatkozás a gyógyszertár-felügyeleti modulra (`/admin/pharmacies`). Automatikusan aktív állapotba kerül az áttekintő lista (`/admin/pharmacies`) és bármely részletes gyógyszertári adatlap (`/admin/pharmacies/[id]`) böngészésekor.
+
+#### 4.6.2. Felhasználókezelés (Felhasználók Listája és Műveletek)
 **Útvonal:** [https://bvo.uneb.hu/admin/users](https://bvo.uneb.hu/admin/users)
-- **Felhasználói Táblázat:** Név, E-mail cím, Szerepkör (`Admin` / `User`), Státusz (`Aktív` / `Inaktív`), Szakterületek, Műveleti gomb (`⋮`).
-- **Felhasználó Szerkesztő Modál (3 Fül):**
-  1. *Alapadatok:* Név, Elsődleges e-mail, Szerepkör váltás (`User` / `Admin`), Státusz váltás (`Active` / `Inactive`).
-  2. *Profil:* Másodlagos e-mail és orvosi szakterületek hozzárendelése.
-  3. *Hírlevél:* Készletértesítő preferenciák konfigurálása.
-- **Adminisztrátori Műveletek:**
-  - Fiók felfüggesztése / aktiválása megerősítő kérdéssel. *(Saját fiókját az adminisztrátor nem deaktiválhatja).*
-  - **Munkamenet Kényszerített Lezárása (Force Logout):** Azonnal érvényteleníti az aktív bejelentkezést, a felhasználó azonnal kijelentkezik.
 
-#### 4.6.2. Gyógyszertár Karbantartás és Készletáttekintés
+- **Üzleti cél és folyamat:**
+  A rendszer orvosi és adminisztrátori felhasználói fiókjainak központi adminisztrációja. Mivel a portál zártkörű és nem rendelkezik publikus önkiszolgáló regisztrációval, az új szakemberek manuális rögzítését (a kamarai pecsétszám ellenőrzése után), az adatok karbantartását, a jelszavak újraküldését és a biztonsági fiókkizárásokat az adminisztrátor innen vezérli.
+
+- **Fejléc és Gyorsműveletek:**
+  - Csoport ikonnal ellátott címsor: **„Felhasználók listája”**.
+  - **„+ Új felhasználó” létrehozó gomb:** Kiemelt elsődleges gomb hozzáadás ikonnal (`person_add`). Rákattintva azonnal felugrik a felhasználókezelő modális ablak üres adatbeviteli űrlappal, alapértelmezetten `Orvos (User)` szerepkörrel és `Aktív` státusszal.
+
+- **Felhasználói Adattáblázat:**
+  Strukturált, sávos színezésű táblázat az alábbi oszlopokkal:
+  1. **Név / Email:** Kétszintes cellaelrendezés: felül kiemelt félkövér teljes név (pl. `Dr. Kovács István`), alatta szürke kisméretű e-mail cím (pl. `demo@example.com`). Amennyiben a sor az éppen bejelentkezett adminisztrátor saját fiókja, a teljes sor diszkrét kék kiemelést kap.
+  2. **Szerepkör:** Színkódolt azonosító jelvény: `Admin` (kiemelt másodlagos színnel) vagy `Orvos` (szürke jelvénnyel).
+  3. **Státusz:** Állapotjelző jelvény: `Aktív` (zöld) vagy `Inaktív` (piros).
+  4. **Szakterületek:** Az orvoshoz rendelt orvosi szakvizsgák címkéi. A felületi tisztaság érdekében az első 2 szakterület teljes névvel jelenik meg körvonalas jelvényként (pl. `Háziorvostan`, `Belgyógyászat`), míg 2-nél több szakterület esetén a többi tétel egy kompakt számláló jelvénybe tömörül (pl. `+3`).
+  5. **Műveletek:** Jobbra zárt, függőleges hárompontos műveleti menügomb (`⋮`).
+
+- **Műveleti Menü (`⋮`) és Végrehajtható Akciók:**
+  A műveleti ikonra kattintva lenyíló lebegő gyorsmenü az alábbi opciókat biztosítja:
+  1. **„Szerkesztés” (Kék szerkesztő ikon):** Megnyitja a felhasználó adatait tartalmazó 3 lapfüles szerkesztő modált.
+  2. **„Új jelszó küldése” (Sárga kulcs ikon):**
+     - Kiválasztásakor felugrik a **Megerősítés szükséges** modális ablak az alábbi kérdéssel:  
+       *„Biztosan küldesz egy új jelszót {Felhasználó Neve} részére?”*
+     - A megerősítő gombra kattintva a rendszer értesítési folyamatban új jelszót generál és küld a felhasználó elsődleges e-mail címére.
+  3. **„Kijelentkeztetés” (Piros kijelentkezés ikon):**
+     - Kényszerített munkamenet-lezárás (Force Logout). Megerősítő kérdés:  
+       *„Biztosan ki szeretnéd jelentkeztetni {Felhasználó Neve} felhasználót minden eszközről?”*
+     - Jóváhagyáskor a rendszer azonnal növeli a felhasználó munkamenet-verziószámát, aminek következtében a célfelhasználó következő kattintásakor a rendszer automatikusan kilépteti őt és a bejelentkező ablakot jeleníti meg.
+  4. **„Deaktiválás” / „Aktiválás”:**
+     - Dinamikusan a fiók aktuális státuszához igazodó funkció:
+       - Aktív fiók esetén piros tiltás ikonnal ellátott **„Deaktiválás”** menüpont jelenik meg. Megerősítés után a felhasználó státusza `Inaktív` lesz és aktív munkamenetei azonnal megszakadnak (újabb belépése letiltva).
+       - Inaktív fiók esetén zöld pipa ikonnal ellátott **„Aktiválás”** menüpont jelenik meg. Megerősítés után a felhasználó státusza `Aktív` lesz, így ismét bejelentkezhet.
+     - **Admin önvédelmi korlát:** A bejelentkezett adminisztrátor a saját sora esetén **nem látja** a deaktiválási opciót, megelőzve az önkizárást.
+
+#### 4.6.3. Felhasználó Létrehozó és Szerkesztő Modális Ablak (3 Lapfül)
+A felhasználó hozzáadásakor vagy szerkesztésekor felugró, nagyméretű, 3 lapfülre tagolt modális párbeszédablak:
+
+- **1. Lapfül: „Alapadatok”**
+  - **Teljes név:** Kötelező szöveges beviteli mező (pl. `"Dr. Minta János"`).
+  - **Email cím:** Kötelező e-mail formátumú beviteli mező (pl. `"minta.janos@korhaz.hu"`). Belépési felhasználónévként funkcionál.
+  - **Szerepkör:** Legördülő menü választható opciókkal: `Orvos (User)` vagy `Adminisztrátor`.
+  - **Státusz:** Legördülő menü választható opciókkal: `Aktív` vagy `Inaktív`.
+
+- **2. Lapfül: „Profil & Szakterületek”**
+  - **Másodlagos Email:** Opcionális e-mail mező személyes vagy alternatív értesítési cím megadására (pl. `"magan@orvos.hu"`).
+  - **Szakterületek:** Görgethető keretben megjelenő kétoszlopos jelölőnégyzet (checkbox) lista az orvosi szakvizsgákból (pl. Aneszteziológia, Bőrgyógyászat, Belgyógyászat, Háziorvostan, Kardiológia, Neurológia, Onkológia, Ortopédia, Szemészet, Urológia). Az orvoshoz rendelt szakterületek egykattintásos bejelöléssel módosíthatók.
+
+- **3. Lapfül: „Hírlevél beállítások”**
+  - Két al-lapfülre osztott konfiguráció: **„Elsődleges Email”** és **„Másodlagos Email”**.
+  - **Készletinfó Értesítési Szekció:**
+    - Fő be/ki kapcsoló (toggle).
+    - Bekapcsolt állapotban szerkeszthető paraméterek:
+      - *Kiküldés ideje (óra):* numerikus mező (0–23).
+      - *Rendszeresség:* legördülő választó (`Napi`, `Heti`, `Havi`).
+      - *Követett Témák:* független kattintható címkegombok: `Újra elérhető`, `Készlethiány`, `Megszűnt`.
+      - *Hatókör:* legördülő választó (`Minden`, `Szakterület + mentett gyógyszerek`, `Csak szakterület`, `Csak mentett gyógyszer`).
+
+- **Modál Műveletek:**
+  - *„Mégsem” gomb:* Bezárja az ablakot az adatok elvetésével.
+  - *„Mentés” gomb:* Rögzíti az új felhasználót vagy a meglévő fiók módosításait, azonnal frissítve a táblázatot.
+
+#### 4.6.4. Gyógyszertárak Karbantartása és Áttekintése (Listaoldal)
 **Útvonal:** [https://bvo.uneb.hu/admin/pharmacies](https://bvo.uneb.hu/admin/pharmacies)
-- A portálon **nincs patika-szerkesztő űrlap** (az adatok forrása a külső Patika Kezelő rendszer).
-- A felület **áttekintést és készletellenőrzést** biztosít: patikák listája, BF kódok, adatszinkron és készletszinkron időpontok, valamint az adott patika termékkészletének tételes táblázata.
 
-#### 4.6.3. Elfogadási Kritériumok
-- **AC-4.6.1:** Normál szakmai felhasználó (`User`) nem érheti el az `/admin/*` útvonalakat; jogosulatlan próbálkozás esetén a rendszer visszairányítja a Dashboardra.
-- **AC-4.6.2:** A Force Logout végrehajtásakor a célfelhasználó böngészőjében a következő kattintáskor azonnal megjelenik a bejelentkezési ablak.
+- **Üzleti cél és folyamat:**
+  A hálózatban működő összes gyógyszertár adatkapcsolati állapotának, nyitvatartásának és szinkronizációs időbélyegeinek központi felügyelete.
+  > [!NOTE]
+  > **Központi Törzsadat-kezelés:**
+  > A portálon **nincs patika-szerkesztő űrlap**, mivel a gyógyszertárak alapadatainak (cím, nyitvatartás, telefonszám) forrása a külső központi Patika Kezelő rendszer. A portál kizárólag felügyeleti és készletellenőrzési funkciókat lát el.
+
+- **Fejléc és Gyorskereső:**
+  - Cím és összesítő: **„Gyógyszertárak áttekintése”**, alatta a teljes patikaszám megjelenítésével (*„Összesen {X} gyógyszertár a rendszerben”*).
+  - **Azonnali Keresőmező:** Kereső ikonnal és egykattintásos törlés (X) gombbal ellátott beviteli mező.
+    - Keresési feltételek: patika neve, települése, címe, vagy egyedi BF azonosító kódja.
+    - Szűrési visszajelzés: aktív szűrés esetén kék információs sáv mutatja a szűrt találatok darabszámát (*„{N} találat a keresésre: ...”*).
+
+- **Gyógyszertárak Áttekintő Táblázata (8 Oszlop):**
+  1. **BF kód:** Monospace kódkiemeléssel megjelenített belső azonosító (pl. `BF001`).
+  2. **Név:** Gyógyszertár hivatalos elnevezése (pl. `BENU Gyógyszertár Arany Sas`).
+  3. **Település:** Település megnevezése helyszín ikonnal (pl. `Budapest`).
+  4. **Cím:** Irányítószám és utca, házszám (pl. `1052 Károly körút 1.`).
+  5. **Nyitvatartás (ma):** Valós idejű 3 állapotú színkódolt státuszjelvény (`Nyitva` - zöld, `Hamarosan zár` - sárga, `Zárva` - piros), kiegészítve az aktuális napi nyitvatartási idősávval (pl. `08:00 - 19:00` vagy `Ma zárva`).
+  6. **Utolsó adatszinkron:** Dátum és időbélyeg (`ÉÉÉÉ.HH.NN. ÓÓ:PP`), amely a patikai alapadatok utolsó frissülését igazolja.
+  7. **Utolsó készletszinkron:** Dátum és időbélyeg (`ÉÉÉÉ.HH.NN. ÓÓ:PP`), amely a raktárkészlet utolsó LogiNet middleware szinkronizációját mutatja.
+  8. **Művelet:** Jobbra zárt **„Részletek”** akciógomb szem ikonnal (`visibility`), amelyre kattintva megnyílik az adott gyógyszertár dedikált részletes admin adatlapja (`/admin/pharmacies/[id]`).
+
+#### 4.6.5. Gyógyszertár Admin Részletes Adatlap
+**Útvonal:** [https://bvo.uneb.hu/admin/pharmacies/[id]](https://bvo.uneb.hu/admin/pharmacies/[id]) (pl. `/admin/pharmacies/BF001`)
+
+- **Üzleti cél és folyamat:**
+  A kiválasztott gyógyszertár részletes profiljának, heti nyitvatartásának, pontos földrajzi koordinátáinak és szinkronizációs állapotának áttekintése, valamint a patika teljes, több száz tételes helyi termékkészletének oszloponkénti szűrése, rendezése és készletszintjeinek darabszámos ellenőrzése.
+
+- **Visszanavigáció:**
+  - Az oldal bal felső sarkában elhelyezett **„← Vissza a listához”** akciógomb, amely közvetlenül visszavezet a `/admin/pharmacies` gyógyszertárlistára.
+
+- **Felső Információs Zóna (2/3 + 1/3 Elrendezés):**
+  - **Bal Oldali Kártya: Gyógyszertár Alapadatok és Heti Nyitvatartás (2/3 szélesség):**
+    - Fejléc: Patika neve gyógyszertár ikonnal, alatta monospace belső azonosító (`BF kód: BF001`), jobb felső sarokban a valós idejű 3 állapotú nyitvatartási jelvény (`Nyitva` / `Hamarosan zár` / `Zárva`).
+    - *Elérhetőségek és Pozíció (bal oszlop):*
+      - Cím: Irányítószám, település, közterület és házszám helyszín ikonnal.
+      - Telefon: Helyi telefonszám (pl. `+36 1 234 5678`) telefon ikonnal.
+      - Email: Hivatalos e-mail cím levél ikonnal.
+      - **Földrajzi Koordináták:** Földgömb ikonnal és monospace szedéssel kiemelt pontos GPS koordináták 4 tizedesjegy pontossággal (pl. `47.4979, 19.0543`).
+    - *Heti Nyitvatartási Rend (jobb oszlop):*
+      - Hétfőtől Vasárnapig tételes naponkénti lista az adott nap nyitási és zárási idejével (pl. `Hétfő: 08:00 - 19:00`, `Vasárnap: Zárva`).
+    - *Adatforrás Megjegyzés:* Kék információs doboz rögzíti: *„Az adatok szerkesztése a Patika Kezelő rendszerben történik. Itt csak áttekintő nézet érhető el.”*
+  - **Jobb Oldali Kártya: Szinkronizációs Mérőszámok (1/3 szélesség):**
+    - Fejléc: Szinkronizáció (`sync`) kártyacím.
+    - 3 kiemelt információs blokk:
+      1. **Utolsó adatszinkron:** Pontos másodperces időbélyeggel (`ÉÉÉÉ.HH.NN. ÓÓ:PP:MP`) a patikai alapadatok utolsó frissítéséről adatbázis ikonnal (`database`).
+      2. **Utolsó készletszinkron:** Pontos másodperces időbélyeggel (`ÉÉÉÉ.HH.NN. ÓÓ:PP:MP`) a helyi készletadatok utolsó frissítéséről raktár ikonnal (`inventory_2`).
+      3. **Készleten lévő termékek:** Kiemelt nagyméretű numerikus számláló (pl. **`100`**), alatta *„db különböző termék”* felirattal, amely a patikában nyilvántartott egyedi készítmények számát jelzi.
+
+- **Alsó Képernyőblokk: 7 Oszlopos Termékkészlet Táblázat:**
+  - **Fejléc:**
+    - Cím: **„Termékkészlet”** raktár ikonnal és dinamikus tételszámláló jelvénnyel (amely az aktív szűrésnek megfelelő tételek darabszámát mutatja).
+    - **„Szűrők törlése” gomb:** Amennyiben bármely oszlopszűrőben adat szerepel, azonnal megjelenik a szűrőtörlő gomb, amely egyetlen kattintással visszaállítja az alapállapotot.
+  - **Oszlopstruktúra és Szűrősor:**
+    A táblázat rögzített fejlécű (`table-pin-rows`), minden oszlopa fejléc-kattintással **kétirányúan rendezhető** (növekvő `arrow_upward` / csökkenő `arrow_downward`), alatta pedig dedikált, mezőspecifikus szűrősor helyezkedik el:
+    1. **TK-szám:** Gyógyszer törzskönyvi száma (pl. `OGYI-T-8898/01`). Szöveges szűrőmezővel ellátva.
+    2. **Megnevezés:** Készítmény kereskedelmi neve félkövér kiemeléssel (pl. `Algopyrin 500 mg tabletta`). Szöveges szűrőmezővel ellátva.
+    3. **Hatóanyag (INN):** Nemzetközi szabadnév (pl. `metamizol-nátrium`). Szöveges szűrőmezővel ellátva.
+    4. **Kiszerelés:** Csomagolási leírás (pl. `10x buborékcsomagolásban`). Szöveges szűrőmezővel ellátva.
+    5. **Gyártó:** Termék gyártója vagy forgalmazója lebegő címmel ellátva. Szöveges szűrőmezővel ellátva.
+    6. **Státusz:** Országos hatósági termékstátusz jelvénye (`Elérhető` - zöld, `Készlethiány` - sárga, `Megszűnt` - piros). **Legördülő szűrővel** választható opciók: `Mind`, `Elérhető`, `Készlethiány`, `Megszűnt`.
+    7. **Készlet (db) (`dapieces`):** A gyógyszertárban fizikai polckészleten lévő darabszám, jobbra zárt monospace formázással és **3 szintű színkódolással**:
+       - `0 db`: piros szöveg (`text-error`) – a termék kifogyott a patikában.
+       - `1 – 9 db`: sárga szöveg (`text-warning`) – kritikus / alacsony készletszint.
+       - `≥ 10 db`: zöld szöveg (`text-success`) – bőséges, stabil raktárkészlet.
+       A darabszám oszlopfejlécére kattintva a lista növekvő vagy csökkenő darabszám szerint rendezhető.
+  - **25 Elemes Lapozó (Pagination):**
+    - A készletlista oldalanként fixen **25 terméket** jelenít meg a gördülékeny böngészés érdekében.
+    - Bal oldalon tételinformáció látható: *„Összesen {X} termék ({mettől} - {meddig})”*.
+    - Jobb oldalon lapozógombok találhatók: előző lap (`chevron_left`), közvetlen oldalszám-választók aktív oldal kiemeléssel, valamint következő lap (`chevron_right`).
+    - Bármely oszlopszűrő módosítása esetén a lapozó automatikusan visszaugrik az 1. oldalra.
+
+#### 4.6.6. Bemenetek és Kimenetek az Adminisztrációban
+- **Bemenet:**
+  - Admin lapfülre kattintás (`Felhasználók` / `Gyógyszertárak`).
+  - „+ Új felhasználó” gomb megnyomása.
+  - Műveleti menü (`⋮`) megnyitása és akció kiválasztása (`Szerkesztés`, `Új jelszó küldése`, `Kijelentkeztetés`, `Deaktiválás`, `Aktiválás`).
+  - Felhasználói űrlap kitöltése (Név, E-mail, Szerepkör, Státusz, Másodlagos e-mail, Szakterület checkboxok, Készletértesítő toggle, időpont, gyakoriság, témák, hatókör).
+  - Megerősítő modál gombjainak megnyomása (`Mégsem`, `Folytatás`).
+  - Gyógyszertár keresőmezőbe gépelés, keresés törlése (X).
+  - Patika táblázatban a „Részletek” gomb megnyomása.
+  - Gyógyszertár adatlapon a „Vissza a listához” link kattintása.
+  - Készlettáblázat oszlopfejléceinek kattintása (rendezés irányváltása), oszlopszűrőkbe gépelés, státusz legördülő választás, „Szűrők törlése” gomb kattintása, lapozógombok használata.
+- **Kimenet:**
+  - Lapfülek közötti váltás, megfelelő felület renderelése.
+  - Felhasználó létrehozó/szerkesztő modál megjelenítése, mentés után táblázat azonnali frissülése.
+  - Új jelszó generálása és mock kiküldése e-mailben.
+  - Kijelentkeztetéskor munkamenet azonnali terminálása.
+  - Fiók státuszváltása (`Aktív` ↔ `Inaktív`), belépési engedély módosulása.
+  - Szűrt gyógyszertárlista megjelenítése találati számláló sávval.
+  - Dedikált gyógyszertári adatlap nyitása GPS koordinátákkal, heti renddel, szinkronizációs adatokkal és készlettel.
+  - Rendezett és oszloponként szűrt 7 oszlopos termékkészlet táblázat 25-ös lapozással, színkódolt darabszámokkal.
+
+#### 4.6.7. Felhasználói Hibakezelés az Adminisztrációban
+- **Jogosulatlan hozzáférés:** Ha szakmai felhasználó (`User`) kísérel meg belépni bármely `/admin/*` felületre, a rendszer azonnal átirányítja az Irányítópultra (`https://bvo.uneb.hu/dashboard`). Nem bejelentkezett látogató a `/login` oldalra kerül.
+- **Kötelező mezők hiánya új felhasználó felvitelekor:** A Teljes név és az E-mail cím kitöltése kötelező. Kitöltetlen mező esetén a böngésző natív validációs figyelmeztetést ad és a mentés nem fut le.
+- **Admin önkizárásának védelme:** Az adminisztrátor nem deaktiválhatja a saját fiókját a felületen.
+- **Nem létező gyógyszertár azonosító (`/admin/pharmacies/[id]`):** Ha az URL-ben megadott BF kód nem található az adatbázisban, a rendszer *"Gyógyszertár nem található"* hibaüzenetet és piros figyelmeztető ikont jelenít meg, a keresett BF kód kiírásával és egykattintásos *"Vissza a listához"* navigációs gombbal.
+- **Nincs találat a szűrésekre:**
+  - Gyógyszertárlistánál: *"Nincs találat"* információs üzenet.
+  - Készlettáblázatnál: *"Nincs a szűrőknek megfelelő termék"* információs sor, mellette a *"Szűrők törlése"* gomb megjelenésével.
+
+#### 4.6.8. Desktop vs. Mobil Felületi Eltérések az Adminisztrációban
+
+| Funkció / Képernyőelem | Asztali / Laptop Nézet (≥1024px) | Mobil Nézet (<1024px) |
+| :--- | :--- | :--- |
+| **Admin Keret és Tabok** | Tágas konténer (max. 1440px), jól látható lifted lapfülekkel. | Teljes képernyőszélességű kompakt tabok, ujjbeggyel érinthető lapfülváltókkal. |
+| **Felhasználók Táblázata** | Teljes szélességű táblázat, minden oszlop (Név, Szerepkör, Státusz, Szakterületek, Műveletek) egyben áttekinthető. | Vízszintesen gördíthető táblázat, a műveleti menü (`⋮`) könnyen elérhető lebegő felugró panellel. |
+| **Gyógyszertár Kereső és Lista** | Keresőmező a fejléc jobb szélén egymás mellett, 8 oszlopos táblázat azonnali adatszinkron oszlopokkal. | Keresőmező a fejléc alá tördelve 100% szélességben, vízszintesen lapozható áttekintő táblázat. |
+| **Gyógyszertár Részletes Nézet** | 2/3 (Alapadatok + Nyitvatartás) és 1/3 (Szinkronizációs mérőszámok) egymás melletti kétoszlopos rács. | Egymás alá rendezett (1 oszlopos) kártyák: felül az alapadatok és GPS pozíció, alatta a heti rend, majd a szinkronizációs kártya. |
+| **7 Oszlopos Készlettáblázat** | Teljes oszloprács fejlécek alatti szűrőmezőkkel, oszlopfejléc rendezési ikonokkal és 25-ös lapozóval. | Érintéssel vízszintesen gördíthető készlettáblázat rögzített fejléc-sorral, kompakt beviteli szűrőkkel és ujjbarát lapozógombokkal. |
+
+#### 4.6.9. Elfogadási Kritériumok (Acceptance Criteria)
+- **AC-4.6.1:** Normál szakmai felhasználó (`User`) nem érheti el az `/admin/*` útvonalakat; jogosulatlan próbálkozás esetén a rendszer visszairányítja a Dashboardra (`https://bvo.uneb.hu/dashboard`). Kijelentkezett látogató a `/login` oldalra kerül.
+- **AC-4.6.2:** Az adminisztrációs felület tetején megjelenő lapfülekkel (`Felhasználók` / `Gyógyszertárak`) a felhasználó azonnal és hibamentesen tud váltani a `/admin/users` és `/admin/pharmacies` oldalak között.
+- **AC-4.6.3:** A `/admin/users` oldalon elhelyezett „+ Új felhasználó” gombra kattintva felugrik a felhasználókezelő modál, amelyen az Alapadatok, Profil és Hírlevél lapfüleken keresztül új orvos rögzíthető a rendszerben.
+- **AC-4.6.4:** A felhasználói lista műveleti menüjében (`⋮`) az „Új jelszó küldése” gombra kattintva megerősítő modális ablak jelenik meg a felhasználó nevével, amelynek jóváhagyásakor a rendszer kiküldi a helyreállító jelszót.
+- **AC-4.6.5:** A felhasználói lista műveleti menüjében a „Kijelentkeztetés” (Force Logout) funkció megerősítésekor a célfelhasználó aktív munkamenete azonnal érvénytelenítésre kerül, így a következő interakciókor megjelenik számára a bejelentkező felület.
+- **AC-4.6.6:** Az adminisztrátor nem deaktiválhatja a saját fiókját; a saját sora esetén a műveleti menüben a Deaktiválás opció nem jelenik meg.
+- **AC-4.6.7:** A `/admin/pharmacies` listaoldalon a keresőmezőbe beírt településnév, patikanév, cím vagy BF kód alapján a táblázat valós időben szűrődik és tájékoztató sáv jelzi a találatok darabszámát.
+- **AC-4.6.8:** A gyógyszertárak táblázatában a „Részletek” gombra kattintva megnyílik az adott patika részletes admin adatlapja (`/admin/pharmacies/[id]`), amely feltünteti a patika nevét, BF kódját, címét, elérhetőségeit, 4 tizedesjegy pontosságú GPS koordinátáit, heti nyitvatartási rendjét és a 3 állapotú napi nyitvatartási státuszt.
+- **AC-4.6.9:** A gyógyszertár részletes adatlapon a szinkronizációs blokk másodperces pontossággal megjeleníti az Utolsó adatszinkron és Utolsó készletszinkron időpontját, valamint a készleten lévő egyedi termékek darabszámát.
+- **AC-4.6.10:** A gyógyszertár részletes adatlapon megjelenő 7 oszlopos Termékkészlet táblázat minden oszlopa (TK-szám, Megnevezés, Hatóanyag, Kiszerelés, Gyártó, Státusz, Készlet db) fejlécre kattintva növekvő és csökkenő irányban rendezhető, oszloponként szűrhető, a készletdarabszám (`dapieces`) pedig színkóddal jelzi a készletszintet (0 db: piros, 1–9 db: sárga, ≥10 db: zöld). A táblázat oldalanként 25 tételt jelenít meg működő lapozóval és szűrőtörlő gombbal.
+- **AC-4.6.11:** Érvénytelen patikaazonosító (`/admin/pharmacies/[nem_létező_id]`) megnyitásakor a rendszer nem omlik össze, hanem „Gyógyszertár nem található” figyelmeztetést és „Vissza a listához” gombot jelenít meg.
 
 ---
 
@@ -751,6 +1286,12 @@ Ez a fejezet a funkcionális specifikációban eszközölt módosítások és ki
 
 | Verzió | Dátum | Változás Típusa | Változások Részletes Összefoglalása |
 | :--- | :--- | :--- | :--- |
+| **v1.14.0** | 2026.10.21. | Funkcionális Bővítés & Pontosítás | **Adminisztráció (/admin/users, /admin/pharmacies, /admin/pharmacies/[id]) modulok teljes körű specifikációja a prototípus működése alapján (4.6):**<br>• **Felső lapfül (Tab) navigációs keretrendszer (`admin/layout.tsx`):** Felső tab-navigáció rögzítése a `Felhasználók` (`/admin/users`) és a `Gyógyszertárak` (`/admin/pharmacies`) felületek közötti azonnali váltáshoz, adminisztrációs jogosultság-ellenőrzéssel.<br>• **Felhasználókezelés új funkciói (`/admin/users`):** Specifikálásra került a fejlécben elhelyezett kiemelt **„+ Új felhasználó”** létrehozó gomb (3 lapfüles felugró űrlappal), valamint a műveleti menü (`⋮`) **„Új jelszó küldése”** (`reset-pw`) funkciója megerősítő modális ablakkal, a kényszerített munkamenet-bontás (Force Logout), valamint az adminisztrátori önkizárás védelme.<br>• **Gyógyszertár Admin Részletes Adatlap (`/admin/pharmacies/[id]`):** A listaoldalról a *„Részletek”* gombbal megnyíló dedikált admin adatlap specifikálása: patika alapadatok, 4 tizedesjegy pontosságú GPS koordináták, heti nyitvatartási rend és valós idejű 3 állapotú nyitvatartási jelvény; Szinkronizációs mérőszám-kártya (`Utolsó adatszinkron`, `Utolsó készletszinkron` másodperces pontossággal és `Készleten lévő termékek` száma); valamint **7 oszlopos, oszloponként szűrhető és kétirányúan rendezhető Termékkészlet táblázat** 25-ös lapozóval, szűrőtörlő gombbal és **3 szintű színkódolt darabszámmal** (`dapieces`: 0 db piros, 1–9 db sárga, ≥10 db zöld).<br>• Új és frissített elfogadási kritériumok (AC-4.6.1 – AC-4.6.11). |
+| **v1.13.0** | 2026.10.21. | Funkcionális Pontosítás | **Gyógyszertár Kereső (/gyogyszertarak, PharmacyFinder, PharmacyCard, PharmacyDetailModal) teljes körű pontosítása a prototípus működése alapján (4.3):**<br>• **3 állapotú nyitvatartási státusz (`pharmacy-utils.ts`):** Rögzítésre került a valós idejű, 3 állapotú nyitvatartási logikát követő státuszjelzés a patikakártyán és a modálban: `Nyitva` (zöld), **`Hamarosan zár`** (sárga/olíva – a napi zárás előtt legfeljebb 60 perccel), valamint `Zárva` (piros).<br>• **Patikakártya feliratok és funkciók (`PharmacyCard.tsx`):** A kártyán a részletező link pontos felirata **„Többit mutasd”**; a preferált patika kijelölő gomb kétállású kapcsolóként (toggle) működik: alapállapotban **„Közelinek jelölöm +”** (halványzöld), aktív állapotban **„✓ Közeli gyógyszertár”** (sötétzöld), amelyre ismételten rákattintva a kijelölés azonnal törlődik.<br>• **Részletes adatlap modál és elérhetőségek (`PharmacyDetailModal.tsx`):** Tisztázásra került, hogy a patika telefonszáma és e-mail címe a zsúfoltság elkerülése érdekében nem a kártyán, hanem a felugró modális ablakban érhető el közvetlenül kattintható (`tel:`, `mailto:`) formában, a modál láblécében pedig helyet kapott a **„Mutasd térképen”** akciógomb is (amely a modál bezárása mellett közvetlenül a patikára centrálja a térképet és kinyitja az adatbuborékot).<br>• **50 elemes renderelési korlát:** A patikalista a gördülékeny felületi teljesítmény megőrzése érdekében egyszerre legfeljebb 50 patikakártyát renderel le a térképen látható találatokból (`visiblePharmacies.slice(0, 50)`).<br>• Új és frissített elfogadási kritériumok (AC-4.3.2, AC-4.3.7, AC-4.3.8, AC-4.3.9). |
+| **v1.12.0** | 2026.10.21. | Funkcionális Pontosítás | **Gyógyszer Részletes Adatlap (/gyogyszerek/adatlap és /gyogyszerek/[...id]) teljes körű pontosítása a prototípus működése alapján (4.2.2):**<br>• **Megszűnt termék figyelmeztető doboz:** `Megszűnt` piaci státusz esetén a sárga hiánybanner helyett egy halványpiros figyelmeztető kártya jelenik meg (*„Megszűnt termék”*), amely 2 oszlopos strukturált elrendezésben feltünteti a termék megszűnésének pontos idejét és hivatalos szabályozói okát (*„Forgalmazási engedély visszavonása / Forgalomból kivonva”*).<br>• **Országos hálózati készletblokk (`BENU GYÓGYSZERTÁRAK`):** A közeli patika szekció felett elhelyezkedő új hálózati készletblokk rögzítése, amely a teljes hálózat 250 BENU gyógyszertárára vetítve mutatja a megoszlást (elérhető terméknél `Készleten` és `Rendelésre [1-2 munkanap]`, hiánycikk vagy megszűnt terméknél `Korlátozottan` és `Nem elérhető`), közvetlen kattintható továbbnavigációval a gyógyszertárkeresőre (`/gyogyszertarak`).<br>• **Termékjellemzők és Árak 3 oszlopos rács:** A termékprofil kártya alsó sávjának specifikálása a `FORGALMAZÓ / GYÁRTÓ`, `KISZERELÉS MÉRETE`, `TÁMOGATÁSI KATEGÓRIA`, **`EKVIVALENCIA CSOPORT`** (*„Helyettesíthető bázisgyógyszer”* / *„Referencia készítmény”*), kiemelt magenta `PUBLIKUS FOGYASZTÓI ÁR` és sötétkék **`TÉRÍTÉSI DÍJ (BECSÜLT)`** mezőkkel.<br>• **Státuszváltozási előzmények lábléce (`MedicineStatusHistory.tsx`):** A státusztörténeti napló alsó szürke zárósávjában rögzítésre került az *„Utolsó lekérdezés orvosi adatbázisból: {dátum}”* időbélyeg megjelenítése.<br>• **Visszafelé kompatibilis dinamikus útvonalátirányítás:** A korábbi vagy külső `/gyogyszerek/[...id]` útvonalkérések automatikus és transzparens átirányításának rögzítése az új lekérdezési paraméteres `/gyogyszerek/adatlap?tk=...` formátumra.<br>• Új elfogadási kritériumok (AC-4.2.16 – AC-4.2.20). |
+| **v1.11.0** | 2026.10.21. | Funkcionális Pontosítás | **Gyógyszer Nyilvántartás (/gyogyszerek) és kártyás megjelenítés részletes pontosítása a prototípus alapján (4.2):**<br>• **Accordion szűrőpanel asztali nézetben is:** A *„Szűrés és rendezés”* accordion panel nemcsak mobilon (<1024px), hanem asztali nézetben is elérhető a táblázat felett, dinamikus aktív szűrőszámlálóval és egykattintásos szűrőtörléssel.<br>• **Automatikus oszlopmegjelenítés patikaválasztáskor:** Amennyiben a felhasználó rendelkezik kijelölt közeli patikával, a táblázatban automatikusan bekapcsolódik és megjelenik a `Közeli patika` (elérhetőség) és a `Közeli patika frissítve` (időbélyeg) oszlop.<br>• **Alapértelmezett oszlopok és 3-állapotú rendezés:** A 15 törzskönyvi oszlopból alapértelmezetten pontosan 7 aktív (`Dátum / idő`, `Státusz`, `Termék neve`, `Hatóanyag`, `Kiszerelés`, `TK szám`, `Műveletek`). Az oszlopfejlécekre kattintva a rendezés háromállapotú ciklust követ (növekvő `▲` -> csökkenő `▼` -> alaphelyzet).<br>• **Kártyás nézet (`MedicineCard`) közeli patika kijelzése és rácselrendezése:** A kártya fejlécében a `NearbyPharmacyStockIndicator` megjeleníti a kijelölt közeli patika nevét, elérhetőségi jelvényét és a helyi készletadat frissítési idejét (`Frissítve: ÉÉÉÉ-HH-NN ÓÓ:PP`). Nagy képernyőn (≥1280px) 3 oszlopos kártyarács (`xl:grid-cols-3`) jelenik meg.<br>• **Oldalankénti találatszám választó:** A lapozó sávban elhelyezett legördülő menüből választható `10`, `20` (alapértelmezett), `50` vagy `100 találat / oldal` érték.<br>• Új és frissített elfogadási kritériumok (AC-4.2.11 – AC-4.2.15). |
+| **v1.10.0** | 2026.10.21. | Funkcionális Pontosítás | **Irányítópult (Dashboard) működésének teljes körű pontosítása a prototípus és tervek alapján (4.1):**<br>• **Nincs kijelölt patika állapot (`PharmacyStockWidget`):** A korábbi statikus térkép-illusztráció leírás helyett rögzítésre került, hogy a felületen teljes értékű interaktív OpenStreetMap térkép (`PharmacyMap`) működik BENU jelölőkkel, ahol a felugró patikakártyáról helyben, az oldal elhagyása nélkül kijelölhető a közeli patika, alatta közvetlen „Tovább a gyógyszertárkeresőre →” továbbnavigáló hivatkozással (`/gyogyszertarak`).<br>• **Kijelölt preferált patika állapot (`PharmacyStockWidget`):** A korábbi általános nyitvatartási leírás helyett specifikálásra került a patika nevével és az adott periódussal ellátott, 2 mutatóból (*„elfogyott”* és *„újra elérhető”*) álló sárga összesítő kártya (`StockNotificationCard`) és a patika saját 20 tételes készletváltozási listája (`StockChangesWidget`).<br>• **„Összes változás” navigációs gyorslinkek:** Rögzítésre került a globális (`/gyogyszerek?sort=lastUpdate&order=desc`) és a patikai (`/gyogyszerek?nearbyOnly=true&sort=lastUpdate&order=desc`) készletváltozási kártyák alsó láblécében elhelyezkedő továbbnavigáló hivatkozások pontos funkcionális viselkedése és céloldalai.<br>• **Időszak-választó kapszula dropdown (`PeriodSelector`):** Gombok sora helyett lekerekített kapszula formájú legördülő menüként (dropdown) történő pontosítás (1, 3, 7, 30 nap), azonnali URL paraméter szinkronizációval (`?period=X`).<br>• Frissített és új elfogadási kritériumok (AC-4.1.1 – AC-4.1.8). |
+| **v1.9.0** | 2026.10.21. | Funkcionális Pontosítás & Védőmechanizmusok | **Globális Lábléc, Toast Undo rendszer és Értesítésmegszűnési megerősítő modál specifikálása:**<br>• **Globális Lábléc (Footer):** Minden bejelentkezett oldalon az oldal alján megjelenő sötétkék (`#002664`) zárósáv rögzítése a hivatalos szerzői jogi nyilatkozattal (*„Minden jog fenntartva. © 2026 BENU Magyarország Zrt”*), verziószámmal (`v6.1.0`), valamint készítői megjelöléssel (*„Created by:”*) és Color and Code logóval (4.0.2 és AC-4.0.6).<br>• **Toast értesítési rendszer és „Visszavonom” (Undo) funkció:** Kedvenc gyógyszer eltávolításakor a jobb alsó sarokban megjelenő, 10 másodperces vizuális visszaszámláló csíkkal (progress bar) ellátott lebegő Toast specifikálása kattintható gyógyszernévvel és azonnali egykattintásos visszaállítást biztosító „Visszavonom” gombbal (2.13, 4.2.3 és AC-4.2.9).<br>• **Értesítésmegszűnési megerősítő modális ablak (`FavoriteRemovalModal`):** Védőmechanizmus specifikálása azon esetekre, amikor az orvos olyan gyógyszert kísérel meg törölni a mentettek közül, amelyhez aktív készletértesítés (harang) tartozik. Figyelmeztető dialógus (*„Értesítés is megszűnik!”*) fókuszált „Mégsem” és megerősítő „Igen, biztosan” opciókkal, a feliratkozás és kedvenc állapot együttes törlésével (2.4, 4.2.3 és AC-4.2.10). |
 | **v1.8.2** | 2026.10.21. | Termékkártya Ergonómia | **Gyógyszer termékkártya fejléc és adatelrendezés optimalizálása:**<br>• A gyógyszerkereső oldal kártyás nézetében (`MedicineCard`) az **Utolsó frissítés** dátuma és időpontja (pl. `Utolsó frissítés: 2026-10-21 00:35`) a kártya jobb felső sarkába került, így közvetlenül a kártya fejlécében, a státuszjelvény mellett biztosít állandó, kiemelt olvashatóságot.<br>• A korábban jobb felül lévő törzskönyvi azonosító (`Azonosító:` / `tkSzam`) lekerült az elsődleges törzsadatok közé (a Hatóanyag, Kiszerelés és Gyártó mezők mellé).<br>• Frissített elfogadási kritérium: AC-4.2.8. |
 | **v1.8.1** | 2026.10.20. | Ergonómiai Optimalizálás | **Dashboard készletváltozási lista kétszintes kompakt optimalizálása:**<br>• A korábbi merev 3 oszlopos táblázat (amelyben a hosszú terméknevek lebegve csonkán, 20-30 karakter után levágódtak) felváltása modern kétszintes kártyasorokkal a `StockChangesWidget` komponensben.<br>• **Felső szint (1. sor):** A terméknév a teljes rendelkezésre álló kártyaszélességet (több mint 500px) megkapja, intelligens legfeljebb 2 soros szövegtördeléssel (`line-clamp-2`), közvetlen kattintható linkkel az adatlapra és lebegő címmel (`title`).<br>• **Alsó szint (2. sor):** Letisztult, szuper kompakt metainfó sáv bal oldalon az országos státuszjelvénnyel (`Elérhető`, `Hiány`, `Megszűnt`), jobb oldalon a pontos időbélyeggel.<br>• A merev táblázatfejléc elhagyásával ~42px függőleges hely takarítható meg, a sorok pedig diszkrét hover kiemelést kaptak a könnyebb pásztázásért.<br>• Új elfogadási kritérium (AC-4.1.5). |
 | **v1.8.0** | 2026.10.20. | Mobil Nézet és Helyszíni Vizit Támogatás | **Teljes körű reszponzív és mobil ergonómiai optimalizálás:**<br>• Új koncepció bevezetése (1.9. fejezet): Asztali/laptop fókuszú rendelői környezet mellett a helyszíni orvosi betegvizit (ambuláns használat) teljes körű támogatása.<br>• **Gyógyszerkereső mobil nézet (<1024px):** Automatikus átváltás ergonomikus gyógyszerkártyákra (`MedicineCard`), kétállású kézi Nézetváltó gomb (`Kártyák` / `Táblázat`), lenyitható egyérintéses **Accordion szűrőpanel** beépített rendezési opciókkal, aktív szűrőszámláló jelvénnyel és egykattintásos szűrőtörléssel.<br>• **Gyógyszertár Kereső Címsori Nézetválasztó, Összecsukható Kereső és Bottom Sheet:** Mobilon (<1024px) a 3-állású nézetválasztó (`[Térkép | Osztott | Lista]`) közvetlenül a címsorral egy sorban helyezkedik el. A „Lista” elemre kattintva a lista felülete kitakarja a címsor alatti teljes részt (100% képernyőkitöltés a térkép és szűrősáv felett, beépített in-sheet gyorskeresővel és gyorsszűrőkkel), míg az „Osztott” (50/50) és „Térkép” (92px peek) állapotok megőrzik a térkép interaktív elérését. A címsorban helyet kapott az **összecsukható kereső és szűrőpanel (Accordion)** gombja, amely aktív szűrés esetén számláló jelvénnyel (badge) jelzi a feltételek darabszámát nyitott és csukott állapotban is. A patikalistában a számláló dinamikusan a térképen látható patikákat jelzi (`"{X} BENU gyógyszertár a térképen"`), mellette tiszta szöveges linkkel (`Összes ({n} db)`). A tartózkodási hely és a közeli patika kártyák a lap görgethető listájának elejére kerültek (nem sticky), így lefelé görgetve elúsznak és a teljes sheet-magasság a patikakártyáké marad.<br>• **Mobil Navigáció és Keresés:** Hamburger menübe integrált „Mentett gyógyszerek” számlálóval, azonnali közeli patika adatkijelzés és módosítási akciógomb, valamint teljes képernyős keresőfelület (Mobil Kereső Overlay).<br>• **Helyettesítő gyógyszerek:** Az adatlapon mobil nézetben a helyettesítő készítmények táblázata automatikusan kártyás listává alakul át.<br>• Részletes **Desktop vs. Mobil összehasonlító táblázatok** elhelyezése minden érintett felületi modulban (4.0.5, 4.2.1.4, 4.2.2.6, 4.3.8) és új elfogadási kritériumok (AC-4.2.6, AC-4.2.7, AC-4.3.4, AC-4.3.5, AC-4.3.6). |

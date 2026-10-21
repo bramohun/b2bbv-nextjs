@@ -17,15 +17,23 @@
  * - Felhasználóként szeretném egyetlen kattintással szűrni a listát csak a mentett (kedvenc)
  *   gyógyszereimre vagy a kijelölt közeli gyógyszertáramban elérhető tételekre.
  * - Felhasználóként szeretném testreszabni a táblázat oszlopait (megjelenítés/elrejtés és drag-and-drop sorrend),
- *   hogy a napi orvosi munkámhoz legfontosabb adatokat láthassam elsődlegesen.
+ *   hogy a 15 lehetséges oszlopból az alapértelmezett 7 aktív oszlop mellett a számomra fontosakat lássam.
+ * - Felhasználóként elvárom, hogy közeli gyógyszertár kijelölése esetén a „Közeli patika” és a
+ *   „Közeli patika frissítve” oszlopok automatikusan aktiválódjanak a táblázatban.
+ * - Felhasználóként szeretném, hogy az oszlopfejlécekre kattintva 3-állapotú rendezés működjön
+ *   (növekvő ▲ -> csökkenő ▼ -> alaphelyzet).
  * - Felhasználóként szeretném, hogy a táblázat fluid (teljes képernyőszélességet kitöltő) elrendezésű legyen,
  *   hogy a rendelkezésre álló képernyőterületet maximálisan kihasználva kényelmesen tekinthessék át a sokoszlopos gyógyszeradatokat.
+ * - Felhasználóként szeretném, hogy az integrált „Szűrés és rendezés” Accordion panel ne csak mobilon,
+ *   hanem asztali nézetben is elérhető legyen a táblázat felett azonnali szűrőtörléssel és aktív számlálóval.
  * - Felhasználóként szeretnék közvetlenül a listából kedvencnek jelölni vagy készlethiány-értesítést
  *   beállítani egy adott gyógyszerre.
  * - Felhasználóként szeretném, hogy a műveletek oszlop (kedvenc mentés, értesítés, részletek gomb)
  *   a táblázat vízszintes görgetése során is folyamatosan rögzítve (fix/sticky) maradjon a jobb szélen.
  * - Orvosként helyszíni vizit során (<1024px) szeretném, ha a sokoszlopos táblázat helyett áttekinthető
- *   gyógyszerkártyák jelennének meg, lenyitható egyérintéses Accordion szűrőpanellel és rendezési lehetőségekkel.
+ *   gyógyszerkártyák jelennének meg (≥1280px esetén 3 oszlopos rácsban), közeli patika indikátorral.
+ * - Felhasználóként szeretném kiválasztani az oldalanként megjelenő találatok számát
+ *   (10, 20 [alapértelmezett], 50, 100 találat / oldal).
  * - Felhasználóként szeretnék bármikor kézzel váltani a kártyás és a táblázatos megjelenítés között
  *   a fejlécben elhelyezett kétállású Nézetváltó gombbal.
  * 
